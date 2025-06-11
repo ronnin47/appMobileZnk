@@ -1,7 +1,12 @@
 import { ScrollView, Text, View, Image, StyleSheet } from 'react-native';
 
+import React, { useState } from 'react';
+
 export const Carrusel = ({ imagenes }) => {
 
+  const imagenBase = require('../assets/imagenBase.jpeg');
+
+ 
   
   return (
     <ScrollView
@@ -10,17 +15,31 @@ export const Carrusel = ({ imagenes }) => {
       showsHorizontalScrollIndicator={false}
     >
       <View style={styles.row}>
-        {imagenes.map((imagen, index) => (
-          <View key={index} style={styles.item}>
-            <Image
-              source={imagen.imagen}
-              style={styles.imagen}
-            />
-            <Text style={styles.text}>
-              {imagen.nombre}
-            </Text>
-          </View>
-        ))}
+       {imagenes.map((imagen, index) => {
+  const [error, setError] = useState(false); // Estado por imagen
+  return (
+    <View key={index} style={styles.item}>
+       <Image
+                source={
+                  error
+                    ? imagenBase
+                    : { uri: imagen.imagen }
+                }
+                onError={() => setError(true)}
+                style={styles.imagen}
+              />
+      <Text 
+        style={styles.text}
+        numberOfLines={1}
+        adjustsFontSizeToFit={true}
+        minimumFontScale={0.5}
+        ellipsizeMode="tail"
+      >
+        {imagen.nombre}
+      </Text>
+    </View>
+  );
+})}
       </View>
     </ScrollView>
   );
@@ -35,12 +54,13 @@ const styles = StyleSheet.create({
     alignItems: 'center', // Centra el contenido horizontalmente
     backgroundColor: '#F5F5F5', // Fondo opcional para darle un buen contraste
   },
-  text: {
-    fontSize: 18,
-    textAlign: 'center',
-    color: '#fff',
-    marginBottom: 10,
-  },
+ text: {
+  fontSize: 16,
+  textAlign: 'center',
+  color: '#fff',
+  marginTop: -5,
+  width: 120, // mismo ancho que la imagen para que se ajuste
+},
   imagen: {
     width: 120,  // Ajusta el tamaño para que se vean bien
     height: 160,

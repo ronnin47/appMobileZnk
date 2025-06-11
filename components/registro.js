@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
 import { ImageBackground, StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-native';
 import axios from 'axios';
+import { showMessage } from 'react-native-flash-message';
 
 
 
-const RegisterScreen = () => {
+
+
+
+const RegisterScreen = ({ navigation }) => {
+ 
+ 
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -31,7 +37,19 @@ const RegisterScreen = () => {
     // Si llegas aquí, el registro fue exitoso
     console.log('Usuario registrado:', response.data);
     setError('');
-    // Aquí podrías navegar a otra pantalla
+     // Navegar a la pantalla de login
+      navigation.navigate('Login');
+
+     // Espera un poco y luego muestra el mensaje (esto evita que se pierda el contexto del componente)
+    setTimeout(() => {
+      showMessage({
+        message: '¡Registro exitoso!',
+        description: 'Ya puedes iniciar sesión',
+        type: 'success',
+        icon: 'success',
+        duration: 3000
+      });
+    }, 500);
 
   } catch (error) {
     if (error.response) {
@@ -43,6 +61,8 @@ const RegisterScreen = () => {
     }
   }
 };
+
+
 
   return (
     <ImageBackground 
@@ -93,6 +113,7 @@ const RegisterScreen = () => {
   );
 };
 
+//estilos
 const styles = StyleSheet.create({
   backgroundImage: {
     flex: 1,

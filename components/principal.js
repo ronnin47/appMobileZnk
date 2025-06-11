@@ -1,46 +1,30 @@
 
 import { StyleSheet, Text, View, Dimensions, ScrollView, } from 'react-native';
-
+import React, { useContext } from 'react';
 import { useState } from 'react';
 import 'react-native-gesture-handler';
 import { Carrusel } from './carrusel';
+import { AuthContext } from './AuthContext';
 
 const windowWidth = Dimensions.get('window').width;
 
 export default function Principal() {
-  const elements = [
-    { id: 1, nombre: "dragon", imagen: require('../assets/dragonHelado.jpg') },
-    { id: 2, nombre: "herbolaria", imagen: require('../assets/herbolaria.jpg') },
-    { id: 3, nombre: "viejo Dragon", imagen: require('../assets/viejoDragon.jpg') },
-    { id: 4, nombre: "dragon", imagen: require('../assets/dragonHelado.jpg') },
-    { id: 5, nombre: "herbolaria", imagen: require('../assets/herbolaria.jpg') },
-    { id: 6, nombre: "viejo Dragon", imagen: require('../assets/viejoDragon.jpg') },
-    { id: 7, nombre: "dragon", imagen: require('../assets/dragonHelado.jpg') },
-    { id: 8, nombre: "herbolaria", imagen: require('../assets/herbolaria.jpg') },
-    { id: 9, nombre: "viejo Dragon", imagen: require('../assets/viejoDragon.jpg') },
-    { id: 10, nombre: "dragon", imagen: require('../assets/dragonHelado.jpg') },
-    { id: 12, nombre: "herbolaria", imagen: require('../assets/herbolaria.jpg') },
-    { id: 13, nombre: "viejo Dragon", imagen: require('../assets/viejoDragon.jpg') },
-    { id: 14, nombre: "dragon", imagen: require('../assets/dragonHelado.jpg') },
-    { id: 15, nombre: "herbolaria", imagen: require('../assets/herbolaria.jpg') },
-    { id: 16, nombre: "viejo Dragon", imagen: require('../assets/viejoDragon.jpg') },
-    { id: 17, nombre: "dragon", imagen: require('../assets/dragonHelado.jpg') },
-    { id: 18, nombre: "herbolaria", imagen: require('../assets/herbolaria.jpg') },
-    { id: 19, nombre: "viejo Dragon", imagen: require('../assets/viejoDragon.jpg') },
-    { id: 20, nombre: "dragon", imagen: require('../assets/dragonHelado.jpg') },
-    { id: 21, nombre: "dragon", imagen: require('../assets/dragonHelado.jpg') },
-    { id: 22, nombre: "herbolaria", imagen: require('../assets/herbolaria.jpg') },
-    { id: 23, nombre: "viejo Dragon", imagen: require('../assets/viejoDragon.jpg') },
-    { id: 24, nombre: "dragon", imagen: require('../assets/dragonHelado.jpg') },
-    { id: 25, nombre: "herbolaria", imagen: require('../assets/herbolaria.jpg') },
-    { id: 26, nombre: "viejo Dragon", imagen: require('../assets/viejoDragon.jpg') },
-    { id: 27, nombre: "dragon", imagen: require('../assets/dragonHelado.jpg') },
-    { id: 28, nombre: "herbolaria", imagen: require('../assets/herbolaria.jpg') },
-    { id: 29, nombre: "viejo Dragon", imagen: require('../assets/viejoDragon.jpg') },
-  ];
+  
+  const { personajes } = useContext(AuthContext);
+  
+//const imagenes = personajes.map(p => p.imagen);
+const imagenes = personajes.map(p => ({
+  imagen: p.imagen.startsWith('data:image') ? p.imagen : `data:image/jpeg;base64,${p.imagen}`,
+  nombre: p.nombre
+}));
 
-  const [personaje, setPersonaje] = useState("Matashiro");
-  const [imagenes, setImagenes] = useState(elements);
+const imagenesBasicas = [
+  { imagen: '../assets/imagenBase.jpeg', nombre: 'Imagen Base' },
+  { imagen: '../assets/imagenFondo.jpeg', nombre: 'Otra Imagen' },
+  { imagen: '../assets/imagenBase.jpeg', nombre: 'Imagen Base' },
+  { imagen: '../assets/imagenFondo.jpeg', nombre: 'Otra Imagen' },
+];
+//console.log(imagenes)
 
   return (
     <ScrollView 
@@ -55,45 +39,33 @@ export default function Principal() {
     
       
       <View style={styles.contenedorPrincipal}>
-        <Text style={styles.tituloSeccion}>Seccion 1</Text>
+        <Text style={styles.tituloSeccion}>Mis Personajes</Text>
       <Carrusel imagenes={imagenes}></Carrusel>
       </View>
 
       <View style={styles.contenedorPrincipal}>
         <Text style={styles.tituloSeccion}>Seccion 2</Text>
-      <Carrusel imagenes={imagenes}></Carrusel>
+        <Carrusel imagenes={imagenesBasicas} />
       </View>
   
       <View style={styles.contenedorPrincipal}>
         <Text style={styles.tituloSeccion}>Seccion 3</Text>
-      <Carrusel imagenes={imagenes}></Carrusel>
+      <Carrusel imagenes={imagenesBasicas} />
       </View>
 
       <View style={styles.contenedorPrincipal}>
         <Text style={styles.tituloSeccion}>Seccion 4</Text>
-      <Carrusel imagenes={imagenes}></Carrusel>
+  <Carrusel imagenes={imagenesBasicas} />
       </View>
 
       <View style={styles.contenedorPrincipal}>
         <Text style={styles.tituloSeccion}>Seccion 5</Text>
-      <Carrusel imagenes={imagenes}></Carrusel>
+      <Carrusel imagenes={imagenesBasicas} />
       </View>
 
-      <View style={styles.contenedorPrincipal}>
-        <Text style={styles.tituloSeccion}>Seccion 6</Text>
-      <Carrusel imagenes={imagenes}></Carrusel>
-      </View>
-
-      <View style={styles.contenedorPrincipal}>
-        <Text style={styles.tituloSeccion}>Seccion 7</Text>
-      <Carrusel imagenes={imagenes}></Carrusel>
-      </View>
-      
-
       
       
       
-  
     
 
     </ScrollView>

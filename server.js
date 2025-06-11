@@ -9,6 +9,8 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(bodyParser.json());
 
+
+//LOCAL HOST bbdd
 const pool = new Pool({
   user: 'postgres',
   host: 'localhost',
@@ -56,7 +58,7 @@ app.get('/test-db', async (req, res) => {
 
 
 
-//insert de usuario
+//insert de usuario OK!!
 
 app.post('/insert-usuario', async (req, res) => {
   const { email, contrasenia } = req.body;
@@ -89,6 +91,86 @@ app.post('/insert-usuario', async (req, res) => {
     
   }
 });
+
+
+//login OK!
+app.post('/loginUsuario', async (req, res) => {
+  const { email, contrasenia } = req.body;
+  
+  console.log("",req.body)
+
+  try {
+    const userQuery = 'SELECT * FROM usuarios WHERE email = $1';
+    const userResult = await pool.query(userQuery, [email]);
+
+    if (userResult.rows.length === 0) {
+      console.log("No se encontró el usuario con el email proporcionado.");
+      return res.status(401).json({ message: 'Email o contraseña incorrectos' });
+    }
+ 
+    const user = userResult.rows[0];
+    const idusuario = userResult.rows[0].idusuario;
+    const estatus = userResult.rows[0].estatus;
+
+    if (user.contrasenia !== contrasenia) {
+      return res.status(401).json({ message: 'Email o contraseña incorrectos' });
+    }
+    res.json({
+      message: 'Inicio de sesión exitoso',
+      //personajes: personajesResult.rows, 
+      idusuario: idusuario,
+      estatus: estatus,
+    });
+
+  } catch (error) {
+    console.error('Error en el inicio de sesión:', error);
+    res.status(500).json({ message: 'Error en el servidor' });
+  }
+});
+
+
+
+
+
+
+
+//Consumir personajes Usuario
+app.get('/consumirPersonajesUsuario', async (req, res) => {
+  try {
+    
+    const { usuarioId } = req.query;
+    console.log("el id del usuario es: ",usuarioId)
+    const userQuery = 'SELECT * FROM personajes WHERE "usuarioId"=$1';
+    const userResult = await pool.query(userQuery,[usuarioId]);
+
+   
+    if (userResult.rows.length === 0) {
+      return res.status(401).json({ message: 'No se recupero personajes para Usuario' });
+    }
+
+    const coleccionPersonajes = userResult.rows;
+
+   
+
+    
+    res.json({
+      message: 'Peticion de personajes consumidos exitoso',
+      coleccionPersonajes: coleccionPersonajes,   
+    });
+
+  } catch (error) {
+    console.error('Error al obtener coleccion personajes del Usuario:', error);
+    res.status(500).json({ message: 'Error en el servidor' });
+  }
+});
+
+
+
+
+
+
+
+
 
 
 

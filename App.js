@@ -16,6 +16,12 @@ import Chat from './components/chat';
 
 import { AuthProvider } from './components/AuthProvider';
 
+import { ListaPersonajes } from './components/listaPersonajes';
+
+
+import FlashMessage from 'react-native-flash-message';
+
+
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
@@ -25,6 +31,14 @@ const Stack = createStackNavigator();
 
 // el Stack navigator es una PILA de pantallas
 export const App = () => {
+  return (
+    <AuthProvider>
+      <NavigationContainer>
+        <MainStack />
+      </NavigationContainer>
+    </AuthProvider>
+  );
+};
 
   // Lógica para mostrar pantallas según login
 const MainStack = () => {
@@ -33,7 +47,8 @@ const MainStack = () => {
   if (isLoading) return null; // o un loader
 
   return (
-    <Stack.Navigator initialRouteName={userToken ? 'Home' : 'Login'}>
+    <>
+<Stack.Navigator initialRouteName={userToken ? 'Home' : 'Login'}>
       {!userToken ? (
         <>
           {/* Primera pantalla---------Pantalla de Login */}
@@ -59,16 +74,12 @@ const MainStack = () => {
           />
         </>
       )}
-    </Stack.Navigator>
-  );
-};
 
-  return (
-    <AuthProvider>
-      <NavigationContainer>
-        <MainStack />
-      </NavigationContainer>
-    </AuthProvider>
+      
+    </Stack.Navigator>
+    <FlashMessage position="top" />
+    </>
+    
   );
 };
 
