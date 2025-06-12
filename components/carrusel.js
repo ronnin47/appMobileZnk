@@ -1,13 +1,15 @@
-import { ScrollView, Text, View, Image, StyleSheet } from 'react-native';
+import { ScrollView, Text, View, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import React from 'react';
+import { useNavigation } from '@react-navigation/native';
 
-import React, { useState } from 'react';
-
-export const Carrusel = ({ imagenes }) => {
-
+export const Carrusel = ({ pjs }) => {
   const imagenBase = require('../assets/imagenBase.jpeg');
+  const navigation = useNavigation();
 
- 
-  
+  const handlePress = (pj) => {
+    navigation.navigate('FichaPersonaje', { pj });
+  };
+
   return (
     <ScrollView
       horizontal={true}
@@ -15,83 +17,97 @@ export const Carrusel = ({ imagenes }) => {
       showsHorizontalScrollIndicator={false}
     >
       <View style={styles.row}>
-       {imagenes.map((imagen, index) => {
-  const [error, setError] = useState(false); // Estado por imagen
-  return (
-    <View key={index} style={styles.item}>
-       <Image
-                source={
-                  error
-                    ? imagenBase
-                    : { uri: imagen.imagen }
-                }
-                onError={() => setError(true)}
-                style={styles.imagen}
-              />
-      <Text 
-        style={styles.text}
-        numberOfLines={1}
-        adjustsFontSizeToFit={true}
-        minimumFontScale={0.5}
-        ellipsizeMode="tail"
-      >
-        {imagen.nombre}
-      </Text>
-    </View>
-  );
-})}
+        {pjs.map((pj, index) => (
+          <TouchableOpacity
+            key={index}
+            onPress={() => handlePress(pj)}
+            style={styles.card}
+            activeOpacity={0.9}
+          >
+            <ImageWrapper uri={pj.imagen} fallback={imagenBase} />
+            <Text
+              style={styles.text}
+              numberOfLines={1}
+              adjustsFontSizeToFit={true}
+              minimumFontScale={0.5}
+              ellipsizeMode="tail"
+            >
+              {pj.nombre}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
     </ScrollView>
   );
 };
 
-// Estilos
+const ImageWrapper = ({ uri, fallback }) => {
+  const [source, setSource] = React.useState({ uri });
+
+  return (
+    <Image
+      source={source}
+      onError={() => setSource(fallback)}
+      style={styles.imagen}
+    />
+  );
+};
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1, // Asegura que el contenedor ocupe todo el alto disponible
+    flex: 1,
     padding: 0,
-    justifyContent: 'center', // Centra el contenido verticalmente
-    alignItems: 'center', // Centra el contenido horizontalmente
-    backgroundColor: '#F5F5F5', // Fondo opcional para darle un buen contraste
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5F5F5',
   },
- text: {
-  fontSize: 16,
-  textAlign: 'center',
-  color: '#fff',
-  marginTop: -5,
-  width: 120, // mismo ancho que la imagen para que se ajuste
-},
+  text: {
+    fontSize: 16,
+    textAlign: 'center',
+    color: '#fff',
+    marginTop: -5,
+    width: 120,
+  },
   imagen: {
-    width: 120,  // Ajusta el tamaño para que se vean bien
+    width: 120,
     height: 160,
-    borderRadius: 8,  // Borde redondeado pero no excesivo, típico de las imágenes de Netflix
-    marginBottom: 15,  // Añade más espacio hacia abajo
-
-   
-    // Sombra para crear profundidad y resplandor
-    shadowColor: '#fff', // Sombra blanca para el resplandor luminoso
+    borderRadius: 8,
+    marginBottom: 15,
+    shadowColor: '#fff',
     shadowOffset: {
-      width: 4, // Desplazamiento más pequeño pero aún notorio
-      height: 8, // Desplazamiento hacia abajo, más intenso en esta dirección
+      width: 4,
+      height: 8,
     },
-    shadowOpacity: 0.9, // Opacidad alta para un brillo más fuerte
-    shadowRadius: 20, // Radio moderado para difundir bien el resplandor
-    elevation: 15, // Para que la sombra sea más visible en Android
-    // Efecto de resplandor
-    backgroundColor: '#000', // Fondo negro para que el borde blanco brille
-    overflow: 'hidden', // Esto asegura que el borde y la sombra no se desborden
+    shadowOpacity: 0.9,
+    shadowRadius: 20,
+    elevation: 15,
+    backgroundColor: '#000',
+    overflow: 'hidden',
   },
   row: {
-    flexDirection: 'row', // Acomoda los elementos en una fila
-    justifyContent: 'flex-start', // Cambié a flex-start para que se alineen al principio
-    alignItems: 'center', // Alinea los elementos al centro verticalmente
-    gap: 10, // Espacio entre las imágenes
-    width: '100%', // Asegura que la fila ocupe todo el ancho
-    paddingHorizontal: 10, // Agrega un pequeño padding horizontal
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    gap: 10,
+    width: '100%',
+    paddingHorizontal: 10,
   },
   item: {
     alignItems: 'center',
     marginBottom: 20,
-    marginRight: 20, // Añade un pequeño espacio entre los elementos
+    marginRight: 20,
+  },
+  scroll: {
+    paddingVertical: 10,
+  },
+  card: {
+    marginHorizontal: 8,
+    alignItems: 'center',
+  },
+  nombre: {
+    color: '#fff',
+    marginTop: 4,
   },
 });
+
+

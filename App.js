@@ -13,6 +13,7 @@ import Configuracion from './components/configuracion';
 import Perfil from './components/perfil';
 import Principal from './components/principal';
 import Chat from './components/chat';
+import { FichaPersonaje } from './components/fichaPersonaje';
 
 import { AuthProvider } from './components/AuthProvider';
 
@@ -74,6 +75,14 @@ const MainStack = () => {
           />
         </>
       )}
+       <Stack.Screen 
+       name="FichaPersonaje" 
+       component={FichaPersonaje}
+       options={{
+          headerTitle: '', // Oculta el texto
+          headerBackTitleVisible: false, // Oculta texto al lado de la flecha en iOS
+        }} 
+       />
 
       
     </Stack.Navigator>
@@ -135,6 +144,7 @@ const TabNavigator = () => {
       <Tab.Screen name="Chat" component={Chat} options={{ title: 'Chat' }} />
       <Tab.Screen name="Perfil" component={Perfil} options={{ title: 'Perfil' }} />
       <Tab.Screen name="Configuracion" component={Configuracion} options={{ title: 'Configuración' }} />
+      
     </Tab.Navigator>
   );
 };
