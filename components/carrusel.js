@@ -2,7 +2,7 @@ import { ScrollView, Text, View, Image, StyleSheet, TouchableOpacity } from 'rea
 import React from 'react';
 import { useNavigation } from '@react-navigation/native';
 
-export const Carrusel = ({ pjs }) => {
+export const Carrusel = ({ personajes }) => {
   const imagenBase = require('../assets/imagenBase.jpeg');
   const navigation = useNavigation();
 
@@ -17,9 +17,9 @@ export const Carrusel = ({ pjs }) => {
       showsHorizontalScrollIndicator={false}
     >
       <View style={styles.row}>
-        {pjs.map((pj, index) => (
+        {personajes.map((pj, index) => (
           <TouchableOpacity
-            key={index}
+            key={pj.idpersonaje || index}
             onPress={() => handlePress(pj)}
             style={styles.card}
             activeOpacity={0.9}
@@ -42,7 +42,16 @@ export const Carrusel = ({ pjs }) => {
 };
 
 const ImageWrapper = ({ uri, fallback }) => {
-  const [source, setSource] = React.useState({ uri });
+  const isValidUri = uri && typeof uri === 'string' && uri.trim() !== '';
+  const [source, setSource] = React.useState(isValidUri ? { uri } : fallback);
+
+  React.useEffect(() => {
+    if (isValidUri) {
+      setSource({ uri });
+    } else {
+      setSource(fallback);
+    }
+  }, [uri]);
 
   return (
     <Image

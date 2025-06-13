@@ -17,7 +17,7 @@ export default function Principal() {
   
   const { personajes, savePersonajes } = useContext(AuthContext);
 
-  
+  /*
   
 //const imagenes = personajes.map(p => p.imagen);
 const pjs = personajes.map(p => {
@@ -29,7 +29,7 @@ const pjs = personajes.map(p => {
   };
 });
 
-
+*/
 
 
 
@@ -146,11 +146,7 @@ const crearFichaPersonaje = async () => {
       horizontal={false}
       pagingEnabled={false}
       showsHorizontalScrollIndicator={false}
-    
       >
-    
-  
-    
       
       <View style={styles.contenedorPrincipal}>
         <Text style={styles.tituloSeccion}>Mis Personajes</Text>
@@ -162,18 +158,8 @@ const crearFichaPersonaje = async () => {
           <Text style={styles.textoBoton}>+ Crear Ficha</Text>
         </TouchableOpacity>
 
-        <Carrusel pjs={pjs} />
+        <Carrusel personajes={personajes} />
       </View>
-
-     
-  
-    
-
-      
-      
-      
-    
-
     </ScrollView>
   );
 }
