@@ -1,9 +1,11 @@
+import { useNavigationState } from '@react-navigation/native';
+import React, { useContext,useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Image, Text, View } from 'react-native';
-import React, { useContext } from 'react';
+
 import { AuthContext } from './components/AuthContext'; // <-- IMPORTAR EL CONTEXTO
 
 // importaciones de COMPONENTS
@@ -96,6 +98,14 @@ const MainStack = () => {
 
 // esto es para cuando ya ingresamos a la pantalla de navegacion principal
 const TabNavigator = () => {
+
+   const state = useNavigationState(state => state);
+
+  useEffect(() => {
+    // Este efecto se ejecuta cada vez que cambia la pestaña activa
+    document.activeElement?.blur?.();
+  }, [state.index]);
+
   return (
     <Tab.Navigator
       initialRouteName="Principal"

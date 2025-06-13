@@ -42,7 +42,8 @@ export const Carrusel = ({ personajes }) => {
 };
 
 const ImageWrapper = ({ uri, fallback }) => {
-  const isValidUri = uri && typeof uri === 'string' && uri.trim() !== '';
+  //const isValidUri = uri && typeof uri === 'string' && uri.trim() !== '';
+  const isValidUri = uri && typeof uri === 'string' && uri.trim() !== '' && !uri.startsWith('../assets');
   const [source, setSource] = React.useState(isValidUri ? { uri } : fallback);
 
   React.useEffect(() => {

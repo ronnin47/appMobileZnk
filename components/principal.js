@@ -96,7 +96,7 @@ const crearFichaPersonaje = async () => {
     valAdd3: 0,
     add4: "",
     valAdd4: 0,
-    imagen: "../assets/imagenBase.jpeg",
+    imagen: null,
     inventario: [],
     dominios: [],
     kenActual: 0,

@@ -38,7 +38,9 @@ export const FichaPersonaje = ({ route }) => {
   
   const seleccionarImagen = async () => {
   const resultado = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    //mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    //esta opcion de picker da advertencia de deprecada
+    mediaTypes: ImagePicker.Images,
     allowsEditing: true,
     quality: 1,
    
@@ -52,7 +54,8 @@ export const FichaPersonaje = ({ route }) => {
   }
   };
 
-  
+
+
 //ACA LOS STATES
   const [nombre,setNombre]=useState(p.nombre);
   const [imagen,setImagen]=useState(p.imagen);
@@ -243,7 +246,7 @@ const guardarCambiosBBDD = async () => {
 };
 */
 
- const btnGuardarCambios = () => {
+ const guardarCambios = () => {
    
 
   const index = personajes.findIndex(per => per.idpersonaje === p.idpersonaje);
@@ -343,7 +346,7 @@ const guardarCambiosBBDD = async () => {
 }
 
 useEffect(() => {
- btnGuardarCambios();
+ guardarCambios();
 }, [ 
   nombre,
   dominio,
@@ -428,6 +431,7 @@ useEffect(() => {
 
   return (
     <View style={styles.container}>
+
       <TextInput style={styles.input} value={nombre} onChangeText={setNombre} />
 
 
