@@ -2,10 +2,13 @@
 
 import React, { useContext,useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
-import { View, Text, StyleSheet, Image } from 'react-native';
-import { TextInput } from 'react-native';
+import { View, Text, StyleSheet, Image,ScrollView,TextInput,TouchableOpacity  } from 'react-native';
+
 import * as ImagePicker from 'expo-image-picker';
-import { TouchableOpacity } from 'react-native';
+
+
+import { KeyboardAvoidingView, Platform } from 'react-native';
+
 
 
 export const FichaPersonaje = ({ route }) => {
@@ -18,7 +21,8 @@ export const FichaPersonaje = ({ route }) => {
 
   //aca extrae el personaje
   const p = personajes.find(p => p.idpersonaje === pj.idpersonaje);
-
+   
+  //console.log("PERSONAJE: ",p)
     if (!p) {
     return (
       <View style={styles.container}>
@@ -65,76 +69,75 @@ export const FichaPersonaje = ({ route }) => {
   const [edad,setEdad]=useState(p.edad); 
   const [ken,setKen]=useState(p.ken);
   const [ki,setKi]=useState(p.ki);
+  const [destino,setDestino]=useState(p.destino);
+  const [pDestino,setPdestino]=useState(p.Destino); 
+  const [fuerza,setFuerza]=useState(p.fuerza);
+  const [fortaleza,setFortaleza]=useState(p.fortaleza);
+  const [destreza,setDestreza]=useState(p.destreza);
+  const [agilidad,setAgilidad]=useState(p.agilidad);
+  const [sabiduria,setSabiduria]=useState(p.sabiduria);
+  const [presencia,setPresencia]=useState(p.presencia);
+  const [principio,setPrincipio]=useState(p.principio);
+  const [sentidos,setSentidos]=useState(p.sentidos);
+  const [academisismo,setAcademisismo]=useState(p.academisismo);
+  const [alerta,setAlerta]=useState(p.alerta);
+  const [atletismo,setAtletismo]=useState(p.atletismo);
+  const [conBakemono,setConBakemono]=useState(p.conBakemono);
+  const [mentir,setMentir]=useState(p.mentir);
+  const [pilotear,setPilotear]=useState(p.pilotear);
+  const [artesMarciales,setArtesMarciales]=useState(p.artesMarciales);
+  const [medicina,setMedicina]=useState(p.medicina);
+  const [conObjMagicos,setConObjMagicos]=useState(p.conObjMagicos);
+  const [sigilo,setSigilo]=useState(p.sigilo);
+  const [conEsferas,setConEsferas]=useState(p.conEsferas);
+  const [conLeyendas,setConLeyendas]=useState(p.conLeyendas);
+  const [forja,setForja]=useState(p.forja);
+  const [conDemonio,setConDemonio]=useState(p.conDemonio);
+  const [conEspiritual,setConEspiritual]=useState(p.conEspiritual);
+  const [manejoBlaster,setManejoBlaster]=useState(p.manejoBlaster);
+  const [manejoSombras,setManejoSombras]=useState(p.manejoSombras);
+  const [tratoBakemono,setTratoBakemono]=useState(p.tratoBakemono);
+  const [conHechiceria,setConHechiceria]=useState(p.conHechiceria);
+  const [medVital,setMedVital]=useState(p.medVital);
+  const [medEspiritual,setMedEspiritual]=useState(p.medEspiritual);
+  const [rayo,setRayo]=useState(p.rayo);
+  const [fuego,setFuego]=useState(p.fuego);
+  const [frio,setFrio]=useState(p.frio);
+  const [veneno,setVeneno]=useState(p.veneno);
+  const [corte,setCorte]=useState(p.corte);
+  const [energia,setEnergia]=useState(p.energia);
+  const [ventajas, setVentajas] = useState(p.ventajas);
+  const [inventario, setInventario] = useState(p.inventario);
+  const [dominios, setDominios] = useState(p.dominios);
+  const [hechizos, setHechizos] = useState(p.hechizos);
+  const [kenActual,setKenActual]=useState(p.kenActual);
+  const [kiActual,setKiActual]=useState(p.kiActual);
+  const [positiva,setPositiva]=useState(p.positiva);
+  const [negativa,setNegativa]=useState(p.negativa);
 
-  /*
-  const [destinoN,setDestinoN]=useState(destino);
-  const [pDestinoN,setPdestinoN]=useState(pDestino); 
-  const [fuerzaN,setFuerzaN]=useState(fuerza);
-  const [fortalezaN,setFortalezaN]=useState(fortaleza);
-  const [destrezaN,setDestrezaN]=useState(destreza);
-  const [agilidadN,setAgilidadN]=useState(agilidad);
-  const [sabiduriaN,setSabiduriaN]=useState(sabiduria);
-  const [presenciaN,setPresenciaN]=useState(presencia);
-  const [principioN,setPrincipioN]=useState(principio);
-  const [sentidosN,setSentidosN]=useState(sentidos);
-  const [academisismoN,setAcademisismoN]=useState(academisismo);
-  const [alertaN,setAlertaN]=useState(alerta);
-  const [atletismoN,setAtletismoN]=useState(atletismo);
-  const [conBakemonoN,setConBakemonoN]=useState(conBakemono);
-  const [mentirN,setMentirN]=useState(mentir);
-  const [pilotearN,setPilotearN]=useState(pilotear);
-  const [artesMarcialesN,setArtesMarcialesN]=useState(artesMarciales);
-  const [medicinaN,setMedicinaN]=useState(medicina);
-  const [conObjMagicosN,setConObjMagicosN]=useState(conObjMagicos);
-  const [sigiloN,setSigiloN]=useState(sigilo);
-  const [conEsferasN,setConEsferasN]=useState(conEsferas);
-  const [conLeyendasN,setConLeyendasN]=useState(conLeyendas);
-  const [forjaN,setForjaN]=useState(forja);
-  const [conDemonioN,setConDemonioN]=useState(conDemonio);
-  const [conEspiritualN,setConEspiritualN]=useState(conEspiritual);
-  const [manejoBlasterN,setManejoBlasterN]=useState(manejoBlaster);
-  const [manejoSombrasN,setManejoSombrasN]=useState(manejoSombras);
-  const [tratoBakemonoN,setTratoBakemonoN]=useState(tratoBakemono);
-  const [conHechiceriaN,setConHechiceriaN]=useState(conHechiceria);
-  const [medVitalN,setMedVitalN]=useState(medVital);
-  const [medEspiritualN,setMedEspiritualN]=useState(medEspiritual);
-  const [rayoN,setRayoN]=useState(rayo);
-  const [fuegoN,setFuegoN]=useState(fuego);
-  const [frioN,setFrioN]=useState(frio);
-  const [venenoN,setVenenoN]=useState(veneno);
-  const [corteN,setCorteN]=useState(corte);
-  const [energiaN,setEnergiaN]=useState(energia);
-  const [ventajasN, setVentajasN] = useState(ventajas);
-  const [inventarioN, setInventarioN] = useState(inventario);
-  const [dominiosN, setDominiosN] = useState(dominios);
-  const [hechizosN, setHechizosN] = useState(hechizos);
-  const [kenActualN,setKenActualN]=useState(kenActual);
-  const [kiActualN,setKiActualN]=useState(kiActual);
-  const [positivaN,setPositivaN]=useState(positiva);
-  const [negativaN,setNegativaN]=useState(negativa);
-  const [damageActualN,setDamageActualN]=useState(vidaActual);
-  const [consumisionN,setConsumisionN]=useState(consumision);
-  const [apCombateN,setApCombateN]=useState(apCombate);
-  const [valCombateN,setValCombateN]=useState(valCombate);
-  const [apCombate2N,setApCombate2N]=useState(apCombate2);
-  const [valCombate2N,setValCombate2N]=useState(valCombate2);
-  const [add1N,setAdd1N]=useState(add1);
-  const [valAdd1N,setValAdd1N]=useState(valAdd1);
-  const [add2N,setAdd2N]=useState(add2);
-  const [valAdd2N,setValAdd2N]=useState(valAdd2);
-  const [add3N,setAdd3N]=useState(add3);
-  const [valAdd3N,setValAdd3N]=useState(valAdd3);
-  const [add4N,setAdd4N]=useState(add4);
-  const [valAdd4N,setValAdd4N]=useState(valAdd4);
-  const [iniciativaN,setIniciativaN]=useState(iniciativa); 
-  const [historiaN,setHistoriaN]=useState(historia);
-  const [tecEspecialN,setTecEspecialN]=useState(tecEspecial);
-  const [conviccionN,setConviccionN]=useState(conviccion);
-  const [cicatrizN,setCicatrizN]=useState(cicatriz);
-  const [resistenciaN,setResistenciaN]=useState(resistencia);
-  const [pjPnjN,setPjPnjN]=useState(pjPnj);
+  //const [damageActual, setDamageActual] = useState(p.vidaActual);
+  const [vidaActual, setVidaActual] = useState(p.vidaActual);
+  const [consumision,setConsumision]=useState(p.consumision);
+  const [apCombate,setApCombate]=useState(p.apCombate);
+  const [valCombate,setValCombate]=useState(p.valCombate);
+  const [apCombate2,setApCombate2]=useState(p.apCombate2);
+  const [valCombate2,setValCombate2]=useState(p.valCombate2);
+  const [add1,setAdd1]=useState(p.add1);
+  const [valAdd1,setValAdd1]=useState(p.valAdd1);
+  const [add2,setAdd2]=useState(p.add2);
+  const [valAdd2,setValAdd2]=useState(p.valAdd2);
+  const [add3,setAdd3]=useState(p.add3);
+  const [valAdd3,setValAdd3]=useState(p.valAdd3);
+  const [add4,setAdd4]=useState(p.add4);
+  const [valAdd4,setValAdd4]=useState(p.valAdd4);
+  const [iniciativa,setIniciativa]=useState(p.iniciativa); 
+  const [historia,setHistoria]=useState(p.historia);
+  const [tecEspecial,setTecEspecial]=useState(p.tecEspecial);
+  const [conviccion,setConviccion]=useState(p.conviccion);
+  const [cicatriz,setCicatriz]=useState(p.cicatriz);
+  const [resistencia,setResistencia]=useState(p.resistencia);
+  const [pjPnj,setPjPnj]=useState(p.pjPnj);
 
-*/
 
 
 
@@ -246,9 +249,10 @@ const guardarCambiosBBDD = async () => {
 };
 */
 
+
+//ESTO ES PARA LA LOGICA INTERNA DE GUARDAR LOS CAMBIOS EN CON STATES Y UN ARRAY CON USE CONTEXT
  const guardarCambios = () => {
    
-
   const index = personajes.findIndex(per => per.idpersonaje === p.idpersonaje);
   if (index === -1) return; // por seguridad, si no se encuentra el personaje
  
@@ -265,7 +269,7 @@ const guardarCambiosBBDD = async () => {
     imagen:imagen,
     ken:ken,
     ki:ki,
-   /*
+   
     destino:destino,
     pDestino:pDestino,
     fuerza: fuerza,
@@ -337,12 +341,10 @@ const guardarCambiosBBDD = async () => {
     cicatriz: cicatriz,  
     resistencia:resistencia,
     pjPnj:pjPnj,
-    */
+ 
   };
 
-
-  savePersonajes(nuevosPersonajes);
- 
+  savePersonajes(nuevosPersonajes); 
 }
 
 useEffect(() => {
@@ -355,7 +357,6 @@ useEffect(() => {
   imagen,
   ken,
   ki,
-  /*
   destino,
   pDestino,
   fuerza,
@@ -405,7 +406,7 @@ useEffect(() => {
   kiActual,
   positiva,
   negativa,
-  damageActual,
+  vidaActual,
   add1,
   valAdd1,
   add2,
@@ -417,24 +418,29 @@ useEffect(() => {
   consumision,
   iniciativa,
   historia,
-  */
   naturaleza,
-  /*
   tecEspecial,
   conviccion,
   cicatriz,
   resistencia,
   pjPnj,
-  */
+
 ]);
 
 
   return (
-    <View style={styles.container}>
+
+    <KeyboardAvoidingView 
+      style={{ flex: 1 }} 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={100}
+    >
+   <ScrollView
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={[styles.container, { paddingBottom: 600, flexGrow: 1 }]}
+      >
 
       <TextInput style={styles.input} value={nombre} onChangeText={setNombre} />
-
-
       <Image source={getImageSource()} style={styles.imagen} resizeMode="cover"/>
          <TouchableOpacity onPress={seleccionarImagen} style={{ marginBottom: 10 }}>
          <Text style={{ color: 'cyan' }}>Cambiar imagen</Text>
@@ -445,20 +451,83 @@ useEffect(() => {
       <TextInput style={styles.input} value={naturaleza} onChangeText={setNaturaleza} />
       <TextInput style={styles.input} value={ki} onChangeText={setKi} />
       <TextInput style={styles.input} value={ken} onChangeText={setKen} />
-      
-   
-      
-    </View>
+      <TextInput style={styles.input} value={destino} onChangeText={setDestino} />
+      <TextInput style={styles.input} value={pDestino} onChangeText={setPdestino} />
+      <TextInput style={styles.input} value={fuerza} onChangeText={setFuerza} /> 
+       <TextInput style={styles.input} value={fortaleza} onChangeText={setFortaleza} />
+       <TextInput style={styles.input} value={destreza} onChangeText={setDestreza} />
+      <TextInput style={styles.input} value={agilidad} onChangeText={setAgilidad} />
+       <TextInput style={styles.input} value={sabiduria} onChangeText={setSabiduria} />
+       <TextInput style={styles.input} value={presencia} onChangeText={setPresencia} />  
+        <TextInput style={styles.input} value={principio} onChangeText={setPrincipio} />
+       <TextInput style={styles.input} value={sentidos} onChangeText={setSentidos} />
+      <TextInput style={styles.input} value={academisismo} onChangeText={setAcademisismo} />
+       <TextInput style={styles.input} value={alerta} onChangeText={setAlerta} />
+       <TextInput style={styles.input} value={atletismo} onChangeText={setAtletismo} />      
+        <TextInput style={styles.input} value={conBakemono} onChangeText={setConBakemono} />
+       <TextInput style={styles.input} value={mentir} onChangeText={setMentir} />
+      <TextInput style={styles.input} value={pilotear} onChangeText={setPilotear} />
+       <TextInput style={styles.input} value={artesMarciales} onChangeText={setArtesMarciales} />
+       <TextInput style={styles.input} value={medicina} onChangeText={setMedicina} /> 
+       <TextInput style={styles.input} value={conObjMagicos} onChangeText={setConObjMagicos} /> 
+       <TextInput style={styles.input} value={sigilo} onChangeText={setSigilo} />     
+       <TextInput style={styles.input} value={conEsferas} onChangeText={setConEsferas} />     
+       <TextInput style={styles.input} value={conLeyendas} onChangeText={setConLeyendas} />     
+       <TextInput style={styles.input} value={forja} onChangeText={setForja} />     
+       <TextInput style={styles.input} value={conDemonio} onChangeText={setConDemonio} />     
+       <TextInput style={styles.input} value={conEspiritual} onChangeText={setConEspiritual} />     
+       <TextInput style={styles.input} value={manejoBlaster} onChangeText={setManejoBlaster} />     
+       <TextInput style={styles.input} value={manejoSombras} onChangeText={setManejoSombras} />     
+       <TextInput style={styles.input} value={tratoBakemono} onChangeText={setTratoBakemono} />     
+       <TextInput style={styles.input} value={conHechiceria} onChangeText={setConHechiceria} />    
+       <TextInput style={styles.input} value={medVital} onChangeText={setMedVital} />    
+       <TextInput style={styles.input} value={medEspiritual} onChangeText={setMedEspiritual} />    
+       <TextInput style={styles.input} value={rayo} onChangeText={setRayo} />    
+       <TextInput style={styles.input} value={fuego} onChangeText={setFuego} />   
+       <TextInput style={styles.input} value={frio} onChangeText={setFrio} />    
+       <TextInput style={styles.input} value={veneno} onChangeText={setVeneno} />    
+       <TextInput style={styles.input} value={corte} onChangeText={setCorte} />    
+       <TextInput style={styles.input} value={energia} onChangeText={setEnergia} />    
+       <TextInput style={styles.input} value={apCombate} onChangeText={setApCombate} />        
+       <TextInput style={styles.input} value={apCombate2} onChangeText={setApCombate2} />
+      <TextInput style={styles.input} value={valCombate2} onChangeText={setValCombate2} />
+      <TextInput style={styles.input} value={ventajas} onChangeText={setVentajas} />
+      <TextInput style={styles.input} value={inventario} onChangeText={setInventario} />
+      <TextInput style={styles.input} value={dominios} onChangeText={setDominios} />
+      <TextInput style={styles.input} value={hechizos} onChangeText={setHechizos} />
+      <TextInput style={styles.input} value={kenActual} onChangeText={setKenActual} />
+      <TextInput style={styles.input} value={kiActual} onChangeText={setKiActual} />
+      <TextInput style={styles.input} value={positiva} onChangeText={setPositiva} />
+      <TextInput style={styles.input} value={negativa} onChangeText={setNegativa} />
+      <TextInput style={styles.input} value={vidaActual} onChangeText={setVidaActual} />
+      <TextInput style={styles.input} value={add1} onChangeText={setAdd1} />
+      <TextInput style={styles.input} value={valAdd1} onChangeText={setValAdd1} />
+      <TextInput style={styles.input} value={add2} onChangeText={setAdd2} />
+      <TextInput style={styles.input} value={valAdd2} onChangeText={setValAdd2} />
+      <TextInput style={styles.input} value={add3} onChangeText={setAdd3} />
+      <TextInput style={styles.input} value={valAdd3} onChangeText={setValAdd3} />
+      <TextInput style={styles.input} value={add4} onChangeText={setAdd4} />
+      <TextInput style={styles.input} value={valAdd4} onChangeText={setValAdd4} />
+      <TextInput style={styles.input} value={consumision} onChangeText={setConsumision} />
+      <TextInput style={styles.input} value={iniciativa} onChangeText={setIniciativa} />
+      <TextInput style={styles.input} value={historia} onChangeText={setHistoria} />
+      <TextInput style={styles.input} value={naturaleza} onChangeText={setNaturaleza} />
+      <TextInput style={styles.input} value={tecEspecial} onChangeText={setTecEspecial} />
+      <TextInput style={styles.input} value={conviccion} onChangeText={setConviccion} />
+      <TextInput style={styles.input} value={cicatriz} onChangeText={setCicatriz} />
+      <TextInput style={styles.input} value={resistencia} onChangeText={setResistencia} />
+      <TextInput style={styles.input} value={pjPnj} onChangeText={setPjPnj} />    
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#000',
-    alignItems: 'center',
-  },
+container: {
+  padding: 20,
+  backgroundColor: '#000',
+  justifyContent: 'flex-start',
+},
   titulo: {
     fontSize: 24,
     color: '#fff',

@@ -23,7 +23,7 @@ import { ListaPersonajes } from './components/listaPersonajes';
 
 
 import FlashMessage from 'react-native-flash-message';
-
+import { Platform } from 'react-native';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -101,10 +101,11 @@ const TabNavigator = () => {
 
    const state = useNavigationState(state => state);
 
-  useEffect(() => {
-    // Este efecto se ejecuta cada vez que cambia la pestaña activa
+ useEffect(() => {
+  if (Platform.OS === 'web') {
     document.activeElement?.blur?.();
-  }, [state.index]);
+  }
+}, [state.index]);
 
   return (
     <Tab.Navigator
