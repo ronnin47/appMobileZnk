@@ -12,7 +12,7 @@ import { Ventajas } from './ventajas';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Inventario } from './inventario';
-
+import { Dominios } from './dominios';
 
 export const FichaPersonaje = ({ route }) => {
   
@@ -792,6 +792,16 @@ const colorPlaceHolder="#888"
           style={{ backgroundColor: '#1c1c1c', borderBottomWidth: 2, borderBottomColor: '#e0b878', paddingVertical: 4 }}
         >
           <Inventario inventario={inventario} setInventario={setInventario} />
+        </List.Accordion>
+
+        <List.Accordion
+          title="Dominios y Tecnicas"
+          expanded={expanded === 'dominios'}
+          onPress={() => handlePress('dominios')}
+          titleStyle={{ fontSize: 18, fontWeight: 'bold', color: '#FFA500' }}
+          style={{ backgroundColor: '#1c1c1c', borderBottomWidth: 2, borderBottomColor: '#e0b878', paddingVertical: 4 }}
+        >
+          <Dominios dominios={dominios} setDominios={setDominios} />
         </List.Accordion>
 
         <List.Accordion
