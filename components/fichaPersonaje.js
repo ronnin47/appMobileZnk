@@ -500,21 +500,63 @@ const colorPlaceHolder="#888"
           <Text style={styles.label}>Naturaleza</Text>
           <TextInput placeholder="Naturaleza" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputTexto} value={naturaleza} onChangeText={setNaturaleza} />
           
-          <Text style={styles.label}>Ki</Text>
-          <TextInput placeholder="Ki" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={ki} onChangeText={setKi} />
-          
-          <Text style={styles.label}>Ken</Text>
-          <TextInput placeholder="Ken" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={ken} onChangeText={setKen} />
-          
-          <Text style={styles.label}>Nivel de Destino</Text>
-          <TextInput placeholder="Nivel de Destino" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={destino} onChangeText={setDestino} />
-          
-          <Text style={styles.label}>P. de Destino</Text>
-          <TextInput placeholder="P. de destino" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={pDestino} onChangeText={setPdestino} />
+        
           
           
         </View>
+
         </View>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10 }}>
+  {/* Columna 1 */}
+  <View style={{ flex: 1, marginRight: 10 }}>
+    <Text style={styles.label}>Ki</Text>
+    <TextInput
+      placeholder="Ki"
+      placeholderTextColor={colorPlaceHolder}
+      keyboardType="numeric"
+      value={ki}
+      onChangeText={setKi}
+     style={styles.inputNumero}
+    />
+
+    <Text style={styles.label}>
+      Nivel de Destino
+    </Text>
+    <TextInput
+      placeholder="Nivel de Destino"
+      placeholderTextColor={colorPlaceHolder}
+      keyboardType="numeric"
+      value={destino}
+      onChangeText={setDestino}
+     style={styles.inputNumero}
+    />
+  </View>
+
+  {/* Columna 2 */}
+  <View style={{ flex: 1, marginLeft: 10 }}>
+    <Text style={styles.label}>Ken</Text>
+    <TextInput
+      placeholder="Ken"
+      placeholderTextColor={colorPlaceHolder}
+      keyboardType="numeric"
+      value={ken}
+      onChangeText={setKen}
+     style={styles.inputNumero}
+    />
+
+    <Text style={styles.label}>
+      P. de Destino
+    </Text>
+    <TextInput
+      placeholder="P. de destino"
+      placeholderTextColor={colorPlaceHolder}
+      keyboardType="numeric"
+      value={pDestino}
+      onChangeText={setPdestino}
+      style={styles.inputNumero}
+    />
+  </View>
+</View>
       <Text style={styles.label}>Convicción</Text>
           <TextInput placeholder="Convicción" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputTexto} value={conviccion} onChangeText={setConviccion} />
 
@@ -871,8 +913,17 @@ const styles = StyleSheet.create({
   imagen: {
     width: 200,
     height: 200,
-    borderRadius: 10,
-    marginVertical: 8, // antes: 10
+    marginTop: 16,
+    borderWidth: 4,
+    borderColor: 'white',
+    borderRadius: 12, // opcional para bordes redondeados
+    // sombra iOS
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.9,
+    shadowRadius: 10,
+    // sombra Android
+    elevation: 15,
   },
   info: {
     fontSize: 16,
@@ -978,5 +1029,5 @@ inputTextoNombre: {
 
   // sombra Android
   elevation: 10,
-}
+}, 
 });

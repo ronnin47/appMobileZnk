@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,23 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
+
+// Función simple para comparar arrays de objetos según los campos que usás
+const areArraysEqual = (a, b) => {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    const objA = a[i];
+    const objB = b[i];
+    if (
+      objA.nombre !== objB.nombre ||
+      objA.presentacion !== objB.presentacion ||
+      objA.sistema !== objB.sistema
+    ) {
+      return false;
+    }
+  }
+  return true;
+};
 
 export const Item = ({ id, itemValues, handleItemChange }) => {
   const [heightPresentacion, setHeightPresentacion] = useState(40);
@@ -57,16 +74,38 @@ export const Item = ({ id, itemValues, handleItemChange }) => {
 };
 
 export const TecnicaEspecial = ({ tecEspecial, setTecEspecial }) => {
-  const [items, setItems] = useState(
-    tecEspecial.map((item, index) => ({
-      id: index,
-      values: {
-        nombre: item.nombre || "",
-        presentacion: item.presentacion || "",
-        sistema: item.sistema || "",
-      },
-    }))
+  // Inicializo items vacío o desde tecEspecial
+  const [items, setItems] = useState(() =>
+    Array.isArray(tecEspecial)
+      ? tecEspecial.map((item, index) => ({
+          id: index,
+          values: {
+            nombre: item.nombre || "",
+            presentacion: item.presentacion || "",
+            sistema: item.sistema || "",
+          },
+        }))
+      : []
   );
+
+  // Sincronizo items cuando tecEspecial cambie y sea válido
+  useEffect(() => {
+    if (Array.isArray(tecEspecial)) {
+      const newItems = tecEspecial.map((item, index) => ({
+        id: index,
+        values: {
+          nombre: item.nombre || "",
+          presentacion: item.presentacion || "",
+          sistema: item.sistema || "",
+        },
+      }));
+
+      // Solo actualizamos estado local si son distintos
+      if (!areArraysEqual(items.map((i) => i.values), tecEspecial)) {
+        setItems(newItems);
+      }
+    }
+  }, [tecEspecial]);
 
   const handleItemChange = (id, newValues) => {
     const updatedItems = items.map((item) =>
@@ -80,8 +119,14 @@ export const TecnicaEspecial = ({ tecEspecial, setTecEspecial }) => {
       ? updatedItems.filter((item) => item.id !== id)
       : updatedItems;
 
+    const finalValues = finalItems.map((item) => item.values);
+
+    // Actualizamos solo si hay cambios reales para evitar parpadeo
+    if (!areArraysEqual(finalValues, tecEspecial)) {
+      setTecEspecial(finalValues);
+    }
+
     setItems(finalItems);
-    setTecEspecial(finalItems.map((item) => item.values));
   };
 
   const btnAgregarItem = () => {
@@ -94,6 +139,22 @@ export const TecnicaEspecial = ({ tecEspecial, setTecEspecial }) => {
     setTecEspecial(newItems.map((item) => item.values));
   };
 
+  if (!items.length) {
+    return null;
+  }
+
+
+  const [showButton, setShowButton] = useState(false);
+
+  // Cada vez que cambian los items, ocultamos el botón y lo mostramos luego con delay
+  useEffect(() => {
+    setShowButton(false); // ocultamos el botón
+    const timeout = setTimeout(() => {
+      setShowButton(true); // mostramos el botón luego del delay
+    }, 100); // 100ms, podés ajustar este tiempo
+
+    return () => clearTimeout(timeout); // limpieza
+  }, [items]);
   return (
     <View style={styles.container}>
       {items.map((item) => (
@@ -105,9 +166,12 @@ export const TecnicaEspecial = ({ tecEspecial, setTecEspecial }) => {
         />
       ))}
 
-      <TouchableOpacity style={styles.btnAgregar} onPress={btnAgregarItem}>
-        <Text style={styles.btnTexto}>+ Técnica-Poder-Objeto especial</Text>
-      </TouchableOpacity>
+      
+      {showButton && (
+        <TouchableOpacity style={styles.btnAgregar} onPress={btnAgregarItem}>
+          <Text style={styles.btnTexto}>+ Técnica-Poder-Objeto especial</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
