@@ -8,6 +8,12 @@ import axios from 'axios';
 import { showMessage } from 'react-native-flash-message';
 import { List } from 'react-native-paper';
 
+import { Ventajas } from './ventajas';
+
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Inventario } from './inventario';
+
+
 export const FichaPersonaje = ({ route }) => {
   
   const { personajes, savePersonajes } = useContext(AuthContext);
@@ -455,13 +461,20 @@ const colorPlaceHolder="#888"
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={[styles.container, { paddingBottom: 600, flexGrow: 1 }]}
           >
+    <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 10 }}>
+      <TextInput
+        placeholder="Nombre"
+        placeholderTextColor={colorPlaceHolder}
+        keyboardType="default"
+        style={[styles.inputTextoNombre, { flex: 1, marginRight: 10 }]}
+        value={nombre}
+        onChangeText={setNombre}
+      />
 
-          <TextInput placeholder="Nombre"   placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputTexto} value={nombre} onChangeText={setNombre} />
-          
-
-          <TouchableOpacity style={styles.botonGuardar} onPress={guardarCambiosBBDD}>
-            <Text style={styles.textoBoton}>Guardar Cambios</Text>
-          </TouchableOpacity>
+      <TouchableOpacity style={styles.botonGuardar} onPress={guardarCambiosBBDD}>
+        <Icon name="save" size={24} color="#00FF00" />
+      </TouchableOpacity>
+    </View>
 
           <View style={styles.rowContainer}>
           <View style={styles.imageContainer}>
@@ -768,7 +781,17 @@ const colorPlaceHolder="#888"
           titleStyle={{ fontSize: 18, fontWeight: 'bold', color: '#FFA500' }}
           style={{ backgroundColor: '#1c1c1c', borderBottomWidth: 2, borderBottomColor: '#e0b878', paddingVertical: 4 }}
                   >
-          <List.Item title="Aquí aparecerán las ventajas y desventajas del personaje." />
+            <Ventajas ventajas={ventajas} setVentajas={setVentajas} />
+        </List.Accordion>
+
+         <List.Accordion
+          title="Inventario"
+          expanded={expanded === 'inventario'}
+          onPress={() => handlePress('inventario')}
+          titleStyle={{ fontSize: 18, fontWeight: 'bold', color: '#FFA500' }}
+          style={{ backgroundColor: '#1c1c1c', borderBottomWidth: 2, borderBottomColor: '#e0b878', paddingVertical: 4 }}
+        >
+          <Inventario inventario={inventario} setInventario={setInventario} />
         </List.Accordion>
 
         <List.Accordion
@@ -781,15 +804,7 @@ const colorPlaceHolder="#888"
           <List.Item title="Aquí aparecerán los hechizos del personaje." />
         </List.Accordion>
 
-        <List.Accordion
-          title="Inventario"
-          expanded={expanded === 'inventario'}
-          onPress={() => handlePress('inventario')}
-          titleStyle={{ fontSize: 18, fontWeight: 'bold', color: '#FFA500' }}
-          style={{ backgroundColor: '#1c1c1c', borderBottomWidth: 2, borderBottomColor: '#e0b878', paddingVertical: 4 }}
-        >
-          <List.Item title="Aquí aparecerá el inventario del personaje." />
-        </List.Accordion>
+       
       </List.Section>
 
 
@@ -897,17 +912,38 @@ const styles = StyleSheet.create({
     fontSize: 13, // antes: 14
     fontWeight: '600',
   },
-    botonGuardar: {
-    backgroundColor: '#facc15',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  textoBoton: {
-    color: '#000',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
+  botonGuardar: {
+  backgroundColor: '#28a745', // verde success estilo Bootstrap
+  paddingVertical: 10,
+  paddingHorizontal: 20,
+  borderRadius: 8,
+  alignSelf: 'center', // lo centra horizontalmente
+  marginTop: 12,
+},
+
+textoBoton: {
+  color: '#fff', // blanco para contraste
+  fontWeight: 'bold',
+  fontSize: 16,
+},
+inputTextoNombre: {
+  borderWidth: 1,
+  backgroundColor: 'black',
+  paddingVertical: 4,
+  paddingHorizontal: 6,
+  borderRadius: 6,
+  marginTop: 5,
+  color: '#FFFF00',
+  fontSize: 19,
+  fontFamily: 'AnimeAce2.0',
+  
+  // sombra iOS
+  shadowColor: '#FFFF00',
+  shadowOffset: { width: 0, height: 0 },
+  shadowOpacity: 0.8,
+  shadowRadius: 8,
+
+  // sombra Android
+  elevation: 10,
+}
 });
