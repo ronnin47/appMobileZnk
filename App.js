@@ -7,7 +7,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Image, Text, View } from 'react-native';
 
 import { AuthContext } from './components/AuthContext'; // <-- IMPORTAR EL CONTEXTO
-
+import { Provider as PaperProvider } from 'react-native-paper';
 // importaciones de COMPONENTS
 import { LoginScreen } from './components/login'; // Tu pantalla de Login
 import RegisterScreen from './components/registro';
@@ -35,11 +35,13 @@ const Stack = createStackNavigator();
 // el Stack navigator es una PILA de pantallas
 export const App = () => {
   return (
-    <AuthProvider>
-      <NavigationContainer>
-        <MainStack />
-      </NavigationContainer>
-    </AuthProvider>
+     <PaperProvider>
+        <AuthProvider>
+          <NavigationContainer>
+            <MainStack />
+          </NavigationContainer>
+        </AuthProvider>
+     </PaperProvider>   
   );
 };
 

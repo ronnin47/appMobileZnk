@@ -7,9 +7,14 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(bodyParser.json());
 
+app.use(express.json({ limit: '50mb' })); // para parsear JSON
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
+/*
+app.use(bodyParser.json({ limit: '50mb' }));  
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true })); 
+*/
 //LOCAL HOST bbdd
 const pool = new Pool({
   user: 'postgres',
@@ -135,7 +140,7 @@ app.get('/consumirPersonajesUsuario', async (req, res) => {
     
     const { usuarioId } = req.query;
     console.log("el id del usuario es: ",usuarioId)
-    const userQuery = 'SELECT * FROM personajes WHERE "usuarioId"=$1';
+    const userQuery = 'SELECT * FROM personajes WHERE "usuarioId"=$1 ORDER BY "idpersonaje" ASC';
     const userResult = await pool.query(userQuery,[usuarioId]);
 
    
@@ -159,6 +164,7 @@ app.get('/consumirPersonajesUsuario', async (req, res) => {
   }
 });
 
+//crear la ficha nueva de pj OK!
 app.post('/insert-personaje', async (req, res) => {
 
   console.log("REQ CRAR FICHA: ",req.body)
@@ -412,6 +418,267 @@ app.post('/insert-personaje', async (req, res) => {
   }
 });
 
+//UPdate personaje OK!
+app.put('/update-personaje/:id', async (req, res) => {
+
+//console.log("esto es lo que trae el req",req.body)
+  const idpersonaje = req.params.id;
+/*
+  console.log("***********ID: ",idpersonaje)
+
+  console.log('REQ.BODY:', req.body);
+  if (!req.body) return res.status(400).json({ error: 'No se recibió body' });
+   if (!req.body) return res.status(400).send('No body');
+  */
+  const { 
+      nombre,
+      dominio,
+      raza,
+      naturaleza,
+      edad,
+      ken,
+      ki,
+      destino,
+      pDestino,
+      fuerza,
+      fortaleza,
+      destreza,
+      agilidad,
+      sabiduria,
+      presencia,
+      principio,
+      sentidos,
+      academisismo,
+      alerta,
+      atletismo,
+      conBakemono,
+      mentir,
+      pilotear,
+      artesMarciales,
+      medicina,
+      conObjMagicos,
+      sigilo,
+      conEsferas,
+      conLeyendas,
+      forja,
+      conDemonio,
+      conEspiritual,
+      manejoBlaster,
+      manejoSombras,
+      tratoBakemono,
+      conHechiceria,
+      medVital,
+      medEspiritual,
+      rayo,
+      fuego,
+      frio,
+      veneno,
+      corte,
+      energia,
+      ventajas,   
+      apCombate,
+      valCombate,
+      apCombate2,
+      valCombate2,
+      add1,
+      valAdd1,
+      add2,
+      valAdd2,
+      add3,
+      valAdd3,
+      add4,
+      valAdd4,
+      imagen,
+      inventario,
+      dominios,
+      kenActual,
+      kiActual,
+      positiva,
+      negativa,
+      vidaActual,
+      hechizos,
+      consumision,
+      iniciativa,
+      historia,
+      usuarioId,
+      tecEspecial,
+      conviccion,
+      cicatriz,
+      resistencia,
+      pjPnj,
+      
+   } = req.body;
+ 
+  try {
+    const query = `
+    UPDATE personajes
+    SET 
+      nombre = $1,
+      dominio = $2,
+      raza = $3,
+      naturaleza = $4,
+      edad = $5,
+      ken = $6,
+      ki = $7,
+      destino = $8,
+      "pDestino" = $9,
+      fuerza = $10,
+      fortaleza = $11,
+      destreza = $12,
+      agilidad = $13,
+      sabiduria = $14,
+      presencia = $15,
+      principio = $16,
+      sentidos = $17,
+      academisismo = $18,
+      alerta = $19,
+      atletismo = $20,
+      "conBakemono" = $21,
+      mentir = $22,
+      pilotear = $23,
+      "artesMarciales" = $24,
+      medicina = $25,
+      "conObjMagicos" = $26,
+      sigilo = $27,
+      "conEsferas" = $28,
+      "conLeyendas" = $29,
+      forja = $30,
+      "conDemonio" = $31,
+      "conEspiritual" = $32,
+      "manejoBlaster" = $33,
+      "manejoSombras" = $34,
+      "tratoBakemono" = $35,
+      "conHechiceria" = $36,
+      "medVital" = $37,
+      "medEspiritual" = $38,
+      rayo = $39,
+      fuego = $40,
+      frio = $41,
+      veneno = $42,
+      corte = $43,
+      energia = $44,
+      ventajas = $45,
+      "apCombate" = $46,
+      "valCombate" = $47,
+      "apCombate2" = $48,
+      "valCombate2" = $49,
+      add1 = $50,
+      "valAdd1" = $51,
+      add2 = $52,
+      "valAdd2" = $53,
+      add3 = $54,
+      "valAdd3" = $55,
+      add4 = $56,
+      "valAdd4" = $57,
+      imagen = $58,
+      inventario = $59,
+      dominios = $60,
+      "kenActual" = $61,
+      "kiActual" = $62,
+      positiva = $63,
+      negativa = $64,
+      "vidaActual" = $65,
+      hechizos = $66,
+      consumision = $67,
+      iniciativa = $68,
+      historia = $69,
+      "usuarioId" = $70,
+      "tecEspecial" = $71,
+      conviccion= $72,
+      cicatriz= $73,
+      resistencia= $74,
+      "pjPnj"= $75
+    WHERE idpersonaje = $76
+  `;
+    const values = [
+      nombre,
+      dominio,
+      raza,
+      naturaleza,
+      edad,
+      ken,
+      ki,
+      destino,
+      pDestino,
+      fuerza,
+      fortaleza,
+      destreza,
+      agilidad,
+      sabiduria,
+      presencia,
+      principio,
+      sentidos,
+
+
+      academisismo,
+      alerta,
+      atletismo,
+      conBakemono,
+      mentir,
+      pilotear,
+      artesMarciales,
+      medicina,
+      conObjMagicos,
+      sigilo,
+      conEsferas,
+      conLeyendas,
+      forja,
+      conDemonio,
+      conEspiritual,
+      manejoBlaster,
+      manejoSombras,
+      tratoBakemono,
+      conHechiceria,
+      medVital,
+      medEspiritual,
+      rayo,
+      fuego,
+      frio,
+      veneno,
+      corte,
+      energia,
+      ventajas,      
+      apCombate,
+      valCombate,
+      apCombate2,
+      valCombate2,
+      add1,
+      valAdd1,
+      add2,
+      valAdd2,
+      add3,
+      valAdd3,
+      add4,
+      valAdd4,
+      imagen,
+      inventario,
+      dominios,
+      kenActual,
+      kiActual,
+      positiva,
+      negativa,
+      vidaActual,
+      hechizos,
+      consumision,
+      iniciativa,
+      historia,
+      usuarioId,
+      tecEspecial,    
+      conviccion,
+      cicatriz,
+      resistencia,
+      pjPnj,
+      idpersonaje
+      ];
+    const result = await pool.query(query, values);
+ 
+    res.status(201).json({ message: 'Personaje modificado exitosamente.', idpersonaje});
+  } catch (err) {
+    console.error('Error al modificar el personaje:', err.message);
+    res.status(500).json({ error: 'Error al modificar el personaje.' });
+  }
+  
+});
 
 
 
