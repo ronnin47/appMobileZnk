@@ -94,11 +94,9 @@ export const Item = ({ id, itemValues, handleItemChange }) => {
 };
 
 export const Hechizos = ({ hechizos, setHechizos }) => {
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const nuevosItems = hechizos.map((hc, index) => ({
+  // Inicializamos items a partir de hechizos directamente para evitar parpadeos
+  const [items, setItems] = useState(() =>
+    hechizos.map((hc, index) => ({
       id: index,
       values: {
         ryu: hc.ryu || "",
@@ -109,9 +107,25 @@ export const Hechizos = ({ hechizos, setHechizos }) => {
         costeKi: hc.costeKi || "",
         invo: hc.invo || "",
       },
-    }));
-    setItems(nuevosItems);
-    setLoading(false);
+    }))
+  );
+
+  // Sincronizamos items si cambia el prop hechizos (solo si cambió realmente)
+  useEffect(() => {
+    setItems(
+      hechizos.map((hc, index) => ({
+        id: index,
+        values: {
+          ryu: hc.ryu || "",
+          nombre: hc.nombre || "",
+          nivelKi: hc.nivelKi || "",
+          descripcion: hc.descripcion || "",
+          sistema: hc.sistema || "",
+          costeKi: hc.costeKi || "",
+          invo: hc.invo || "",
+        },
+      }))
+    );
   }, [hechizos]);
 
   const handleItemChange = (id, newValues) => {
@@ -133,8 +147,7 @@ export const Hechizos = ({ hechizos, setHechizos }) => {
       : updatedItems;
 
     setItems(finalItems);
-    const newHechizos = finalItems.map((item) => item.values);
-    setHechizos(newHechizos);
+    setHechizos(finalItems.map((item) => item.values));
   };
 
   const btnAgregarItem = () => {
@@ -152,29 +165,29 @@ export const Hechizos = ({ hechizos, setHechizos }) => {
     };
 
     const newItems = [...items, newItem];
-    const newHechizos = newItems.map((item) => item.values);
 
     setItems(newItems);
-    setHechizos(newHechizos);
+    setHechizos(newItems.map((item) => item.values));
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {!loading &&
-        items.map((item) => (
-          <Item
-            key={item.id}
-            id={item.id}
-            itemValues={item.values}
-            handleItemChange={handleItemChange}
-          />
-        ))}
+      {items.map((item) => (
+        <Item
+          key={item.id}
+          id={item.id}
+          itemValues={item.values}
+          handleItemChange={handleItemChange}
+        />
+      ))}
 
-      {!loading && (
+    <View style={{ marginTop: 10, alignItems: 'center' }}>
+      <View style={{ width: 140 }}>
         <TouchableOpacity style={styles.btnAgregar} onPress={btnAgregarItem}>
           <Text style={styles.btnTexto}>+ Hechizo</Text>
         </TouchableOpacity>
-      )}
+      </View>
+    </View>
     </ScrollView>
   );
 };
@@ -230,15 +243,14 @@ const styles = StyleSheet.create({
     minHeight: 120,
   },
   btnAgregar: {
-    backgroundColor: "#339CFF",
-    paddingVertical: 12,
-    borderRadius: 6,
-    alignItems: "center",
-    marginTop: 15,
-  },
-  btnTexto: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 18,
-  },
+  backgroundColor: '#339CFF',
+  paddingVertical: 10,
+  borderRadius: 6,
+  alignItems: 'center',
+},
+btnTexto: {
+  color: 'white',
+  fontWeight: 'bold',
+  fontSize: 16,
+},
 });

@@ -157,9 +157,13 @@ export const Dominios = ({ dominios, setDominios }) => {
         />
       ))}
 
-      <TouchableOpacity style={styles.btnAgregar} onPress={btnAgregarItem}>
-        <Text style={styles.btnTexto}>+ Técnica</Text>
-      </TouchableOpacity>
+      <View style={{ marginTop: 10, alignItems: 'center' }}>
+      <View style={{ width: 140 }}>
+        <TouchableOpacity style={styles.btnAgregar} onPress={btnAgregarItem}>
+          <Text style={styles.btnTexto}>+ Técnica</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
     </ScrollView>
   );
 };

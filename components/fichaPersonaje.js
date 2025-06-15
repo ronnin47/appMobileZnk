@@ -14,6 +14,8 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Inventario } from './inventario';
 import { Dominios } from './dominios';
 import { Hechizos } from './hechizos';
+import { Historia } from './historia';
+import { TecnicaEspecial } from './tecEpecial';
 
 export const FichaPersonaje = ({ route }) => {
   
@@ -813,6 +815,26 @@ const colorPlaceHolder="#888"
           style={{ backgroundColor: '#1c1c1c', borderBottomWidth: 2, borderBottomColor: '#e0b878', paddingVertical: 4 }}
         >
           <Hechizos hechizos={hechizos} setHechizos={setHechizos}></Hechizos>
+        </List.Accordion>
+
+        <List.Accordion
+          title="Historia"
+          expanded={expanded === 'historia'}
+          onPress={() => handlePress('historia')}
+          titleStyle={{ fontSize: 18, fontWeight: 'bold', color: '#FFA500' }}
+          style={{ backgroundColor: '#1c1c1c', borderBottomWidth: 2, borderBottomColor: '#e0b878', paddingVertical: 4 }}
+        >
+          <Historia historia={historia} setHistoria={setHistoria}></Historia>
+        </List.Accordion>
+
+         <List.Accordion
+          title="Tecnicas, poderes y objetos unicos"
+          expanded={expanded === 'tecEspecial'}
+          onPress={() => handlePress('tecEspecial')}
+          titleStyle={{ fontSize: 18, fontWeight: 'bold', color: '#FFA500' }}
+          style={{ backgroundColor: '#1c1c1c', borderBottomWidth: 2, borderBottomColor: '#e0b878', paddingVertical: 4 }}
+        >
+          <TecnicaEspecial tecEspecial={tecEspecial} setTecEspecial={setTecEspecial}></TecnicaEspecial>
         </List.Accordion>
 
        
