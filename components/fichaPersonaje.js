@@ -13,6 +13,7 @@ import { Ventajas } from './ventajas';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Inventario } from './inventario';
 import { Dominios } from './dominios';
+import { Hechizos } from './hechizos';
 
 export const FichaPersonaje = ({ route }) => {
   
@@ -811,7 +812,7 @@ const colorPlaceHolder="#888"
           titleStyle={{ fontSize: 18, fontWeight: 'bold', color: '#FFA500' }}
           style={{ backgroundColor: '#1c1c1c', borderBottomWidth: 2, borderBottomColor: '#e0b878', paddingVertical: 4 }}
         >
-          <List.Item title="Aquí aparecerán los hechizos del personaje." />
+          <Hechizos hechizos={hechizos} setHechizos={setHechizos}></Hechizos>
         </List.Accordion>
 
        

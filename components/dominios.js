@@ -16,16 +16,17 @@ export const Item = ({ id, itemValues, handleItemChange }) => {
 
   return (
     <View style={styles.itemContainer}>
-      {/* Nombre: ocupa toda la fila */}
+      {/* Nombre */}
       <TextInput
         style={[styles.inputDominio, styles.nombreInput]}
         value={itemValues.nombre}
         onChangeText={(text) => handleChange('nombre', text)}
         placeholder="Nombre"
         placeholderTextColor="#aaa"
+        textAlign="center"
       />
 
-      {/* Fila: Nivel de Ki y Arte */}
+      {/* Nivel Ki + Arte */}
       <View style={styles.row}>
         <TextInput
           style={[styles.inputDominio, styles.smallInput]}
@@ -34,6 +35,7 @@ export const Item = ({ id, itemValues, handleItemChange }) => {
           placeholder="Nivel de Ki"
           placeholderTextColor="#aaa"
           keyboardType="numeric"
+          textAlign="center"
         />
         <TextInput
           style={[styles.inputDominio, styles.smallInput]}
@@ -41,32 +43,35 @@ export const Item = ({ id, itemValues, handleItemChange }) => {
           onChangeText={(text) => handleChange('dominio', text)}
           placeholder="Arte"
           placeholderTextColor="#aaa"
+          textAlign="center"
         />
       </View>
 
-      {/* Áreas de texto: Descripción y Sistema */}
+      {/* Descripción */}
       <TextInput
-        style={styles.inputArea}
+        style={[styles.inputArea, { marginTop: 10 }]}
         value={itemValues.descripcion}
         onChangeText={(text) => handleChange('descripcion', text)}
         placeholder="Descripción"
         placeholderTextColor="#aaa"
-        multiline={true}
-        numberOfLines={4}
+        multiline
+        numberOfLines={6}
         textAlignVertical="top"
       />
+
+      {/* Sistema */}
       <TextInput
         style={[styles.inputArea, { marginTop: 10 }]}
         value={itemValues.sistema}
         onChangeText={(text) => handleChange('sistema', text)}
         placeholder="Sistema"
         placeholderTextColor="#aaa"
-        multiline={true}
-        numberOfLines={4}
+        multiline
+        numberOfLines={6}
         textAlignVertical="top"
       />
 
-      {/* Fila: Coste de Ki y Tiempo Invocación */}
+      {/* Coste de Ki + Tiempo Invocación */}
       <View style={[styles.row, { marginTop: 10 }]}>
         <TextInput
           style={[styles.inputDominio, styles.smallInput]}
@@ -75,6 +80,7 @@ export const Item = ({ id, itemValues, handleItemChange }) => {
           placeholder="Coste de Ki"
           placeholderTextColor="#aaa"
           keyboardType="numeric"
+          textAlign="center"
         />
         <TextInput
           style={[styles.inputDominio, styles.smallInput]}
@@ -82,6 +88,7 @@ export const Item = ({ id, itemValues, handleItemChange }) => {
           onChangeText={(text) => handleChange('invo', text)}
           placeholder="Tiempo Invocación"
           placeholderTextColor="#aaa"
+          textAlign="center"
         />
       </View>
     </View>
@@ -89,61 +96,43 @@ export const Item = ({ id, itemValues, handleItemChange }) => {
 };
 
 export const Dominios = ({ dominios, setDominios }) => {
-  const [items, setItems] = useState([]);
+  // Inicializamos items con la transformación de dominios para evitar render vacío
+  const [items, setItems] = useState(
+    dominios.map((dominio, index) => ({
+      id: index,
+      values: {
+        dominio: dominio.dominio || '',
+        nombre: dominio.nombre || '',
+        nivelKi: dominio.nivelKi || '',
+        descripcion: dominio.descripcion || '',
+        sistema: dominio.sistema || '',
+        costeKi: dominio.costeKi || '',
+        invo: dominio.invo || '',
+      },
+    }))
+  );
 
-  useEffect(() => {
-    setItems(
-      dominios.map((dominio, index) => ({
-        id: index,
-        values: {
-          dominio: dominio.dominio || '',
-          nombre: dominio.nombre || '',
-          nivelKi: dominio.nivelKi || '',
-          descripcion: dominio.descripcion || '',
-          sistema: dominio.sistema || '',
-          costeKi: dominio.costeKi || '',
-          invo: dominio.invo || '',
-        },
-      }))
-    );
-  }, [dominios]);
+  // Ya no hace falta el useEffect que sincronizaba items con dominios porque se inicializa bien
 
   const handleItemChange = (id, newValues) => {
-    const isEmpty = Object.values(newValues).every((value) => value === '');
+    const updatedItems = items.map((item) =>
+      item.id === id ? { ...item, values: newValues } : item
+    );
 
-    if (isEmpty) {
-      setItems((prevItems) => prevItems.filter((item) => item.id !== id));
-      setDominios((prevDominios) => prevDominios.filter((_, index) => index !== id));
-    } else {
-      setItems((prevItems) =>
-        prevItems.map((item) => (item.id === id ? { ...item, values: newValues } : item))
-      );
+    const areFieldsEmpty = Object.values(newValues).every((v) => v === '');
 
-      setDominios((prevDominios) =>
-        prevDominios.map((dominio, index) => (index === id ? newValues : dominio))
-      );
-    }
+    const finalItems = areFieldsEmpty
+      ? updatedItems.filter((item) => item.id !== id)
+      : updatedItems;
+
+    setItems(finalItems);
+    setDominios(finalItems.map((item) => item.values));
   };
 
   const btnAgregarItem = () => {
-    setItems((prevItems) => [
-      ...prevItems,
-      {
-        id: prevItems.length,
-        values: {
-          dominio: '',
-          nombre: '',
-          nivelKi: '',
-          descripcion: '',
-          sistema: '',
-          costeKi: '',
-          invo: '',
-        },
-      },
-    ]);
-    setDominios((prevDominios) => [
-      ...prevDominios,
-      {
+    const newItem = {
+      id: items.length,
+      values: {
         dominio: '',
         nombre: '',
         nivelKi: '',
@@ -152,7 +141,9 @@ export const Dominios = ({ dominios, setDominios }) => {
         costeKi: '',
         invo: '',
       },
-    ]);
+    };
+    setItems([...items, newItem]);
+    setDominios([...dominios, newItem.values]);
   };
 
   return (
@@ -189,6 +180,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
   },
   inputDominio: {
     backgroundColor: '#222',
@@ -196,26 +188,25 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 8,
     borderRadius: 4,
-    marginHorizontal: 4,
   },
   nombreInput: {
+    flex: 1,
     fontFamily: 'cursive',
     fontSize: 18,
     color: 'yellow',
-    textAlign: 'center',
     marginBottom: 10,
+    textAlign: 'center',
   },
   smallInput: {
     flex: 1,
-    textAlign: 'center',
+    marginHorizontal: 2,
   },
   inputArea: {
     backgroundColor: '#222',
     color: '#fff',
     borderRadius: 6,
     padding: 10,
-    minHeight: 80,
-    marginTop: 10,
+    minHeight: 120,
   },
   btnAgregar: {
     backgroundColor: '#339CFF',
