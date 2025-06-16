@@ -558,7 +558,7 @@ const colorPlaceHolder="#888"
   </View>
 </View>
       <Text style={styles.label}>Convicción</Text>
-          <TextInput placeholder="Convicción" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputTexto} value={conviccion} onChangeText={setConviccion} />
+          <TextInput placeholder="Convicción" placeholderTextColor={colorPlaceHolder} keyboardType="default" multiline={true} style={styles.inputTextoConv} value={conviccion} onChangeText={setConviccion} />
 
 
      
@@ -969,6 +969,19 @@ const styles = StyleSheet.create({
     color: '#e0e0e0',
     fontSize: 14, // antes: 15
   },
+  inputTextoConv: {
+  borderWidth: 1,
+  borderColor: '#a16207',
+  backgroundColor: '#1a1a1a',
+  paddingVertical: 8,  // aumenta el padding vertical para más espacio interno
+  paddingHorizontal: 6,
+  borderRadius: 6,
+  marginBottom: 6,
+  color: '#e0e0e0',
+  fontSize: 14,
+  minHeight: 60, // altura mínima, ajusta a lo que necesites
+  textAlignVertical: 'top', // para que el texto empiece desde arriba
+},
   inputNumero: {
     borderWidth: 1,
     borderColor: '#a16207',
