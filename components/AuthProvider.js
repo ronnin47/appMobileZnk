@@ -7,6 +7,9 @@ export const AuthProvider = ({ children }) => {
   const [userToken, setUserToken] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [personajes, setPersonajes] = useState([]);
+  
+  // NUEVO: Historial de tiradas global
+  const [historialChat, setHistorialChat] = useState([]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -78,7 +81,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ userToken, setUserToken, isLoading, logout, personajes, savePersonajes }}>
+    <AuthContext.Provider value={{ userToken, setUserToken, isLoading, logout, personajes, savePersonajes, historialChat, setHistorialChat }}>
       {children}
     </AuthContext.Provider>
   );

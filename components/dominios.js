@@ -157,13 +157,26 @@ export const Dominios = ({ dominios, setDominios }) => {
         />
       ))}
 
-      <View style={{ marginTop: 10, alignItems: 'center' }}>
-      <View style={{ width: 140 }}>
-        <TouchableOpacity style={styles.btnAgregar} onPress={btnAgregarItem}>
-          <Text style={styles.btnTexto}>+ Técnica</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+     
+
+
+     <View style={{ marginTop: 10, alignItems: 'center' }}>
+              <View style={{ width: 140 }}>
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: '#339CFF',
+                    paddingVertical: 10,
+                    borderRadius: 6,
+                    alignItems: 'center',
+                  }}
+                  onPress={btnAgregarItem}
+                >
+                  <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>
+                    + Tecnica
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
     </ScrollView>
   );
 };
@@ -195,7 +208,7 @@ const styles = StyleSheet.create({
   },
   nombreInput: {
     flex: 1,
-    fontFamily: 'cursive',
+    fontFamily: 'sans-serif',
     fontSize: 18,
     color: 'yellow',
     marginBottom: 10,

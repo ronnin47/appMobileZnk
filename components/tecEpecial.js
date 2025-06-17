@@ -168,9 +168,24 @@ export const TecnicaEspecial = ({ tecEspecial, setTecEspecial }) => {
 
       
       {showButton && (
-        <TouchableOpacity style={styles.btnAgregar} onPress={btnAgregarItem}>
-          <Text style={styles.btnTexto}>+ Técnica-Poder-Objeto especial</Text>
-        </TouchableOpacity>
+       
+         <View style={{ marginTop: 10, alignItems: 'center' }}>
+              <View style={{ width: 140 }}>
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: '#339CFF',
+                    paddingVertical: 10,
+                    borderRadius: 6,
+                    alignItems: 'center',
+                  }}
+                  onPress={btnAgregarItem}
+                >
+                  <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>
+                    + Poder Unico
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
       )}
     </View>
   );

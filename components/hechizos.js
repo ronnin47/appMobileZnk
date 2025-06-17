@@ -16,80 +16,83 @@ export const Item = ({ id, itemValues, handleItemChange }) => {
 
   return (
     <View style={styles.itemContainer}>
-      {/* Fila 1: Nombre + Nivel Ki + Ryu */}
-      <View style={styles.row}>
-        <TextInput
-          style={[styles.inputDominio, styles.nombreInput]}
-          value={itemValues.nombre}
-          onChangeText={(text) => handleChange("nombre", text)}
-          placeholder="Nombre"
-          placeholderTextColor="#aaa"
-          textAlign="center"
-        />
-        <TextInput
-          style={[styles.inputDominio, styles.smallInput]}
-          value={itemValues.nivelKi}
-          onChangeText={(text) => handleChange("nivelKi", text)}
-          placeholder="Nivel arcano"
-          placeholderTextColor="#aaa"
-          keyboardType="numeric"
-          textAlign="center"
-        />
-        <TextInput
-          style={[styles.inputDominio, styles.smallInput]}
-          value={itemValues.ryu}
-          onChangeText={(text) => handleChange("ryu", text)}
-          placeholder="Ryu"
-          placeholderTextColor="#aaa"
-          textAlign="center"
-        />
-      </View>
+  {/* Agrupar el nombre + nivel + ryu */}
+  <View style={{ alignItems: 'center' }}>
+    <TextInput
+      style={[styles.inputDominio, styles.nombreInput]}
+      value={itemValues.nombre}
+      onChangeText={(text) => handleChange("nombre", text)}
+      placeholder="Nombre"
+      placeholderTextColor="#aaa"
+      textAlign="center"
+    />
 
-      {/* Fila 2: Descripción */}
+    <View style={[styles.row, { justifyContent: 'center', gap: 6, marginTop: 4 }]}>
       <TextInput
-        style={[styles.inputArea, { marginTop: 10 }]}
-        value={itemValues.descripcion}
-        onChangeText={(text) => handleChange("descripcion", text)}
-        placeholder="Descripción"
+        style={[styles.inputDominio, styles.smallInput, { width: 120 }]} // aseguramos el ancho
+        value={itemValues.nivelKi}
+        onChangeText={(text) => handleChange("nivelKi", text)}
+        placeholder="Nivel arcano"
         placeholderTextColor="#aaa"
-        multiline
-        numberOfLines={6}
-        textAlignVertical="top"
+        keyboardType="numeric"
+        textAlign="center"
       />
-
-      {/* Fila 3: Sistema */}
       <TextInput
-        style={[styles.inputArea, { marginTop: 10 }]}
-        value={itemValues.sistema}
-        onChangeText={(text) => handleChange("sistema", text)}
-        placeholder="Sistema"
+        style={[styles.inputDominio, styles.smallInput, { width: 120 }]}
+        value={itemValues.ryu}
+        onChangeText={(text) => handleChange("ryu", text)}
+        placeholder="Ryu"
         placeholderTextColor="#aaa"
-        multiline
-        numberOfLines={6}
-        textAlignVertical="top"
+        textAlign="center"
       />
-
-      {/* Fila 4: Tiempo Invocación + Coste Ki */}
-      <View style={[styles.row, { marginTop: 10 }]}>
-        <TextInput
-          style={[styles.inputDominio, styles.smallInput]}
-          value={itemValues.invo}
-          onChangeText={(text) => handleChange("invo", text)}
-          placeholder="Tiempo Invocación"
-          placeholderTextColor="#aaa"
-          textAlign="center"
-        />
-        <TextInput
-          style={[styles.inputDominio, styles.smallInput]}
-          value={itemValues.costeKi}
-          onChangeText={(text) => handleChange("costeKi", text)}
-          placeholder="Coste de Ki"
-          placeholderTextColor="#aaa"
-          keyboardType="numeric"
-          textAlign="center"
-        />
-      </View>
     </View>
+  </View>
+
+  {/* Descripción */}
+  <TextInput
+    style={[styles.inputArea, { marginTop: 10 }]}
+    value={itemValues.descripcion}
+    onChangeText={(text) => handleChange("descripcion", text)}
+    placeholder="Descripción"
+    placeholderTextColor="#aaa"
+    multiline
+    numberOfLines={6}
+    textAlignVertical="top"
+  />
+
+  {/* Sistema */}
+  <TextInput
+    style={[styles.inputArea, { marginTop: 10 }]}
+    value={itemValues.sistema}
+    onChangeText={(text) => handleChange("sistema", text)}
+    placeholder="Sistema"
+    placeholderTextColor="#aaa"
+    multiline
+    numberOfLines={6}
+    textAlignVertical="top"
+  />
+
+  {/* Tiempo Invocación + Coste Ki */}
+  <View style={[styles.row, { marginTop: 10, gap: 6 }]}>
+    <TextInput
+      style={[styles.inputDominio, styles.smallInput, { flex: 1 }]}
+      value={itemValues.invo}
+      onChangeText={(text) => handleChange("invo", text)}
+      placeholder="Tiempo Invocación"
+      placeholderTextColor="#aaa"
+      textAlign="center"
+    />
+    <TextInput
+      style={[styles.inputDominio, styles.smallInput, { flex: 1 }]}
+      value={itemValues.costeKi}
+      onChangeText={(text) => handleChange("costeKi", text)}
+      placeholder="Coste de Ki"
+      placeholderTextColor="#aaa"
+      keyboardType="numeric"
+      textAlign="center"
+    />
+  </View>
+</View>
   );
 };
 
@@ -225,9 +228,10 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   nombreInput: {
+    width: '100%',
     flex: 4,
     color: "yellow",
-    fontFamily: "cursive",
+    fontFamily: "sans-serif",
     fontSize: 18,
     marginRight: 1,
   },

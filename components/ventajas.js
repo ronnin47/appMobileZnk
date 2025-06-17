@@ -1,4 +1,4 @@
-import { View, Text, TextInput, Button, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, ScrollView,TouchableOpacity} from 'react-native';
 
 
 export const ItemVentaja = ({ itemVentaja, handleVentaja }) => {
@@ -56,11 +56,26 @@ export const Ventajas = ({ ventajas, setVentajas }) => {
           />
         ))}
       </ScrollView>
-      <View style={{ marginTop: 10, alignItems: 'center' }}>
-        <View style={{ width: 140 }}>
-            <Button title="+ Ventaja" onPress={btnAgregarVentaja} color="#339CFF" />
-        </View>
-        </View>
+    
+
+       <View style={{ marginTop: 10, alignItems: 'center' }}>
+              <View style={{ width: 140 }}>
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: '#339CFF',
+                    paddingVertical: 10,
+                    borderRadius: 6,
+                    alignItems: 'center',
+                  }}
+                  onPress={btnAgregarVentaja}
+                >
+                  <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>
+                    + Ventaja
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+        
     </View>
   );
 };

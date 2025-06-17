@@ -17,10 +17,10 @@ import { Hechizos } from './hechizos';
 import { Historia } from './historia';
 import { TecnicaEspecial } from './tecEpecial';
 
-export const FichaPersonaje = ({ route }) => {
+export const FichaPersonaje = ({ pj }) => {
   
   const { personajes, savePersonajes } = useContext(AuthContext);
-  const { pj } = route.params;
+ 
   const imagenBase = require('../assets/imagenBase.jpeg');
 
 //PARA EL TEMA DE LOS COLAPSE
@@ -460,10 +460,10 @@ const colorPlaceHolder="#888"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={100}
     >
-        <ScrollView
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={[styles.container, { paddingBottom: 600, flexGrow: 1 }]}
-          >
+  <ScrollView
+      keyboardShouldPersistTaps="handled"
+      contentContainerStyle={[styles.container, { paddingBottom: 100, flexGrow: 1 }]}
+    >
     <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 10 }}>
       <TextInput
         placeholder="Nombre"
@@ -505,58 +505,58 @@ const colorPlaceHolder="#888"
           
         </View>
 
-        </View>
+          </View>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10 }}>
-  {/* Columna 1 */}
-  <View style={{ flex: 1, marginRight: 10 }}>
-    <Text style={styles.label}>Ki</Text>
-    <TextInput
-      placeholder="Ki"
-      placeholderTextColor={colorPlaceHolder}
-      keyboardType="numeric"
-      value={ki}
-      onChangeText={setKi}
-     style={styles.inputNumero}
-    />
+          {/* Columna 1 */}
+          <View style={{ flex: 1, marginRight: 10 }}>
+            <Text style={styles.label}>Ki</Text>
+            <TextInput
+              placeholder="Ki"
+              placeholderTextColor={colorPlaceHolder}
+              keyboardType="numeric"
+              value={ki}
+              onChangeText={setKi}
+            style={styles.inputNumero}
+            />
 
-    <Text style={styles.label}>
-      Nivel de Destino
-    </Text>
-    <TextInput
-      placeholder="Nivel de Destino"
-      placeholderTextColor={colorPlaceHolder}
-      keyboardType="numeric"
-      value={destino}
-      onChangeText={setDestino}
-     style={styles.inputNumero}
-    />
-  </View>
+            <Text style={styles.label}>
+              Nivel de Destino
+            </Text>
+            <TextInput
+              placeholder="Nivel de Destino"
+              placeholderTextColor={colorPlaceHolder}
+              keyboardType="numeric"
+              value={destino}
+              onChangeText={setDestino}
+            style={styles.inputNumero}
+            />
+          </View>
 
-  {/* Columna 2 */}
-  <View style={{ flex: 1, marginLeft: 10 }}>
-    <Text style={styles.label}>Ken</Text>
-    <TextInput
-      placeholder="Ken"
-      placeholderTextColor={colorPlaceHolder}
-      keyboardType="numeric"
-      value={ken}
-      onChangeText={setKen}
-     style={styles.inputNumero}
-    />
+          {/* Columna 2 */}
+          <View style={{ flex: 1, marginLeft: 10 }}>
+            <Text style={styles.label}>Ken</Text>
+            <TextInput
+              placeholder="Ken"
+              placeholderTextColor={colorPlaceHolder}
+              keyboardType="numeric"
+              value={ken}
+              onChangeText={setKen}
+            style={styles.inputNumero}
+            />
 
-    <Text style={styles.label}>
-      P. de Destino
-    </Text>
-    <TextInput
-      placeholder="P. de destino"
-      placeholderTextColor={colorPlaceHolder}
-      keyboardType="numeric"
-      value={pDestino}
-      onChangeText={setPdestino}
-      style={styles.inputNumero}
-    />
-  </View>
-</View>
+            <Text style={styles.label}>
+              P. de Destino
+            </Text>
+            <TextInput
+              placeholder="P. de destino"
+              placeholderTextColor={colorPlaceHolder}
+              keyboardType="numeric"
+              value={pDestino}
+              onChangeText={setPdestino}
+              style={styles.inputNumero}
+            />
+          </View>
+      </View>
       <Text style={styles.label}>Convicción</Text>
           <TextInput placeholder="Convicción" placeholderTextColor={colorPlaceHolder} keyboardType="default" multiline={true} style={styles.inputTextoConv} value={conviccion} onChangeText={setConviccion} />
 

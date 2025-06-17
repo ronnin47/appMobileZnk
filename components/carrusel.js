@@ -5,9 +5,14 @@ import { useNavigation } from '@react-navigation/native';
 export const Carrusel = ({ personajes }) => {
   const imagenBase = require('../assets/imagenBase.jpeg');
   const navigation = useNavigation();
-
+/*
   const handlePress = (pj) => {
     navigation.navigate('FichaPersonaje', { pj });
+  };
+*/
+
+  const handlePress = (pj) => {
+    navigation.navigate('PantallaDeslizable', { pj });
   };
 
   return (

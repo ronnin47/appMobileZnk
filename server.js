@@ -1,5 +1,9 @@
 const express = require('express');
 const cors = require('cors');
+
+const http = require('http');
+const { Server } = require('socket.io');
+
 const bodyParser = require('body-parser');
 const { Pool } = require('pg');
 
@@ -15,6 +19,67 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(bodyParser.json({ limit: '50mb' }));  
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true })); 
 */
+
+
+
+
+
+const server = http.createServer(app);
+// Inicializa el servidor de Socket.IO
+const io = new Server(server, {
+  cors: {
+    origin: '*', // Cambiar por dominio exacto en producción
+    methods: ['GET', 'POST'],
+  },
+});
+
+
+const connectedUsers = new Map();
+// Escucha cuando un cliente se conecta
+io.on('connection', (socket) => {
+  console.log(`Socket conectado: ${socket.id}`);
+
+  socket.on('user-connected', (userData) => {
+    const { usuarioId, sesion } = userData;
+    if (usuarioId && sesion) {
+      connectedUsers.set(socket.id, usuarioId);
+      console.log(`Usuario ${usuarioId} conectado.`);
+      io.emit('connected-users', Array.from(connectedUsers.values()));
+    }
+  });
+
+  socket.on('tirada', (mensaje) => {
+    console.log('Tirada recibida:', mensaje);
+    io.emit('tirada', mensaje);
+  });
+
+  socket.on('chat-message', (mensaje) => {
+    console.log('Mensaje de chat recibido:', mensaje);
+    io.emit('chat-message', mensaje);
+  });
+
+  socket.on('disconnect', () => {
+    const usuarioDesconectado = connectedUsers.get(socket.id);
+    if (usuarioDesconectado) {
+      console.log(`Usuario ${usuarioDesconectado} desconectado.`);
+      connectedUsers.delete(socket.id);
+      io.emit('connected-users', Array.from(connectedUsers.values()));
+    }
+  });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
 //LOCAL HOST bbdd
 const pool = new Pool({
   user: 'postgres',
@@ -689,7 +754,13 @@ app.put('/update-personaje/:id', async (req, res) => {
 
 
 
-
+/*
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor corriendo en puerto ${PORT}`);
+});
+
+*/
+
+server.listen(PORT, () => {
+  console.log(`🟢 Servidor Socket.IO corriendo en http://localhost:${PORT}`);
 });

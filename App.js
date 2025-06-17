@@ -16,6 +16,7 @@ import Perfil from './components/perfil';
 import Principal from './components/principal';
 import Chat from './components/chat';
 import { FichaPersonaje } from './components/fichaPersonaje';
+import { PantallaDeslizable } from './components/pantallaDeslizable';
 
 import { AuthProvider } from './components/AuthProvider';
 
@@ -25,15 +26,38 @@ import { ListaPersonajes } from './components/listaPersonajes';
 import FlashMessage from 'react-native-flash-message';
 import { Platform } from 'react-native';
 
+
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
 
 
+import { io } from 'socket.io-client';
+
+const socket = io('http://192.168.0.38:3000'); // IP y puerto de tu servidor
 
 
 // el Stack navigator es una PILA de pantallas
 export const App = () => {
+/*
+useEffect(() => {
+    // Emitir que un usuario se conectó (esto activa el 'user-connected' en el servidor)
+    socket.emit('user-connected', { usuarioId: '123', sesion: 'sesion1' });
+
+    // Escuchar eventos desde el servidor
+    socket.on('connected-users', (users) => {
+      console.log('Usuarios conectados:', users);
+    });
+
+    // Limpiar al desmontar
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+  */
+
+
+
   return (
      <PaperProvider>
         <AuthProvider>
@@ -80,8 +104,8 @@ const MainStack = () => {
         </>
       )}
        <Stack.Screen 
-       name="FichaPersonaje" 
-       component={FichaPersonaje}
+       name="PantallaDeslizable" 
+       component={PantallaDeslizable}
        options={{
           headerTitle: '', // Oculta el texto
           headerBackTitleVisible: false, // Oculta texto al lado de la flecha en iOS
