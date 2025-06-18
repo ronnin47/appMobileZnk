@@ -1,22 +1,19 @@
 
-import { ImageBackground, StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-native';
+
 import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from './AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
+import { ImageBackground, StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-native';
 
 
 
 //este componente inicial que renderiza la aplciaicon al ingresar
 export const LoginScreen = ({ navigation}) => {
 
-  
-
  const { setUserToken, savePersonajes } = useContext(AuthContext);
  
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -29,59 +26,40 @@ export const LoginScreen = ({ navigation}) => {
   }
 
   try {
-    const response = await axios.post('http://192.168.0.38:3000/loginUsuario', {
-      email,
-      contrasenia: password,
-    });
+  const response = await axios.post('http://192.168.0.38:3000/loginUsuario', {
+    email,
+    contrasenia: password,
+  });
 
-    // Si el backend devuelve éxito
+  // Asegurate de que el status sea 200
+  if (response.status === 200 && response.data?.idusuario) {
     const { idusuario, estatus } = response.data;
 
-    // Guarda un token simulado (o usa el idusuario como token si no usas JWT)
     const token = `usuario-${idusuario}`;
     await AsyncStorage.setItem('userToken', token);
-    await AsyncStorage.setItem('userId', idusuario.toString()); // Guarda el ID para futuras consultas
-    
-    // Notifica al AuthContext
+    await AsyncStorage.setItem('userId', idusuario.toString());
+
     setUserToken(token);
 
-
-      // 🔽 Consumir los personajes del usuario
     const personajesRes = await axios.get('http://192.168.0.38:3000/consumirPersonajesUsuario', {
-      params: {
-        usuarioId: idusuario,
-      },
+      params: { usuarioId: idusuario },
     });
 
     const coleccion = personajesRes.data.coleccionPersonajes;
-    //console.log('Personajes del usuario:', coleccion);
-    // 🔽 Guardar personajes en AsyncStorage como JSON
-    // await AsyncStorage.setItem('personajesUsuario', JSON.stringify(coleccion));
-
-
-    //console.log(coleccion) ok!!
-
-   //const nombres = coleccion.map(p => p.nombre); // Suponiendo que tienen campo `nombre`
-   //console.log("ARCHIVO LOGIN-tipo de estructura de nombres: ",typeof coleccion)
-   
-
-    savePersonajes(coleccion)
-
-
-
-
-
-   
-
-  } catch (error) {
-    console.error('Error en login:', error);
-
-    if (error.response && error.response.status === 401) {
-      setError('Correo o contraseña incorrectos');
-    } else {
-      setError('Error al conectar con el servidor');
-    }
+    savePersonajes(coleccion);
+  } else {
+    setError('Login inválido: no se pudo autenticar');
   }
+
+} catch (error) {
+  console.error('Error en login:', error);
+
+  if (error.response?.status === 401) {
+    setError('Correo o contraseña incorrectos');
+  } else {
+    setError('Error al conectar con el servidor');
+  }
+}
 };
 
 

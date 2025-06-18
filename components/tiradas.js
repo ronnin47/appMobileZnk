@@ -5,8 +5,8 @@ import { View,Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from '
 import { ChatTiradas } from './chatTiradas';
 
 import { BarraVida } from './barraVida';
-
-
+import { BarraKi } from './barraKi';
+import { BarraKen } from './barraKen';
 
 import { io } from 'socket.io-client';
 //const socket = io('http://192.168.0.38:3000');
@@ -234,8 +234,20 @@ export const Tiradas = ({ pj }) => {
         </View>
 
         <View style={styles.barras}>
-           <BarraVida pj={p}></BarraVida>
+            <View >
+              <BarraVida pj={p}></BarraVida>
+            </View>
+
+            <View>
+              <BarraKi pj={p}></BarraKi>
+            </View>
+
+            <View>
+              <BarraKen pj={p}></BarraKen>
+            </View>       
         </View>
+
+        
         
       </ScrollView>
     </>
@@ -273,9 +285,7 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: 16,
-    
     backgroundColor: "#1a1a1a",
-   
     flex: 1,
   },
   titulo: {
@@ -334,8 +344,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     padding: 10,
     backgroundColor: "#2a2a2a",
-    borderRadius: 6,
-   
+    borderRadius: 6,  
   },
   resultadoTexto: {
     color: "#ccc",
@@ -355,7 +364,6 @@ const styles = StyleSheet.create({
 },
 columna: {
   flex: 1,
-  // Opcional para separar columnas
   marginHorizontal: 5,
 },
 dadoRow: {
@@ -365,6 +373,6 @@ dadoRow: {
   marginBottom: 8,
 },
 barras: {
-  marginBottom:100,
+  marginBottom:50,
 }
 });

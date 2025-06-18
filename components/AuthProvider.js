@@ -65,19 +65,24 @@ export const AuthProvider = ({ children }) => {
   // ... resto de tu código, savePersonajes, logout, etc.
 
   const savePersonajes = async (lista) => {
-    try {
-      setPersonajes(lista);
-      //await AsyncStorage.setItem('personajesUsuario', JSON.stringify(lista));
-    } catch (e) {
-      console.log('Error saving personajes', e);
-    }
-  };
+  try {
+    // Clon profundo para asegurar nueva referencia
+    const clon = lista.map(p => ({ ...p }));
+    setPersonajes(clon);
+
+    // await AsyncStorage.setItem('personajesUsuario', JSON.stringify(clon));
+  } catch (e) {
+    console.log('Error saving personajes', e);
+  }
+};
+
 
   const logout = async () => {
     setUserToken(null);
     await AsyncStorage.removeItem('userToken');
     await AsyncStorage.removeItem('personajesUsuario');
     await AsyncStorage.removeItem('userId');
+    setPersonajes([]);
   };
 
   return (

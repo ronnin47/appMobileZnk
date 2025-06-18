@@ -1,11 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Animated } from 'react-native';
-
 import { AuthContext } from './AuthContext';
-
-
-//import { io } from 'socket.io-client';
-//const socket = io(process.env.REACT_APP_BACKEND_URL);
+import socket from './socket';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export const BarraVida = ({pj}) => {
 const { personajes, savePersonajes } = useContext(AuthContext);
@@ -34,151 +31,488 @@ const { personajes, savePersonajes } = useContext(AuthContext);
     console.log(typeof faseSalud)
 
 
-//*********************HASTA ACA LLEGAMOS**********************
-
-    const vidaTotalPositiva = faseSalud * parseInt(p.positiva);
-  const vidaTotalNegativa = faseSalud * parseInt(p.negativa);
+//aca la vida total en barra positiva y en barra negativa y el total de la suma de ambas
+  const vidaTotalPositiva = faseSalud * parseInt(positiva);
+  const vidaTotalNegativa = faseSalud * parseInt(negativa);
   const vidaTotal = vidaTotalPositiva + vidaTotalNegativa;
+   
 
-   //const [vidaActual, setVidaActual] = useState(p.vidaActual);
+  //const damageActual= parseInt(vidaActual)
+
+  const [damageActual, setDamageActual] = useState(parseInt(vidaActual));
+
+  let porcentajeVidaPositivaInicial = (damageActual * 100) / vidaTotalPositiva;
+  let porcentajeVidaNegativaInicial = 0;
+
+  if (porcentajeVidaPositivaInicial > 100) {
+    porcentajeVidaNegativaInicial = ((damageActual - vidaTotalPositiva) * 100) / vidaTotalNegativa;
+    porcentajeVidaPositivaInicial = 100;
+    porcentajeVidaNegativaInicial = porcentajeVidaNegativaInicial > 100 ? 100 : porcentajeVidaNegativaInicial;
+  }
+  
+  
   const [estadoDeFase, setEstadoDeFase] = useState("SIN HERIDAS");
-  const [porcentajeVidaPositiva, setPorcentajeVidaPositiva] = useState(0);
-  const [porcentajeVidaNegativa, setPorcentajeVidaNegativa] = useState(0);
-  const [consumirVida, setConsumirVida] = useState("");
+  const [porcentajeVidaPositiva, setPorcentajeVidaPositiva] = useState(porcentajeVidaPositivaInicial);
+  const [porcentajeVidaNegativa, setPorcentajeVidaNegativa] = useState(porcentajeVidaNegativaInicial);
+  const [consumirVida, setConsumirVida] = useState(0);
+  
+   useEffect(() => {
+      const cicatrizValue = parseInt(cicatriz, 10);
+      if (cicatrizValue > 0 && damageActual < cicatrizValue) {
+        setDamageActual(cicatrizValue);
+      }
+    }, [cicatriz, damageActual]);
+  
+    useEffect(() => {
+      if (parseInt(cicatriz) > 0) {
+        if (damageActual < parseInt(cicatriz)) {
+          setDamageActual(parseInt(cicatriz));
+        }
+      }
+    }, [cicatriz, damageActual]);
 
   useEffect(() => {
     calcularEstadoInicial();
   }, []);
 
   const calcularEstadoInicial = () => {
-    const newDamage = p.vidaActual;
+    let newDamage = damageActual;
 
-    if (newDamage > vidaTotal) return setEstadoDeFase("MUERTO");
-    if (newDamage === 0) return setEstadoDeFase("SIN HERIDAS");
+    if (newDamage <= vidaTotalPositiva && newDamage >= vidaTotalPositiva - faseSalud) {
+      if (newDamage !== 0) {
+        setEstadoDeFase("MALHERIDO");
+      }
+    }
 
-    const delta = vidaTotalPositiva - newDamage;
+    if (newDamage <= vidaTotalPositiva - faseSalud && newDamage >= vidaTotalPositiva - faseSalud * 2) {
+      if (newDamage !== 0) {
+        setEstadoDeFase("MALTRECHO");
+      }
+    }
 
-    if (delta < faseSalud) return setEstadoDeFase("MALHERIDO");
-    if (delta < faseSalud * 2) return setEstadoDeFase("MALTRECHO");
-    if (delta < faseSalud * 3) return setEstadoDeFase("RAZGADO");
+    if (newDamage <= vidaTotalPositiva - faseSalud * 2 && newDamage >= vidaTotalPositiva - faseSalud * 3) {
+      if (newDamage !== 0) {
+        setEstadoDeFase("RAZGADO");
+      }
+    }
 
-    if (newDamage > vidaTotalPositiva) {
-      const exceso = newDamage - vidaTotalPositiva;
-      if (negativa === 1) return setEstadoDeFase("MORIBUNDO");
-      if (negativa === 2) return setEstadoDeFase("INCAPACITADO");
-      if (negativa >= 3) return setEstadoDeFase("INCONCIENTE");
+    if (newDamage <= vidaTotalPositiva - faseSalud * 3) {
+      if (positiva >= 3 && newDamage !== 0) {
+        setEstadoDeFase("RAZGADO");
+      }
+    }
+
+    if (newDamage > vidaTotalPositiva && newDamage <= vidaTotalPositiva + faseSalud) {
+      if (negativa === 1) {
+        setEstadoDeFase("MORIBUNDO");
+      } else if (negativa === 2) {
+        setEstadoDeFase("INCAPACITADO");
+      } else if (negativa >= 3) {
+        setEstadoDeFase("INCONCIENTE");
+      }
+    }
+
+    if (newDamage > vidaTotalPositiva + faseSalud && newDamage <= vidaTotalPositiva + faseSalud * 2) {
+      if (negativa === 1 || negativa === 2) {
+        setEstadoDeFase("MORIBUNDO");
+      } else if (negativa >= 3) {
+        setEstadoDeFase("INCAPACITADO");
+      }
+    }
+
+    if (newDamage > vidaTotalPositiva + faseSalud * 2 && newDamage <= vidaTotalPositiva + faseSalud * 3) {
+      if (negativa >= 3) {
+        setEstadoDeFase("MORIBUNDO");
+      }
+    }
+
+    if (newDamage > vidaTotal) {
+      setEstadoDeFase("MUERTO");
+    }
+
+    if (newDamage === 0) {
+      setEstadoDeFase("SIN HERIDAS");
     }
   };
 
-  const agregarDamage = () => {
-    let newValue = parseInt(consumirVida) || 0;
-    let newDamage = p.vidaActual + newValue;
 
-    if (newDamage < 0) newDamage = 0;
-    if (parseInt(p.cicatriz) > 0 && newDamage < parseInt(p.cicatriz)) {
-      newDamage = parseInt(p.cicatriz);
+
+
+
+  //const [animacionActiva, setAnimacionActiva] = useState(true);
+
+  const handleChangeCicatriz=(event)=>{
+    setCicatriz(event.target.value);
+   }
+   
+/*************************hasta aca llegue******************************* */
+
+
+const agregarDamage = async () => {
+    console.log("FUE DAÑADO POR: ",consumirVida)
+    let newValue = parseInt(consumirVida)|| 0;
+    let newDamage = damageActual + newValue;
+  
+    console.log("FUNCIONA BOTON: ",consumirVida)
+    
+    
+
+    if (newDamage < 0) {
+      newDamage = 0; 
     }
 
-    setVidaActual(newDamage);
-    calcularEstadoInicial();
 
-    // Calcular porcentaje
+     const cicatrizValue = parseInt(cicatriz, 10);
+     if (cicatrizValue > 0 && newDamage < cicatrizValue) {
+       newDamage = cicatrizValue;
+     }
+  
+    setDamageActual(newDamage);
+   
     if (newDamage <= vidaTotalPositiva) {
       setPorcentajeVidaPositiva((newDamage * 100) / vidaTotalPositiva);
-      setPorcentajeVidaNegativa(0);
+      setPorcentajeVidaNegativa(0); 
     } else {
+    
+      const nuevoPorcentajeNegativa = ((newDamage - vidaTotalPositiva) * 100) / vidaTotalNegativa;
+      const porcentajeNegativaAjustado = nuevoPorcentajeNegativa > 100 ? 100 : nuevoPorcentajeNegativa;
       setPorcentajeVidaPositiva(100);
-      const dañoNegativo = newDamage - vidaTotalPositiva;
-      setPorcentajeVidaNegativa(Math.min(100, (dañoNegativo * 100) / vidaTotalNegativa));
+      setPorcentajeVidaNegativa(porcentajeNegativaAjustado); 
     }
-/*
-    // Emitir mensaje
-    const msgEnviar = {
-      idpersonaje:p.idpersonaje,
-      nombre: p.nombre,
-      vidaActual: newDamage,
-      vidaTotal: vidaTotal,
-      mensaje: `${nombre} tiene ${newDamage}/${vidaTotal} (${estadoDeFase})`
+    
+    let estadoDeFaseActual=""
+
+    if(newDamage<=vidaTotalPositiva && newDamage>=(vidaTotalPositiva-faseSalud)){
+      if(newDamage!==0){
+      estadoDeFaseActual="MALHERIDO"
+      setEstadoDeFase("MALHERIDO")
+      }
+   }
+   
+   if(newDamage<=(vidaTotalPositiva-faseSalud) && newDamage>=(vidaTotalPositiva-faseSalud*2)){
+    if(newDamage!==0){
+      estadoDeFaseActual="MALTRECHO"
+      setEstadoDeFase("MALTRECHO")
+    }
+  }
+  if(newDamage<=(vidaTotalPositiva-faseSalud*2) && newDamage>=(vidaTotalPositiva-faseSalud*3)){
+    if(newDamage!==0){
+     estadoDeFaseActual="RAZGADO"
+     setEstadoDeFase("RAZGADO")
+    }
+  }
+
+  if(newDamage<=(vidaTotalPositiva-faseSalud*3)){
+    if(positiva>=3){
+      if(newDamage!==0){
+        estadoDeFaseActual="RAZGADO"
+        setEstadoDeFase("RAZGADO")
+       }
+    } 
+}
+
+   if(newDamage>vidaTotalPositiva && newDamage<=(vidaTotalPositiva+faseSalud)){    
+   
+    if(negativa==1){
+       setEstadoDeFase("MORIBUNDO")
+    }else if(negativa==2){
+      estadoDeFaseActual="INCAPACITADO"
+      setEstadoDeFase("INCAPACITADO")
+    }else if(negativa>=3){
+      estadoDeFaseActual="INCONCIENTE"
+      setEstadoDeFase("INCONCIENTE")
+    }
+   }
+
+   if(newDamage>(vidaTotalPositiva+faseSalud) && newDamage<=(vidaTotalPositiva+faseSalud*2)){
+
+    if(negativa==1){
+      estadoDeFaseActual="MORIBUNDO"
+      setEstadoDeFase("MORIBUNDO")
+   }else if(negativa==2){
+    estadoDeFaseActual="MORIBUNDO" 
+    setEstadoDeFase("MORIBUNDO")
+   }else if(negativa>=3){
+     estadoDeFaseActual="INCAPACITADO"
+     setEstadoDeFase("INCAPACITADO")
+   }
+    //estadoDeFase="fase iNCAPACITADO"
+   }
+   if(newDamage>(vidaTotalPositiva+faseSalud*2) && newDamage<=(vidaTotalPositiva+faseSalud*3)){
+    
+    if(negativa==1){
+       estadoDeFaseActual=""
+      setEstadoDeFase("")
+   }else if(negativa==2){
+     estadoDeFaseActual=""
+     setEstadoDeFase("")
+   }else if(negativa>=3){
+     estadoDeFaseActual="MORIBUNDO"
+     setEstadoDeFase("MORIBUNDO")
+   }
+    //estadoDeFase="fase MORIBUNDO"
+   }
+  
+   if(newDamage > vidaTotal){
+     estadoDeFaseActual="MUERTO"
+    setEstadoDeFase("MUERTO")
+  }
+
+  if(newDamage == 0){
+     estadoDeFaseActual="SIN HERIDAS"
+    setEstadoDeFase("SIN HERIDAS")
+  }
+
+
+
+    let aturdimiento="";
+    //catidad de fase positivas, cantidad de fases negativas
+    if(newValue>=faseSalud){
+      aturdimiento="****ATURDIDO*****"
+    }
+
+    let estadoSalud
+    if(newDamage>vidaTotalPositiva){
+      if(newDamage<=vidaTotal){
+          estadoSalud=`barra negativa ${aturdimiento}`
+      }else if(newDamage>vidaTotal){
+        estadoSalud=`********************* ${nombre} MUERTO ********************* ${aturdimiento}`
+      }
+      
+    }else if(newDamage<=vidaTotalPositiva){
+      estadoSalud=`barra positiva ${aturdimiento}`
+    }
+
+
+    let message
+
+    if(newValue>0){
+        message = `  Recibio ${newValue} p de DAÑO    VITALIDAD: ${newDamage} / ${vidaTotal}    ${estadoDeFaseActual}   ${estadoSalud}`;
+    }else if(newValue<0){
+        let recuperado=-(newValue)
+        message = `   Restauro ${recuperado} p de VIDA     VITALIDAD: ${newDamage} / ${vidaTotal}                             ${estadoDeFaseActual}   ${estadoSalud}`;
+    }else {
+        message = `    VITALIDAD: ${newDamage} / ${vidaTotal}     ${estadoDeFaseActual}  ${estadoSalud}`;
+    }
+  
+  
+   
+     // Emitiendo el objeto con idpersonaje, kenActual y ken
+      const msgEnviar = {
+        idpersonaje: p.idpersonaje,    
+        nombre:nombre,
+        vidaActual: newDamage,         
+        vidaTotal: vidaTotal,                   
+        mensaje: message            
     };
-    socket.emit('message', msgEnviar);
-  */
-    };
+    
+    socket.emit('chat-message', msgEnviar);
+   
+  };
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.estadoText}>Estado: {estadoDeFase}</Text>
-      <Text style={styles.vidaText}>Vida: {vidaActual}/{vidaTotal}</Text>
 
-      <View style={styles.barraContenedor}>
-        <View style={[styles.barraPositiva, { width: `${porcentajeVidaPositiva}%` }]} />
-        <View style={[styles.barraNegativa, { width: `${porcentajeVidaNegativa}%` }]} />
-      </View>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Cambiar daño"
-        value={consumirVida}
-        onChangeText={setConsumirVida}
-        keyboardType="numeric"
+  const estaMuerto = damageActual > vidaTotal;
+
+  const handlePos=(event)=>{
+    const newPos=parseInt(event.target.value)
+    setPositiva(newPos)
+  }
+  const handleNeg=(event)=>{
+    const newNeg=parseInt(event.target.value)
+    setNegativa(newNeg)
+  }
+  const curarFase=async()=>{
+    setConsumirVida("")
+    setConsumirVida(-(faseSalud))
+    if(consumirVida==-(faseSalud)){
+      agregarDamage();
+      setConsumirVida("")
+    }
+   
+  }
+
+//ESTO ES PARA LA LOGICA INTERNA DE GUARDAR LOS CAMBIOS EN CON STATES Y UN ARRAY CON USE CONTEXT
+ const guardarCambios = () => {
+   
+  const index = personajes.findIndex(per => per.idpersonaje === p.idpersonaje);
+  if (index === -1) return; // por seguridad, si no se encuentra el personaje
+ 
+  const nuevosPersonajes = [...personajes];
+
+
+  nuevosPersonajes[index] = {
+    ...nuevosPersonajes[index],
+
+   
+    positiva:positiva,
+    negativa:negativa,
+    vidaActual:damageActual,
+    cicatriz: cicatriz,  
+    resistencia:resistencia,
+  
+ 
+  };
+
+  savePersonajes(nuevosPersonajes); 
+}
+
+useEffect(() => {
+ guardarCambios();
+}, [ 
+  
+  positiva,
+  negativa,
+  damageActual,
+  cicatriz,
+  resistencia,
+]);
+
+return (
+  <View style={styles.container}>
+    <Text style={styles.estadoText}>Estado: {estadoDeFase}</Text>
+
+    {/* Barra positiva */}
+    <View style={styles.barraContenedor}>
+      <View style={[styles.barraAmarilla, { width: '100%' }]} />
+
+      <LinearGradient
+        colors={['#8B0000', '#B22222', '#FF4500']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={[
+          styles.barraRoja,
+          { width: `${Math.min((damageActual / vidaTotalPositiva) * 100, 100)}%` },
+        ]}
       />
-      <TouchableOpacity style={styles.boton} onPress={agregarDamage}>
-        <Text style={styles.botonTexto}>Aplicar Daño</Text>
-      </TouchableOpacity>
-    </View>
-  );
-};
 
+      {/* Mostrar texto solo si NO hay daño negativo */}
+      {damageActual <= vidaTotalPositiva && (
+        <Text style={styles.textoVidaEnBarra}>Vida: {damageActual}/{vidaTotal}</Text>
+      )}
+    </View>
+
+    {/* Barra negativa, solo si hay daño más allá de la positiva */}
+    {damageActual > vidaTotalPositiva && (
+      <View style={styles.barraContenedor}>
+        <View style={[styles.barraAmarilla, { width: '100%' }]} />
+
+        <LinearGradient
+          colors={['#4B0082', '#8A2BE2', '#DDA0DD']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={[
+            styles.barraVioleta,
+            {
+              width: `${Math.min(
+                ((damageActual - vidaTotalPositiva) / vidaTotalNegativa) * 100,
+                100
+              )}%`,
+            },
+          ]}
+        />
+
+        {/* Mostrar texto dentro de la barra negativa si hay daño negativo */}
+        <Text style={styles.textoVidaEnBarra}>Vida: {damageActual}/{vidaTotal}</Text>
+      </View>
+    )}
+
+    <TextInput
+      style={styles.input}
+      placeholder="ingresa daño"
+      placeholderTextColor="#aaa"
+      value={String(consumirVida)}
+      onChangeText={setConsumirVida}
+      keyboardType="numeric"
+    />
+    <TouchableOpacity style={styles.boton} onPress={agregarDamage}>
+      <Text style={styles.botonTexto}>Aplicar Daño</Text>
+    </TouchableOpacity>
+  </View>
+);
+};
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#111',
-    padding: 12,
-    borderRadius: 10,
-    margin: 10,
+    backgroundColor: '#000',
+    padding: 16,
+    alignItems: 'center',
   },
   estadoText: {
-    color: '#f8e71c',
-    fontSize: 18,
-    textAlign: 'center',
-    marginBottom: 5,
+    color: '#fff',
+    marginBottom: 6,
+    fontSize: 16,
   },
   vidaText: {
     color: '#fff',
+    marginBottom: 6,
     fontSize: 16,
-    marginBottom: 5,
-    textAlign: 'center',
   },
   barraContenedor: {
-    flexDirection: 'row',
-    height: 20,
-    backgroundColor: '#555',
-    borderRadius: 10,
+    width: '100%',
+    height: 16,
+    borderRadius: 8,
     overflow: 'hidden',
-    marginBottom: 10,
+    marginVertical: 4,
+    position: 'relative',
+    backgroundColor: '#333',
   },
-  barraPositiva: {
-    backgroundColor: '#2ecc71',
+  barraAmarilla: {
+    position: 'absolute',
     height: '100%',
+    backgroundColor: 'yellow',
+    left: 0,
+    width: '100%',
   },
-  barraNegativa: {
-    backgroundColor: '#e74c3c',
+  barraRoja: {
+    position: 'absolute',
     height: '100%',
+    borderRadius: 8,
+    left: 0,
+    borderColor: 'white',  // <-- así va el color en string
+  borderWidth: 1,        // No olvides poner el ancho del borde
+  },
+  barraVioleta: {
+    position: 'absolute',
+    height: '100%',
+    borderRadius: 8,
+    left: 0,
+    borderColor: 'white',  // <-- así va el color en string
+  borderWidth: 1,        // No olvides poner el ancho del borde
   },
   input: {
-    backgroundColor: '#222',
-    color: '#fff',
+    borderWidth: 1,
+    borderColor: '#aaa',
     padding: 8,
+    color: 'white',
+    backgroundColor: '#1a1a1a',
     borderRadius: 6,
-    marginBottom: 6,
+    marginTop: 10,
+    width: '60%',
+    textAlign: 'center',
   },
   boton: {
-    backgroundColor: '#c0392b',
-    paddingVertical: 10,
+    marginTop: 10,
+    backgroundColor: 'red',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
     borderRadius: 6,
-    alignItems: 'center',
   },
   botonTexto: {
-    color: '#fff',
+    color: 'white',
     fontWeight: 'bold',
   },
+textoVidaEnBarra: {
+  position: 'absolute',
+  width: '100%',
+  height: '100%',
+  textAlign: 'center',
+  color: 'black',
+  fontWeight: 'bold',
+  fontSize: 18,
+  textAlignVertical: 'center', // Android
+  includeFontPadding: false,   // iOS
+  lineHeight: 16,              // Coincidir con la altura de la barra
+  zIndex: 10,
+},
 });

@@ -35,6 +35,10 @@ export const ChatTiradas = ({p}) => {
     socket.off('chat-message');
   };
 }, []);
+
+
+
+
   return (
     <View style={styles.panelHistorial}>
       <ScrollView ref={scrollViewRef} style={styles.scrollHistorial}>
