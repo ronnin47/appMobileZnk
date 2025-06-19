@@ -22,12 +22,12 @@ const generarNumerosAzarSinRangoMin=(cantidad, rangoMax)=> {
   return numeros;
 }
 
-export const Tiradas = ({ pj }) => {
+export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen }) => {
   
   const { personajes, historialChat, setHistorialChat } = useContext(AuthContext);
 
   const p = personajes.find((p) => p.idpersonaje === pj.idpersonaje);
-
+ console.log("de tiradas KEN: ",ken)
 
 
   const [valTirada, setValTirada] = useState("");
@@ -235,15 +235,15 @@ export const Tiradas = ({ pj }) => {
 
         <View style={styles.barras}>
             <View >
-              <BarraVida pj={p}></BarraVida>
+              <BarraVida pj={p} ki={ki} setKi={setKi} fortaleza={fortaleza} setFortaleza={setFortaleza}></BarraVida>
             </View>
 
             <View>
-              <BarraKi pj={p}></BarraKi>
+              <BarraKi pj={p} ki={ki} setKi={setKi}></BarraKi>
             </View>
 
             <View>
-              <BarraKen pj={p}></BarraKen>
+              <BarraKen pj={p} ken={ken} setKen={setKen}></BarraKen>
             </View>       
         </View>
 

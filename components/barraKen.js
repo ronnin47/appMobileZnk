@@ -1,22 +1,17 @@
 import React, { useState, useEffect, useContext } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-} from 'react-native';
+import { View,Text, TextInput, TouchableOpacity, StyleSheet} from 'react-native';
 import { AuthContext } from './AuthContext';
 import socket from './socket';
 import { LinearGradient } from 'expo-linear-gradient';
 
 
-export const BarraKen = ({ pj }) => {
+export const BarraKen = ({ pj, ken,setKen }) => {
   const { personajes, savePersonajes } = useContext(AuthContext);
   const p = personajes.find(p => p.idpersonaje === pj.idpersonaje);
 
   const [nombre, setNombre] = useState(p.nombre);
-  const [ken, setKen] = useState(p.ken != null ? String(p.ken) : '');
+  //este se anulo de aca porque los state estan en el componenete PantallaDeslizable
+  //const [ken, setKen] = useState(p.ken != null ? String(p.ken) : '');
   const [kenActual, setKenActual] = useState(p.kenActual != null ? String(p.kenActual) : '');
   const [consumir, setConsumir] = useState("0");
   
@@ -60,6 +55,7 @@ export const BarraKen = ({ pj }) => {
     nuevosPersonajes[index] = {
       ...nuevosPersonajes[index],
       kenActual: kenActual,
+   
     };
 
     savePersonajes(nuevosPersonajes);
@@ -67,7 +63,7 @@ export const BarraKen = ({ pj }) => {
 
   useEffect(() => {
     guardarCambios();
-  }, [kenActual]);
+  }, [ken,kenActual]);
 
   return (
    <View style={styles.container}>

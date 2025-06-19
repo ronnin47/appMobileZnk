@@ -4,20 +4,19 @@ import { AuthContext } from './AuthContext';
 import socket from './socket';
 import { LinearGradient } from 'expo-linear-gradient';
 
-export const BarraVida = ({pj}) => {
+export const BarraVida = ({pj, ki, setKi, fortaleza, setFortaleza}) => {
 const { personajes, savePersonajes } = useContext(AuthContext);
  //aca extrae el personaje
   const p = personajes.find(p => p.idpersonaje === pj.idpersonaje);
 
-  console.log("El persoanje que extraemos es: ",p.nombre)
+  //console.log("El persoanje que extraemos es: ",p.nombre)
   
-  // LOS STATES QUE USAMOS
+ 
+  //este se anulo de aca porque los state estan en el componenete PantallaDeslizable
+  //const [ki, setKi] = useState(ki);
+  //const [fortaleza, setFortaleza] = useState(fortaleza);
 //ACA LOS STATES
   const [nombre,setNombre]=useState(p.nombre);
-
- 
-  const [ki, setKi] = useState(p.ki != null ? String(p.ki) : '');
-  const [fortaleza, setFortaleza] = useState(p.fortaleza != null ? String(p.fortaleza) : '');
   const [positiva, setPositiva] = useState(p.positiva != null ? String(p.positiva) : '');
   const [negativa, setNegativa] = useState(p.negativa != null ? String(p.negativa) : '');
   const [vidaActual, setVidaActual] = useState(p.vidaActual != null ? String(p.vidaActual) : '');

@@ -17,7 +17,7 @@ import { Hechizos } from './hechizos';
 import { Historia } from './historia';
 import { TecnicaEspecial } from './tecEpecial';
 
-export const FichaPersonaje = ({ pj }) => {
+export const FichaPersonaje = ({ pj, ki, setKi, fortaleza, setFortaleza, ken,setKen }) => {
   
   const { personajes, savePersonajes } = useContext(AuthContext);
  
@@ -80,13 +80,13 @@ export const FichaPersonaje = ({ pj }) => {
   const [naturaleza,setNaturaleza]=useState(p.naturaleza);
   const [edad,setEdad]=useState(p.edad); 
   
-  const [ken, setKen] = useState(p.ken != null ? String(p.ken) : '');
-  const [ki, setKi] = useState(p.ki != null ? String(p.ki) : '');
+  //const [ken, setKen] = useState(p.ken != null ? String(p.ken) : '');
+  //const [ki, setKi] = useState(p.ki != null ? String(p.ki) : '');
   const [destino, setDestino] = useState(p.destino != null ? String(p.destino) : '');
   const [pDestino, setPdestino] = useState(p.pDestino != null ? String(p.pDestino) : '');
 
   const [fuerza, setFuerza] = useState(p.fuerza != null ? String(p.fuerza) : '');
-  const [fortaleza, setFortaleza] = useState(p.fortaleza != null ? String(p.fortaleza) : '');
+  //const [fortaleza, setFortaleza] = useState(p.fortaleza != null ? String(p.fortaleza) : '');
   const [destreza, setDestreza] = useState(p.destreza != null ? String(p.destreza) : '');
   const [agilidad, setAgilidad] = useState(p.agilidad != null ? String(p.agilidad) : '');
   const [sabiduria, setSabiduria] = useState(p.sabiduria != null ? String(p.sabiduria) : '');

@@ -4,16 +4,20 @@ import { AuthContext } from './AuthContext';
 import socket from './socket';
 import { LinearGradient } from 'expo-linear-gradient';
 
-export const BarraKi = ({ pj }) => {
+export const BarraKi = ({ pj,ki,setKi }) => {
   const { personajes, savePersonajes } = useContext(AuthContext);
   const p = personajes.find(p => p.idpersonaje === pj.idpersonaje);
 
   const [nombre, setNombre] = useState(p.nombre);
-  const [ki, setKi] = useState(p.ki != null ? String(p.ki) : '');
+  //este se anulo de aca porque los state estan en el componenete PantallaDeslizable
+ // const [ki, setKi] = useState(p.ki != null ? String(p.ki) : '');
   const [fortaleza, setFortaleza] = useState(p.fortaleza != null ? String(p.fortaleza) : '');
   const [kiActual, setKiActual] = useState(p.kiActual != null ? String(p.kiActual) : '');
   const [consumir, setConsumir] = useState("0");
   const [consumision, setConsumision] = useState(p.consumision != null ? String(p.consumision) : '');
+
+
+
 
   const porcentajeKi = (parseInt(kiActual) / parseInt(ki)) * 100;
 
