@@ -66,32 +66,46 @@ export const BarraKen = ({ pj, ken,setKen }) => {
   }, [ken,kenActual]);
 
   return (
-   <View style={styles.container}>
-      
+   
 
-      <TouchableOpacity onPress={consumirKen} style={styles.boton}>
-        <Text style={styles.botonTexto}>Consumir Ken</Text>
-      </TouchableOpacity>
+<View style={styles.container}>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Consumir"
-        placeholderTextColor="#aaa"
-        keyboardType="numeric"
-        value={consumir}
-        onChangeText={setConsumir}
-      />
+  {/* Barra de Ken arriba */}
+  <View style={styles.barraContenedor}>
+    <LinearGradient
+      colors={['#00ff66', '#00cc44', '#006622']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 0 }}
+      style={[styles.barraEnergia, { width: `${Math.min(porcentajeKen, 100)}%` }]}
+    />
+    <Text style={styles.kenTextoEnBarra}>Ken: {kenActual}/{ken}</Text>
+  </View>
 
-     <View style={styles.barraContenedor}>
-            <LinearGradient
-                colors={['#00ff66', '#00cc44', '#006622']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={[styles.barraEnergia, { width: `${Math.min(porcentajeKen, 100)}%` }]}
-            />
-            <Text style={styles.kenTextoEnBarra}>Ken: {kenActual}/{ken}</Text>
-    </View>
-    </View>
+
+
+  <View style={styles.fila}>
+    <TextInput
+      style={styles.input}
+      placeholder="ingresa Ken"
+      placeholderTextColor="#aaa"
+      value={String(consumir)}
+      onChangeText={setConsumir}
+      keyboardType="numbers-and-punctuation"
+    />
+  
+   <LinearGradient
+       colors={['#32CD32', '#2E8B57', '#228B22']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.boton}
+      >
+        <TouchableOpacity style={styles.botonInterno} onPress={consumirKen}>
+          <Text style={styles.botonTexto}>Consumir Ken</Text>
+        </TouchableOpacity>
+    </LinearGradient>
+  </View>
+
+</View>
   );
 };
 
@@ -108,28 +122,9 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     fontSize: 16,
   },
-  boton: {
-    marginTop: 10,
-    backgroundColor: '#007bff',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 6,
-  },
-  botonTexto: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#aaa',
-    padding: 8,
-    color: 'white',
-    backgroundColor: '#1a1a1a',
-    borderRadius: 6,
-    marginTop: 10,
-    width: '60%',
-    textAlign: 'center',
-  },
+  
+ 
+ 
   barraContenedor: {
     width: '100%',
     height: 16,
@@ -169,4 +164,78 @@ kenTextoEnBarra: {
   textAlignVertical: 'center', // Para Android
   includeFontPadding: false,   // Para iOS
 },
+
+
+
+botonTouchable: {
+  paddingVertical: 8,
+  paddingHorizontal: 16,
+  borderRadius: 6,
+  alignItems: 'center',
+  justifyContent: 'center',
+},
+
+
+botonGradient: {
+  borderRadius: 6,
+  padding: 1,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 3 },
+  shadowOpacity: 0.5,
+  shadowRadius: 4,
+  elevation: 6,
+  // Ancho para que quede similar al input
+  minWidth: 120,
+},
+
+botonTouchable: {
+  paddingVertical: 8,
+  paddingHorizontal: 16,
+  borderRadius: 6,
+  alignItems: 'center',
+  justifyContent: 'center',
+},
+
+
+ input: {
+    borderWidth: 1,
+    borderColor: '#aaa',
+    padding: 8,
+    color: 'white',
+    backgroundColor: '#1a1a1a',
+    borderRadius: 6,
+    marginTop: 10,
+    width: '60%',
+    textAlign: 'center',
+      flex: 1,
+  },
+  fila: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap:5,
+},
+
+
+
+boton: {
+  marginTop: 10,
+  borderRadius: 6,
+  padding: 1, // espacio alrededor del botón interno para mostrar el gradiente
+},
+
+botonInterno: {
+  paddingVertical: 10,
+  paddingHorizontal: 20,
+  borderRadius: 6,
+  alignItems: 'center',
+  justifyContent: 'center', // ✅ centra verticalmente el texto
+},
+
+botonTexto: {
+  color: 'white',
+  fontWeight: 'bold',
+  fontSize: 16,
+  fontFamily: 'sans-serif-condensed',
+}
+ 
 });

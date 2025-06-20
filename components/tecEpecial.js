@@ -74,7 +74,6 @@ export const Item = ({ id, itemValues, handleItemChange }) => {
 };
 
 export const TecnicaEspecial = ({ tecEspecial, setTecEspecial }) => {
-  // Inicializo items vacío o desde tecEspecial
   const [items, setItems] = useState(() =>
     Array.isArray(tecEspecial)
       ? tecEspecial.map((item, index) => ({
@@ -88,7 +87,6 @@ export const TecnicaEspecial = ({ tecEspecial, setTecEspecial }) => {
       : []
   );
 
-  // Sincronizo items cuando tecEspecial cambie y sea válido
   useEffect(() => {
     if (Array.isArray(tecEspecial)) {
       const newItems = tecEspecial.map((item, index) => ({
@@ -100,7 +98,6 @@ export const TecnicaEspecial = ({ tecEspecial, setTecEspecial }) => {
         },
       }));
 
-      // Solo actualizamos estado local si son distintos
       if (!areArraysEqual(items.map((i) => i.values), tecEspecial)) {
         setItems(newItems);
       }
@@ -121,7 +118,6 @@ export const TecnicaEspecial = ({ tecEspecial, setTecEspecial }) => {
 
     const finalValues = finalItems.map((item) => item.values);
 
-    // Actualizamos solo si hay cambios reales para evitar parpadeo
     if (!areArraysEqual(finalValues, tecEspecial)) {
       setTecEspecial(finalValues);
     }
@@ -139,24 +135,25 @@ export const TecnicaEspecial = ({ tecEspecial, setTecEspecial }) => {
     setTecEspecial(newItems.map((item) => item.values));
   };
 
-  if (!items.length) {
-    return null;
-  }
-
-
   const [showButton, setShowButton] = useState(false);
 
-  // Cada vez que cambian los items, ocultamos el botón y lo mostramos luego con delay
   useEffect(() => {
-    setShowButton(false); // ocultamos el botón
+    setShowButton(false);
     const timeout = setTimeout(() => {
-      setShowButton(true); // mostramos el botón luego del delay
-    }, 100); // 100ms, podés ajustar este tiempo
+      setShowButton(true);
+    }, 100);
 
-    return () => clearTimeout(timeout); // limpieza
+    return () => clearTimeout(timeout);
   }, [items]);
+
   return (
     <View style={styles.container}>
+      {items.length === 0 && (
+        <Text style={{ color: "#ccc", textAlign: "center", marginBottom: 10 }}>
+          No hay poderes únicos aún.
+        </Text>
+      )}
+
       {items.map((item) => (
         <Item
           key={item.id}
@@ -166,26 +163,26 @@ export const TecnicaEspecial = ({ tecEspecial, setTecEspecial }) => {
         />
       ))}
 
-      
       {showButton && (
-       
-         <View style={{ marginTop: 10, alignItems: 'center' }}>
-              <View style={{ width: 140 }}>
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: '#339CFF',
-                    paddingVertical: 10,
-                    borderRadius: 6,
-                    alignItems: 'center',
-                  }}
-                  onPress={btnAgregarItem}
-                >
-                  <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>
-                    + Poder Unico
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
+        <View style={{ marginTop: 10, alignItems: "center" }}>
+          <View style={{ width: 140 }}>
+            <TouchableOpacity
+              style={{
+                backgroundColor: "#339CFF",
+                paddingVertical: 10,
+                borderRadius: 6,
+                alignItems: "center",
+              }}
+              onPress={btnAgregarItem}
+            >
+              <Text
+                style={{ color: "white", fontWeight: "bold", fontSize: 16 }}
+              >
+                + Poder Único
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       )}
     </View>
   );

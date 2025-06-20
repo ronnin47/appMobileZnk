@@ -71,27 +71,9 @@ export const BarraKi = ({ pj,ki,setKi }) => {
   return (
    <View style={styles.container}>
    
-      <TouchableOpacity onPress={consumirKi} style={styles.boton}>
-        <Text style={styles.botonTexto}>Consumir KI</Text>
-      </TouchableOpacity>
+     
 
-      <TextInput
-        style={styles.input}
-        placeholder="Consumir"
-        placeholderTextColor="#aaa"
-        keyboardType="numeric"
-        value={consumir}
-        onChangeText={setConsumir}
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Consumision"
-        placeholderTextColor="#aaa"
-        keyboardType="numeric"
-        value={consumision}
-        onChangeText={setConsumision}
-      />
+     
 
        <View style={styles.barraContenedor}>
                   <LinearGradient
@@ -102,7 +84,42 @@ export const BarraKi = ({ pj,ki,setKi }) => {
                   />
                      <Text style={styles.kiTextoEnBarra}>Ki: {kiActual}/{ki}</Text>
 
-          </View>
+        </View>
+
+
+       <View style={styles.fila}>
+         <TextInput
+        style={styles.input}
+        placeholder="Consumir"
+        placeholderTextColor="#aaa"
+        keyboardType="numbers-and-punctuation"
+        value={consumir}
+        onChangeText={setConsumir}
+      />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Consumision"
+        placeholderTextColor="#aaa"
+        keyboardType="numbers-and-punctuation"
+        value={consumision}
+        onChangeText={setConsumision}
+      />
+
+       <LinearGradient
+              colors={['#00FFFF', '#1E90FF', '#0000CD']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.boton}
+            >
+            <TouchableOpacity onPress={consumirKi} style={styles.botonInterno}>
+              <Text style={styles.botonTexto}>Consumir KI</Text>
+            </TouchableOpacity>
+            </LinearGradient>
+     
+
+       </View>
+        
     </View>
   );
 };
@@ -120,18 +137,12 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     fontSize: 16,
   },
-  boton: {
-    marginTop: 10,
-    backgroundColor: '#007bff',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 6,
-  },
+  
   botonTexto: {
     color: 'white',
     fontWeight: 'bold',
   },
-  input: {
+   input: {
     borderWidth: 1,
     borderColor: '#aaa',
     padding: 8,
@@ -141,7 +152,9 @@ const styles = StyleSheet.create({
     marginTop: 10,
     width: '60%',
     textAlign: 'center',
+      flex: 1,
   },
+  
   barraContenedor: {
     width: '100%',
     height: 16,
@@ -181,4 +194,32 @@ kiTextoEnBarra: {
   textAlignVertical: 'center', // Para Android
   includeFontPadding: false,   // Para iOS
 },
+ fila: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap:5,
+},
+
+
+boton: {
+  marginTop: 10,
+  borderRadius: 6,
+  padding: 1, // espacio alrededor del botón interno para mostrar el gradiente
+},
+
+botonInterno: {
+  paddingVertical: 10,
+  paddingHorizontal: 20,
+  borderRadius: 6,
+  alignItems: 'center',
+  justifyContent: 'center', // ✅ centra verticalmente el texto
+},
+
+botonTexto: {
+  color: 'white',
+  fontWeight: 'bold',
+  fontSize: 16,
+  fontFamily: 'sans-serif-condensed',
+}
+ 
 });

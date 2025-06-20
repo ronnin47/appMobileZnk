@@ -366,10 +366,10 @@ useEffect(() => {
   cicatriz,
   resistencia,
 ]);
-
+//<Text style={styles.estadoText}>{estadoDeFase}</Text>
 return (
   <View style={styles.container}>
-    <Text style={styles.estadoText}>Estado: {estadoDeFase}</Text>
+    
 
     {/* Barra positiva */}
     <View style={styles.barraContenedor}>
@@ -387,7 +387,10 @@ return (
 
       {/* Mostrar texto solo si NO hay daño negativo */}
       {damageActual <= vidaTotalPositiva && (
-        <Text style={styles.textoVidaEnBarra}>Vida: {damageActual}/{vidaTotal}</Text>
+          <Text style={styles.textoVidaEnBarra}>
+        Vida: {damageActual}/{vidaTotal}{" "}
+        <Text style={styles.estadoText}>{estadoDeFase}</Text>
+      </Text>
       )}
     </View>
 
@@ -412,21 +415,34 @@ return (
         />
 
         {/* Mostrar texto dentro de la barra negativa si hay daño negativo */}
-        <Text style={styles.textoVidaEnBarra}>Vida: {damageActual}/{vidaTotal}</Text>
+         <Text style={styles.textoVidaEnBarra}>
+        Vida: {damageActual}/{vidaTotal}{" "}
+        <Text style={styles.estadoText}>{estadoDeFase}</Text>
+      </Text>
       </View>
     )}
 
-    <TextInput
-      style={styles.input}
-      placeholder="ingresa daño"
-      placeholderTextColor="#aaa"
-      value={String(consumirVida)}
-      onChangeText={setConsumirVida}
-      keyboardType="numeric"
-    />
-    <TouchableOpacity style={styles.boton} onPress={agregarDamage}>
-      <Text style={styles.botonTexto}>Aplicar Daño</Text>
-    </TouchableOpacity>
+   <View style={styles.fila}>
+  <TextInput
+    style={styles.input}
+    placeholder="ingresa daño"
+    placeholderTextColor="#aaa"
+    value={String(consumirVida)}
+    onChangeText={setConsumirVida}
+    keyboardType="numbers-and-punctuation"
+  />
+
+ <LinearGradient
+    colors={['#4B0000', '#8B0000', '#FF2D2D']} 
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.boton}
+    >
+      <TouchableOpacity style={styles.botonInterno} onPress={agregarDamage}>
+        <Text style={styles.botonTexto}>Aplicar Daño</Text>
+      </TouchableOpacity>
+  </LinearGradient>
+    </View>
   </View>
 );
 };
@@ -438,9 +454,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   estadoText: {
-    color: '#fff',
+    color: 'black',
     marginBottom: 6,
-    fontSize: 16,
+    fontSize: 14,
+    fontFamily: 'sans-serif-condensed',
   },
   vidaText: {
     color: '#fff',
@@ -489,18 +506,9 @@ const styles = StyleSheet.create({
     marginTop: 10,
     width: '60%',
     textAlign: 'center',
+      flex: 1,
   },
-  boton: {
-    marginTop: 10,
-    backgroundColor: 'red',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 6,
-  },
-  botonTexto: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
+ 
 textoVidaEnBarra: {
   position: 'absolute',
   width: '100%',
@@ -513,5 +521,34 @@ textoVidaEnBarra: {
   includeFontPadding: false,   // iOS
   lineHeight: 16,              // Coincidir con la altura de la barra
   zIndex: 10,
+  
 },
+fila: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap:5,
+},
+
+
+
+boton: {
+  marginTop: 10,
+  borderRadius: 6,
+  padding: 1, // espacio alrededor del botón interno para mostrar el gradiente
+},
+
+botonInterno: {
+  paddingVertical: 10,
+  paddingHorizontal: 20,
+  borderRadius: 6,
+  alignItems: 'center',
+  justifyContent: 'center', // ✅ centra verticalmente el texto
+},
+
+botonTexto: {
+  color: 'white',
+  fontWeight: 'bold',
+  fontSize: 16,
+  fontFamily: 'sans-serif-condensed',
+}
 });
