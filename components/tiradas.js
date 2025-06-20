@@ -12,6 +12,7 @@ import { io } from 'socket.io-client';
 //const socket = io('http://192.168.0.38:3000');
 
 import socket from './socket';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const generarNumerosAzarSinRangoMin=(cantidad, rangoMax)=> {
   var numeros = [];
@@ -24,7 +25,7 @@ const generarNumerosAzarSinRangoMin=(cantidad, rangoMax)=> {
 
 export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen }) => {
   
-  const { personajes, historialChat, setHistorialChat } = useContext(AuthContext);
+  const { personajes, historialChat, setHistorialChat,savePersonajes } = useContext(AuthContext);
 
   const p = personajes.find((p) => p.idpersonaje === pj.idpersonaje);
  console.log("de tiradas KEN: ",ken)
@@ -49,7 +50,7 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen }) => {
   const [dadosD10Bono, setDadosD10Bono] = useState(0);
 
   //console.log("USUARIO ID: ",p.usuarioId)
-
+ const [abierto, setAbierto] = useState(false);
   useEffect(() => {
 
     // Cuando el socket se conecta, enviamos info del usuario (ejemplo)
@@ -145,6 +146,41 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen }) => {
     socket.emit('chat-message', mensaje);
   };
 
+
+
+  //aca los states de positiva, negativa, cicatriz
+  const [positiva, setPositiva] = useState(p.positiva != null ? String(p.positiva) : '');
+  const [negativa, setNegativa] = useState(p.negativa != null ? String(p.negativa) : '');
+  const [cicatriz, setCicatriz] = useState(p.cicatriz != null ? String(p.cicatriz) : '');
+
+//ESTO ES PARA LA LOGICA INTERNA DE GUARDAR sobre el array que esta en el context
+    const guardarCambios = () => {
+    const index = personajes.findIndex(per => per.idpersonaje === pj.idpersonaje);
+    if (index === -1) return;
+
+    const nuevosPersonajes = [...personajes];
+
+    nuevosPersonajes[index] = {
+      ...nuevosPersonajes[index],
+      positiva: positiva,
+      negativa: negativa,
+      cicatriz: cicatriz,
+    };
+
+    savePersonajes(nuevosPersonajes);
+  };
+  
+  useEffect(() => {
+   guardarCambios();
+  }, [ 
+    positiva,
+    negativa,
+    cicatriz,
+  ]);
+
+    //se refiere a la cantidad de vida por fase 
+  const faseSalud = parseInt(ki) + parseInt(fortaleza);
+
   return (
     <>
      <ChatTiradas p={p}/>
@@ -216,9 +252,16 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen }) => {
     ))}
   </View>
 </View>
-        <TouchableOpacity style={styles.botonPrincipal} onPress={tirarDados}>
-          <Text style={styles.botonPrincipalTexto}>¡Tirar Dados!</Text>
-        </TouchableOpacity>
+        <LinearGradient
+            colors={['#EF6C00', '#E65100', '#BF360C']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.botonPrincipal}
+          >
+            <TouchableOpacity onPress={tirarDados} style={styles.botonToque}>
+              <Text style={styles.botonPrincipalTexto}>Tirar Dados</Text>
+            </TouchableOpacity>
+          </LinearGradient>
 
         <View style={styles.resultado}>
           <Text style={styles.resultadoTexto}>D10 esfuerzo: {valTirada}</Text>
@@ -235,7 +278,7 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen }) => {
 
         <View style={styles.barras}>
             <View >
-              <BarraVida pj={p} ki={ki} setKi={setKi} fortaleza={fortaleza} setFortaleza={setFortaleza}></BarraVida>
+              <BarraVida pj={p} ki={ki} setKi={setKi} fortaleza={fortaleza} setFortaleza={setFortaleza}  positiva={Number(positiva) || 0} negativa={Number(negativa) || 0} cicatriz={Number(cicatriz) || 0}></BarraVida>
             </View>
 
             <View>
@@ -249,6 +292,52 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen }) => {
 
         
         
+         <View style={styles.acordeonContainer}>
+      <TouchableOpacity onPress={() => setAbierto(!abierto)} style={styles.acordeonHeader}>
+        <Text style={styles.acordeonTitulo}>Fases y cicatrices {abierto ? '▲' : '▼'}</Text>
+      </TouchableOpacity>
+
+      {abierto && (
+  <View style={styles.inputsContainer}>
+    <View style={styles.inputGroup}>
+       <Text style={styles.labelFases}>Fases de Salud {faseSalud} pv</Text>
+      <Text style={styles.label}>Fases positivas</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Fases positivas"
+        placeholderTextColor="#aaa"
+        value={positiva}
+        onChangeText={setPositiva}
+        keyboardType="numbers-and-punctuation"
+      />
+    </View>
+
+    <View style={styles.inputGroup}>
+      <Text style={styles.label}>Fases negativas</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Fases negativas"
+        placeholderTextColor="#aaa"
+        value={negativa}
+        onChangeText={setNegativa}
+        keyboardType="numbers-and-punctuation"
+      />
+    </View>
+
+    <View style={styles.inputGroup}>
+      <Text style={styles.label}>Puntos de cicatrices</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Puntos de cicatrices"
+        placeholderTextColor="#aaa"
+        value={cicatriz}
+        onChangeText={setCicatriz}
+        keyboardType="numbers-and-punctuation"
+      />
+    </View>
+  </View>
+)}
+    </View>
       </ScrollView>
     </>
   );
@@ -319,21 +408,25 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   boton: {
-    backgroundColor: "#444",
-    borderRadius: 4,
+    backgroundColor: "#28a745",
+    borderRadius: 6,
     paddingHorizontal: 10,
     paddingVertical: 4,
+    borderColor:"gray",
+    borderWidth: 2, 
   },
   botonTexto: {
     color: "#fff",
     fontSize: 24,
   },
   botonPrincipal: {
-    backgroundColor: "#f97316",
+   backgroundColor: "#28a745",
     padding: 12,
     borderRadius: 8,
     marginTop: 20,
     alignItems: "center",
+      borderColor:"white",
+    borderWidth: 4,
   },
   botonPrincipalTexto: {
     color: "#fff",
@@ -374,5 +467,70 @@ dadoRow: {
 },
 barras: {
   marginBottom:50,
+},
+ acordeonContainer: {
+    marginVertical: 10,
+    borderWidth: 1,
+    borderColor: '#333',
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: '#1a1a1a',
+    marginBottom:100, 
+  },
+  acordeonHeader: {
+    backgroundColor: '#222',
+    padding: 12,
+  },
+  acordeonTitulo: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  inputsContainer: {
+    padding: 12,
+    backgroundColor: '#111',
+  },
+  input: {
+    backgroundColor: '#2a2a2a',
+    color: '#fff',
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    fontSize: 14,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#444',
+  },
+  inputGroup: {
+  marginBottom: 12,
+},
+label: {
+  color: '#ddd',
+  fontSize: 13,
+  marginBottom: 4,
+  fontWeight: '500',
+},
+labelFases: {
+  color: 'yellow',
+  fontSize: 16,
+  marginBottom: 4,
+  fontWeight: '500',
+  textAlign:"center",
+},
+botonPrincipal: {
+  borderRadius: 10,
+  overflow: 'hidden',
+},
+
+botonToque: {
+  paddingVertical: 12,
+  paddingHorizontal: 24,
+  alignItems: 'center',
+},
+
+botonPrincipalTexto: {
+  color: 'white',
+  fontSize: 18,
+  fontWeight: 'bold',
 }
 });

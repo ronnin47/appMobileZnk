@@ -154,7 +154,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
       flex: 1,
   },
-  
   barraContenedor: {
     width: '100%',
     height: 16,

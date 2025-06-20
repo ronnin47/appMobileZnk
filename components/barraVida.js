@@ -4,12 +4,16 @@ import { AuthContext } from './AuthContext';
 import socket from './socket';
 import { LinearGradient } from 'expo-linear-gradient';
 
-export const BarraVida = ({pj, ki, setKi, fortaleza, setFortaleza}) => {
+export const BarraVida = ({pj, ki, setKi, fortaleza, setFortaleza,positiva,negativa,cicatriz}) => {
 const { personajes, savePersonajes } = useContext(AuthContext);
  //aca extrae el personaje
   const p = personajes.find(p => p.idpersonaje === pj.idpersonaje);
 
   //console.log("El persoanje que extraemos es: ",p.nombre)
+   // Normalizar valores que podrían ser NaN o undefined
+
+   console.log("postiva ",typeof positiva)
+
   
  
   //este se anulo de aca porque los state estan en el componenete PantallaDeslizable
@@ -17,10 +21,12 @@ const { personajes, savePersonajes } = useContext(AuthContext);
   //const [fortaleza, setFortaleza] = useState(fortaleza);
 //ACA LOS STATES
   const [nombre,setNombre]=useState(p.nombre);
+  /*
   const [positiva, setPositiva] = useState(p.positiva != null ? String(p.positiva) : '');
   const [negativa, setNegativa] = useState(p.negativa != null ? String(p.negativa) : '');
-  const [vidaActual, setVidaActual] = useState(p.vidaActual != null ? String(p.vidaActual) : '');
   const [cicatriz, setCicatriz] = useState(p.cicatriz != null ? String(p.cicatriz) : '');
+  */
+  const [vidaActual, setVidaActual] = useState(p.vidaActual != null ? String(p.vidaActual) : '');
   const [resistencia, setResistencia] = useState(p.resistencia != null ? String(p.resistencia) : '');
   
 
@@ -139,11 +145,11 @@ const { personajes, savePersonajes } = useContext(AuthContext);
 
 
   //const [animacionActiva, setAnimacionActiva] = useState(true);
-
+/*
   const handleChangeCicatriz=(event)=>{
     setCicatriz(event.target.value);
    }
-   
+  */ 
 /*************************hasta aca llegue******************************* */
 
 
@@ -344,10 +350,10 @@ const agregarDamage = async () => {
     ...nuevosPersonajes[index],
 
    
-    positiva:positiva,
-    negativa:negativa,
+    //positiva:positiva,
+    //negativa:negativa,
     vidaActual:damageActual,
-    cicatriz: cicatriz,  
+    //cicatriz: cicatriz,  
     resistencia:resistencia,
   
  
@@ -360,10 +366,10 @@ useEffect(() => {
  guardarCambios();
 }, [ 
   
-  positiva,
-  negativa,
+  //positiva,
+  //negativa,
   damageActual,
-  cicatriz,
+ // cicatriz,
   resistencia,
 ]);
 //<Text style={styles.estadoText}>{estadoDeFase}</Text>
@@ -486,7 +492,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     left: 0,
     borderColor: 'white',  // <-- así va el color en string
-  borderWidth: 1,        // No olvides poner el ancho del borde
+    borderWidth: 1,        // No olvides poner el ancho del borde
   },
   barraVioleta: {
     position: 'absolute',
