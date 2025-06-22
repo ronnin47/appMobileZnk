@@ -7,6 +7,13 @@ const { Server } = require('socket.io');
 const bodyParser = require('body-parser');
 const { Pool } = require('pg');
 
+//ACA LAS NUEVAS IMPORTACIONES
+const fs = require('fs');
+const path = require('path');
+
+//para la carpeta de imagene sy sus urls
+const cloudinary = require('cloudinary').v2;
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -15,6 +22,9 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' })); // para parsear JSON
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
+
+// Servir la carpeta uploads como pública
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 /*
 app.use(bodyParser.json({ limit: '50mb' }));  
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true })); 
@@ -124,7 +134,11 @@ app.get('/test-db', async (req, res) => {
 
 
 
-
+cloudinary.config({
+  cloud_name: 'dzul1hatw',
+  api_key: '687946621544217',
+  api_secret: '09DUepXU-FApoUrHnc8h6sJb25I',
+});
 
 
 
@@ -229,6 +243,16 @@ app.get('/consumirPersonajesUsuario', async (req, res) => {
   }
 });
 
+
+
+
+
+
+
+
+
+//***********************ACA ESTAMSO TRABAJANDO************* */
+/*
 //crear la ficha nueva de pj OK!
 app.post('/insert-personaje', async (req, res) => {
 
@@ -482,19 +506,312 @@ app.post('/insert-personaje', async (req, res) => {
     res.status(500).json({ error: 'Error al insertar el personaje.' });
   }
 });
+*/
+
+/*esta es la de la carpeta local 
+app.post('/insert-personaje', async (req, res) => {
+  // Desestructurás TODO lo que recibís del personaje, incluyendo imagen
+  const { 
+    nombre,
+    dominio,
+    raza,
+    naturaleza,
+    edad,
+    ken,
+    ki,
+    destino,
+    pDestino,
+    fuerza,
+    fortaleza,
+    destreza,
+    agilidad,
+    sabiduria,
+    presencia,
+    principio,
+    sentidos,
+    academisismo,
+    alerta,
+    atletismo,
+    conBakemono,
+    mentir,
+    pilotear,
+    artesMarciales,
+    medicina,
+    conObjMagicos,
+    sigilo,
+    conEsferas,
+    conLeyendas,
+    forja,
+    conDemonio,
+    conEspiritual,
+    manejoBlaster,
+    manejoSombras,
+    tratoBakemono,
+    conHechiceria,
+    medVital,
+    medEspiritual,
+    rayo,
+    fuego,
+    frio,
+    veneno,
+    corte,
+    energia,
+    ventajas,  
+    apCombate,
+    valCombate,
+    apCombate2,
+    valCombate2,
+    add1,
+    valAdd1,
+    add2,
+    valAdd2,
+    add3,
+    valAdd3,
+    add4,
+    valAdd4,
+    imagen,
+    inventario,
+    dominios,
+    kenActual,
+    kiActual,
+    positiva,
+    negativa,
+    vidaActual,
+    hechizos,
+    consumision,
+    iniciativa,
+    historia,
+    usuarioId,
+    tecEspecial,   
+    conviccion,
+    cicatriz, 
+    notaSaga,  
+    resistencia,  
+    pjPnj,
+  } = req.body;
+
+  try {
+
+      console.log('Datos recibidos para insertar personaje:', {
+      nombre, dominio, raza, usuarioId,
+      // No es necesario loguear todo si es muy grande, solo lo relevante
+    });
+    // Insertás todo excepto imagenurl (lo agregamos después)
+    const query = `
+      INSERT INTO personajes (
+        nombre, dominio, raza, naturaleza, edad, ken, ki, destino, "pDestino",
+        fuerza, fortaleza, destreza, agilidad, sabiduria, presencia, principio,
+        sentidos, academisismo, alerta, atletismo, "conBakemono", mentir, pilotear,
+        "artesMarciales", medicina, "conObjMagicos", sigilo, "conEsferas", "conLeyendas",
+        forja, "conDemonio", "conEspiritual", "manejoBlaster", "manejoSombras", "tratoBakemono",
+        "conHechiceria", "medVital", "medEspiritual", rayo, fuego, frio, veneno, corte,
+        energia, ventajas, "apCombate", "valCombate", "apCombate2", "valCombate2",
+        add1, "valAdd1", add2, "valAdd2", add3, "valAdd3", add4, "valAdd4", inventario, 
+        dominios, "kenActual", "kiActual", positiva, negativa, "vidaActual",
+        hechizos, consumision, iniciativa, historia, "tecEspecial", conviccion, cicatriz,
+        notasaga, resistencia, "pjPnj", "usuarioId"
+      )
+      VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9,
+        $10, $11, $12, $13, $14, $15, $16,
+        $17, $18, $19, $20, $21, $22, $23,
+        $24, $25, $26, $27, $28, $29,
+        $30, $31, $32, $33, $34, $35,
+        $36, $37, $38, $39, $40, $41, $42, $43,
+        $44, $45, $46, $47, $48, $49,
+        $50, $51, $52, $53, $54, $55,
+        $56, $57, $58, $59, $60, $61,
+        $62, $63, $64, $65, $66, $67,
+        $68, $69, $70, $71, $72, $73,
+        $74, $75
+      )
+      RETURNING idpersonaje
+    `;
+
+    const values = [
+      nombre, dominio, raza, naturaleza, edad, ken, ki, destino, pDestino,
+      fuerza, fortaleza, destreza, agilidad, sabiduria, presencia, principio,
+      sentidos, academisismo, alerta, atletismo, conBakemono, mentir, pilotear,
+      artesMarciales, medicina, conObjMagicos, sigilo, conEsferas, conLeyendas,
+      forja, conDemonio, conEspiritual, manejoBlaster, manejoSombras, tratoBakemono,
+      conHechiceria, medVital, medEspiritual, rayo, fuego, frio, veneno, corte,
+      energia, ventajas, apCombate, valCombate, apCombate2, valCombate2,
+      add1, valAdd1, add2, valAdd2, add3, valAdd3, add4, valAdd4,
+      inventario, dominios, kenActual, kiActual, positiva, negativa, vidaActual,
+      hechizos, consumision, iniciativa, historia, tecEspecial, conviccion, cicatriz,
+      notaSaga, resistencia, pjPnj, usuarioId
+    ];
+     console.log('Valores para la inserción:', values);
+    const result = await pool.query(query, values);
+    const newId = result.rows[0].idpersonaje;
+
+
+     console.log('*******Nuevo idpersonaje insertado:', newId);
+    // Si llegó la imagen, la procesás y guardás en carpeta uploads
+    if (imagen) {
+      const matches = imagen.match(/^data:image\/(\w+);base64,(.+)$/);
+      if (!matches) {
+        return res.status(400).json({ error: 'Imagen base64 inválida.' });
+      }
+      const ext = matches[1];
+      const data = matches[2];
+      const buffer = Buffer.from(data, 'base64');
+
+      const filename = `personaje_${newId}.${ext}`;
+      const filepath = path.join(__dirname, 'uploads', filename);
+
+      fs.writeFileSync(filepath, buffer);
+
+      // Formás URL pública para la imagen guardada
+      const baseUrl = 'http://192.168.0.38:3000'; // Cambiar a tu IP o dominio real
+      const url = `${baseUrl}/uploads/${filename}`;
+
+      // Actualizás el registro con la URL de la imagen
+      await pool.query(
+        'UPDATE personajes SET imagenurl = $1 WHERE idpersonaje = $2',
+        [url, newId]
+      );
+    }
+
+
+
+    res.status(201).json({ message: 'Nueva ficha creada exitosamente.', idpersonaje: newId });
+  } catch (err) {
+    console.error('Error al insertar el personaje:', err.message);
+    res.status(500).json({ error: 'Error al insertar el personaje.' });
+  }
+});
+*/
+
+app.post('/insert-personaje', async (req, res) => {
+  const {
+    nombre, dominio, raza, naturaleza, edad, ken, ki, destino, pDestino,
+    fuerza, fortaleza, destreza, agilidad, sabiduria, presencia, principio,
+    sentidos, academisismo, alerta, atletismo, conBakemono, mentir, pilotear,
+    artesMarciales, medicina, conObjMagicos, sigilo, conEsferas, conLeyendas,
+    forja, conDemonio, conEspiritual, manejoBlaster, manejoSombras, tratoBakemono,
+    conHechiceria, medVital, medEspiritual, rayo, fuego, frio, veneno, corte,
+    energia, ventajas, apCombate, valCombate, apCombate2, valCombate2,
+    add1, valAdd1, add2, valAdd2, add3, valAdd3, add4, valAdd4,
+    imagen, inventario, dominios, kenActual, kiActual, positiva, negativa, vidaActual,
+    hechizos, consumision, iniciativa, historia, usuarioId,
+    tecEspecial, conviccion, cicatriz, notaSaga, resistencia, pjPnj
+  } = req.body;
+
+  try {
+    // 1. Insertar personaje sin imagenurl
+    const query = `
+      INSERT INTO personajes (
+        nombre, dominio, raza, naturaleza, edad, ken, ki, destino, "pDestino",
+        fuerza, fortaleza, destreza, agilidad, sabiduria, presencia, principio,
+        sentidos, academisismo, alerta, atletismo, "conBakemono", mentir, pilotear,
+        "artesMarciales", medicina, "conObjMagicos", sigilo, "conEsferas", "conLeyendas",
+        forja, "conDemonio", "conEspiritual", "manejoBlaster", "manejoSombras", "tratoBakemono",
+        "conHechiceria", "medVital", "medEspiritual", rayo, fuego, frio, veneno, corte,
+        energia, ventajas, "apCombate", "valCombate", "apCombate2", "valCombate2",
+        add1, "valAdd1", add2, "valAdd2", add3, "valAdd3", add4, "valAdd4",
+        inventario, dominios, "kenActual", "kiActual", positiva, negativa, "vidaActual",
+        hechizos, consumision, iniciativa, historia, "tecEspecial", conviccion, cicatriz,
+        notasaga, resistencia, "pjPnj", "usuarioId"
+      )
+      VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9,
+        $10, $11, $12, $13, $14, $15, $16,
+        $17, $18, $19, $20, $21, $22, $23,
+        $24, $25, $26, $27, $28, $29,
+        $30, $31, $32, $33, $34, $35,
+        $36, $37, $38, $39, $40, $41, $42, $43,
+        $44, $45, $46, $47, $48, $49,
+        $50, $51, $52, $53, $54, $55,
+        $56, $57, $58, $59, $60, $61,
+        $62, $63, $64, $65, $66, $67,
+        $68, $69, $70, $71, $72, $73,
+        $74, $75
+      )
+      RETURNING idpersonaje
+    `;
+
+    const values = [
+      nombre, dominio, raza, naturaleza, edad, ken, ki, destino, pDestino,
+      fuerza, fortaleza, destreza, agilidad, sabiduria, presencia, principio,
+      sentidos, academisismo, alerta, atletismo, conBakemono, mentir, pilotear,
+      artesMarciales, medicina, conObjMagicos, sigilo, conEsferas, conLeyendas,
+      forja, conDemonio, conEspiritual, manejoBlaster, manejoSombras, tratoBakemono,
+      conHechiceria, medVital, medEspiritual, rayo, fuego, frio, veneno, corte,
+      energia, ventajas, apCombate, valCombate, apCombate2, valCombate2,
+      add1, valAdd1, add2, valAdd2, add3, valAdd3, add4, valAdd4,
+      inventario, dominios, kenActual, kiActual, positiva, negativa, vidaActual,
+      hechizos, consumision, iniciativa, historia, tecEspecial, conviccion, cicatriz,
+      notaSaga, resistencia, pjPnj, usuarioId
+    ];
+
+    const result = await pool.query(query, values);
+    const newId = result.rows[0].idpersonaje;
+
+    let imageUrl = null;
+
+    if (imagen) {
+      const matches = imagen.match(/^data:image\/(\w+);base64,(.+)$/);
+      if (!matches) return res.status(400).json({ error: 'Imagen base64 inválida.' });
+
+      const ext = matches[1];
+      const data = matches[2];
+
+      // 2. Subir la imagen a Cloudinary
+      const uploadResult = await cloudinary.uploader.upload(`data:image/${ext};base64,${data}`, {
+        folder: 'personajes',
+        public_id: `personaje_${newId}`,
+        overwrite: true,
+      });
+
+      imageUrl = uploadResult.secure_url;
+
+      // 3. Actualizar la URL en la base de datos
+      await pool.query(
+        'UPDATE personajes SET imagenurl = $1 WHERE idpersonaje = $2',
+        [imageUrl, newId]
+      );
+    }
+
+    // 4. Responder con éxito y URL
+    res.status(201).json({
+      message: 'Personaje creado exitosamente.',
+      idpersonaje: newId,
+      imagenurl: imageUrl,
+    });
+
+  } catch (err) {
+    console.error('Error al insertar el personaje:', err);
+    res.status(500).json({ error: 'Error al insertar el personaje.' });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+//*********************************ahora estamso aca************************** */
 
 //UPdate personaje OK!
+/*
 app.put('/update-personaje/:id', async (req, res) => {
 
 //console.log("esto es lo que trae el req",req.body)
   const idpersonaje = req.params.id;
-/*
-  console.log("***********ID: ",idpersonaje)
 
-  console.log('REQ.BODY:', req.body);
-  if (!req.body) return res.status(400).json({ error: 'No se recibió body' });
-   if (!req.body) return res.status(400).send('No body');
-  */
+//  console.log("***********ID: ",idpersonaje)
+
+  //console.log('REQ.BODY:', req.body);
+  //if (!req.body) return res.status(400).json({ error: 'No se recibió body' });
+   //if (!req.body) return res.status(400).send('No body');
+  
   const { 
       nombre,
       dominio,
@@ -744,13 +1061,147 @@ app.put('/update-personaje/:id', async (req, res) => {
   }
   
 });
+*/
+
+/*
+const baseUrl = 'http://192.168.0.38:3000'; // Cambiar si usás otra IP o dominio
+
+async function migrarImagenes() {
+  try {
+    const res = await pool.query('SELECT idpersonaje, imagen FROM personajes WHERE imagen IS NOT NULL');
+
+    for (let row of res.rows) {
+      const { idpersonaje, imagen } = row;
+
+      const match = imagen.match(/^data:image\/(\w+);base64,(.+)$/);
+      if (!match) {
+        console.log(`Imagen inválida para personaje ${idpersonaje}`);
+        continue;
+      }
+
+      const ext = match[1];
+      const base64Data = match[2];
+
+      const buffer = Buffer.from(base64Data, 'base64');
+      const filename = `personaje_${idpersonaje}.${ext}`;
+      const filepath = path.join(__dirname, 'uploads', filename);
+
+      fs.writeFileSync(filepath, buffer);
+      const url = `${baseUrl}/uploads/${filename}`;
+
+      await pool.query(
+        'UPDATE personajes SET imagenurl = $1 WHERE idpersonaje = $2',
+        [url, idpersonaje]
+      );
+
+      console.log(`✅ Imagen migrada para personaje ${idpersonaje}`);
+    }
+
+    console.log('Migración completada.');
+    pool.end();
+  } catch (err) {
+    console.error('Error durante la migración:', err);
+  }
+}
+
+migrarImagenes();
+*/
 
 
 
+app.put('/update-personaje/:id', async (req, res) => {
+  const idpersonaje = req.params.id;
 
+  const {
+    nombre, dominio, raza, naturaleza, edad, ken, ki, destino, pDestino,
+    fuerza, fortaleza, destreza, agilidad, sabiduria, presencia, principio,
+    sentidos, academisismo, alerta, atletismo, conBakemono, mentir, pilotear,
+    artesMarciales, medicina, conObjMagicos, sigilo, conEsferas, conLeyendas,
+    forja, conDemonio, conEspiritual, manejoBlaster, manejoSombras, tratoBakemono,
+    conHechiceria, medVital, medEspiritual, rayo, fuego, frio, veneno, corte,
+    energia, ventajas, apCombate, valCombate, apCombate2, valCombate2,
+    add1, valAdd1, add2, valAdd2, add3, valAdd3, add4, valAdd4,
+    imagen, inventario, dominios, kenActual, kiActual, positiva, negativa,
+    vidaActual, hechizos, consumision, iniciativa, historia, usuarioId,
+    tecEspecial, conviccion, cicatriz, resistencia, pjPnj
+  } = req.body;
 
+  try {
+    let imagenurl = null;
 
+    // Si hay imagen base64, la subimos a Cloudinary
+    if (imagen && imagen.startsWith('data:image/')) {
+      const matches = imagen.match(/^data:image\/(\w+);base64,(.+)$/);
+      if (!matches) {
+        return res.status(400).json({ error: 'Imagen base64 inválida.' });
+      }
 
+      const ext = matches[1];
+      const data = matches[2];
+
+      const uploadResult = await cloudinary.uploader.upload(`data:image/${ext};base64,${data}`, {
+        folder: 'personajes',
+        public_id: `personaje_${idpersonaje}`,
+        overwrite: true,
+      });
+
+      imagenurl = uploadResult.secure_url;
+
+      // Actualizar imagenurl en la base
+      await pool.query(
+        'UPDATE personajes SET imagenurl = $1 WHERE idpersonaje = $2',
+        [imagenurl, idpersonaje]
+      );
+    }
+
+    // Actualizar los demás campos
+    const query = `
+      UPDATE personajes SET
+        nombre=$1, dominio=$2, raza=$3, naturaleza=$4, edad=$5,
+        ken=$6, ki=$7, destino=$8, "pDestino"=$9, fuerza=$10,
+        fortaleza=$11, destreza=$12, agilidad=$13, sabiduria=$14,
+        presencia=$15, principio=$16, sentidos=$17, academisismo=$18,
+        alerta=$19, atletismo=$20, "conBakemono"=$21, mentir=$22,
+        pilotear=$23, "artesMarciales"=$24, medicina=$25, "conObjMagicos"=$26,
+        sigilo=$27, "conEsferas"=$28, "conLeyendas"=$29, forja=$30,
+        "conDemonio"=$31, "conEspiritual"=$32, "manejoBlaster"=$33,
+        "manejoSombras"=$34, "tratoBakemono"=$35, "conHechiceria"=$36,
+        "medVital"=$37, "medEspiritual"=$38, rayo=$39, fuego=$40,
+        frio=$41, veneno=$42, corte=$43, energia=$44, ventajas=$45,
+        "apCombate"=$46, "valCombate"=$47, "apCombate2"=$48,
+        "valCombate2"=$49, add1=$50, "valAdd1"=$51, add2=$52,
+        "valAdd2"=$53, add3=$54, "valAdd3"=$55, add4=$56, "valAdd4"=$57,
+        inventario=$58, dominios=$59, "kenActual"=$60,
+        "kiActual"=$61, positiva=$62, negativa=$63, "vidaActual"=$64,
+        hechizos=$65, consumision=$66, iniciativa=$67, historia=$68,
+        "usuarioId"=$69, "tecEspecial"=$70, conviccion=$71, cicatriz=$72,
+        resistencia=$73, "pjPnj"=$74
+      WHERE idpersonaje=$75
+    `;
+
+    const values = [
+      nombre, dominio, raza, naturaleza, edad, ken, ki, destino, pDestino,
+      fuerza, fortaleza, destreza, agilidad, sabiduria, presencia, principio,
+      sentidos, academisismo, alerta, atletismo, conBakemono, mentir, pilotear,
+      artesMarciales, medicina, conObjMagicos, sigilo, conEsferas, conLeyendas,
+      forja, conDemonio, conEspiritual, manejoBlaster, manejoSombras, tratoBakemono,
+      conHechiceria, medVital, medEspiritual, rayo, fuego, frio, veneno, corte,
+      energia, ventajas, apCombate, valCombate, apCombate2, valCombate2,
+      add1, valAdd1, add2, valAdd2, add3, valAdd3, add4, valAdd4,
+      inventario, dominios, kenActual, kiActual, positiva, negativa,
+      vidaActual, hechizos, consumision, iniciativa, historia, usuarioId,
+      tecEspecial, conviccion, cicatriz, resistencia, pjPnj, idpersonaje
+    ];
+
+    await pool.query(query, values);
+
+    res.status(201).json({ message: 'Personaje modificado exitosamente.', idpersonaje, imagenurl });
+
+  } catch (err) {
+    console.error('Error al modificar el personaje:', err.message);
+    res.status(500).json({ error: 'Error al modificar el personaje.' });
+  }
+});
 
 
 

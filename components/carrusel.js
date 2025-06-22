@@ -5,11 +5,6 @@ import { useNavigation } from '@react-navigation/native';
 export const Carrusel = ({ personajes }) => {
   const imagenBase = require('../assets/imagenBase.jpeg');
   const navigation = useNavigation();
-/*
-  const handlePress = (pj) => {
-    navigation.navigate('FichaPersonaje', { pj });
-  };
-*/
 
   const handlePress = (pj) => {
     navigation.navigate('PantallaDeslizable', { pj });
@@ -29,7 +24,14 @@ export const Carrusel = ({ personajes }) => {
             style={styles.card}
             activeOpacity={0.9}
           >
-            <ImageWrapper uri={pj.imagen} fallback={imagenBase} />
+            <ImageWrapper 
+              uri={
+                pj.imagen && pj.imagen.startsWith && pj.imagen.startsWith('data:image')
+                  ? pj.imagen
+                  : pj.imagenurl
+              } 
+              fallback={imagenBase} 
+            />
             <Text
               style={styles.text}
               numberOfLines={1}
@@ -47,12 +49,10 @@ export const Carrusel = ({ personajes }) => {
 };
 
 const ImageWrapper = ({ uri, fallback }) => {
-  //const isValidUri = uri && typeof uri === 'string' && uri.trim() !== '';
-  const isValidUri = uri && typeof uri === 'string' && uri.trim() !== '' && !uri.startsWith('../assets');
-  const [source, setSource] = React.useState(isValidUri ? { uri } : fallback);
+  const [source, setSource] = React.useState(fallback);
 
   React.useEffect(() => {
-    if (isValidUri) {
+    if (uri && typeof uri === 'string' && uri.trim() !== '') {
       setSource({ uri });
     } else {
       setSource(fallback);
@@ -107,22 +107,8 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 10,
   },
-  item: {
-    alignItems: 'center',
-    marginBottom: 20,
-    marginRight: 20,
-  },
-  scroll: {
-    paddingVertical: 10,
-  },
   card: {
     marginHorizontal: 8,
     alignItems: 'center',
   },
-  nombre: {
-    color: '#fff',
-    marginTop: 4,
-  },
 });
-
-

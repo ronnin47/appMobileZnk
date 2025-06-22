@@ -108,6 +108,7 @@ const crearFichaPersonaje = async () => {
     consumision: 0,
     iniciativa: 0,
     historia: "",
+    tecEspecial:[],
     conviccion: "",
     cicatriz: 0,
     notaSaga: [],
@@ -124,13 +125,18 @@ const crearFichaPersonaje = async () => {
     });
     const { idpersonaje } = response.data;
 
+
+    console.log("+++++este es el id que RECIBE: ",idpersonaje)
+
     // Puedes guardar el personaje en el estado o redirigir al formulario de edición
      // Actualiza la lista con el nuevo personaje, añadiendo el id recibido
-    savePersonajes(prevPersonajes => [
+   /* savePersonajes(prevPersonajes => [
       ...prevPersonajes,
       { ...pjNew, idpersonaje }
     ]);
-
+*/
+// ... después de recibir idpersonaje
+savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
     
 
   } catch (error) {

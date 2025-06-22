@@ -7,7 +7,7 @@ import { KeyboardAvoidingView, Platform } from 'react-native';
 import axios from 'axios';
 import { showMessage } from 'react-native-flash-message';
 import { List } from 'react-native-paper';
-
+import * as FileSystem from 'expo-file-system';
 import { Ventajas } from './ventajas';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -43,32 +43,6 @@ export const FichaPersonaje = ({ pj, ki, setKi, fortaleza, setFortaleza, ken,set
     );
   }
 
-  const getImageSource = () => {
-  if (imagen && typeof imagen === 'string') {
-    return { uri: imagen };
-  } else {
-    return imagenBase;
-  }
-};
-
-  
-  const seleccionarImagen = async () => {
-  const resultado = await ImagePicker.launchImageLibraryAsync({
-    //mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    //esta opcion de picker da advertencia de deprecada
-    mediaTypes: ImagePicker.Images,
-    allowsEditing: true,
-    quality: 1,
-   
-  });
-
-  if (!resultado.canceled) {
-     const uri = resultado.assets[0].uri;
-    setImagen(uri);
-
-    console.log("se guardo la imagen")
-  }
-  };
 
 
 
@@ -159,6 +133,12 @@ export const FichaPersonaje = ({ pj, ki, setKi, fortaleza, setFortaleza, ken,set
   const [cicatriz, setCicatriz] = useState(p.cicatriz != null ? String(p.cicatriz) : '');
   const [resistencia, setResistencia] = useState(p.resistencia != null ? String(p.resistencia) : '');
   const [pjPnj,setPjPnj]=useState(p.pjPnj);
+
+
+
+  //uno nuevo que va ser la url
+  
+const [imagenUrl, setImagenUrl] = useState(p.imagenurl || '');
 
 
 
@@ -258,7 +238,23 @@ const guardarCambiosBBDD = async () => {
       }
     });
 
+
     console.log('Cambios guardados exitosamente:', response.data);
+    console.log("vamos a ver que devuelve en imagenurl: ",response.data.imagenurl)
+    console.log("vamos a ver que devuelve en imagenurl: ",response.data.idpersonaje)
+    
+    if (response.data.imagenurl) {
+      // Actualizás la imagen en el estado global personajes
+      const index = personajes.findIndex(per => per.idpersonaje === p.idpersonaje);
+      if (index !== -1) {
+        const nuevosPersonajes = [...personajes];
+        nuevosPersonajes[index] = {
+          ...nuevosPersonajes[index],
+          imagenurl: response.data.imagenurl,  // actualizás la URL de la imagen
+        };
+        savePersonajes(nuevosPersonajes);
+      }
+    }
     setTimeout(() => {
       showMessage({
         message: 'Cambios guardados',
@@ -450,8 +446,40 @@ useEffect(() => {
   cicatriz,
   resistencia,
   pjPnj,
+  imagenUrl,
 
 ]);
+
+
+
+const getImageSource = () => {
+  if (imagen && imagen.startsWith('data:image')) {
+    return { uri: imagen };
+  } else if (imagenUrl && typeof imagenUrl === 'string') {
+    return { uri: imagenUrl };
+  } else {
+    return imagenBase;
+  }
+};
+  
+const seleccionarImagen = async () => {
+  const resultado = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: true,
+    quality: 1,
+    base64: true, // ✅ ESTA LÍNEA es clave
+  });
+
+  if (!resultado.canceled) {
+    const { uri, base64 } = resultado.assets[0];
+    const extension = uri.split('.').pop().split('?')[0] || 'jpg';
+    const imagenEnBase64 = `data:image/${extension};base64,${base64}`;
+
+    setImagen(imagenEnBase64); // ✅ imagen está lista para enviar
+    console.log("Imagen base64 lista para guardar.");
+  }
+};
+
 
 const colorPlaceHolder="#888" 
   return (
