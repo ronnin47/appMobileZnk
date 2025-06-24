@@ -17,33 +17,34 @@ export const Carrusel = ({ personajes }) => {
       showsHorizontalScrollIndicator={false}
     >
       <View style={styles.row}>
-        {personajes.map((pj, index) => (
-          <TouchableOpacity
-            key={pj.idpersonaje || index}
-            onPress={() => handlePress(pj)}
-            style={styles.card}
-            activeOpacity={0.9}
-          >
-            <ImageWrapper 
-              uri={
-                pj.imagen && pj.imagen.startsWith && pj.imagen.startsWith('data:image')
-                  ? pj.imagen
-                  : pj.imagenurl
-              } 
-              fallback={imagenBase} 
-            />
-            <Text
-              style={styles.text}
-              numberOfLines={1}
-              adjustsFontSizeToFit={true}
-              minimumFontScale={0.5}
-              ellipsizeMode="tail"
-            >
-              {pj.nombre}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+  {personajes.slice().reverse().map((pj, index) => (
+    <TouchableOpacity
+      key={pj.idpersonaje || index}
+      onPress={() => handlePress(pj)}
+      style={styles.card}
+      activeOpacity={0.9}
+    >
+      <ImageWrapper 
+        uri={
+          pj.imagen && pj.imagen.startsWith && pj.imagen.startsWith('data:image')
+            ? pj.imagen
+            : pj.imagenurl
+        } 
+        fallback={imagenBase} 
+      />
+      <Text
+        style={styles.text}
+        numberOfLines={1}
+        adjustsFontSizeToFit={true}
+        minimumFontScale={0.5}
+        ellipsizeMode="tail"
+      >
+        {pj.nombre}
+      </Text>
+    </TouchableOpacity>
+  ))}
+</View>
+      
     </ScrollView>
   );
 };

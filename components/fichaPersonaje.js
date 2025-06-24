@@ -6,7 +6,7 @@ import { KeyboardAvoidingView, Platform } from 'react-native';
 
 import axios from 'axios';
 import { showMessage } from 'react-native-flash-message';
-import { List } from 'react-native-paper';
+import { List, Button } from 'react-native-paper';
 import * as FileSystem from 'expo-file-system';
 import { Ventajas } from './ventajas';
 
@@ -17,7 +17,8 @@ import { Hechizos } from './hechizos';
 import { Historia } from './historia';
 import { TecnicaEspecial } from './tecEpecial';
 
-export const FichaPersonaje = ({ pj, ki, setKi, fortaleza, setFortaleza, ken,setKen }) => {
+
+export const FichaPersonaje = ({ pj, ki, setKi, fortaleza, setFortaleza, ken,setKen,eliminarPersonaje }) => {
   
   const { personajes, savePersonajes } = useContext(AuthContext);
  
@@ -251,6 +252,7 @@ const guardarCambiosBBDD = async () => {
         nuevosPersonajes[index] = {
           ...nuevosPersonajes[index],
           imagenurl: response.data.imagenurl,  // actualizás la URL de la imagen
+          
         };
         savePersonajes(nuevosPersonajes);
       }
@@ -482,6 +484,13 @@ const seleccionarImagen = async () => {
 
 
 const colorPlaceHolder="#888" 
+
+
+
+
+
+
+
   return (
     <KeyboardAvoidingView 
       style={{ flex: 1 }} 
@@ -905,6 +914,23 @@ const colorPlaceHolder="#888"
           style={{ backgroundColor: '#1c1c1c', borderBottomWidth: 2, borderBottomColor: '#e0b878', paddingVertical: 4 }}
         >
           <TecnicaEspecial tecEspecial={tecEspecial} setTecEspecial={setTecEspecial}></TecnicaEspecial>
+        </List.Accordion>
+
+        <List.Accordion
+          title="Eliminar Personaje"
+          expanded={expanded === 'eliminarPj'}
+          onPress={() => handlePress('eliminarPj')}
+          titleStyle={{ fontSize: 18, fontWeight: 'bold', color: '#FFA500' }}
+          style={{ backgroundColor: '#1c1c1c', borderBottomWidth: 2, borderBottomColor: '#e0b878', paddingVertical: 4 }}
+        >
+          <Button
+                mode="contained"
+                onPress={() => eliminarPersonaje(pj.idpersonaje)}
+                style={{ backgroundColor: '#FF4500', margin: 10 }}
+                labelStyle={{ color: '#fff' }}
+              >
+                Confirmar eliminación de {nombre}
+              </Button>
         </List.Accordion>
 
        

@@ -12,7 +12,7 @@ const { personajes, savePersonajes } = useContext(AuthContext);
   //console.log("El persoanje que extraemos es: ",p.nombre)
    // Normalizar valores que podrían ser NaN o undefined
 
-   console.log("postiva ",typeof positiva)
+   //console.log("postiva ",typeof positiva)
 
   
  

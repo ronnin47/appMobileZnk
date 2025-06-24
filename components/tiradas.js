@@ -1,16 +1,10 @@
 import React, { useContext, useState, useRef, useEffect } from 'react';
-
 import { AuthContext } from './AuthContext';
 import { View,Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { ChatTiradas } from './chatTiradas';
-
 import { BarraVida } from './barraVida';
 import { BarraKi } from './barraKi';
 import { BarraKen } from './barraKen';
-
-import { io } from 'socket.io-client';
-//const socket = io('http://192.168.0.38:3000');
-
 import socket from './socket';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -28,8 +22,6 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen }) => {
   const { personajes, historialChat, setHistorialChat,savePersonajes } = useContext(AuthContext);
 
   const p = personajes.find((p) => p.idpersonaje === pj.idpersonaje);
- console.log("de tiradas KEN: ",ken)
-
 
   const [valTirada, setValTirada] = useState("");
   const [sumaTirada, setSumaTirada] = useState("");
@@ -49,7 +41,7 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen }) => {
   const [dadosD20, setDadosD20] = useState(0);
   const [dadosD10Bono, setDadosD10Bono] = useState(0);
 
-  //console.log("USUARIO ID: ",p.usuarioId)
+
  const [abierto, setAbierto] = useState(false);
   useEffect(() => {
 
@@ -135,7 +127,6 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen }) => {
       `${d12.length > 0 ? `Bono D12: ${d12.join(", ")}` : ""}   
                                    TOTAL: ${total}`;
 
-   // setHistorialChat(prev => [...prev, mensaje]);
   
     const mensaje={
       idpersonaje:p.idpersonaje,

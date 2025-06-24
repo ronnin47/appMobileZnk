@@ -1,14 +1,24 @@
 import React, { useContext } from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
 import { AuthContext } from './AuthContext';
+import { useNavigation } from '@react-navigation/native';
 
-export default function Configuracion(){
-const { logout } = useContext(AuthContext);
+export default function Configuracion() {
+  const { logout } = useContext(AuthContext);
+  const navigation = useNavigation();
+
+  const handleLogout = async () => {
+    await logout();
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Login' }], // cambia 'Login' por el nombre correcto de tu pantalla de inicio
+    });
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Pantalla de Configuración</Text>
-      <Button title="Cerrar sesión" onPress={logout} />
+      <Button title="Cerrar sesión" onPress={handleLogout} />
     </View>
   );
 }
@@ -18,10 +28,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   text: {
     color: '#fff',
-    fontSize: 20
-  }
+    fontSize: 20,
+  },
 });

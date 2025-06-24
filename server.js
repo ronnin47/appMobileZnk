@@ -370,6 +370,7 @@ app.put('/update-personaje/:id', async (req, res) => {
 
   try {
     let imagenurl = null;
+    let imagencloudid = null;
 
     // Si hay imagen base64, la subimos a Cloudinary
     if (imagen && imagen.startsWith('data:image/')) {
@@ -388,11 +389,12 @@ app.put('/update-personaje/:id', async (req, res) => {
       });
 
       imagenurl = uploadResult.secure_url;
+      imagencloudid = uploadResult.public_id;
 
-      // Actualizar imagenurl en la base
+      // Actualizar imagenurl e imagencloudid en la base
       await pool.query(
-        'UPDATE personajes SET imagenurl = $1 WHERE idpersonaje = $2',
-        [imagenurl, idpersonaje]
+        'UPDATE personajes SET imagenurl = $1, imagencloudid = $2 WHERE idpersonaje = $3',
+        [imagenurl, imagencloudid, idpersonaje]
       );
     }
 
@@ -437,7 +439,7 @@ app.put('/update-personaje/:id', async (req, res) => {
 
     await pool.query(query, values);
 
-    res.status(201).json({ message: 'Personaje modificado exitosamente.', idpersonaje, imagenurl });
+    res.status(201).json({ message: 'Personaje modificado exitosamente.', idpersonaje, imagenurl, imagencloudid });
 
   } catch (err) {
     console.error('Error al modificar el personaje:', err.message);
@@ -449,14 +451,67 @@ app.put('/update-personaje/:id', async (req, res) => {
 
 
 
-//FUNCION PARA MIGRAR PERSONAJES A CLOUDNARY OK!!
+//aca vamos a probar el delete
+app.delete('/deletePersonaje/:id', async (req, res) => {
+  const idpersonaje = parseInt(req.params.id, 10);
+
+  try {
+    // 1) Obtener el imagencloudid (nombre público en Cloudinary)
+    const { rows } = await pool.query(
+      'SELECT imagencloudid FROM personajes WHERE idpersonaje = $1',
+      [idpersonaje]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'Personaje no encontrado.' });
+    }
+
+    const imagencloudid = rows[0].imagencloudid;
+
+    // 2) Eliminar el personaje de la base de datos
+    const result = await pool.query(
+      'DELETE FROM personajes WHERE idpersonaje = $1 RETURNING *',
+      [idpersonaje]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: 'No se pudo eliminar el personaje.' });
+    }
+
+    // 3) Si había imagencloudid, eliminar imagen de Cloudinary
+    if (imagencloudid) {
+      try {
+        await cloudinary.uploader.destroy(imagencloudid);
+        console.log(`🗑️ Imagen ${imagencloudid} eliminada de Cloudinary`);
+      } catch (cloudErr) {
+        console.error('❌ Error al eliminar imagen en Cloudinary:', cloudErr.message);
+        // No cancelamos la respuesta por error en imagen, pero lo informamos
+      }
+    }
+
+    res.status(200).json({
+      message: 'Personaje y su imagen eliminados correctamente.',
+      deletedPersonaje: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error('🚨 Error al eliminar personaje:', error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
+  }
+});
+
+
+
+
+//Script PARA MIGRAR PERSONAJES A CLOUDNARY y traerme la url y cludid a la base de datos OK!!
 /*
 async function migrarImagenesPersonajes() {
   try {
     const resultado = await pool.query(`
-      SELECT idpersonaje, imagen
+      SELECT idpersonaje, imagen, imagenurl
       FROM personajes
-      WHERE imagenurl IS NULL OR imagenurl NOT LIKE '%res.cloudinary.com%'
+      WHERE imagen IS NOT NULL
+      AND (imagenurl IS NULL OR imagenurl NOT LIKE '%res.cloudinary.com%')
     `);
 
     const personajes = resultado.rows;
@@ -469,27 +524,37 @@ async function migrarImagenesPersonajes() {
         continue;
       }
 
-      // Verificar si es una ruta local de dispositivo móvil
+      // Verificar si es una ruta local de dispositivo móvil (que no se puede subir desde backend)
       if (imagen.startsWith('file://')) {
         console.log(`⛔ Imagen de personaje ${idpersonaje} es una ruta local (file://...) y no es accesible desde el backend. Saltando...`);
         continue;
       }
 
       try {
-        // Subir imagen a Cloudinary como base64
+        // Subir imagen a Cloudinary (se asume que 'imagen' es base64 sin prefijo data:image/...)
+        // Si tiene prefijo, hay que limpiarlo antes, aquí asumo que es base64 limpio
+        let base64data = imagen;
+        // Si tiene prefijo "data:image/xxx;base64,", removerlo
+        const base64PrefixMatch = imagen.match(/^data:image\/\w+;base64,/);
+        if (base64PrefixMatch) {
+          base64data = imagen.replace(/^data:image\/\w+;base64,/, '');
+        }
+
         const res = await cloudinary.uploader.upload(
-          `data:image/jpeg;base64,${imagen}`,
+          `data:image/jpeg;base64,${base64data}`,
           {
             folder: 'personajes',
             public_id: `personaje_${idpersonaje}`,
+            overwrite: true,
           }
         );
 
         const url = res.secure_url;
+        const publicId = res.public_id;
 
         await pool.query(
-          `UPDATE personajes SET imagenurl = $1 WHERE idpersonaje = $2`,
-          [url, idpersonaje]
+          `UPDATE personajes SET imagenurl = $1, imagencloudid = $2 WHERE idpersonaje = $3`,
+          [url, publicId, idpersonaje]
         );
 
         console.log(`✅ Imagen del personaje ${idpersonaje} migrada con éxito.`);
@@ -504,8 +569,70 @@ async function migrarImagenesPersonajes() {
   }
 }
 
-migrarImagenesPersonajes()
+migrarImagenesPersonajes();
 */
+
+
+/*
+
+// esto es para llenar los cloudnary id 
+async function rellenarImagenCloudId() {
+  try {
+    // 1. Traer personajes sin imagencloudid pero con imagenurl
+    const { rows: personajes } = await pool.query(`
+      SELECT idpersonaje, imagenurl
+      FROM personajes
+      WHERE imagenurl IS NOT NULL
+      AND (imagencloudid IS NULL OR imagencloudid = '')
+    `);
+
+    for (const pj of personajes) {
+      const { idpersonaje, imagenurl } = pj;
+
+      // 2. Extraer public_id de la URL
+      const publicId = getPublicIdFromUrl(imagenurl);
+
+      if (publicId) {
+        // 3. Actualizar en la base
+        await pool.query(
+          'UPDATE personajes SET imagencloudid = $1 WHERE idpersonaje = $2',
+          [publicId, idpersonaje]
+        );
+        console.log(`Actualizado personaje ${idpersonaje} con imagencloudid: ${publicId}`);
+      } else {
+        console.log(`No se pudo extraer public_id para personaje ${idpersonaje}`);
+      }
+    }
+
+    console.log('Proceso terminado.');
+  } catch (error) {
+    console.error('Error en rellenarImagenCloudId:', error);
+  }
+}
+
+// Función para extraer public_id de URL de Cloudinary
+function getPublicIdFromUrl(url) {
+  try {
+    const parts = url.split('/');
+    const uploadIndex = parts.findIndex(part => part === 'upload');
+    if (uploadIndex === -1) return null;
+
+    // Obtenemos la parte después de 'upload' y la versión
+    const publicIdWithExt = parts.slice(uploadIndex + 2).join('/');
+
+    // Quitamos la extensión (ejemplo .jpg)
+    const publicId = publicIdWithExt.replace(/\.[^/.]+$/, "");
+
+    return publicId;
+  } catch {
+    return null;
+  }
+}
+
+
+rellenarImagenCloudId()
+*/
+
 server.listen(PORT, () => {
   console.log(`🟢 Servidor Socket.IO corriendo en http://localhost:${PORT}`);
 });

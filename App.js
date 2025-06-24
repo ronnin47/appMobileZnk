@@ -20,7 +20,7 @@ import { PantallaDeslizable } from './components/pantallaDeslizable';
 
 import { AuthProvider } from './components/AuthProvider';
 
-import { ListaPersonajes } from './components/listaPersonajes';
+
 
 
 import FlashMessage from 'react-native-flash-message';

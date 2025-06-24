@@ -17,22 +17,6 @@ export default function Principal() {
   
   const { personajes, savePersonajes } = useContext(AuthContext);
 
-  /*
-  
-//const imagenes = personajes.map(p => p.imagen);
-const pjs = personajes.map(p => {
-  const img = p.imagen || '';
-  return {
-    idpersonaje: p.idpersonaje,
-    imagen: img.startsWith('data:image') ? img : `data:image/jpeg;base64,${img}`,
-    nombre: p.nombre || 'Sin Nombre',
-  };
-});
-
-*/
-
-
-
 //crear la nueva ficha
 const crearFichaPersonaje = async () => {
 
@@ -155,17 +139,22 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
       >
       
       <View style={styles.contenedorPrincipal}>
-        <Text style={styles.tituloSeccion}>Mis Personajes</Text>
+        <View style={styles.tituloYBotonContainer}>
+          <Text style={styles.tituloSeccion}>Mis Personajes</Text>
 
-        <TouchableOpacity
-          style={styles.botonCrear}
-          onPress={crearFichaPersonaje} // Asegúrate de tener esta función disponible aquí o pasarla como prop
-        >
-          <Text style={styles.textoBoton}>+ Crear Ficha</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.botonCrear}
+            onPress={crearFichaPersonaje}
+          >
+            <Text style={styles.textoBoton}>+ Crear Ficha</Text>
+          </TouchableOpacity>
+        </View>
+
+       
 
         <Carrusel personajes={personajes} />
       </View>
+
     </ScrollView>
   );
 }
@@ -173,54 +162,58 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000', // fondo negro
-    paddingLeft:6,
-    paddingTop:20
+    backgroundColor: '#000',
+    paddingLeft: 6,
+    paddingTop: 20,
   },
   screen: {
     width: windowWidth,
     paddingTop: 30,
     paddingHorizontal: 10,
     paddingBottom: 40,
-    backgroundColor: '#000', // también negro para cada pantalla
+    backgroundColor: '#000',
   },
   textoGrande: {
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: '#fff', // texto blanco
+    color: '#fff',
   },
   contenedorPrincipal: {
-    fontSize: 16,
-    fontWeight: 'bold',
     marginBottom: 5,
-    color: '#fff', // texto blanco
-   
-    padding: 5, // para darle algo de espacio dentro del contenedor
-  
+    padding: 5,
   },
   tituloSeccion: {
-  color: "#fff",
-  textAlign: "center",
-  margin: 2,
-  fontFamily: "sans-serif", // Compatible en Android, Roboto
-  fontSize: 18,
-  fontWeight: "bold",       // Para hacerlo más destacado
-   marginBottom: 12,
-},
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginRight: 10,
+    color: '#fff',
+  },
 botonCrear: {
-  backgroundColor: '#1e90ff',
+  backgroundColor: '#FFC107', // golden orange
   paddingVertical: 8,
-  paddingHorizontal: 20,
-  borderRadius: 10,
-  alignSelf: 'center',
-  marginBottom: 10,
+  paddingHorizontal: 16,
+  borderRadius: 12,
+  shadowColor: '#FFD54F', // un poco más claro
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.5,
+  shadowRadius: 6,
+  elevation: 6,
+  borderWidth: 1,
+  borderColor: '#FFF8E1', // borde dorado claro
 },
-
 textoBoton: {
-  color: '#fff',
-  fontSize: 16,
-  fontWeight: 'bold',
+  color: '#333', // gris oscuro para mejor contraste
+  fontSize: 15,
+  fontWeight: '600',
+  textShadowColor: 'rgba(255, 255, 255, 0.3)',
+  textShadowOffset: { width: 0, height: 1 },
+  textShadowRadius: 1,
 },
+  tituloYBotonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
 });
-
