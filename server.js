@@ -217,7 +217,7 @@ app.get('/consumirPersonajesUsuario', async (req, res) => {
         add1, "valAdd1", add2, "valAdd2", add3, "valAdd3", add4, "valAdd4",
         inventario, dominios, "kenActual", "kiActual", positiva, negativa, "vidaActual",
         hechizos, consumision, iniciativa, historia, "tecEspecial", conviccion, cicatriz,
-        notasaga, resistencia, "pjPnj", imagenurl, "usuarioId"
+        notasaga, resistencia, "pjPnj", imagenurl, imagencloudid, "usuarioId"
       FROM personajes
       WHERE "usuarioId" = $1
       ORDER BY "idpersonaje" ASC
@@ -500,6 +500,49 @@ app.delete('/deletePersonaje/:id', async (req, res) => {
   }
 });
 
+
+
+
+
+
+//consumir los todos los personajes
+app.get('/consumirPersonajesTodos', async (req, res) => {
+  try {
+    const userQuery = `
+      SELECT 
+        idpersonaje, nombre, dominio, raza, naturaleza, edad, ken, ki, destino, "pDestino",
+        fuerza, fortaleza, destreza, agilidad, sabiduria, presencia, principio,
+        sentidos, academisismo, alerta, atletismo, "conBakemono", mentir, pilotear,
+        "artesMarciales", medicina, "conObjMagicos", sigilo, "conEsferas", "conLeyendas",
+        forja, "conDemonio", "conEspiritual", "manejoBlaster", "manejoSombras", "tratoBakemono",
+        "conHechiceria", "medVital", "medEspiritual", rayo, fuego, frio, veneno, corte,
+        energia, ventajas, "apCombate", "valCombate", "apCombate2", "valCombate2",
+        add1, "valAdd1", add2, "valAdd2", add3, "valAdd3", add4, "valAdd4",
+        inventario, dominios, "kenActual", "kiActual", positiva, negativa, "vidaActual",
+        hechizos, consumision, iniciativa, historia, "tecEspecial", conviccion, cicatriz,
+        notasaga, resistencia, "pjPnj", imagenurl,imagencloudid, "usuarioId"
+      FROM personajes
+    `;
+
+
+
+    const userResult = await pool.query(userQuery);
+
+    if (userResult.rows.length === 0) {
+  return res.status(404).json({ message: 'No se encontraron personajes en la base de datos' });
+}
+
+    const coleccionPersonajes = userResult.rows;
+    res.json({
+      message: 'Se consumiron todos los personajes',
+      coleccionPersonajes: coleccionPersonajes,   
+    });
+
+  } catch (error) {
+    console.error('Error al obtener coleccion todos los persoanjes de la base de datos:', error);
+    res.status(500).json({ message: 'Error en el servidor' });
+  }
+});
 
 
 

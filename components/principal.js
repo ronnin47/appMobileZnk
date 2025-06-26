@@ -1,5 +1,5 @@
 
-import { StyleSheet, Text, View, Dimensions, ScrollView, } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, ScrollView,Image } from 'react-native';
 import React, { useContext } from 'react';
 import { useState } from 'react';
 import 'react-native-gesture-handler';
@@ -8,6 +8,8 @@ import { AuthContext } from './AuthContext';
 import { TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { useNavigation } from '@react-navigation/native'; // para navegar
+
 
 const windowWidth = Dimensions.get('window').width;
 
@@ -16,7 +18,8 @@ const windowWidth = Dimensions.get('window').width;
 export default function Principal() {
   
   const { personajes, savePersonajes } = useContext(AuthContext);
-
+  
+  const navigation = useNavigation();
 //crear la nueva ficha
 const crearFichaPersonaje = async () => {
 
@@ -130,6 +133,17 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
 };
 
 
+
+
+
+
+
+
+  const universoCelesteItems = [
+    { id: 'ranking', nombre: 'Ranking', imagen: require('../assets/imagenBase.jpeg') },
+    { id: 'otro1', nombre: 'Mundo 1', imagen: require('../assets/imagenBase.jpeg') },
+    { id: 'otro2', nombre: 'Mundo 2', imagen: require('../assets/imagenBase.jpeg') },
+  ];
   return (
     <ScrollView 
       style={styles.container}
@@ -155,9 +169,65 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
         <Carrusel personajes={personajes} />
       </View>
 
+     <View style={[styles.contenedorPrincipal, { marginTop: 20 }]}>
+  <Text style={styles.tituloSeccion}>Universo Celeste</Text>
+  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+    <View style={styles.row}>
+      {universoCelesteItems.map((item) => (
+        <TouchableOpacity
+          key={item.id}
+          style={styles.card}
+          activeOpacity={0.9}
+          onPress={() => {
+            if (item.id === 'ranking') {
+              navigation.navigate('Ranking');
+            } else {
+              alert(`Seleccionaste ${item.nombre}`);
+            }
+          }}
+        >
+          <ImageWrapper uri={item.imagen} fallback={require('../assets/imagenBase.jpeg')} />
+          <Text
+            style={styles.text}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.5}
+            ellipsizeMode="tail"
+          >
+            {item.nombre}
+          </Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  </ScrollView>
+</View>
     </ScrollView>
   );
 }
+
+
+
+const ImageWrapper = ({ uri, fallback }) => {
+  const [source, setSource] = React.useState(fallback);
+
+  React.useEffect(() => {
+    if (uri) {
+      setSource(uri);
+    } else {
+      setSource(fallback);
+    }
+  }, [uri]);
+
+  return (
+    <Image
+      source={source}
+      onError={() => setSource(fallback)}
+      style={styles.imagen}
+    />
+  );
+};
+
+
 
 const styles = StyleSheet.create({
   container: {
@@ -216,4 +286,32 @@ textoBoton: {
     justifyContent: 'space-between',
     marginBottom: 10,
   },
+  row: {
+  flexDirection: 'row',
+  justifyContent: 'flex-start',
+  alignItems: 'center',
+  gap: 10,
+  paddingHorizontal: 10,
+},
+
+card: {
+  marginHorizontal: 8,
+  alignItems: 'center',
+},
+
+imagen: {
+  width: 120,
+  height: 160,
+  borderRadius: 8,
+  marginBottom: 15,
+  backgroundColor: '#000',
+  // otros estilos de sombra si quieres
+},
+
+text: {
+  fontSize: 16,
+  textAlign: 'center',
+  color: '#fff',
+  width: 120,
+},
 });

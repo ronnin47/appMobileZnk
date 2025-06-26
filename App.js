@@ -19,7 +19,7 @@ import { FichaPersonaje } from './components/fichaPersonaje';
 import { PantallaDeslizable } from './components/pantallaDeslizable';
 
 import { AuthProvider } from './components/AuthProvider';
-
+import { Ranking } from './components/ranking';
 
 
 
@@ -111,6 +111,7 @@ const MainStack = () => {
           headerBackTitleVisible: false, // Oculta texto al lado de la flecha en iOS
         }} 
        />
+         <Stack.Screen name="Ranking" component={Ranking} />
 
       
     </Stack.Navigator>

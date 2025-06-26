@@ -13,6 +13,8 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [personajes, setPersonajes] = useState([]);
 
+  const [coleccionPersonajes, setColeccionPersonajes] = useState([]);
+
   // NUEVO: Historial de tiradas global
   const [historialChat, setHistorialChat] = useState([]);
 
@@ -60,8 +62,8 @@ export const AuthProvider = ({ children }) => {
     };
 
     loadData();
-  }, []);
-
+  }, [userToken]);
+/*
   // Importante: este useEffect escucha cambios en userToken para recargar personajes
   useEffect(() => {
     const fetchPersonajes = async () => {
@@ -87,6 +89,48 @@ export const AuthProvider = ({ children }) => {
 
     fetchPersonajes();
   }, [userToken]);
+
+
+*/
+
+
+  //CONSUMIR TODOS LOS PERSONAJES
+useEffect(() => {
+  const loadPersonajes = async () => {
+
+     /*if (!userToken) {
+        setColeccionPersonajes([]);
+        return;
+      }
+    */
+       if (!userToken) return; 
+    try {
+           
+        const response = await axios.get(`http://192.168.0.38:3000/consumirPersonajesTodos`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const { coleccionPersonajes } = response.data;
+
+        if (!Array.isArray(coleccionPersonajes)) {
+          console.error('El formato de datos no es un array/ aca esta el error.');
+          return;
+        }
+
+        setColeccionPersonajes(coleccionPersonajes);
+      
+    } catch (error) {
+      console.error("Cliente: Fallo al consumir personajes narrador TODOS", error.message);
+    }
+       
+  };
+
+  loadPersonajes();
+  
+}, [userToken]);
+
 
   const savePersonajes = async (lista) => {
     try {
@@ -119,6 +163,7 @@ export const AuthProvider = ({ children }) => {
         savePersonajes,
         historialChat,
         setHistorialChat,
+        coleccionPersonajes,
       }}
     >
       {children}
