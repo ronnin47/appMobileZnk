@@ -602,6 +602,120 @@ app.get('/consumirSagas', async (req, res) => {
     res.status(500).json({ error: 'Error interno al obtener sagas' });
   }
 });
+
+
+//PARA LA SECCION DE LA SAGA
+app.get('/consumirSecciones', async (req, res) => {
+  const { idsaga } = req.query;
+
+  try {
+    const result = await pool.query(
+      'SELECT * FROM secciones WHERE idsaga = $1',
+      [idsaga]
+    );
+    res.status(200).json({ coleccionSecciones: result.rows });
+  } catch (error) {
+    console.error('Error al obtener secciones:', error);
+    res.status(500).json({ error: 'Error interno al obtener secciones' });
+  }
+});
+/*
+//ESTO ES PARA TODAS LAS SECCIONES
+app.get('/consumirSecciones', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT idseccion, titulo, presentacion, idsaga, imagenurl, imagencloudid
+      FROM secciones
+    `);
+
+    res.status(200).json({ coleccionSecciones: result.rows });
+  } catch (error) {
+    console.error('Error al obtener secciones:', error);
+    res.status(500).json({ error: 'Error interno al obtener secciones' });
+  }
+});
+*/
+
+
+
+/*
+
+//PARA HACER LA MIGRACION DE LAS SECCIONES HACEMSO ESTO 
+async function migrarImagenesSecciones() {
+  try {
+    console.log('🔄 Iniciando migración de imágenes de secciones...');
+
+    const resultado = await pool.query(`
+      SELECT idseccion, imagen, imagenurl
+      FROM secciones
+      WHERE imagen IS NOT NULL
+      AND (imagenurl IS NULL OR imagenurl NOT LIKE '%res.cloudinary.com%')
+    `);
+
+    const secciones = resultado.rows;
+    console.log(`📝 Se encontraron ${secciones.length} secciones para migrar.`);
+
+    for (const seccion of secciones) {
+      const { idseccion, imagen } = seccion;
+
+      console.log(`➡️ Procesando sección ID: ${idseccion}...`);
+
+      if (!imagen) {
+        console.log(`⚠️ Sección ${idseccion} no tiene imagen base64, se omite.`);
+        continue;
+      }
+
+      if (imagen.startsWith('file://')) {
+        console.log(`⛔ Imagen de sección ${idseccion} es ruta local (file://...), no accesible para backend, se omite.`);
+        continue;
+      }
+
+      try {
+        let base64data = imagen;
+        const base64PrefixMatch = imagen.match(/^data:image\/\w+;base64,/);
+        if (base64PrefixMatch) {
+          base64data = imagen.replace(/^data:image\/\w+;base64,/, '');
+          console.log(`🔍 Se removió prefijo base64 de sección ${idseccion}`);
+        }
+
+        console.log(`🚀 Subiendo imagen de sección ${idseccion} a Cloudinary...`);
+
+        const res = await cloudinary.uploader.upload(
+          `data:image/jpeg;base64,${base64data}`,
+          {
+            folder: 'secciones',
+            public_id: `seccion_${idseccion}`,
+            overwrite: true,
+          }
+        );
+
+        const url = res.secure_url;
+        const publicId = res.public_id;
+
+        console.log(`✅ Imagen subida con URL: ${url}`);
+
+        await pool.query(
+          `UPDATE secciones SET imagenurl = $1, imagencloudid = $2 WHERE idseccion = $3`,
+          [url, publicId, idseccion]
+        );
+
+        console.log(`🎉 Actualización DB sección ${idseccion} completada.`);
+      } catch (error) {
+        console.error(`❌ Error subiendo imagen de sección ${idseccion}:`, error.message);
+      }
+    }
+
+    console.log('🎉 Migración de imágenes de secciones finalizada exitosamente.');
+  } catch (error) {
+    console.error('🚨 Error general al migrar secciones:', error.message);
+  } finally {
+    await pool.end();
+  }
+}
+
+migrarImagenesSecciones();
+
+*/
 /* PARA MIGRAR LAS IMAGENES Y OBTENER URL Y ID DE CLUDNARY
 async function migrarImagenesSagas() {
   try {
