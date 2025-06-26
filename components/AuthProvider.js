@@ -15,6 +15,8 @@ export const AuthProvider = ({ children }) => {
 
   const [coleccionPersonajes, setColeccionPersonajes] = useState([]);
 
+   const [sagas, setSagas] = useState([]);
+
   // NUEVO: Historial de tiradas global
   const [historialChat, setHistorialChat] = useState([]);
 
@@ -94,6 +96,22 @@ export const AuthProvider = ({ children }) => {
 */
 
 
+ const fetchSagas = async () => {
+    try {
+      const res = await axios.get('http://192.168.0.38:3000/consumirSagas');
+      setSagas(res.data.coleccionSagas || []);
+    } catch (error) {
+      console.error('Error al cargar sagas:', error);
+    } 
+  };
+
+  useEffect(() => {
+    fetchSagas();
+  }, []);
+
+
+
+
   //CONSUMIR TODOS LOS PERSONAJES
 useEffect(() => {
   const loadPersonajes = async () => {
@@ -164,6 +182,7 @@ useEffect(() => {
         historialChat,
         setHistorialChat,
         coleccionPersonajes,
+        sagas
       }}
     >
       {children}

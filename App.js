@@ -20,7 +20,7 @@ import { PantallaDeslizable } from './components/pantallaDeslizable';
 
 import { AuthProvider } from './components/AuthProvider';
 import { Ranking } from './components/ranking';
-
+import { Sagas } from './components/sagas';
 
 
 import FlashMessage from 'react-native-flash-message';
@@ -112,6 +112,7 @@ const MainStack = () => {
         }} 
        />
          <Stack.Screen name="Ranking" component={Ranking} />
+          <Stack.Screen name="Sagas" component={Sagas} />
 
       
     </Stack.Navigator>

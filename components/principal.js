@@ -17,8 +17,8 @@ const windowWidth = Dimensions.get('window').width;
 
 export default function Principal() {
   
-  const { personajes, savePersonajes } = useContext(AuthContext);
-  
+  const { personajes, savePersonajes,sagas } = useContext(AuthContext);
+
   const navigation = useNavigation();
 //crear la nueva ficha
 const crearFichaPersonaje = async () => {
@@ -200,7 +200,39 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
       ))}
     </View>
   </ScrollView>
-</View>
+     </View>
+
+
+       <View style={[styles.contenedorPrincipal, { marginTop: 20, marginBottom:80 }]}>
+        <Text style={styles.tituloSeccion}>Sagas</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View style={styles.row}>
+            {sagas.map((saga) => (
+              <TouchableOpacity
+                key={saga.idsaga}
+                style={styles.card}
+                activeOpacity={0.9}
+                onPress={() => navigation.navigate('Sagas', { sagaId: saga.idsaga })}
+              >
+               <ImageWrapper
+  uri={saga.imagenurl}
+  fallback={require('../assets/imagenBase.jpeg')}
+/>
+                       
+                <Text
+                  style={styles.text}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.5}
+                  ellipsizeMode="tail"
+                >
+                  {saga.titulo}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </ScrollView>
+      </View>
     </ScrollView>
   );
 }
@@ -211,8 +243,16 @@ const ImageWrapper = ({ uri, fallback }) => {
   const [source, setSource] = React.useState(fallback);
 
   React.useEffect(() => {
+    console.log('Tipo de uri:', typeof uri, 'valor:', uri);
+
     if (uri) {
-      setSource(uri);
+      if (typeof uri === 'string') {
+        // URI remota (url)
+        setSource({ uri });
+      } else {
+        // Imagen local (require devuelve número)
+        setSource(uri);
+      }
     } else {
       setSource(fallback);
     }
@@ -226,9 +266,6 @@ const ImageWrapper = ({ uri, fallback }) => {
     />
   );
 };
-
-
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

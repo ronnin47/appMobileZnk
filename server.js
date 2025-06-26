@@ -546,6 +546,354 @@ app.get('/consumirPersonajesTodos', async (req, res) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// SAGAS
+
+// Crear saga
+app.post('/insertSaga', async (req, res) => {
+  const { titulo, presentacion, imagen } = req.body;
+
+  if (!titulo || !presentacion || !imagen) {
+    return res.status(400).json({ error: 'Faltan campos obligatorios: titulo, presentacion o imagen' });
+  }
+
+  try {
+    const result = await pool.query(
+      'INSERT INTO sagas (titulo, presentacion, imagensaga) VALUES ($1, $2, $3) RETURNING *',
+      [titulo, presentacion, imagen]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('Error al insertar saga:', error);
+    res.status(500).json({ error: 'Error interno al crear saga' });
+  }
+});
+
+
+
+
+
+
+
+app.get('/consumirSagas', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT idsaga, titulo, presentacion, personajes, imagenurl, imagencloudid
+      FROM sagas
+    `);
+
+    res.status(200).json({ coleccionSagas: result.rows });
+  } catch (error) {
+    console.error('Error al obtener sagas:', error);
+    res.status(500).json({ error: 'Error interno al obtener sagas' });
+  }
+});
+/* PARA MIGRAR LAS IMAGENES Y OBTENER URL Y ID DE CLUDNARY
+async function migrarImagenesSagas() {
+  try {
+    console.log('🔄 Iniciando migración de imágenes de sagas...');
+
+    const resultado = await pool.query(`
+      SELECT idsaga, imagensaga, imagenurl
+      FROM sagas
+      WHERE imagensaga IS NOT NULL
+      AND (imagenurl IS NULL OR imagenurl NOT LIKE '%res.cloudinary.com%')
+    `);
+
+    const sagas = resultado.rows;
+    console.log(`📝 Se encontraron ${sagas.length} sagas para migrar.`);
+
+    for (const saga of sagas) {
+      const { idsaga, imagensaga } = saga;
+
+      console.log(`➡️ Procesando saga ID: ${idsaga}...`);
+
+      if (!imagensaga) {
+        console.log(`⚠️ Saga ${idsaga} no tiene imagen base64, se omite.`);
+        continue;
+      }
+
+      if (imagensaga.startsWith('file://')) {
+        console.log(`⛔ Imagen de saga ${idsaga} es ruta local (file://...), no accesible para backend, se omite.`);
+        continue;
+      }
+
+      try {
+        let base64data = imagensaga;
+        const base64PrefixMatch = imagensaga.match(/^data:image\/\w+;base64,/);
+        if (base64PrefixMatch) {
+          base64data = imagensaga.replace(/^data:image\/\w+;base64,/, '');
+          console.log(`🔍 Se removió prefijo base64 de saga ${idsaga}`);
+        }
+
+        console.log(`🚀 Subiendo imagen de saga ${idsaga} a Cloudinary...`);
+
+        const res = await cloudinary.uploader.upload(
+          `data:image/jpeg;base64,${base64data}`,
+          {
+            folder: 'sagas',
+            public_id: `saga_${idsaga}`,
+            overwrite: true,
+          }
+        );
+
+        const url = res.secure_url;
+        const publicId = res.public_id;
+
+        console.log(`✅ Imagen subida con URL: ${url}`);
+
+        await pool.query(
+          `UPDATE sagas SET imagenurl = $1, imagencloudid = $2 WHERE idsaga = $3`,
+          [url, publicId, idsaga]
+        );
+
+        console.log(`🎉 Actualización DB saga ${idsaga} completada.`);
+      } catch (error) {
+        console.error(`❌ Error subiendo imagen de saga ${idsaga}:`, error.message);
+      }
+    }
+
+    console.log('🎉 Migración de imágenes de sagas finalizada exitosamente.');
+  } catch (error) {
+    console.error('🚨 Error general al migrar sagas:', error.message);
+  } finally {
+    await pool.end();
+  }
+}
+
+migrarImagenesSagas();
+
+*/
+
+/*
+
+
+
+
+
+
+
+
+
+
+// Actualizar presentación saga
+app.put('/updateSaga/:idsaga', async (req, res) => {
+  const { idsaga } = req.params;
+  const { presentacion } = req.body;
+
+  if (!presentacion) {
+    return res.status(400).json({ error: 'Presentacion es requerida' });
+  }
+
+  try {
+    const result = await pool.query(
+      'UPDATE sagas SET presentacion = $1 WHERE idsaga = $2 RETURNING *',
+      [presentacion, idsaga]
+    );
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Saga no encontrada' });
+    }
+    res.json({ message: 'Saga actualizada correctamente', saga: result.rows[0] });
+  } catch (error) {
+    console.error('Error al actualizar saga:', error);
+    res.status(500).json({ error: 'Error interno al actualizar saga' });
+  }
+});
+
+// Eliminar saga y sus secciones relacionadas
+app.delete('/deleteSaga/:idsaga', async (req, res) => {
+  const { idsaga } = req.params;
+
+  try {
+    await pool.query('BEGIN');
+
+    await pool.query('DELETE FROM secciones WHERE idsaga = $1', [idsaga]);
+    const result = await pool.query('DELETE FROM sagas WHERE idsaga = $1 RETURNING *', [idsaga]);
+
+    if (result.rowCount === 0) {
+      await pool.query('ROLLBACK');
+      return res.status(404).json({ error: 'Saga no encontrada' });
+    }
+
+    await pool.query('COMMIT');
+    res.json({ message: 'Saga eliminada correctamente' });
+  } catch (error) {
+    await pool.query('ROLLBACK');
+    console.error('Error al eliminar saga:', error);
+    res.status(500).json({ error: 'Error interno al eliminar saga' });
+  }
+});
+
+
+// SECCIONES
+
+// Obtener todas las secciones
+app.get('/consumirSecciones', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM secciones');
+    res.status(200).json({ coleccionSecciones: result.rows });
+  } catch (error) {
+    console.error('Error al obtener secciones:', error);
+    res.status(500).json({ error: 'Error interno al obtener secciones' });
+  }
+});
+
+// Insertar sección
+app.post('/insertSeccion', async (req, res) => {
+  const { titulo, presentacion, imagen, idsaga } = req.body;
+
+  if (!titulo || !presentacion || !imagen || !idsaga) {
+    return res.status(400).json({ error: 'Faltan campos obligatorios: titulo, presentacion, imagen o idsaga' });
+  }
+
+  try {
+    const result = await pool.query(
+      'INSERT INTO secciones (titulo, presentacion, imagen, idsaga) VALUES ($1, $2, $3, $4) RETURNING *',
+      [titulo, presentacion, imagen, idsaga]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('Error al insertar sección:', error);
+    res.status(500).json({ error: 'Error interno al crear sección' });
+  }
+});
+
+// Actualizar sección
+app.put('/updateSeccion/:idseccion', async (req, res) => {
+  const { idseccion } = req.params;
+  const { titulo, presentacion, imagen } = req.body;
+
+  if (!titulo || !presentacion || !imagen) {
+    return res.status(400).json({ error: 'Faltan campos obligatorios: titulo, presentacion o imagen' });
+  }
+
+  try {
+    const result = await pool.query(
+      'UPDATE secciones SET titulo = $1, presentacion = $2, imagen = $3 WHERE idseccion = $4 RETURNING *',
+      [titulo, presentacion, imagen, idseccion]
+    );
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Sección no encontrada' });
+    }
+    res.json({ message: 'Sección actualizada correctamente', seccion: result.rows[0] });
+  } catch (error) {
+    console.error('Error al actualizar sección:', error);
+    res.status(500).json({ error: 'Error interno al actualizar sección' });
+  }
+});
+
+// Eliminar sección
+app.delete('/deleteSeccion/:idseccion', async (req, res) => {
+  const { idseccion } = req.params;
+
+  try {
+    const result = await pool.query('DELETE FROM secciones WHERE idseccion = $1 RETURNING *', [idseccion]);
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Sección no encontrada' });
+    }
+    res.json({ message: 'Sección eliminada correctamente' });
+  } catch (error) {
+    console.error('Error al eliminar sección:', error);
+    res.status(500).json({ error: 'Error interno al eliminar sección' });
+  }
+});
+
+
+// Añadir personaje a saga
+app.post('/insertPjSaga', async (req, res) => {
+  const { idpersonaje, idsaga } = req.body;
+
+  if (!idpersonaje || !idsaga) {
+    return res.status(400).json({ error: 'Faltan campos obligatorios: idpersonaje o idsaga' });
+  }
+
+  try {
+    // Verificar que la saga exista y que el personaje no esté ya incluido puede ser buena idea
+
+    const query = `
+      UPDATE sagas
+      SET personajes = array_append(personajes, $1)
+      WHERE idsaga = $2 AND NOT personajes @> ARRAY[$1]
+      RETURNING *;
+    `;
+    const result = await pool.query(query, [idpersonaje, idsaga]);
+
+    if (result.rowCount === 0) {
+      return res.status(400).json({ message: 'Personaje ya está en la saga o saga no encontrada' });
+    }
+
+    res.json({ message: 'Personaje añadido correctamente' });
+  } catch (error) {
+    console.error('Error al añadir personaje a saga:', error);
+    res.status(500).json({ error: 'Error interno al añadir personaje a saga' });
+  }
+});
+
+
+// NOTAS
+
+app.put('/update-notas/:idpersonaje', async (req, res) => {
+  const { idpersonaje } = req.params;
+  const { nota, idsaga } = req.body;
+
+  if (!nota || !idsaga) {
+    return res.status(400).json({ error: 'Faltan campos obligatorios: nota o idsaga' });
+  }
+
+  try {
+    const result = await pool.query('SELECT notasaga FROM personajes WHERE idpersonaje = $1', [idpersonaje]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Personaje no encontrado' });
+    }
+
+    let notasaga = result.rows[0].notasaga;
+
+    if (notasaga) {
+      if (typeof notasaga === 'string') {
+        notasaga = JSON.parse(notasaga);
+      }
+      if (!Array.isArray(notasaga)) {
+        notasaga = [notasaga];
+      }
+
+      const index = notasaga.findIndex(n => n.idsaga === idsaga);
+      if (index !== -1) {
+        notasaga[index].nota = nota;
+      } else {
+        notasaga.push({ nota, idsaga });
+      }
+    } else {
+      notasaga = [{ nota, idsaga }];
+    }
+
+    await pool.query('UPDATE personajes SET notasaga = $1 WHERE idpersonaje = $2', [
+      JSON.stringify(notasaga),
+      idpersonaje,
+    ]);
+
+    res.json({ message: 'Nota actualizada correctamente', data: notasaga });
+  } catch (error) {
+    console.error('Error al actualizar nota:', error);
+    res.status(500).json({ error: 'Error interno al actualizar nota' });
+  }
+});
+*/
+
 //Script PARA MIGRAR PERSONAJES A CLOUDNARY y traerme la url y cludid a la base de datos OK!!
 /*
 async function migrarImagenesPersonajes() {
@@ -617,6 +965,14 @@ migrarImagenesPersonajes();
 
 
 /*
+
+
+
+
+
+
+
+
 
 // esto es para llenar los cloudnary id 
 async function rellenarImagenCloudId() {
