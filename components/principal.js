@@ -140,7 +140,7 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
 
 
   const universoCelesteItems = [
-    { id: 'ranking', nombre: 'Ranking', imagen: require('../assets/imagenBase.jpeg') },
+    { id: 'ranking', nombre: 'Ranking', imagen: require('../assets/ranker.jpg') },
     { id: 'otro1', nombre: 'Mundo 1', imagen: require('../assets/imagenBase.jpeg') },
     { id: 'otro2', nombre: 'Mundo 2', imagen: require('../assets/imagenBase.jpeg') },
   ];
@@ -258,6 +258,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginRight: 10,
     color: '#fff',
+    marginBottom:15,
   },
 botonCrear: {
   backgroundColor: '#FFC107', // golden orange

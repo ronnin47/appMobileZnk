@@ -2,6 +2,8 @@ import React, { useState, useEffect, useContext} from 'react';
 import { AuthContext } from './AuthContext';
 import { View, Text, TextInput, ScrollView, Image, TouchableOpacity, Modal, StyleSheet } from 'react-native';
 import { Estrellitas } from './estrellitas'; // adaptado también
+import { FlatList } from 'react-native';
+import { BackHandler } from 'react-native'; // 👈 asegurate de importar esto
 
 const Cartita = ({
   idpersonaje,
@@ -19,6 +21,24 @@ const Cartita = ({
   const [showModal, setShowModal] = useState(false);
   const isLeyenda = ken >= 400;
 
+
+    // 👇 Efecto para manejar el botón "Atrás"
+  useEffect(() => {
+    if (showModal) {
+      const backAction = () => {
+        setShowModal(false); // cierra el modal
+        return true; // evita que el sistema cierre la app
+      };
+
+      const backHandler = BackHandler.addEventListener(
+        'hardwareBackPress',
+        backAction
+      );
+
+      return () => backHandler.remove(); // limpia el listener
+    }
+  }, [showModal]); // solo se activa cuando showModal cambia
+
   return (
     <>
       <TouchableOpacity onPress={() => setShowModal(true)} style={[styles.card, isLeyenda && styles.cardLeyenda]}>
@@ -28,8 +48,12 @@ const Cartita = ({
         <Text style={styles.name}>{nombre}</Text>
         <Text style={styles.domain}>{dominio}</Text>
       </TouchableOpacity>
-
-      <Modal visible={showModal} transparent={false} animationType="slide">
+        <Modal
+          visible={showModal}
+          transparent={false}
+          animationType="fade"
+          onRequestClose={() => setShowModal(false)} // 👈 ¡agregá esto!
+        >
         <CartaUnica
           onClose={() => setShowModal(false)}
           nombre={nombre}
@@ -46,69 +70,59 @@ const Cartita = ({
 };
 
 
-const CartaUnica = ({ onClose, nombre, dominio, ken, imagenurl, historia, naturaleza, conviccion }) => {
-  const [tab, setTab] = useState('personaje');
-
+const CartaUnica = ({ nombre, dominio, ken, imagenurl, historia, naturaleza, conviccion }) => {
   return (
     <ScrollView style={styles.modalContainer}>
       <View style={styles.modalHeader}>
         <Text style={styles.modalTitle}>{nombre}</Text>
-       <Estrellitas ken={parseInt(ken) || 0} />
+        <Estrellitas ken={parseInt(ken) || 0} />
       </View>
 
       <Image source={{ uri: imagenurl }} style={styles.modalImage} />
 
       <View style={styles.modalInfo}>
-        {tab === 'personaje' ? (
-          <>
-            <Text style={styles.modalText}>Dominio: {dominio}</Text>
-            <Text style={styles.modalText}>Ken: {ken}</Text>
-            <Text style={styles.modalText}>Naturaleza: {naturaleza}</Text>
-            <Text style={styles.modalText}>Convicción: {conviccion}</Text>
-          </>
-        ) : (
-          <Text style={styles.modalText}>{historia}</Text>
-        )}
+        <Text style={styles.modalText}>Dominio: {dominio}</Text>
+        <Text style={styles.modalText}>Ken: {ken}</Text>
+        <Text style={styles.modalText}>Naturaleza: {naturaleza}</Text>
+        <Text style={styles.modalText}>
+          Convicción: <Text style={styles.modalConviccion}>{conviccion}</Text>
+        </Text>
       </View>
-
-      <View style={styles.tabButtons}>
-        <TouchableOpacity onPress={() => setTab('personaje')}>
-          <Text style={[styles.tabButton, tab === 'personaje' && styles.activeTab]}>Personaje</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setTab('historia')}>
-          <Text style={[styles.tabButton, tab === 'historia' && styles.activeTab]}>Historia</Text>
-        </TouchableOpacity>
+      <View style={styles.modalHistoria}>
+        <Text style={styles.modalText}>
+          {historia && historia.trim().length > 0 ? historia : 'Historia desconocida'}
+        </Text>
       </View>
-
-      <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-        <Text style={styles.closeText}>Cerrar</Text>
-      </TouchableOpacity>
     </ScrollView>
   );
 };
 
 export const Ranking = () => {
   const { coleccionPersonajes } = useContext(AuthContext);
-
-
-
-  const nombres = coleccionPersonajes.map(pj => pj.nombre);
-console.log("Nombres de los personajes:", nombres);
   const [pjBuscado, setPjBuscado] = useState("");
 
-  const personajesFiltrados = coleccionPersonajes
-    .filter((pj) => {
-      const vidaTotal =
-        ((parseInt(pj.ki) || 0) + (parseInt(pj.fortaleza) || 0)) *
-        ((parseInt(pj.positiva) || 0) + (parseInt(pj.negativa) || 0));
-      return (
-        pj.pjPnj === true &&
-        pj.nombre.toLowerCase().includes(pjBuscado.toLowerCase()) &&
-        pj.ken >= 40 &&
-        (pj.vidaActual <= vidaTotal || pj.ken >= 400)
-      );
-    })
-    .sort((a, b) => b.ken - a.ken);
+  // Ordenar toda la colección por ken descendente
+  const coleccionOrdenada = [...coleccionPersonajes].sort((a, b) => b.ken - a.ken);
+
+  // Crear un diccionario para rankear cada personaje según su posición en el ranking global
+  const rankingMap = {};
+  coleccionOrdenada.forEach((pj, index) => {
+    rankingMap[pj.idpersonaje] = index + 1;
+  });
+
+  // Filtrar la colección según la búsqueda y otros criterios
+  const personajesFiltrados = coleccionOrdenada.filter((pj) => {
+    const vidaTotal =
+      ((parseInt(pj.ki) || 0) + (parseInt(pj.fortaleza) || 0)) *
+      ((parseInt(pj.positiva) || 0) + (parseInt(pj.negativa) || 0));
+
+    return (
+      pj.pjPnj === true &&
+      pj.nombre.toLowerCase().includes(pjBuscado.toLowerCase()) &&
+      pj.ken >= 40 &&
+      (pj.vidaActual <= vidaTotal || pj.ken >= 400)
+    );
+  });
 
   return (
     <View style={styles.container}>
@@ -120,22 +134,21 @@ console.log("Nombres de los personajes:", nombres);
         placeholderTextColor="#ccc"
       />
 
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {personajesFiltrados.length > 0 ? (
-          <View style={styles.cardsContainer}>
-            {personajesFiltrados.map((pj, index) => (
-              <Cartita
-                key={pj.idpersonaje}
-                rank={index + 1}
-                {...pj}
-                vidaTotal={(pj.ki + pj.fortaleza) * (pj.positiva + pj.negativa)}
-              />
-            ))}
-          </View>
-        ) : (
-          <Text style={styles.noResults}>No se encontraron personajes</Text>
+      <FlatList
+        data={personajesFiltrados}
+        keyExtractor={(item) => item.idpersonaje.toString()}
+        numColumns={2}
+        renderItem={({ item }) => (
+          <Cartita
+            rank={rankingMap[item.idpersonaje]} // ranking real aquí
+            {...item}
+            vidaTotal={(item.ki + item.fortaleza) * (item.positiva + item.negativa)}
+          />
         )}
-      </ScrollView>
+        columnWrapperStyle={{ justifyContent: "space-between" }}
+        contentContainerStyle={styles.cardsContainer}
+        showsVerticalScrollIndicator={false}
+      />
     </View>
   );
 };
@@ -145,7 +158,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000',
     padding: 10,
-    marginTop:5,
+  
   },
   searchInput: {
     backgroundColor: '#222',
@@ -158,10 +171,10 @@ const styles = StyleSheet.create({
     // alignItems removed para evitar interferencia con flexWrap
   },
  cardsContainer: {
-  flexDirection: 'row',
-  flexWrap: 'wrap',
-  justifyContent: 'space-between',
+   paddingHorizontal: 10,
+  paddingBottom: 20,
   paddingHorizontal: 10,
+  paddingTop: 10, // <--- nuevo
 },
   card: {
   backgroundColor: '#111',
@@ -172,10 +185,14 @@ const styles = StyleSheet.create({
   width: '47%', // permite dos por fila con espacio para rankNumber
   alignItems: 'center',
   position: 'relative', // necesario para que rankNumber se posicione bien
+     borderColor:  '#7baedc',
+    borderWidth: 0.3,
+
 },
   cardLeyenda: {
     borderColor: 'gold',
-    borderWidth: 2,
+    borderWidth: 3,
+   
   },
   cardImage: {
     width: 120,
@@ -191,46 +208,58 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 14,
   },
- rankNumber: {
+rankNumber: {
   position: 'absolute',
   top: -8,
   left: -8,
   backgroundColor: '#f1c40f',
   color: 'black',
   borderRadius: 20,
-  paddingHorizontal: 6,
   paddingVertical: 4,
   fontWeight: 'bold',
   fontSize: 12,
+  width: 30,           // ancho fijo igual para todos
+  textAlign: 'center', // para centrar el número
   zIndex: 10,
 },
-  modalContainer: {
-    backgroundColor: '#000',
+ modalContainer: {
     flex: 1,
-    padding: 20,
+    padding: 16,
+    backgroundColor: '#000', // Fondo negro
   },
   modalHeader: {
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 12,
   },
   modalTitle: {
-    color: 'yellow',
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 'bold',
+    color: '#fff', // Texto blanco
+    marginBottom: 6,
   },
   modalImage: {
     width: '100%',
-    height: 200,
-    borderRadius: 10,
-    resizeMode: 'contain',
+    height: 300, // Imagen más alta
+    resizeMode: 'cover',
+    borderRadius: 12,
+    marginBottom: 20,
   },
   modalInfo: {
-    marginTop: 20,
+    backgroundColor: '#111', // Fondo gris oscuro
+    padding: 14,
+    borderRadius: 8,
+    marginBottom: 16,
   },
   modalText: {
-    color: 'white',
     fontSize: 16,
-    marginBottom: 5,
+    marginBottom: 6,
+    color: '#eee', // Texto claro para buen contraste
+  },
+  modalHistoria: {
+    padding: 14,
+    backgroundColor: '#1a1a1a', // Gris más claro para distinguir la historia
+    borderRadius: 8,
+    marginBottom: 32,
   },
   tabButtons: {
     flexDirection: 'row',
@@ -262,6 +291,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: 'cursive',
   },
+  modalConviccion: {
+  fontSize: 16,
+  marginBottom: 6,
+  color: '#00FFFF', // Cian brillante
+  fontWeight: 'bold', // Opcional, para destacarlo más
+},
 });
 
 /*
