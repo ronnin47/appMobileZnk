@@ -17,7 +17,7 @@ const windowWidth = Dimensions.get('window').width;
 
 export default function Principal() {
   
-  const { personajes, savePersonajes,sagas } = useContext(AuthContext);
+  const { personajes, savePersonajes,sagas, setSagas, estatus } = useContext(AuthContext);
 
   const navigation = useNavigation();
 //crear la nueva ficha
@@ -135,7 +135,34 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
 
 
 
+ const crearSaga = async () => {
+  console.log("FUNCIONA EL BOTÓN DE CREAR SAGAS");
 
+  try {
+    const datosSaga = {
+      titulo: "Nueva Saga",
+      presentacion: "Una introducción épica...",
+      personajes: [], // o un array, según tu backend
+      imagensaga: null, // algo tipo "data:image/png;base64,ABCDEF..."
+    };
+
+    const response = await axios.post('http://192.168.0.38:3000/insert-saga', datosSaga);
+
+    if (response.status === 201) {
+      const { idsaga, imagenurl, imagencloudid } = response.data;
+      console.log("Saga creada con ID:", idsaga);
+      console.log("URL imagen:", imagenurl);
+
+
+      setSagas([...sagas, { ...datosSaga, idsaga }]);
+    } else {
+      console.warn("Algo salió mal al crear la saga:", response.data);
+    }
+
+  } catch (error) {
+    console.error("Error en la creación de saga:", error.response?.data || error.message);
+  }
+};
 
 
 
@@ -203,8 +230,19 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
      </View>
 
 
-       <View style={[styles.contenedorPrincipal, { marginTop: 20, marginBottom:80 }]}>
-        <Text style={styles.tituloSeccion}>Sagas</Text>
+        {/* Contenedor de Sagas con botón Crear Saga */}
+      <View style={[styles.contenedorPrincipal, { marginTop: 20, marginBottom: 80 }]}>
+        <View style={styles.tituloYBotonContainer}>
+          <Text style={styles.tituloSeccion}>Sagas</Text>
+
+          {/* Mostrar botón sólo si estatus es narrador */}
+          {estatus === 'narrador' && (
+            <TouchableOpacity style={styles.botonCrear} onPress={crearSaga}>
+              <Text style={styles.textoBoton}>+ Crear Saga</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View style={styles.row}>
             {sagas.map((saga) => (
@@ -214,11 +252,10 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
                 activeOpacity={0.9}
                 onPress={() => navigation.navigate('Sagas', { sagaId: saga.idsaga })}
               >
-               <ImageWrapper
-  uri={saga.imagenurl}
-  fallback={require('../assets/imagenBase.jpeg')}
-/>
-                       
+                <ImageWrapper
+                  uri={saga.imagenurl}
+                  fallback={require('../assets/imagenBase.jpeg')}
+                />
                 <Text
                   style={styles.text}
                   numberOfLines={1}

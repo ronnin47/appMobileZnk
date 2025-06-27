@@ -6,7 +6,7 @@ import axios from 'axios';
 
 export const Sagas = () => {
   const route = useRoute();
-  const { sagas } = useContext(AuthContext);
+  const { sagas,estatus } = useContext(AuthContext);
   const { sagaId } = route.params;
 
   const [sagaSeleccionada, setSagaSeleccionada] = useState(null);
@@ -56,6 +56,9 @@ export const Sagas = () => {
       <Text style={styles.cardDescription}>{item.presentacion}</Text>
     </View>
   );
+
+
+  console.log("Estatus del clientes es : ",estatus)
 
   return (
     <FlatList

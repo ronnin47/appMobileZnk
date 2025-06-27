@@ -563,26 +563,70 @@ app.get('/consumirPersonajesTodos', async (req, res) => {
 
 // SAGAS
 
-// Crear saga
-app.post('/insertSaga', async (req, res) => {
-  const { titulo, presentacion, imagen } = req.body;
+app.post('/insert-saga', async (req, res) => {
 
-  if (!titulo || !presentacion || !imagen) {
-    return res.status(400).json({ error: 'Faltan campos obligatorios: titulo, presentacion o imagen' });
-  }
+  console.log("esto viene del cliente: ",req.body)
+  const {
+    titulo,
+    presentacion,
+    imagensaga, // si tenés otro campo aparte de imagen
+    personajes,
+  } = req.body;
 
   try {
-    const result = await pool.query(
-      'INSERT INTO sagas (titulo, presentacion, imagensaga) VALUES ($1, $2, $3) RETURNING *',
-      [titulo, presentacion, imagen]
-    );
-    res.status(201).json(result.rows[0]);
+    // 1. Insertar saga sin imagenurl ni imagencloudid
+    const insertQuery = `
+      INSERT INTO sagas (titulo, presentacion, imagensaga, personajes)
+      VALUES ($1, $2, $3, $4)
+      RETURNING idsaga
+    `;
+
+    const insertValues = [titulo, presentacion, imagensaga, personajes];
+    const insertResult = await pool.query(insertQuery, insertValues);
+
+    const newSagaId = insertResult.rows[0].idsaga;
+
+    let imagenUrl = null;
+    let imagenCloudId = null;
+
+    // 2. Si recibís imagen base64, subir a Cloudinary
+    if (imagensaga) {
+      const matches = imagensaga.match(/^data:image\/(\w+);base64,(.+)$/);
+      if (!matches) return res.status(400).json({ error: 'Imagen base64 inválida.' });
+
+      const ext = matches[1];
+      const data = matches[2];
+
+      const uploadResult = await cloudinary.uploader.upload(`data:image/${ext};base64,${data}`, {
+        folder: 'sagas',
+        public_id: `saga_${newSagaId}`,
+        overwrite: true,
+      });
+
+      imagenUrl = uploadResult.secure_url;
+      imagenCloudId = uploadResult.public_id;
+
+      // 3. Actualizar saga con URL e id Cloudinary
+      const updateQuery = `
+        UPDATE sagas SET imagenurl = $1, imagencloudid = $2 WHERE idsaga = $3
+      `;
+
+      await pool.query(updateQuery, [imagenUrl, imagenCloudId, newSagaId]);
+    }
+
+    // 4. Retornar resultado con el idsaga y url de imagen
+    res.status(201).json({
+      message: 'Saga creada exitosamente.',
+      idsaga: newSagaId,
+      imagenurl: imagenUrl,
+      imagencloudid: imagenCloudId,
+    });
+
   } catch (error) {
-    console.error('Error al insertar saga:', error);
-    res.status(500).json({ error: 'Error interno al crear saga' });
+    console.error('Error al insertar la saga:', error);
+    res.status(500).json({ error: 'Error al insertar la saga.' });
   }
 });
-
 
 
 
@@ -619,6 +663,11 @@ app.get('/consumirSecciones', async (req, res) => {
     res.status(500).json({ error: 'Error interno al obtener secciones' });
   }
 });
+
+
+
+
+
 /*
 //ESTO ES PARA TODAS LAS SECCIONES
 app.get('/consumirSecciones', async (req, res) => {

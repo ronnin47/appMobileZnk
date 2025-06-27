@@ -12,7 +12,7 @@ import { ImageBackground, StyleSheet, View, Text, TextInput, TouchableOpacity } 
 //este componente inicial que renderiza la aplciaicon al ingresar
 export const LoginScreen = ({ navigation}) => {
 
- const { setUserToken, savePersonajes } = useContext(AuthContext);
+ const { setUserToken, savePersonajes,setEstatus } = useContext(AuthContext);
  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -35,11 +35,17 @@ export const LoginScreen = ({ navigation}) => {
   if (response.status === 200 && response.data?.idusuario) {
     const { idusuario, estatus } = response.data;
 
+
+    //ponemos el estatus jugador o narrador
+    await AsyncStorage.setItem('estatus', estatus);
+
     const token = `usuario-${idusuario}`;
     await AsyncStorage.setItem('userToken', token);
     await AsyncStorage.setItem('userId', idusuario.toString());
 
     setUserToken(token);
+
+    setEstatus(estatus);
 
     const personajesRes = await axios.get('http://192.168.0.38:3000/consumirPersonajesUsuario', {
       params: { usuarioId: idusuario },

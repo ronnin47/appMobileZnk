@@ -10,6 +10,8 @@ SplashScreen.preventAutoHideAsync();
 
 export const AuthProvider = ({ children }) => {
   const [userToken, setUserToken] = useState(null);
+  const [estatus,setEstatus]=useState(null)
+
   const [isLoading, setIsLoading] = useState(true);
   const [personajes, setPersonajes] = useState([]);
 
@@ -27,9 +29,11 @@ export const AuthProvider = ({ children }) => {
       console.time('loadData');
       try {
         const token = await AsyncStorage.getItem('userToken');
+        const estatus = await AsyncStorage.getItem('estatus');
 
         if (token) {
           setUserToken(token);
+          setEstatus(estatus);
 
           const usuarioIdStr = await AsyncStorage.getItem('userId');
           const usuarioId = usuarioIdStr ? parseInt(usuarioIdStr, 10) : null;
@@ -51,11 +55,13 @@ export const AuthProvider = ({ children }) => {
         } else {
           setUserToken(null);
           setPersonajes([]);
+          setEstatus(null)
         }
       } catch (e) {
         console.log('Error loading token or personajes:', e);
         setUserToken(null);
         setPersonajes([]);
+        setEstatus(null)
       } finally {
         setIsLoading(false);
         console.timeEnd('loadData');
@@ -167,7 +173,9 @@ useEffect(() => {
     await AsyncStorage.removeItem('userToken');
     await AsyncStorage.removeItem('personajesUsuario');
     await AsyncStorage.removeItem('userId');
+    await AsyncStorage.removeItem('estatus');
     setPersonajes([]);
+    setEstatus(null)
   };
 
   return (
@@ -182,7 +190,10 @@ useEffect(() => {
         historialChat,
         setHistorialChat,
         coleccionPersonajes,
-        sagas
+        sagas,
+        setSagas,
+        setEstatus,
+        estatus,
       }}
     >
       {children}
