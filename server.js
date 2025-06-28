@@ -628,16 +628,12 @@ app.post('/insert-saga', async (req, res) => {
   }
 });
 
-
-
-
-
-
+//ok!!
 app.get('/consumirSagas', async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT idsaga, titulo, presentacion, personajes, imagenurl, imagencloudid
-      FROM sagas
+     FROM sagas ORDER BY idsaga DESC
     `);
 
     res.status(200).json({ coleccionSagas: result.rows });
@@ -648,7 +644,130 @@ app.get('/consumirSagas', async (req, res) => {
 });
 
 
-//PARA LA SECCION DE LA SAGA
+
+//***************************ACA ETSAMSO TRABAJANDO**************** */
+app.put('/updateSagaCompleta/:idsaga', async (req, res) => {
+  const { idsaga } = req.params;
+  const { titulo, presentacion, imagensaga, secciones } = req.body;
+
+  if (!presentacion || !titulo) {
+    return res.status(400).json({ error: 'Título y presentación son requeridos' });
+  }
+
+  try {
+    let imagenurl = null;
+    let imagencloudid = null;
+
+    // Actualizar imagen saga si viene base64
+    if (imagensaga && imagensaga.startsWith('data:image/')) {
+      const matches = imagensaga.match(/^data:image\/(\w+);base64,(.+)$/);
+      if (!matches) {
+        return res.status(400).json({ error: 'Formato de imagen base64 inválido para saga' });
+      }
+
+      const ext = matches[1];
+      const data = matches[2];
+
+      const uploadResult = await cloudinary.uploader.upload(`data:image/${ext};base64,${data}`, {
+        folder: 'sagas',
+        public_id: `saga_${idsaga}`,
+        overwrite: true,
+      });
+
+      imagenurl = uploadResult.secure_url;
+      imagencloudid = uploadResult.public_id;
+
+      await pool.query(
+        'UPDATE sagas SET imagenurl = $1, imagencloudid = $2 WHERE idsaga = $3',
+        [imagenurl, imagencloudid, idsaga]
+      );
+    }
+
+    // Actualizar datos de la saga (título y presentación)
+    const resultSaga = await pool.query(
+      'UPDATE sagas SET titulo = $1, presentacion = $2 WHERE idsaga = $3 RETURNING *',
+      [titulo, presentacion, idsaga]
+    );
+
+    if (resultSaga.rowCount === 0) {
+      return res.status(404).json({ error: 'Saga no encontrada' });
+    }
+
+    // Array para acumular las secciones ya guardadas (con id)
+    const seccionesActualizadas = [];
+
+    // Actualizar o insertar las secciones
+    if (Array.isArray(secciones)) {
+      for (const seccion of secciones) {
+        const { idseccion, titulo, presentacion, imagen } = seccion;
+
+        let idsec = idseccion;
+        let imagenurlSeccion = null;
+        let imagencloudidSeccion = null;
+
+        // Subir imagen si es base64
+        if (imagen && imagen.startsWith('data:image/')) {
+          const matchesSeccion = imagen.match(/^data:image\/(\w+);base64,(.+)$/);
+          if (!matchesSeccion) {
+            return res.status(400).json({ error: `Formato de imagen base64 inválido para sección ${idseccion || 'nueva'}` });
+          }
+
+          const ext = matchesSeccion[1];
+          const data = matchesSeccion[2];
+
+          const uploadResultSeccion = await cloudinary.uploader.upload(`data:image/${ext};base64,${data}`, {
+            folder: 'secciones',
+            public_id: idseccion ? `seccion_${idseccion}` : undefined,
+            overwrite: true,
+          });
+
+          imagenurlSeccion = uploadResultSeccion.secure_url;
+          imagencloudidSeccion = uploadResultSeccion.public_id;
+        }
+
+        if (!idsec) {
+          // Nueva sección: insertar
+          const insertResult = await pool.query(
+            `INSERT INTO secciones (idsaga, titulo, presentacion, imagenurl, imagencloudid)
+             VALUES ($1, $2, $3, $4, $5) RETURNING idseccion`,
+            [idsaga, titulo, presentacion, imagenurlSeccion, imagencloudidSeccion]
+          );
+          idsec = insertResult.rows[0].idseccion;
+        } else {
+          // Sección existente: actualizar
+          await pool.query(
+            `UPDATE secciones SET titulo = $1, presentacion = $2,
+             imagenurl = COALESCE($3, imagenurl),
+             imagencloudid = COALESCE($4, imagencloudid)
+             WHERE idseccion = $5`,
+            [titulo, presentacion, imagenurlSeccion, imagencloudidSeccion, idsec]
+          );
+        }
+
+        seccionesActualizadas.push({
+          idseccion: idsec,
+          titulo,
+          presentacion,
+          imagenurl: imagenurlSeccion,
+          imagencloudid: imagencloudidSeccion,
+        });
+      }
+    }
+
+    res.json({
+      message: 'Saga y secciones actualizadas correctamente',
+      saga: resultSaga.rows[0],
+      imagenurl,
+      imagencloudid,
+      secciones: seccionesActualizadas,
+    });
+  } catch (error) {
+    console.error('Error al actualizar saga y secciones:', error.message);
+    res.status(500).json({ error: 'Error interno al actualizar saga y secciones' });
+  }
+});
+
+//PARA LA SECCION DE LA SAGA  ok!!
 app.get('/consumirSecciones', async (req, res) => {
   const { idsaga } = req.query;
 

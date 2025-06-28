@@ -194,6 +194,7 @@ useEffect(() => {
         setSagas,
         setEstatus,
         estatus,
+        fetchSagas,
       }}
     >
       {children}
