@@ -168,6 +168,20 @@ useEffect(() => {
     }
   };
 
+  const savePersonajeUno = async (personajeActualizado) => {
+  try {
+    setPersonajes((anteriores) =>
+      anteriores.map((p) =>
+        p.idpersonaje === personajeActualizado.idpersonaje
+          ? { ...p, ...personajeActualizado }
+          : p
+      )
+    );
+  } catch (e) {
+    console.log('Error guardando personaje individual', e);
+  }
+};
+
   const logout = async () => {
     setUserToken(null);
     await AsyncStorage.removeItem('userToken');
@@ -195,6 +209,7 @@ useEffect(() => {
         setEstatus,
         estatus,
         fetchSagas,
+        savePersonajeUno,
       }}
     >
       {children}

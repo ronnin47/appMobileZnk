@@ -562,7 +562,7 @@ app.get('/consumirPersonajesTodos', async (req, res) => {
 
 
 // SAGAS
-
+//insert saga ok!!
 app.post('/insert-saga', async (req, res) => {
 
   console.log("esto viene del cliente: ",req.body)
@@ -628,7 +628,7 @@ app.post('/insert-saga', async (req, res) => {
   }
 });
 
-//ok!!
+//consmumir sagas ok!!
 app.get('/consumirSagas', async (req, res) => {
   try {
     const result = await pool.query(`
@@ -645,7 +645,7 @@ app.get('/consumirSagas', async (req, res) => {
 
 
 
-//***************************ACA ETSAMSO TRABAJANDO**************** */
+//update sagas y secciones ok!!
 app.put('/updateSagaCompleta/:idsaga', async (req, res) => {
   const { idsaga } = req.params;
   const { titulo, presentacion, imagensaga, secciones } = req.body;
@@ -767,6 +767,36 @@ app.put('/updateSagaCompleta/:idsaga', async (req, res) => {
   }
 });
 
+
+// Endpoint para agregar personaje a una saga
+app.put('/agregarPersonajeSaga/:idsaga', async (req, res) => {
+  const { idsaga } = req.params;
+  const { personajes } = req.body;
+
+  if (!personajes || !Array.isArray(personajes)) {
+    return res.status(400).json({ error: 'El campo personajes es requerido y debe ser un array' });
+  }
+
+  try {
+    const result = await pool.query(
+      `UPDATE sagas SET personajes = $1 WHERE idsaga = $2 RETURNING *`,
+      [personajes, idsaga]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Saga no encontrada' });
+    }
+
+    res.json({ message: 'Personaje agregado correctamente', sagaActualizada: result.rows[0] });
+  } catch (error) {
+    console.error('Error al actualizar saga:', error.message);
+    res.status(500).json({ error: 'Error del servidor al actualizar la saga' });
+  }
+});
+
+
+
+
 //PARA LA SECCION DE LA SAGA  ok!!
 app.get('/consumirSecciones', async (req, res) => {
   const { idsaga } = req.query;
@@ -784,6 +814,38 @@ app.get('/consumirSecciones', async (req, res) => {
 });
 
 
+
+
+//notas 
+
+
+app.put('/personajes/:idpersonaje/notasaga', async (req, res) => {
+  const { idpersonaje } = req.params;
+  const { notasaga } = req.body;
+
+  console.log(" id personaje ",idpersonaje)
+  console.log("notasaga  ", notasaga)
+
+  if (!notasaga) {
+    return res.status(400).json({ error: 'Faltan datos de notasaga' });
+  }
+
+  try {
+    const result = await pool.query(
+      `UPDATE personajes SET notasaga = $1 WHERE idpersonaje = $2`,
+      [JSON.stringify(notasaga), idpersonaje]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Personaje no encontrado' });
+    }
+
+    res.status(200).json({ message: 'Notasaga actualizada correctamente' });
+  } catch (error) {
+    console.error('Error al actualizar notasaga:', error);
+    res.status(500).json({ error: 'Error en el servidor' });
+  }
+});
 
 
 
