@@ -23,6 +23,8 @@ import { Ranking } from './components/ranking';
 import { Sagas } from './components/sagas';
 
 
+
+
 import FlashMessage from 'react-native-flash-message';
 import { Platform } from 'react-native';
 
@@ -33,6 +35,7 @@ const Stack = createStackNavigator();
 
 
 import { io } from 'socket.io-client';
+import { Nuevo } from './components/nuevo';
 
 const socket = io('http://192.168.0.38:3000'); // IP y puerto de tu servidor
 
@@ -113,6 +116,7 @@ const MainStack = () => {
        />
          <Stack.Screen name="Ranking" component={Ranking} />
           <Stack.Screen name="Sagas" component={Sagas} />
+          <Stack.Screen name="Nuevo" component={Nuevo} />
 
       
     </Stack.Navigator>

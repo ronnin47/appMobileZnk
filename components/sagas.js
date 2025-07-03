@@ -19,41 +19,58 @@ import * as ImagePicker from 'expo-image-picker';
 
 export const Sagas = () => {
   const route = useRoute();
-  const { sagas, estatus, fetchSagas, coleccionPersonajes, personajes,userToken,savePersonajes,savePersonajeUno } = useContext(AuthContext);
+  const { sagas, estatus, fetchSagas, coleccionPersonajes,saveColeccionPersonajes, personajes,userToken,savePersonajes,savePersonajeUno } = useContext(AuthContext);
+  
+  
+  
+useEffect(() => {
+  console.log("coleccionPersonajes se siente:");
+}, [coleccionPersonajes]);
   const { sagaId } = route.params;
-
   const [sagaSeleccionada, setSagaSeleccionada] = useState(null);
   const [secciones, setSecciones] = useState([]);
   const [cargandoSecciones, setCargandoSecciones] = useState(true);
-
-
   const [notasEditables, setNotasEditables] = useState([]);
-
-
   const esNarrador = estatus === 'narrador';
 
 const puedeEditarNotas = (personaje) => {
+   if (!personaje) {
+    console.log("Personaje es null o undefined");
+    return false;
+  }
+ // console.log("Personaje id usuario ",typeof personaje.usuarioId)
   // Extraigo el número del userToken, asumiendo formato "usuario-1"
   const userIdNumber = userToken?.split('-')[1]; // "1"
-  console.log("puedeEditarNotas:", personaje?.usuarioId, userIdNumber, personaje?.usuarioId == userIdNumber);
+  //console.log("puedeEditarNotas:", personaje?.usuarioId, userIdNumber, personaje?.usuarioId == userIdNumber);
   return personaje?.usuarioId == userIdNumber; // == para permitir comparación string/número
 };
 
   const imagenBase = require('../assets/imagenBase.jpeg');
-
   const [mostrarSelector, setMostrarSelector] = useState(false);
   const [personajeSeleccionado, setPersonajeSeleccionado] = useState(null);
-
   // Estados para mostrar notas en modal
   const [modalVisible, setModalVisible] = useState(false);
   const [notasSeleccionadas, setNotasSeleccionadas] = useState([]);
   const [personajeSeleccionadoModal, setPersonajeSeleccionadoModal] = useState(null);
+
+
+  useEffect(() => {
+  if (sagaSeleccionada?.personajes) {
+    console.log("🆕 Cambiaron los personajes de la saga:");
+    console.log("➡️ Nuevos IDs:", sagaSeleccionada.personajes);
+  }
+}, [sagaSeleccionada?.personajes]);
 
 const abrirNotasPersonaje = (personaje) => {
   if (!sagaSeleccionada || !sagaSeleccionada.idsaga) {
     console.warn("No hay saga seleccionada o falta el ID de la saga.");
     return;
   }
+
+
+
+
+
 
   const notasagaArray = Array.isArray(personaje.notasaga) ? personaje.notasaga : [];
 
@@ -108,6 +125,11 @@ const abrirNotasPersonaje = (personaje) => {
       });
     }
   };
+
+
+
+
+
 
   useEffect(() => {
     const encontrada = sagas.find((s) => s.idsaga === sagaId);
@@ -317,25 +339,28 @@ const abrirNotasPersonaje = (personaje) => {
     );
   }
 
-  console.log('PERSONAJES EN LA SAGA: ', sagaSeleccionada.personajes);
+
   const personajesSaga = coleccionPersonajes
     .filter((pj) => sagaSeleccionada.personajes?.includes(pj.idpersonaje))
     .sort((a, b) => {
       return a.idpersonaje - b.idpersonaje;
     });
 
-
-
-
-
 const guardarNotaSaga = async (notasEditables, personaje, savePersonajes,savePersonajeUno) => {
 
-    console.log("guardarNotaSaga llamada", { notasEditables, personaje });
+
+  console.log("entra en guardar nota")
+  //console.log("guardarNotaSaga llamada", { notasEditables, personaje });
   
-  if (!personaje || !notasEditables || notasEditables.length === 0) return;
+if (!personaje || !notasEditables || notasEditables.length === 0) {
+  console.log("NO ENTRA: personaje o notasEditables inválidos", { personaje, notasEditables });
+  return;
+}
 
   const notaEditada = notasEditables[0];
-  const nuevasNotas = personaje.notasaga ? [...personaje.notasaga] : [];
+  //const nuevasNotas = personaje.notasaga ? [...personaje.notasaga] : [];
+  const nuevasNotas = Array.isArray(personaje.notasaga) ? [...personaje.notasaga] : [];
+  
 
   const indexExistente = nuevasNotas.findIndex(
     (n) => n.idsaga === notaEditada.idsaga
@@ -358,7 +383,21 @@ const guardarNotaSaga = async (notasEditables, personaje, savePersonajes,savePer
   });
 
 
-  console.log("Enviando notasaga al backend:", nuevasNotas);
+
+  // Actualizar la colección global de personajes con las nuevas notas
+  const indexColeccion = coleccionPersonajes.findIndex(pj => pj.idpersonaje === personaje.idpersonaje);
+
+  if (indexColeccion !== -1) {
+    const nuevaColeccion = [...coleccionPersonajes];
+    nuevaColeccion[indexColeccion] = {
+      ...nuevaColeccion[indexColeccion],
+      notasaga: nuevasNotas,
+    };
+    saveColeccionPersonajes(nuevaColeccion);
+  }
+
+  //CON saveColeccionPersonajes() guardo en el contexto, y tengoq eu guardar las notas dentro 
+  //console.log("Enviando notasaga al backend:", nuevasNotas);
   // Enviar SOLO notasaga al backend
   try {
     const response = await fetch(`http://192.168.0.38:3000/personajes/${personaje.idpersonaje}/notasaga`, {
@@ -398,25 +437,28 @@ const guardarNotaSaga = async (notasEditables, personaje, savePersonajes,savePer
                 />
 
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 15 }}>
-                  {personajesSaga.map((pj) => (
-                    <TouchableOpacity
-                      key={pj.idpersonaje}
-                      onPress={() => abrirNotasPersonaje(pj)}
-                    >
-                      <Image
-                        source={pj.imagenurl ? { uri: pj.imagenurl } : imagenBase}
-                        style={{
-                          width: 50,
-                          height: 50,
-                          borderRadius: 25,
-                          marginRight: 8,
-                          marginBottom: 8,
-                          borderWidth: 1,
-                          borderColor: '#fff',
-                        }}
-                      />
-                    </TouchableOpacity>
-                  ))}
+                 {personajesSaga.map((pj) => {
+  console.log("🧪 personajeSaga", pj.idpersonaje, pj.nombre, pj.imagenurl);
+                      return (
+                        <TouchableOpacity
+                          key={pj.idpersonaje}
+                          onPress={() => abrirNotasPersonaje(pj)}
+                        >
+                          <Image
+                            source={pj.imagenurl ? { uri: pj.imagenurl } : imagenBase}
+                            style={{
+                              width: 50,
+                              height: 50,
+                              borderRadius: 25,
+                              marginRight: 8,
+                              marginBottom: 8,
+                              borderWidth: 1,
+                              borderColor: '#fff',
+                            }}
+                          />
+                        </TouchableOpacity>
+                      );
+                    })}
                 </View>
 
                 {sagaSeleccionada.imagenurl && (
@@ -446,7 +488,7 @@ const guardarNotaSaga = async (notasEditables, personaje, savePersonajes,savePer
 
                   {mostrarSelector && (
                     <View style={{ marginBottom: 15 }}>
-                      {personajes?.map((pj) => {
+                      {coleccionPersonajes?.map((pj) => {
                         const yaEstaEnSaga = sagaSeleccionada.personajes?.includes(
                           pj.idpersonaje
                         );
@@ -521,63 +563,6 @@ const guardarNotaSaga = async (notasEditables, personaje, savePersonajes,savePer
                   <Image source={{ uri: sagaSeleccionada.imagenurl }} style={styles.image} />
                 )}
                 <Text style={styles.description}>{sagaSeleccionada.presentacion}</Text>
-
-                <>
-                  <TouchableOpacity
-                    onPress={() => setMostrarSelector(!mostrarSelector)}
-                    style={[styles.button, { marginVertical: 10 }]}
-                  >
-                    <Text style={styles.buttonText}>Sumarse a saga</Text>
-                  </TouchableOpacity>
-
-                  {mostrarSelector && (
-                    <View style={{ marginBottom: 15 }}>
-                      {personajes?.map((pj) => {
-                        const yaEstaEnSaga = sagaSeleccionada.personajes?.includes(
-                          pj.idpersonaje
-                        );
-                        return (
-                          <TouchableOpacity
-                            key={pj.idpersonaje}
-                            onPress={() => {
-                              if (!yaEstaEnSaga) {
-                                setPersonajeSeleccionado(pj.idpersonaje);
-                              }
-                            }}
-                            style={{
-                              backgroundColor:
-                                personajeSeleccionado === pj.idpersonaje
-                                  ? '#444'
-                                  : yaEstaEnSaga
-                                  ? '#666'
-                                  : '#222',
-                              padding: 10,
-                              borderRadius: 5,
-                              marginBottom: 5,
-                            }}
-                          >
-                            <Text
-                              style={{
-                                color: yaEstaEnSaga ? '#aaa' : '#fff',
-                              }}
-                            >
-                              {pj.nombre}
-                            </Text>
-                          </TouchableOpacity>
-                        );
-                      })}
-
-                      {personajeSeleccionado && (
-                        <TouchableOpacity
-                          onPress={agregarPersonajeASaga}
-                          style={[styles.button, { backgroundColor: '#28a745', marginTop: 10 }]}
-                        >
-                          <Text style={styles.buttonText}>Confirmar</Text>
-                        </TouchableOpacity>
-                      )}
-                    </View>
-                  )}
-                </>
               </>
             )}
             <Text style={styles.sectionTitle}>Secciones</Text>
@@ -605,13 +590,15 @@ const guardarNotaSaga = async (notasEditables, personaje, savePersonajes,savePer
         Notas de {personajeSeleccionadoModal?.nombre || 'personaje'}
       </Text>
 
-      {personajeSeleccionadoModal?.imagenurl && (
-        <Image
-          source={{ uri: personajeSeleccionadoModal.imagenurl }}
-          style={styles.personajeImagenFull}
-          resizeMode="cover"
-        />
-      )}
+          <Image
+                source={
+                  personajeSeleccionadoModal?.imagenurl
+                    ? { uri: personajeSeleccionadoModal.imagenurl }
+                    : imagenBase
+                }
+                style={styles.personajeImagenFull}
+                resizeMode="cover"
+              />
 
       <View style={styles.datosContainer}>
         <Text style={styles.datoText}>
@@ -624,7 +611,7 @@ const guardarNotaSaga = async (notasEditables, personaje, savePersonajes,savePer
         </Text>
       </View>
 
-      {console.log('Modal render - puedeEditarNotas:', puedeEditarNotas(personajeSeleccionadoModal), 'notasEditables:', notasEditables)}
+   
 
       {puedeEditarNotas(personajeSeleccionadoModal) ? (
         <>
@@ -659,14 +646,15 @@ const guardarNotaSaga = async (notasEditables, personaje, savePersonajes,savePer
                 alignItems: 'center',
                 marginTop: 10,
               }}
-              onPress={() => {
-                console.log("Notas guardadas:", notasEditables);
-                setNotasSeleccionadas(notasEditables);
-                setModalVisible(false);
-
-                // Llama a la función externa
-               guardarNotaSaga(notasEditables, personajeSeleccionadoModal, savePersonajes,savePersonajeUno);
-              }}
+             onPress={() => {
+  if (!notasEditables || notasEditables.length === 0) {
+    console.log("No hay notas editables para guardar");
+    return; // salir sin llamar a guardarNotaSaga
+  }
+  setNotasSeleccionadas(notasEditables);
+  setModalVisible(false); // mejor cerrar modal al guardar
+  guardarNotaSaga(notasEditables, personajeSeleccionadoModal, savePersonajes, savePersonajeUno);
+}}
             >
               <Text style={{ color: '#fff', fontWeight: 'bold' }}>Guardar cambios</Text>
             </TouchableOpacity>

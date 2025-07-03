@@ -258,7 +258,7 @@ app.post('/insert-personaje', async (req, res) => {
     add1, valAdd1, add2, valAdd2, add3, valAdd3, add4, valAdd4,
     imagen, inventario, dominios, kenActual, kiActual, positiva, negativa, vidaActual,
     hechizos, consumision, iniciativa, historia, usuarioId,
-    tecEspecial, conviccion, cicatriz, notaSaga, resistencia, pjPnj
+    tecEspecial, conviccion, cicatriz, notasaga, resistencia, pjPnj
   } = req.body;
 
   try {
@@ -305,7 +305,7 @@ app.post('/insert-personaje', async (req, res) => {
       add1, valAdd1, add2, valAdd2, add3, valAdd3, add4, valAdd4,
       inventario, dominios, kenActual, kiActual, positiva, negativa, vidaActual,
       hechizos, consumision, iniciativa, historia, tecEspecial, conviccion, cicatriz,
-      notaSaga, resistencia, pjPnj, usuarioId
+      notasaga, resistencia, pjPnj, usuarioId
     ];
 
     const result = await pool.query(query, values);

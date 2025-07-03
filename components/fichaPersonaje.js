@@ -20,7 +20,7 @@ import { TecnicaEspecial } from './tecEpecial';
 
 export const FichaPersonaje = ({ pj, ki, setKi, fortaleza, setFortaleza, ken,setKen,eliminarPersonaje }) => {
   
-  const { personajes, savePersonajes } = useContext(AuthContext);
+  const { personajes, savePersonajes,coleccionPersonajes,saveColeccionPersonajes } = useContext(AuthContext);
  
   const imagenBase = require('../assets/imagenBase.jpeg');
 
@@ -139,7 +139,7 @@ export const FichaPersonaje = ({ pj, ki, setKi, fortaleza, setFortaleza, ken,set
 
   //uno nuevo que va ser la url
   
-const [imagenUrl, setImagenUrl] = useState(p.imagenurl || '');
+const [imagenurl, setImagenurl] = useState(p.imagenurl || '');
 
 
 
@@ -230,6 +230,7 @@ const guardarCambiosBBDD = async () => {
       cicatriz: cicatriz || 0,
       resistencia: resistencia || 0,
       pjPnj:pjPnj,
+      notasaga:[],
     };
     
    
@@ -254,7 +255,18 @@ const guardarCambiosBBDD = async () => {
           imagenurl: response.data.imagenurl,  // actualizás la URL de la imagen
           
         };
+
+     
         savePersonajes(nuevosPersonajes);
+        
+        //necesito guardar la imagenurl de este personaje en el global de coleccionPersonajes
+        const indexColeccion = coleccionPersonajes.findIndex(pj => pj.idpersonaje === p.idpersonaje);
+
+        if (indexColeccion !== -1) {
+          const nuevaColeccion = [...coleccionPersonajes];
+          nuevaColeccion[indexColeccion] = nuevosPersonajes[index];
+          saveColeccionPersonajes(nuevaColeccion);
+        }
       }
     }
     setTimeout(() => {
@@ -365,10 +377,15 @@ const guardarCambiosBBDD = async () => {
     cicatriz: cicatriz,  
     resistencia:resistencia,
     pjPnj:pjPnj,
+
  
   };
 
   savePersonajes(nuevosPersonajes); 
+
+  
+
+
 }
 
 useEffect(() => {
@@ -448,7 +465,7 @@ useEffect(() => {
   cicatriz,
   resistencia,
   pjPnj,
-  imagenUrl,
+  imagenurl,
 
 ]);
 
@@ -457,8 +474,8 @@ useEffect(() => {
 const getImageSource = () => {
   if (imagen && imagen.startsWith('data:image')) {
     return { uri: imagen };
-  } else if (imagenUrl && typeof imagenUrl === 'string') {
-    return { uri: imagenUrl };
+  } else if (imagenurl && typeof imagenurl === 'string') {
+    return { uri: imagenurl };
   } else {
     return imagenBase;
   }

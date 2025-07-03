@@ -9,6 +9,7 @@ import { TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native'; // para navegar
+import { Nuevo } from './nuevo';
 
 
 const windowWidth = Dimensions.get('window').width;
@@ -17,7 +18,7 @@ const windowWidth = Dimensions.get('window').width;
 
 export default function Principal() {
   
-  const { personajes, savePersonajes,sagas, setSagas, estatus } = useContext(AuthContext);
+  const { personajes, savePersonajes,consumir,sagas, setSagas, estatus,coleccionPersonajes,saveColeccionPersonajes,fetchSagas} = useContext(AuthContext);
 
   const navigation = useNavigation();
 //crear la nueva ficha
@@ -98,7 +99,7 @@ const crearFichaPersonaje = async () => {
     tecEspecial:[],
     conviccion: "",
     cicatriz: 0,
-    notaSaga: [],
+    notasaga: [],
     resistencia: 0,
     pjPnj: true,
     usuarioId: usuarioId
@@ -124,7 +125,11 @@ const crearFichaPersonaje = async () => {
 */
 // ... después de recibir idpersonaje
 savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
-    
+ saveColeccionPersonajes([...coleccionPersonajes, pjNew]);   
+
+  // 🔄 En lugar de agregar manualmente, recarga todos
+    await consumir();
+ //fetchSagas()
 
   } catch (error) {
     console.error("Error al crear personaje vacío:", error.message);
@@ -270,6 +275,18 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
           </View>
         </ScrollView>
       </View>
+
+
+      <View style={styles.contenedorPrincipal}>
+        <View style={styles.tituloYBotonContainer}>
+          <Text style={styles.tituloSeccion}>Nuevo componenete</Text>
+
+        </View>
+
+       
+
+        <Nuevo></Nuevo>
+      </View>
     </ScrollView>
   );
 }
@@ -280,7 +297,7 @@ const ImageWrapper = ({ uri, fallback }) => {
   const [source, setSource] = React.useState(fallback);
 
   React.useEffect(() => {
-    console.log('Tipo de uri:', typeof uri, 'valor:', uri);
+   // console.log('Tipo de uri:', typeof uri, 'valor:', uri);
 
     if (uri) {
       if (typeof uri === 'string') {
