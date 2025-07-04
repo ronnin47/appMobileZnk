@@ -436,9 +436,9 @@ if (!personaje || !notasEditables || notasEditables.length === 0) {
                   onChangeText={(text) => handleInputChange('titulo', text)}
                 />
 
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 15 }}>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap',    justifyContent: 'center', marginBottom: 15 }}>
                  {personajesSaga.map((pj) => {
-  console.log("🧪 personajeSaga", pj.idpersonaje, pj.nombre, pj.imagenurl);
+  
                       return (
                         <TouchableOpacity
                           key={pj.idpersonaje}
@@ -452,7 +452,7 @@ if (!personaje || !notasEditables || notasEditables.length === 0) {
                               borderRadius: 25,
                               marginRight: 8,
                               marginBottom: 8,
-                              borderWidth: 1,
+                              borderWidth: 0.75,
                               borderColor: '#fff',
                             }}
                           />
@@ -647,14 +647,14 @@ if (!personaje || !notasEditables || notasEditables.length === 0) {
                 marginTop: 10,
               }}
              onPress={() => {
-  if (!notasEditables || notasEditables.length === 0) {
-    console.log("No hay notas editables para guardar");
-    return; // salir sin llamar a guardarNotaSaga
-  }
-  setNotasSeleccionadas(notasEditables);
-  setModalVisible(false); // mejor cerrar modal al guardar
-  guardarNotaSaga(notasEditables, personajeSeleccionadoModal, savePersonajes, savePersonajeUno);
-}}
+                if (!notasEditables || notasEditables.length === 0) {
+                  console.log("No hay notas editables para guardar");
+                  return; // salir sin llamar a guardarNotaSaga
+                }
+                setNotasSeleccionadas(notasEditables);
+                setModalVisible(false); // mejor cerrar modal al guardar
+                guardarNotaSaga(notasEditables, personajeSeleccionadoModal, savePersonajes, savePersonajeUno);
+              }}
             >
               <Text style={{ color: '#fff', fontWeight: 'bold' }}>Guardar cambios</Text>
             </TouchableOpacity>
@@ -718,22 +718,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 26,
-    color: '#fff',
-    fontWeight: 'bold',
-    marginBottom: 15,
-    marginTop: 15,
-    backgroundColor: '#111',
-    padding: 10,
-    borderRadius: 8,
-  },
-  image: {
-    width: '100%',
-    height: 220,
-    borderRadius: 10,
-    marginBottom: 15,
-    marginTop: 15,
-  },
+  fontSize: 26,
+ color: '#FFD700',
+  fontWeight: 'bold',
+  fontFamily: 'serif', // o 'sans-serif-light' si lo preferís más moderno
+  marginBottom: 15,
+  marginTop: 15,
+  backgroundColor: '#1a1a1a',
+  paddingVertical: 6,
+  paddingHorizontal: 18,
+  borderRadius: 10,
+  textAlign: 'center',
+  shadowColor: '#fff8dc',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.5,
+  shadowRadius: 4,
+  elevation: 4,
+},
+ image: {
+  width: '100%',
+  height: 260,
+  borderRadius: 7,
+  marginBottom: 12,
+  marginTop: 15,
+  borderWidth: 1,           // grosor del borde
+  borderColor: '#ffffff',   // color blanco puro
+},
   description: {
     fontSize: 16,
     color: '#ddd',
@@ -749,7 +759,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#FFD700',
     marginTop: 20,
     marginBottom: 10,
   },
@@ -798,18 +808,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: 10,
-    marginBottom: 80,
+    marginBottom: 60,
   },
   button: {
-    backgroundColor: '#333',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
+    backgroundColor: '#B0C4DE',
+    paddingVertical: 8,
+    paddingHorizontal: 10,
     borderRadius: 6,
+    alignSelf: 'flex-start',
+    borderWidth: 0.75,
+    borderColor: '#FFF8E1', 
   },
   buttonText: {
-    color: '#fff',
+    color: 'black',
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 14,
+    alignSelf: 'flex-start'
   },
   modalBackgroundFull: {
     flex: 1,
@@ -824,15 +838,17 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
+     color: '#FFA726',
     marginBottom: 15,
     textAlign: 'center',
   },
   personajeImagenFull: {
     width: '100%',
-    height: 250,
-    borderRadius: 12,
+    height: 300,
+    borderRadius: 5,
     marginBottom: 15,
+     borderWidth: 0.7,           // grosor del borde
+   borderColor: '#ffffff', 
   },
   datosContainer: {
     marginBottom: 15,

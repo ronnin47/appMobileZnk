@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from './AuthContext';
 import axios from 'axios';
-
+import socket from './socket';
 import * as SplashScreen from 'expo-splash-screen';
 
 SplashScreen.preventAutoHideAsync();
@@ -21,6 +21,10 @@ export const AuthProvider = ({ children }) => {
 
 
   const [historialChat, setHistorialChat] = useState([]);
+
+
+
+
 
   useEffect(() => {
     SplashScreen.preventAutoHideAsync();
@@ -71,6 +75,8 @@ export const AuthProvider = ({ children }) => {
 
     loadData();
   }, [userToken]);
+
+
 
 
 
@@ -126,6 +132,31 @@ useEffect(() => {
   loadPersonajes();
   
 }, [userToken]);
+
+
+/*
+socket.on('chat-message', (mensaje) => {
+  console.log('Mensaje recibido en cliente:', mensaje);
+  setHistorialChat(prev => [...prev, mensaje]);
+});
+*/
+
+const handleMensaje = (mensaje) => {
+  console.log('🟢 Mensaje recibido en cliente:', mensaje);
+  setHistorialChat(prev => [...prev, mensaje]);
+};
+
+socket.off('chat-message'); // Elimina cualquier duplicado anterior
+socket.on('chat-message', handleMensaje);
+
+
+socket.off("chat-chat");
+socket.on('chat-chat', handleMensaje);
+
+
+
+
+
 
 
   const savePersonajes = async (lista) => {

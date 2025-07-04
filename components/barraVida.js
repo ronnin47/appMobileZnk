@@ -5,7 +5,7 @@ import socket from './socket';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export const BarraVida = ({pj, ki, setKi, fortaleza, setFortaleza,positiva,negativa,cicatriz}) => {
-const { personajes, savePersonajes } = useContext(AuthContext);
+const { personajes, savePersonajes,estatus } = useContext(AuthContext);
  //aca extrae el personaje
   const p = personajes.find(p => p.idpersonaje === pj.idpersonaje);
 
@@ -308,7 +308,8 @@ const agregarDamage = async () => {
         nombre:nombre,
         vidaActual: newDamage,         
         vidaTotal: vidaTotal,                   
-        mensaje: message            
+        mensaje: message,
+        estatus:estatus,            
     };
     
     socket.emit('chat-message', msgEnviar);

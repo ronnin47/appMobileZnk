@@ -87,6 +87,8 @@ const styles = StyleSheet.create({
   imagen: {
     width: 120,
     height: 160,
+      borderWidth: 0.35,
+    borderColor: "white",
     borderRadius: 8,
     marginBottom: 15,
     shadowColor: '#fff',

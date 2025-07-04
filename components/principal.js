@@ -11,7 +11,7 @@ import axios from 'axios';
 import { useNavigation } from '@react-navigation/native'; // para navegar
 import { Nuevo } from './nuevo';
 
-
+import { LinearGradient } from 'expo-linear-gradient';
 const windowWidth = Dimensions.get('window').width;
 
 
@@ -241,37 +241,44 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
           <Text style={styles.tituloSeccion}>Sagas</Text>
 
           {/* Mostrar botón sólo si estatus es narrador */}
-          {estatus === 'narrador' && (
-            <TouchableOpacity style={styles.botonCrear} onPress={crearSaga}>
-              <Text style={styles.textoBoton}>+ Crear Saga</Text>
+         {estatus === 'narrador' && (
+            <TouchableOpacity onPress={crearSaga} activeOpacity={0.8} style={styles.botonWrapper}>
+              <LinearGradient
+                colors={['#f6f7f8', '#d9d9d9', '#a3a3a3', '#eaeaea']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.botonCrear}
+              >
+                <Text style={styles.textoBoton}>+ Crear Saga</Text>
+              </LinearGradient>
             </TouchableOpacity>
           )}
         </View>
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View style={styles.row}>
-            {sagas.map((saga) => (
-              <TouchableOpacity
-                key={saga.idsaga}
-                style={styles.card}
-                activeOpacity={0.9}
-                onPress={() => navigation.navigate('Sagas', { sagaId: saga.idsaga })}
-              >
-                <ImageWrapper
-                  uri={saga.imagenurl}
-                  fallback={require('../assets/imagenBase.jpeg')}
-                />
-                <Text
-                  style={styles.text}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                  minimumFontScale={0.5}
-                  ellipsizeMode="tail"
-                >
-                  {saga.titulo}
-                </Text>
-              </TouchableOpacity>
-            ))}
+          {sagas.slice().reverse().map((saga) => (
+  <TouchableOpacity
+    key={saga.idsaga}
+    style={styles.card}
+    activeOpacity={0.9}
+    onPress={() => navigation.navigate('Sagas', { sagaId: saga.idsaga })}
+  >
+    <ImageWrapper
+      uri={saga.imagenurl}
+      fallback={require('../assets/imagenBase.jpeg')}
+    />
+    <Text
+      style={styles.text}
+      numberOfLines={1}
+      adjustsFontSizeToFit
+      minimumFontScale={0.5}
+      ellipsizeMode="tail"
+    >
+      {saga.titulo}
+    </Text>
+  </TouchableOpacity>
+))}
           </View>
         </ScrollView>
       </View>
@@ -355,22 +362,29 @@ botonCrear: {
   backgroundColor: '#FFC107', // golden orange
   paddingVertical: 8,
   paddingHorizontal: 16,
-  borderRadius: 12,
-  shadowColor: '#FFD54F', // un poco más claro
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.5,
-  shadowRadius: 6,
-  elevation: 6,
+  borderRadius: 6,
   borderWidth: 1,
   borderColor: '#FFF8E1', // borde dorado claro
+
+  // Sombra glow blanca más intensa
+  shadowColor: '#ffffff',
+  shadowOffset: { width: 0, height: 6 },
+  shadowOpacity: 1,
+  shadowRadius: 12,
+  elevation: 10,
+
+  // Para que el contenido quede centrado y ordenado
+  justifyContent: 'center',
+  alignItems: 'center',
 },
 textoBoton: {
-  color: '#333', // gris oscuro para mejor contraste
-  fontSize: 15,
-  fontWeight: '600',
-  textShadowColor: 'rgba(255, 255, 255, 0.3)',
-  textShadowOffset: { width: 0, height: 1 },
-  textShadowRadius: 1,
+  color: 'black', 
+  fontWeight: 'bold',
+  fontSize: 14,
+  textAlign: 'center',
+  
+  textShadowOffset: { width: 1, height: 1 },
+  textShadowRadius: 40,
 },
   tituloYBotonContainer: {
     flexDirection: 'row',
@@ -391,14 +405,24 @@ card: {
   alignItems: 'center',
 },
 
-imagen: {
-  width: 120,
-  height: 160,
-  borderRadius: 8,
-  marginBottom: 15,
-  backgroundColor: '#000',
-  // otros estilos de sombra si quieres
-},
+ imagen: {
+    width: 120,
+    height: 160,
+    borderWidth: 0.35,
+    borderColor: "white",
+    borderRadius: 8,
+    marginBottom: 15,
+    shadowColor: '#fff',
+    shadowOffset: {
+      width: 4,
+      height: 8,
+    },
+    shadowOpacity: 0.9,
+    shadowRadius: 20,
+    elevation: 15,
+    backgroundColor: '#000',
+    overflow: 'hidden',
+  },
 
 text: {
   fontSize: 16,

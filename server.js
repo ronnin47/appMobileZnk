@@ -61,6 +61,12 @@ io.on('connection', (socket) => {
     io.emit('chat-message', mensaje);
   });
 
+     socket.on('chat-chat', (mensaje) => {
+    console.log('Mensaje de chat chat recibido:', mensaje);
+    io.emit('chat-chat', mensaje);
+    console.log('📤 Mensaje de chat chat emitido a todos los clientes:', mensaje);
+  });
+
   socket.on('disconnect', () => {
     const usuarioDesconectado = connectedUsers.get(socket.id);
     if (usuarioDesconectado) {

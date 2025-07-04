@@ -5,7 +5,7 @@ import socket from './socket';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export const BarraKi = ({ pj,ki,setKi }) => {
-  const { personajes, savePersonajes } = useContext(AuthContext);
+  const { personajes, savePersonajes,estatus } = useContext(AuthContext);
   const p = personajes.find(p => p.idpersonaje === pj.idpersonaje);
 
   const [nombre, setNombre] = useState(p.nombre);
@@ -43,6 +43,7 @@ export const BarraKi = ({ pj,ki,setKi }) => {
         kiActual: newValue,
         ki: ki,
         mensaje: message,
+        estatus:estatus,
       };
 
       socket.emit('chat-message', msgEnviar);

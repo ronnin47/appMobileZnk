@@ -19,7 +19,7 @@ const generarNumerosAzarSinRangoMin=(cantidad, rangoMax)=> {
 
 export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen }) => {
   
-  const { personajes, historialChat, setHistorialChat,savePersonajes } = useContext(AuthContext);
+  const { personajes, historialChat, setHistorialChat,savePersonajes,estatus } = useContext(AuthContext);
 
   const p = personajes.find((p) => p.idpersonaje === pj.idpersonaje);
 
@@ -129,11 +129,14 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen }) => {
 
   
     const mensaje={
+      usuarioId:p.usuarioId,
       idpersonaje:p.idpersonaje,
       nombre:p.nombre,
-      mensaje:mensajeChat
+      mensaje:mensajeChat,
+      estatus:estatus,
     }
 
+    console.log("***TIRADAS emite**",mensaje)
     socket.emit('chat-message', mensaje);
   };
 

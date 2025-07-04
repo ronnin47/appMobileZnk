@@ -2,8 +2,11 @@
 import React, { useEffect, useRef,useContext } from 'react';
 import { View, ScrollView, Text, StyleSheet } from 'react-native';
 import { AuthContext } from './AuthContext';
-
 import socket from './socket';
+
+
+
+
 
 export const ChatTiradas = ({p}) => {
   const scrollViewRef = useRef();
@@ -26,7 +29,7 @@ export const ChatTiradas = ({p}) => {
   if (scrollViewRef.current) {
     scrollViewRef.current.scrollToEnd({ animated: true });
   }
-
+/*
   socket.on('chat-message', (mensaje) => {
     setHistorialChat(prev => [...prev, mensaje]);
   });
@@ -34,6 +37,7 @@ export const ChatTiradas = ({p}) => {
   return () => {
     socket.off('chat-message');
   };
+  */
 }, []);
 
 
