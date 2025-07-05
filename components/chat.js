@@ -1,10 +1,15 @@
 import React, { useState, useContext, useRef, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
-  ScrollView, StyleSheet, KeyboardAvoidingView, Platform
+  ScrollView, StyleSheet, KeyboardAvoidingView, Platform,Image
 } from 'react-native';
 import socket from './socket';
 import { AuthContext } from './AuthContext';
+import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
+
+
+
 
 export default function Chat() {
   const scrollViewRef = useRef();
@@ -37,6 +42,45 @@ useEffect(() => {
     setInput('');
   };
 
+
+
+
+  const abrirGaleria = async () => {
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: true,
+    quality: 0.7,
+    base64: false, // no lo usamos aquí, usamos FileSystem
+  });
+
+  if (!result.canceled && result.assets.length > 0) {
+    const imagenUri = result.assets[0].uri;
+
+    try {
+      // Convertir a base64
+      const imagenBase64 = await FileSystem.readAsStringAsync(imagenUri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      const mensajeImagen = {
+        id: Date.now().toString() + Math.random().toString(36).substring(2),
+        usuarioId: Number(usuarioId),
+        idpersonaje: personajeActual?.idpersonaje || 0,
+        nombre: personajeActual?.nombre || estatus,
+        estatus: estatus,
+        imagenBase64: `data:image/jpeg;base64,${imagenBase64}`, // 🔹 así lo reconoce Cloudinary
+      };
+
+      // Emitimos al socket
+      socket.emit('chat-chat', mensajeImagen);
+      console.log('📤 Imagen emitida al servidor');
+
+    } catch (error) {
+      console.error('❌ Error al convertir imagen a base64:', error);
+    }
+  }
+};
+
 const renderMensajes = () => {
   return historialChat.map((item, index) => {
     const esPropio = item.usuarioId == usuarioId;
@@ -58,13 +102,31 @@ const renderMensajes = () => {
       estilos.push(styles.alinearIzquierda);
     }
 
+
+    const esImagen = typeof item.mensaje === 'string' && item.mensaje.startsWith('http') &&
+        (item.mensaje.endsWith('.jpg') || item.mensaje.endsWith('.jpeg') || item.mensaje.endsWith('.png') || item.mensaje.endsWith('.webp'));
+
+
+
     return (
-      <Text key={item.id || index.toString()} style={estilos}>
-        {item.nombre}: {item.mensaje}
-      </Text>
+        <View key={item.id || index.toString()} style={estilos}>
+          <Text style={{ color: 'gray', fontSize: 10 }}>{item.nombre}</Text>
+          {esImagen ? (
+            <Image source={{ uri: item.mensaje }} style={{ width: 200, height: 200, borderRadius: 8 }} />
+          ) : (
+            <Text style={{ color: estilos.includes(styles.mensajeNarrador) ? 'yellow' : estilos.includes(styles.mensajePropio) ? 'greenyellow' : '#e0e0ff' }}>
+              {item.mensaje}
+            </Text>
+          )}
+        </View>
     );
   });
 };
+
+
+
+
+
 
   return (
     <KeyboardAvoidingView
@@ -80,6 +142,7 @@ const renderMensajes = () => {
       </ScrollView>
 
       <View style={styles.inputBox}>
+        
         <TextInput
           style={styles.input}
           value={input}
@@ -89,6 +152,9 @@ const renderMensajes = () => {
           onSubmitEditing={enviar}
           returnKeyType="send"
         />
+         <TouchableOpacity onPress={abrirGaleria}>
+          <Text style={styles.enviar}>🖼️</Text>
+        </TouchableOpacity>
         <TouchableOpacity onPress={enviar}>
           <Text style={styles.enviar}>➤</Text>
         </TouchableOpacity>

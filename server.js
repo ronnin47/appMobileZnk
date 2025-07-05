@@ -61,10 +61,32 @@ io.on('connection', (socket) => {
     io.emit('chat-message', mensaje);
   });
 
-     socket.on('chat-chat', (mensaje) => {
-    console.log('Mensaje de chat chat recibido:', mensaje);
+   socket.on('chat-chat', async (mensaje) => {
+    console.log('📥 Mensaje de chat-chat recibido:', mensaje);
+
+    if (mensaje.imagenBase64) {
+      try {
+        // Subir a Cloudinary
+        const resultado = await cloudinary.uploader.upload(mensaje.imagenBase64, {
+          folder: 'chat-imagenes',
+        });
+
+        // Reemplazamos el contenido del mensaje con la URL
+        mensaje.mensaje = resultado.secure_url;
+
+        // Ya no necesitamos la imagen base64
+        delete mensaje.imagenBase64;
+
+        console.log('✅ Imagen subida a Cloudinary:', resultado.secure_url);
+      } catch (error) {
+        console.error('❌ Error al subir imagen:', error);
+        return; // No emitimos si falló
+      }
+    }
+
+    // Emitimos el mensaje (texto o con imagen)
     io.emit('chat-chat', mensaje);
-    console.log('📤 Mensaje de chat chat emitido a todos los clientes:', mensaje);
+    console.log('📤 Mensaje emitido a clientes:', mensaje);
   });
 
   socket.on('disconnect', () => {

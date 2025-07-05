@@ -1,21 +1,10 @@
-
-import React, { useEffect, useRef,useContext } from 'react';
-import { View, ScrollView, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useRef, useContext } from 'react';
+import { View, ScrollView, Text, StyleSheet, Image } from 'react-native';
 import { AuthContext } from './AuthContext';
-import socket from './socket';
 
 
-
-
-
-export const ChatTiradas = ({p}) => {
+export const ChatTiradas = ({ p }) => {
   const scrollViewRef = useRef();
-
-  
-
- //necesito que cuando el mendaje que recibe tenga el mismo idpersonaje que este sea de otro color
-
-
   const { historialChat, setHistorialChat } = useContext(AuthContext);
 
   useEffect(() => {
@@ -24,24 +13,11 @@ export const ChatTiradas = ({p}) => {
     }
   }, [historialChat]);
 
-
-   useEffect(() => {
-  if (scrollViewRef.current) {
-    scrollViewRef.current.scrollToEnd({ animated: true });
-  }
-/*
-  socket.on('chat-message', (mensaje) => {
-    setHistorialChat(prev => [...prev, mensaje]);
-  });
-
-  return () => {
-    socket.off('chat-message');
-  };
-  */
-}, []);
-
-
-
+  useEffect(() => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }
+  }, []);
 
   return (
     <View style={styles.panelHistorial}>
@@ -49,19 +25,60 @@ export const ChatTiradas = ({p}) => {
         {historialChat.length === 0 ? (
           <></>
         ) : (
-         historialChat.map((msg, idx) => (
+          historialChat.map((msg, idx) => {
+            const esPropio = msg.idpersonaje === p.idpersonaje;
+            const esImagen =
+              typeof msg.mensaje === 'string' &&
+              (msg.mensaje.startsWith('http://') || msg.mensaje.startsWith('https://')) &&
+              (msg.mensaje.endsWith('.jpg') ||
+                msg.mensaje.endsWith('.jpeg') ||
+                msg.mensaje.endsWith('.png') ||
+                msg.mensaje.includes('cloudinary'));
+
+            return (
+              <View key={idx}  style={{
+                marginBottom: 8,
+                backgroundColor: '#222',
+                padding: 8,
+                borderRadius: 8,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.3,
+                shadowRadius: 2,
+                elevation: 3,  // para sombra en Android
+                
+              }}>
+                <Text
+                  style={[
+                    styles.textoHistorial,
+                    esPropio && styles.mensajePropio,
+                  ]}
+                >
+                  {msg.nombre}:
+                </Text>
+
+                {esImagen ? (
+                  <Image
+                    source={{ uri: msg.mensaje }}
+                    style={[
+                      styles.imagenChat,
+                      esPropio && { alignSelf: 'flex-end' },
+                    ]}
+                    resizeMode="cover"
+                  />
+                ) : (
                   <Text
-                    key={idx}
                     style={[
                       styles.textoHistorial,
-                      msg.idpersonaje === p.idpersonaje && styles.mensajePropio
+                      esPropio && styles.mensajePropio,
                     ]}
                   >
-                    {typeof msg === 'string'
-                      ? msg
-                      : `${msg.nombre}: ${msg.mensaje}`}
+                    {msg.mensaje}
                   </Text>
-                ))
+                )}
+              </View>
+            );
+          })
         )}
       </ScrollView>
     </View>
@@ -85,9 +102,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   textoHistorial: {
-    color: "#FFFFFF", 
+    color: "#FFFFFF",
     fontSize: 12,
-    marginBottom: 6,
+    marginBottom: 4,
   },
   textoHistorialVacio: {
     color: "#ADFF2F",
@@ -96,8 +113,13 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   mensajePropio: {
-  color: "#00FF00", // Verde para el personaje actual
-},
+    color: "#00FF00",
+  },
+  imagenChat: {
+    width: 180,
+    height: 120,
+    borderRadius: 8,
+    marginTop: 4,
+    alignSelf: 'flex-start',
+  },
 });
-
-
