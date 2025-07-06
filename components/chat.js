@@ -8,12 +8,13 @@ import { AuthContext } from './AuthContext';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 
-
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 
 export default function Chat() {
   const scrollViewRef = useRef();
   const [input, setInput] = useState('');
+  const [imagenPreview, setImagenPreview] = useState(null);
   const { historialChat, setHistorialChat, userToken, personajeActual, estatus } = useContext(AuthContext);
 
   
@@ -26,39 +27,11 @@ useEffect(() => {
     }
   }, [historialChat]);
 
-  const enviar = () => {
-    if (!input.trim()) return;
-
-    const msgEnviar = {
-      id: Date.now().toString() + Math.random().toString(36).substring(2),
-      usuarioId: Number(usuarioId),
-      idpersonaje: personajeActual?.idpersonaje || 0,
-      nombre: personajeActual?.nombre || estatus,
-      mensaje: input,
-      estatus: estatus,
-    };
-
-    socket.emit('chat-chat', msgEnviar); // solo emite
-    setInput('');
-  };
-
-
-
-
-  const abrirGaleria = async () => {
-  const result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    allowsEditing: true,
-    quality: 0.7,
-    base64: false, // no lo usamos aquí, usamos FileSystem
-  });
-
-  if (!result.canceled && result.assets.length > 0) {
-    const imagenUri = result.assets[0].uri;
-
+  const enviar = async () => {
+  // Si hay imagen para enviar
+  if (imagenPreview) {
     try {
-      // Convertir a base64
-      const imagenBase64 = await FileSystem.readAsStringAsync(imagenUri, {
+      const imagenBase64 = await FileSystem.readAsStringAsync(imagenPreview, {
         encoding: FileSystem.EncodingType.Base64,
       });
 
@@ -68,16 +41,50 @@ useEffect(() => {
         idpersonaje: personajeActual?.idpersonaje || 0,
         nombre: personajeActual?.nombre || estatus,
         estatus: estatus,
-        imagenBase64: `data:image/jpeg;base64,${imagenBase64}`, // 🔹 así lo reconoce Cloudinary
+        imagenBase64: `data:image/jpeg;base64,${imagenBase64}`,
       };
 
-      // Emitimos al socket
       socket.emit('chat-chat', mensajeImagen);
-      console.log('📤 Imagen emitida al servidor');
-
+      setImagenPreview(null); // Limpia el preview después de enviar
+      // Espera un pequeño tiempo para asegurar el orden
+      await new Promise(res => setTimeout(res, 100));
     } catch (error) {
       console.error('❌ Error al convertir imagen a base64:', error);
+      return;
     }
+  }
+
+  // Si hay texto para enviar
+  if (input.trim()) {
+    const msgEnviar = {
+      id: Date.now().toString() + Math.random().toString(36).substring(2),
+      usuarioId: Number(usuarioId),
+      idpersonaje: personajeActual?.idpersonaje || 0,
+      nombre: personajeActual?.nombre || estatus,
+      mensaje: input,
+      estatus: estatus,
+    };
+
+    socket.emit('chat-chat', msgEnviar);
+    setInput('');
+  }
+};
+
+
+
+
+  const abrirGaleria = async () => {
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: true,
+    quality: 0.7,
+    base64: false,
+  });
+
+  if (!result.canceled && result.assets.length > 0) {
+    const imagenUri = result.assets[0].uri;
+    setImagenPreview(imagenUri); // Solo guarda la URI para el preview
+    // No envíes nada aquí
   }
 };
 
@@ -127,40 +134,51 @@ const renderMensajes = () => {
 
 
 
-
-  return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={styles.container}
+return (
+  <KeyboardAvoidingView
+    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    style={styles.container}
+    keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 80} // Puedes ajustar el offset si lo necesitas
+  >
+    <ScrollView
+      ref={scrollViewRef}
+      contentContainerStyle={styles.chatBox}
+      onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
+      keyboardShouldPersistTaps="handled"
     >
-      <ScrollView
-        ref={scrollViewRef}
-        contentContainerStyle={styles.chatBox}
-        onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
-      >
-        {renderMensajes()}
-      </ScrollView>
+      {renderMensajes()}
+    </ScrollView>
 
-      <View style={styles.inputBox}>
-        
-        <TextInput
-          style={styles.input}
-          value={input}
-          onChangeText={setInput}
-          placeholder="Escribe un mensaje"
-          placeholderTextColor="#aaa"
-          onSubmitEditing={enviar}
-          returnKeyType="send"
-        />
-         <TouchableOpacity onPress={abrirGaleria}>
-          <Text style={styles.enviar}>🖼️</Text>
+    <View style={styles.inputBox}>
+      {imagenPreview && (
+        <TouchableOpacity onPress={() => setImagenPreview(null)}>
+          <Image
+            source={{ uri: imagenPreview }}
+            style={{ width: 40, height: 40, borderRadius: 6, marginRight: 8 }}
+          />
         </TouchableOpacity>
-        <TouchableOpacity onPress={enviar}>
-          <Text style={styles.enviar}>➤</Text>
-        </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
-  );
+      )}
+      <TextInput
+        style={[
+          styles.input,
+          imagenPreview && { marginLeft: 0 } // Ajusta si quieres menos espacio cuando hay imagen
+        ]}
+        value={input}
+        onChangeText={setInput}
+        placeholder="Escribe un mensaje"
+        placeholderTextColor="#aaa"
+        onSubmitEditing={enviar}
+        returnKeyType="send"
+      />
+    <TouchableOpacity onPress={abrirGaleria}>
+  <MaterialCommunityIcons name="image-outline" size={28} color="#00e0ff" />
+</TouchableOpacity>
+      <TouchableOpacity onPress={enviar}>
+        <Text style={styles.enviar}>➤</Text>
+      </TouchableOpacity>
+    </View>
+  </KeyboardAvoidingView>
+);
 }
 
 const styles = StyleSheet.create({
@@ -170,7 +188,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   chatBox: {
-    paddingBottom: 80,
+    paddingBottom: 40,
   },
   mensaje: {
   color: '#e0e0ff',
@@ -200,10 +218,12 @@ mensajeNarrador: {
     borderRadius: 8,
     padding: 10,
     alignItems: 'center',
-    position: 'absolute',
-    bottom: 10,
-    left: 10,
-    right: 10,
+  //  position: 'absolute',
+   // bottom: 10,
+    //left: 10,
+    //right: 10,
+     marginBottom: 5, 
+    
   },
   input: {
     flex: 1,
