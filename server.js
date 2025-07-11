@@ -574,21 +574,6 @@ app.get('/consumirPersonajesTodos', async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // SAGAS
 //insert saga ok!!
 app.post('/insert-saga', async (req, res) => {

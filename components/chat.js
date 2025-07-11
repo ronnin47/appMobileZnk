@@ -7,15 +7,14 @@ import socket from './socket';
 import { AuthContext } from './AuthContext';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
-
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 
 export default function Chat() {
-  const scrollViewRef = useRef();
-  const [input, setInput] = useState('');
-  const [imagenPreview, setImagenPreview] = useState(null);
-  const { historialChat, setHistorialChat, userToken, personajeActual, estatus } = useContext(AuthContext);
+const scrollViewRef = useRef();
+const [input, setInput] = useState('');
+const [imagenPreview, setImagenPreview] = useState(null);
+const { historialChat, setHistorialChat, userToken, personajeActual, estatus } = useContext(AuthContext);
 
   
 const usuarioId = userToken ? userToken.split("-")[1] : null;
@@ -27,7 +26,63 @@ useEffect(() => {
     }
   }, [historialChat]);
 
-  const enviar = async () => {
+
+
+//***********ACA ESTAMOS TRABAJANDO ********************************* */
+
+const activarTirada = (mensaje) => {
+  if (!mensaje.includes('#')) return mensaje;
+
+  const partes = mensaje.split('#');
+  const textoAntes = partes[0].trim();
+  const contenidoTirada = partes.slice(1).join('#').trim();
+
+  const normalizado = contenidoTirada.replace(/\s+/g, '');
+  const regex = /([+-]?)(\d+)(d(\d+))?/gi;
+
+  let totalFinal = 0;
+  let resultadoTexto = '';
+  let match;
+  let esPrimero = true;
+
+  while ((match = regex.exec(normalizado)) !== null) {
+    const signoStr = match[1] || '+';
+    const signo = signoStr === '-' ? -1 : 1;
+    const cantidad = parseInt(match[2], 10);
+    const esDado = !!match[3];
+    const caras = parseInt(match[4], 10);
+
+    const prefix = esPrimero
+      ? ''
+      : signo === 1
+        ? '+ '
+        : '- ';
+
+    if (esDado) {
+      const tiradas = [];
+      for (let i = 0; i < cantidad; i++) {
+        const resultado = Math.floor(Math.random() * caras) + 1;
+        tiradas.push(resultado);
+      }
+      const suma = tiradas.reduce((a, b) => a + b, 0) * signo;
+      totalFinal += suma;
+      resultadoTexto += `${prefix}${cantidad}d${caras} → [${tiradas.join(', ')}] `;
+    } else {
+      const modificador = cantidad * signo;
+      totalFinal += modificador;
+      resultadoTexto += `${prefix}${Math.abs(modificador)} `;
+    }
+
+    esPrimero = false;
+  }
+
+  if (!resultadoTexto) return mensaje;
+
+  return `${textoAntes} ${resultadoTexto.trim()}\nTotal final: ${totalFinal}`;
+};
+
+
+const enviar = async () => {
   // Si hay imagen para enviar
   if (imagenPreview) {
     try {
@@ -56,12 +111,20 @@ useEffect(() => {
 
   // Si hay texto para enviar
   if (input.trim()) {
+
+    
+    //aca estamos*******************
+    const mensaje=activarTirada(input)
+
+
+
+
     const msgEnviar = {
       id: Date.now().toString() + Math.random().toString(36).substring(2),
       usuarioId: Number(usuarioId),
       idpersonaje: personajeActual?.idpersonaje || 0,
       nombre: personajeActual?.nombre || estatus,
-      mensaje: input,
+      mensaje: mensaje,
       estatus: estatus,
     };
 
@@ -69,8 +132,6 @@ useEffect(() => {
     setInput('');
   }
 };
-
-
 
 
   const abrirGaleria = async () => {
@@ -89,8 +150,12 @@ useEffect(() => {
 };
 
 const renderMensajes = () => {
+
   return historialChat.map((item, index) => {
+
     const esPropio = item.usuarioId == usuarioId;
+
+
     const esNarrador = item.estatus === 'narrador';
 
     const estilos = [styles.mensaje];

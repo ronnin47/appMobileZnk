@@ -35,6 +35,7 @@ export const BarraKen = ({ pj, ken,setKen }) => {
       }
 
       const msgEnviar = {
+        usuarioId:p.usuarioId,
         idpersonaje: p.idpersonaje,
         nombre: nombre,
         kenActual: newValue,

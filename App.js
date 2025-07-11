@@ -4,7 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Image, Text, View } from 'react-native';
+import { Image, Text, View, StyleSheet } from 'react-native';
 
 import { AuthContext } from './components/AuthContext'; // <-- IMPORTAR EL CONTEXTO
 import { Provider as PaperProvider } from 'react-native-paper';
@@ -158,25 +158,30 @@ const TabNavigator = () => {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: 'tomato',
-        tabBarInactiveTintColor: 'gray',
+         tabBarActiveTintColor: 'white',
+          tabBarInactiveTintColor: 'gray',
+          tabBarStyle: {
+            backgroundColor: 'black',
+           borderTopColor: 'white',
+           borderTopWidth: 0.5,
+          },
         headerShown: true,
         headerTitleAlign: 'center',
         headerStyle: {
-          backgroundColor: 'white',
+          backgroundColor: '#121212',
         },
-        headerTintColor: 'black',
+        headerTintColor: 'white',
         headerTitleStyle: {
           fontWeight: 'bold',
         },
         headerTitle: () => (
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <View style={styles.nav}>
             <Image
               source={require('./assets/mitamaDorada.png')}
               style={{ width: 40, height: 40, marginRight: 10 }}
               resizeMode="contain"
             />
-            <Text style={{ fontWeight: 'bold', fontSize: 18, color: 'black' }}>
+            <Text style={styles.tituloNav}>
               {route.name}
             </Text>
           </View>
@@ -191,3 +196,16 @@ const TabNavigator = () => {
     </Tab.Navigator>
   );
 };
+const styles = StyleSheet.create({
+  tituloNav: {
+    color:"white",
+      fontWeight: 'bold',
+      fontSize:18,
+
+  },
+  nav:{
+    flexDirection:"row",
+    alignItems:"center",
+  }
+  
+});

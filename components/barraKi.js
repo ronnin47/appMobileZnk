@@ -38,6 +38,7 @@ export const BarraKi = ({ pj,ki,setKi }) => {
       }
 
       const msgEnviar = {
+          usuarioId:p.usuarioId,
         idpersonaje: p.idpersonaje,
         nombre: nombre,
         kiActual: newValue,

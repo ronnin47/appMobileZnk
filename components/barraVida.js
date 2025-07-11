@@ -300,10 +300,11 @@ const agregarDamage = async () => {
         message = `    VITALIDAD: ${newDamage} / ${vidaTotal}     ${estadoDeFaseActual}  ${estadoSalud}`;
     }
   
-  
+     
    
      // Emitiendo el objeto con idpersonaje, kenActual y ken
       const msgEnviar = {
+        usuarioId:p.usuarioId,
         idpersonaje: p.idpersonaje,    
         nombre:nombre,
         vidaActual: newDamage,         
