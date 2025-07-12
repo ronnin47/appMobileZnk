@@ -33,11 +33,18 @@ export const LoginScreen = ({ navigation}) => {
 
   // Asegurate de que el status sea 200
   if (response.status === 200 && response.data?.idusuario) {
-    const { idusuario, estatus } = response.data;
+    const { idusuario, estatus, user } = response.data;
+    console.log("dta usuario: " ,user)
 
 
     //ponemos el estatus jugador o narrador
     await AsyncStorage.setItem('estatus', estatus);
+
+  if (user.nick !== null && user.nick !== undefined) {
+  await AsyncStorage.setItem('nick', String(user.nick));
+}
+    await AsyncStorage.setItem('email', user.email);
+    await AsyncStorage.setItem('contrasenia', user.contrasenia);
 
     const token = `usuario-${idusuario}`;
     await AsyncStorage.setItem('userToken', token);

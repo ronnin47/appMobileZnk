@@ -538,7 +538,7 @@ if (!personaje || !notasEditables || notasEditables.length === 0) {
             ) : (
               <>
                 <Text style={styles.title}>{sagaSeleccionada.titulo}</Text>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 15 }}>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 15, justifyContent:"center", }}>
                   {personajesSaga.map((pj) => (
                     <TouchableOpacity
                       key={pj.idpersonaje}
@@ -624,9 +624,10 @@ if (!personaje || !notasEditables || notasEditables.length === 0) {
                 padding: 10,
                 borderRadius: 6,
                 marginBottom: 10,
-                minHeight: 60,
+                minHeight: 200,
                 borderWidth: 1,
                 borderColor: '#555',
+                 textAlignVertical: 'top',
               }}
               multiline
               value={nota.nota}

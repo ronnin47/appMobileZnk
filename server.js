@@ -218,6 +218,7 @@ app.post('/loginUsuario', async (req, res) => {
       //personajes: personajesResult.rows, 
       idusuario: idusuario,
       estatus: estatus,
+      user:user,
     });
 
   } catch (error) {
@@ -859,6 +860,49 @@ app.put('/personajes/:idpersonaje/notasaga', async (req, res) => {
     res.status(500).json({ error: 'Error en el servidor' });
   }
 });
+
+
+
+
+
+
+app.put('/updateUsuarios/:usuarioId', async (req, res) => {
+  const usuarioId = req.params.usuarioId;
+  const { nick, email, contrasenia } = req.body;
+
+  if (!usuarioId) {
+    return res.status(400).json({ error: 'ID de usuario es obligatorio' });
+  }
+
+  if (typeof nick !== 'string' || typeof email !== 'string' || typeof contrasenia !== 'string') {
+    return res.status(400).json({ error: 'Datos inválidos' });
+  }
+
+  try {
+    const query = `
+      UPDATE usuarios
+      SET nick = $1,
+          email = $2,
+          contrasenia = $3
+      WHERE idusuario = $4
+      RETURNING *;
+    `;
+
+    const values = [nick, email, contrasenia, usuarioId];
+
+    const result = await pool.query(query, values);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    res.status(200).json({ mensaje: 'Usuario actualizado', usuario: result.rows[0] });
+  } catch (error) {
+    console.error('Error actualizando usuario:', error);
+    res.status(500).json({ error: 'Error del servidor' });
+  }
+});
+
 
 
 

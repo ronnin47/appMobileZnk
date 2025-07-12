@@ -7,7 +7,6 @@ import {
   StyleSheet,
 } from "react-native";
 
-// Función simple para comparar arrays de objetos según los campos que usás
 const areArraysEqual = (a, b) => {
   if (a.length !== b.length) return false;
   for (let i = 0; i < a.length; i++) {
@@ -16,7 +15,8 @@ const areArraysEqual = (a, b) => {
     if (
       objA.nombre !== objB.nombre ||
       objA.presentacion !== objB.presentacion ||
-      objA.sistema !== objB.sistema
+      objA.sistema !== objB.sistema ||
+      objA.check !== objB.check
     ) {
       return false;
     }
@@ -35,16 +35,26 @@ export const Item = ({ id, itemValues, handleItemChange }) => {
 
   return (
     <View style={styles.itemContainer}>
-      <TextInput
-        style={styles.inputNombre}
-        value={itemValues.nombre}
-        onChangeText={(text) => handleChange("nombre", text)}
-        placeholder="Nombre"
-        placeholderTextColor="#aaa"
-        multiline
-        numberOfLines={2}
-        textAlignVertical="top"
-      />
+      <View style={styles.nombreCheckContainer}>
+        <TextInput
+          style={styles.inputNombreFlex}
+          value={itemValues.nombre}
+          onChangeText={(text) => handleChange("nombre", text)}
+          placeholder="Nombre"
+          placeholderTextColor="#aaa"
+          multiline
+          numberOfLines={2}
+          textAlignVertical="top"
+        />
+        <TouchableOpacity
+          onPress={() => handleChange("check", !itemValues.check)}
+          style={styles.checkContainer}
+        >
+          <Text style={{ color: itemValues.check ? 'lime' : '#ccc', fontSize: 16 }}>
+            {itemValues.check ? '✅' : '⬜'}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       <TextInput
         style={[styles.textarea, { height: Math.max(40, heightPresentacion) }]}
@@ -82,6 +92,7 @@ export const TecnicaEspecial = ({ tecEspecial, setTecEspecial }) => {
             nombre: item.nombre || "",
             presentacion: item.presentacion || "",
             sistema: item.sistema || "",
+            check: item.check ?? false,
           },
         }))
       : []
@@ -95,6 +106,7 @@ export const TecnicaEspecial = ({ tecEspecial, setTecEspecial }) => {
           nombre: item.nombre || "",
           presentacion: item.presentacion || "",
           sistema: item.sistema || "",
+          check: item.check ?? false,
         },
       }));
 
@@ -128,7 +140,12 @@ export const TecnicaEspecial = ({ tecEspecial, setTecEspecial }) => {
   const btnAgregarItem = () => {
     const newItem = {
       id: items.length,
-      values: { nombre: "", presentacion: "", sistema: "" },
+      values: {
+        nombre: "",
+        presentacion: "",
+        sistema: "",
+        check: false,
+      },
     };
     const newItems = [...items, newItem];
     setItems(newItems);
@@ -209,14 +226,21 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 12,
   },
-  inputNombre: {
+  nombreCheckContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  inputNombreFlex: {
     backgroundColor: "#222",
     color: "yellow",
     fontFamily: "Comic Sans MS",
     fontSize: 18,
     padding: 8,
     borderRadius: 6,
-    marginBottom: 12,
+    flex: 1,
+    marginRight: 10,
     minHeight: 40,
     textAlignVertical: "top",
   },
@@ -246,5 +270,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 18,
   },
+  checkContainer: {
+    backgroundColor: "#1a1a1a",
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 6,
+  },
 });
-

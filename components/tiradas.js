@@ -180,7 +180,7 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen }) => {
      <ChatTiradas p={p}/>
 
       <ScrollView style={styles.container}>
-        <Text style={styles.titulo}>Tiradas</Text>
+      
 
         <TextInput
           style={styles.input}

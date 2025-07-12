@@ -173,7 +173,7 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
 
   const universoCelesteItems = [
     { id: 'ranking', nombre: 'Ranking', imagen: require('../assets/ranker.jpg') },
-    { id: 'otro1', nombre: 'Mundo 1', imagen: require('../assets/imagenBase.jpeg') },
+    { id: 'poderesUnicos', nombre: 'Poderes Unicos', imagen: require('../assets/tecnicaEspecial.jpg') },
     { id: 'otro2', nombre: 'Mundo 2', imagen: require('../assets/imagenBase.jpeg') },
   ];
   return (
@@ -188,12 +188,19 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
         <View style={styles.tituloYBotonContainer}>
           <Text style={styles.tituloSeccion}>Mis Personajes</Text>
 
-          <TouchableOpacity
-            style={styles.botonCrear}
-            onPress={crearFichaPersonaje}
-          >
-            <Text style={styles.textoBoton}>+ Crear Ficha</Text>
-          </TouchableOpacity>
+
+
+           <TouchableOpacity onPress={crearFichaPersonaje} activeOpacity={0.8} style={styles.botonWrapper}>
+              <LinearGradient
+                colors={['#f6f7f8', '#d9d9d9', '#a3a3a3', '#eaeaea']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.botonCrear}
+              >
+                <Text style={styles.textoBoton}>+ Crear Ficha</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+         
         </View>
 
        
@@ -213,7 +220,9 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
           onPress={() => {
             if (item.id === 'ranking') {
               navigation.navigate('Ranking');
-            } else {
+            } else if(item.id=="poderesUnicos") {
+               navigation.navigate('Poderes Unicos');
+            }else {
               alert(`Seleccionaste ${item.nombre}`);
             }
           }}

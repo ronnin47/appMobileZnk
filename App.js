@@ -21,7 +21,7 @@ import { PantallaDeslizable } from './components/pantallaDeslizable';
 import { AuthProvider } from './components/AuthProvider';
 import { Ranking } from './components/ranking';
 import { Sagas } from './components/sagas';
-
+import { PoderesUnicos } from './components/poderesUnicos';
 
 
 
@@ -117,6 +117,7 @@ const MainStack = () => {
          <Stack.Screen name="Ranking" component={Ranking} />
           <Stack.Screen name="Sagas" component={Sagas} />
           <Stack.Screen name="Nuevo" component={Nuevo} />
+          <Stack.Screen name="Poderes Unicos" component={PoderesUnicos} />
 
       
     </Stack.Navigator>

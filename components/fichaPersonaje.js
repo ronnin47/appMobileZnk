@@ -241,9 +241,9 @@ const guardarCambiosBBDD = async () => {
     });
 
 
-    console.log('Cambios guardados exitosamente:', response.data);
-    console.log("vamos a ver que devuelve en imagenurl: ",response.data.imagenurl)
-    console.log("vamos a ver que devuelve en imagenurl: ",response.data.idpersonaje)
+    //console.log('Cambios guardados exitosamente:', response.data);
+    //console.log("vamos a ver que devuelve en imagenurl: ",response.data.imagenurl)
+    //console.log("vamos a ver que devuelve en imagenurl: ",response.data.idpersonaje)
     
     if (response.data.imagenurl) {
       // Actualizás la imagen en el estado global personajes
@@ -1087,6 +1087,9 @@ const styles = StyleSheet.create({
   borderRadius: 8,
   alignSelf: 'center', // lo centra horizontalmente
   marginTop: 12,
+  borderWidth: 1,
+  borderColor: 'white',
+  
 },
 
 textoBoton: {

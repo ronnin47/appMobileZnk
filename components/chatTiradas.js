@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: 200,
+    height: 270,
     backgroundColor: "#111827",
     paddingHorizontal: 10,
     paddingVertical: 8,
