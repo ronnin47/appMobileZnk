@@ -9,6 +9,13 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
+import { PinchGestureHandler } from 'react-native-gesture-handler';
+import Animated, {
+  useAnimatedGestureHandler,
+  useAnimatedStyle,
+  useSharedValue,
+} from 'react-native-reanimated';
+
 export default function Chat() {
   const scrollViewRef = useRef();
   const [input, setInput] = useState('');
@@ -23,6 +30,26 @@ export default function Chat() {
       scrollViewRef.current.scrollToEnd({ animated: true });
     }
   }, [historialChat]);
+
+  // Variables para mantener escala acumulada y punto inicial
+  const scale = useSharedValue(1);
+  const savedScale = useSharedValue(1);
+
+  const pinchHandler = useAnimatedGestureHandler({
+    onStart: (event, context) => {
+      context.startScale = savedScale.value;
+    },
+    onActive: (event, context) => {
+      scale.value = context.startScale * event.scale;
+    },
+    onEnd: () => {
+      savedScale.value = scale.value;
+    },
+  });
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
 
   const activarTirada = (mensaje) => {
     if (!mensaje.includes('#')) return mensaje;
@@ -227,33 +254,53 @@ export default function Chat() {
         </TouchableOpacity>
       </View>
 
-      {/* Modal para imagen ampliada */}
-      {imagenAmpliada && (
-        <View style={{
-          position: 'absolute',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.95)',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 999,
-        }}>
-          <TouchableOpacity
-            onPress={() => setImagenAmpliada(null)}
-            style={{
-              position: 'absolute',
-              top: 40,
-              right: 20,
-              zIndex: 1000,
-              backgroundColor: 'rgba(255, 255, 255, 0.2)',
-              borderRadius: 20,
-              padding: 2,
-            }}
-          >
-            <MaterialCommunityIcons name="close-circle" size={36} color="white" />
-          </TouchableOpacity>
-          <Image source={{ uri: imagenAmpliada }} style={{ width: '90%', height: '70%', resizeMode: 'contain' }} />
-        </View>
-      )}
+      {/* Modal para imagen ampliada con zoom */}
+     {imagenAmpliada && (
+  <ScrollView
+    style={{
+      position: 'absolute',
+      top: 0, left: 0, right: 0, bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.95)',
+      zIndex: 999,
+    }}
+    contentContainerStyle={{
+      flexGrow: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingVertical: 60,
+    }}
+  >
+    <TouchableOpacity
+      onPress={() => {
+        setImagenAmpliada(null);
+        scale.value = 1;
+        savedScale.value = 1;
+      }}
+      style={{
+        position: 'absolute',
+        top: 40,
+        right: 20,
+        zIndex: 1000,
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        borderRadius: 20,
+        padding: 2,
+      }}
+    >
+      <MaterialCommunityIcons name="close-circle" size={36} color="white" />
+    </TouchableOpacity>
+
+    <PinchGestureHandler onGestureEvent={pinchHandler}>
+      <Animated.Image
+        source={{ uri: imagenAmpliada }}
+        style={[{
+          width: '90%',
+          height: 500, // Altura fija o relativa si preferís
+          resizeMode: 'contain',
+        }, animatedStyle]}
+      />
+    </PinchGestureHandler>
+  </ScrollView>
+)}
 
     </KeyboardAvoidingView>
   );
@@ -288,7 +335,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#333',
     color: 'yellow',
     fontStyle: 'italic',
-
   },
   inputBox: {
     flexDirection: 'row',
