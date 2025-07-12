@@ -34,15 +34,24 @@ export const LoginScreen = ({ navigation}) => {
   // Asegurate de que el status sea 200
   if (response.status === 200 && response.data?.idusuario) {
     const { idusuario, estatus, user } = response.data;
-    console.log("dta usuario: " ,user)
-
-
-    //ponemos el estatus jugador o narrador
+    //console.log("dta usuario: " ,user)
+    
     await AsyncStorage.setItem('estatus', estatus);
 
-  if (user.nick !== null && user.nick !== undefined) {
-  await AsyncStorage.setItem('nick', String(user.nick));
-}
+    if (user.nick !== null && user.nick !== undefined) {
+      await AsyncStorage.setItem('nick', String(user.nick));
+    }
+
+    await AsyncStorage.setItem(
+      'imagenurl',
+      user.imagenurl != null ? String(user.imagenurl) : ''
+    );
+
+    await AsyncStorage.setItem(
+      'imagencloudid',
+      user.imagencloudid != null ? String(user.imagencloudid) : ''
+    );
+
     await AsyncStorage.setItem('email', user.email);
     await AsyncStorage.setItem('contrasenia', user.contrasenia);
 
@@ -51,7 +60,6 @@ export const LoginScreen = ({ navigation}) => {
     await AsyncStorage.setItem('userId', idusuario.toString());
 
     setUserToken(token);
-
     setEstatus(estatus);
 
     const personajesRes = await axios.get('http://192.168.0.38:3000/consumirPersonajesUsuario', {

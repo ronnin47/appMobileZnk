@@ -15,6 +15,9 @@ export const AuthProvider = ({ children }) => {
   const [email,setEmail]=useState(null)
   const [contrasenia,setContrasenia]=useState(null)
   const [nick,setNick]=useState(null)
+  const [imagenurl,setImagenurl]=useState(null)
+  const [imagencloudid, setImagencloudid]=useState(null)
+
 
   const [isLoading, setIsLoading] = useState(true);
   const [personajes, setPersonajes] = useState([]);
@@ -41,6 +44,8 @@ export const AuthProvider = ({ children }) => {
           const email = await AsyncStorage.getItem('email');
           const contrasenia = await AsyncStorage.getItem('contrasenia');
           const nick = await AsyncStorage.getItem('nick');
+          const imagenurl= await AsyncStorage.getItem("imagenurl");
+          const imagencloudid= await AsyncStorage.getItem("imagencloudid");
 
 
 
@@ -52,6 +57,8 @@ export const AuthProvider = ({ children }) => {
           setEmail(email);
           setContrasenia(contrasenia);
           setNick(nick);
+          setImagenurl(imagenurl);
+          setImagencloudid(imagencloudid);
 
           const usuarioIdStr = await AsyncStorage.getItem('userId');
           const usuarioId = usuarioIdStr ? parseInt(usuarioIdStr, 10) : null;
@@ -224,12 +231,17 @@ socket.on('chat-chat', handleMensaje);
     await AsyncStorage.removeItem('nick');
     await AsyncStorage.removeItem('email');
     await AsyncStorage.removeItem('contrasenia');
+    await AsyncStorage.removeItem('imagenurl');
+    await AsyncStorage.removeItem('imagencloudid');
+    
     setPersonajes([]);
      
     setEstatus(null);
     setEmail(null);
     setContrasenia(null);
     setNick(null);
+    setImagenurl(null);
+    setImagencloudid(null);
   };
 
 const consumir = async () => {
@@ -260,7 +272,7 @@ const consumir = async () => {
 
 
 
- const cambiosUsuario = async ({ nuevoNick, nuevoEmail, nuevaContrasenia, usuarioId }) => {
+ const cambiosUsuario = async ({ nuevoNick, nuevoEmail, nuevaContrasenia, usuarioId,nuevaImagenurl }) => {
  if (!usuarioId || usuarioId.toString().trim() === '') {
   Alert.alert('Error', 'El ID de usuario es obligatorio.');
   return;
@@ -272,31 +284,45 @@ const consumir = async () => {
       nick: nuevoNick || "",
       email: nuevoEmail,
       contrasenia: nuevaContrasenia,
+      imagenurl:nuevaImagenurl,
     });
 
     if (response.status === 200) {
-      // Actualizamos el estado local sólo si la petición fue exitosa
-      setNick(nuevoNick || "");
-      setEmail(nuevoEmail);
-      setContrasenia(nuevaContrasenia);
+  const {
+    nick,
+    email,
+    contrasenia,
+    imagenurl: serverImagenurl,
+    imagencloudid: serverImagencloudid,
+  } = response.data;
 
-      // Guardamos en AsyncStorage
-      await AsyncStorage.setItem('nick', nuevoNick);
-      await AsyncStorage.setItem('email', nuevoEmail);
-      await AsyncStorage.setItem('contrasenia', nuevaContrasenia);
+  const imagenFinal = serverImagenurl || "";
+  const cloudIdFinal = serverImagencloudid || "";
 
-      
-      console.log("guardado en el storage exitoso y servidor actualizado");
-      setTimeout(() => {
-            showMessage({
-              message: 'Cambios guardados',
-              description: 'Tus datos se han actualizado correctamente.',
-              type: 'success',
-              icon: 'success',
-              duration: 3000
-            });
-          }, 500);
-    } else {
+  setNick(nick || "");
+  setEmail(email);
+  setContrasenia(contrasenia);
+  setImagenurl(imagenFinal);
+  setImagencloudid(cloudIdFinal);
+
+  // Guardamos en AsyncStorage
+  await AsyncStorage.setItem('nick', nick || "");
+  await AsyncStorage.setItem('email', email);
+  await AsyncStorage.setItem('contrasenia', contrasenia);
+  await AsyncStorage.setItem('imagenurl', imagenFinal);
+  await AsyncStorage.setItem('imagencloudid', cloudIdFinal);
+  
+  console.log("guardado en el storage exitoso y servidor actualizado");
+  setTimeout(() => {
+    showMessage({
+      message: 'Cambios guardados',
+      description: 'Tus datos se han actualizado correctamente.',
+      type: 'success',
+      icon: 'success',
+      duration: 3000
+    });
+  }, 500);
+}else {
       Alert.alert('Error', 'No se pudo actualizar el perfil en el servidor.');
     }
   } catch (error) {
@@ -332,6 +358,10 @@ const consumir = async () => {
         nick,
         setNick,
         cambiosUsuario,
+        imagenurl,
+        setImagenurl,
+        imagencloudid,
+        setImagencloudid,
       }}
     >
       {children}

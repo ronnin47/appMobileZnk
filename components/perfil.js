@@ -7,35 +7,74 @@ import {
   TouchableOpacity,
   Alert,
   ScrollView,
+  Image,
 } from 'react-native';
 
+import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from './AuthContext';
 
 export default function Perfil() {
   const {
     userToken,
-    actualizarNombreUsuario,
     estatus,
     email,
     contrasenia,
     nick,
-    setUserToken,
+    imagenurl,
+    imagencloudid,
     setEstatus,
     cambiosUsuario,
   } = useContext(AuthContext);
 
   const [nombreUsuario, setNombreUsuario] = useState(nick || '');
   const [emailEditable, setEmailEditable] = useState(email || '');
-
   const [contraseniaEditable, setContraseniaEditable] = useState(contrasenia || '');
-  const [mostrarContrasenia, setMostrarContrasenia] = useState(false); // 👁 estado nuevo
+  const [mostrarContrasenia, setMostrarContrasenia] = useState(false);
+  const [imagen, setImagen] = useState(null); // ✅ agregado
   const usuarioId = userToken ? userToken.split("-")[1] : null;
- 
+
+  const imagenBase = require('../assets/imagenBase.jpeg');
+
+  const getImageSource = () => {
+    if (imagen && imagen.startsWith('data:image')) {
+      return { uri: imagen };
+    } else if (imagenurl && typeof imagenurl === 'string') {
+      return { uri: imagenurl };
+    } else {
+      return imagenBase;
+    }
+  };
+
+  const seleccionarImagen = async () => {
+    const resultado = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+      base64: true,
+    });
+
+    if (!resultado.canceled) {
+      const { uri, base64 } = resultado.assets[0];
+      const extension = uri.split('.').pop().split('?')[0] || 'jpg';
+      const imagenEnBase64 = `data:image/${extension};base64,${base64}`;
+      setImagen(imagenEnBase64); // ✅ imagen lista
+      console.log("Imagen base64 lista para guardar.");
+    }
+  };
+
+  const nuevaImagenurl = imagen || imagenurl; // ✅ agregado
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.card}>
+        <View style={styles.imageContainer}>
+          <Image source={getImageSource()} style={styles.imagen} resizeMode="cover" />
+          <TouchableOpacity onPress={seleccionarImagen} style={{ marginTop: 10 }}>
+            <Text style={{ color: 'cyan' }}>Cambiar imagen</Text>
+          </TouchableOpacity>
+        </View>
+
         <Text style={styles.label}>🧾 Estatus</Text>
         <Text style={styles.valor}>{estatus || 'Desconocido'}</Text>
 
@@ -53,7 +92,7 @@ export default function Perfil() {
         <Text style={styles.label}>🔒 Contraseña</Text>
         <View style={styles.inputContainer}>
           <TextInput
-            style={[styles.input, { flex: 1, marginTop: 1, borderWidth:0, }]}
+            style={[styles.input, { flex: 1, marginTop: 1, borderWidth: 0 }]}
             value={contraseniaEditable}
             onChangeText={setContraseniaEditable}
             placeholder="Ingresa tu contraseña"
@@ -87,6 +126,7 @@ export default function Perfil() {
               nuevoEmail: emailEditable,
               nuevaContrasenia: contraseniaEditable,
               usuarioId,
+              nuevaImagenurl,
             })
           }
         >
@@ -165,5 +205,17 @@ const styles = StyleSheet.create({
     color: '#000',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+   imageContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  imagen: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 2,
+    borderColor: '#00FFC6',
+    backgroundColor: '#2c2c2c',
   },
 });

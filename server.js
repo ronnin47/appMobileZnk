@@ -868,35 +868,82 @@ app.put('/personajes/:idpersonaje/notasaga', async (req, res) => {
 
 app.put('/updateUsuarios/:usuarioId', async (req, res) => {
   const usuarioId = req.params.usuarioId;
-  const { nick, email, contrasenia } = req.body;
+  const { nick, email, contrasenia, imagenurl } = req.body;
 
   if (!usuarioId) {
     return res.status(400).json({ error: 'ID de usuario es obligatorio' });
   }
 
-  if (typeof nick !== 'string' || typeof email !== 'string' || typeof contrasenia !== 'string') {
+  if (
+    typeof nick !== 'string' ||
+    typeof email !== 'string' ||
+    typeof contrasenia !== 'string'
+  ) {
     return res.status(400).json({ error: 'Datos inválidos' });
   }
 
+  let imagenUrlFinal = null;
+  let imagenCloudIdFinal = null;
+
   try {
-    const query = `
+    // 1. Si la imagen viene en base64, subir a Cloudinary
+    if (imagenurl && imagenurl.startsWith('data:image/')) {
+      const matches = imagenurl.match(/^data:image\/(\w+);base64,(.+)$/);
+      if (!matches) {
+        return res.status(400).json({ error: 'Imagen base64 inválida.' });
+      }
+
+      const ext = matches[1];
+      const data = matches[2];
+
+      const uploadResult = await cloudinary.uploader.upload(`data:image/${ext};base64,${data}`, {
+        folder: 'usuarios',
+        public_id: `usuario_${usuarioId}`,
+        overwrite: true,
+      });
+
+      imagenUrlFinal = uploadResult.secure_url;
+      imagenCloudIdFinal = uploadResult.public_id;
+    }
+
+    // 2. Armar consulta de actualización
+    let updateQuery = `
       UPDATE usuarios
       SET nick = $1,
           email = $2,
           contrasenia = $3
-      WHERE idusuario = $4
-      RETURNING *;
     `;
 
-    const values = [nick, email, contrasenia, usuarioId];
+    const values = [nick, email, contrasenia];
+    let paramIndex = 4;
 
-    const result = await pool.query(query, values);
+    if (imagenUrlFinal && imagenCloudIdFinal) {
+      updateQuery += `, imagenurl = $${paramIndex}, imagencloudid = $${paramIndex + 1}`;
+      values.push(imagenUrlFinal, imagenCloudIdFinal);
+      paramIndex += 2;
+    }
+
+    updateQuery += ` WHERE idusuario = $${paramIndex} RETURNING *`;
+    values.push(usuarioId);
+
+    const result = await pool.query(updateQuery, values);
 
     if (result.rowCount === 0) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    res.status(200).json({ mensaje: 'Usuario actualizado', usuario: result.rows[0] });
+    // 3. Asegurar consistencia en los datos retornados
+    const usuarioActualizado = result.rows[0];
+
+    res.status(200).json({
+      mensaje: 'Usuario actualizado',
+      nick: usuarioActualizado.nick,
+      email: usuarioActualizado.email,
+      contrasenia: usuarioActualizado.contrasenia,
+      imagenurl: usuarioActualizado.imagenurl || "",
+      imagencloudid: usuarioActualizado.imagencloudid || "",
+    });
+
   } catch (error) {
     console.error('Error actualizando usuario:', error);
     res.status(500).json({ error: 'Error del servidor' });
