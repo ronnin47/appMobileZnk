@@ -4,9 +4,13 @@ import { AuthContext } from './AuthContext';
 import socket from './socket';
 import { LinearGradient } from 'expo-linear-gradient';
 
-export const BarraKi = ({ pj,ki,setKi, kiActual,setKiActual }) => {
+export const BarraKi = ({ pj,ki,setKi, kiActual,setKiActual,consumision,setConsumision }) => {
   const { personajes, savePersonajes,estatus } = useContext(AuthContext);
   const p = personajes.find(p => p.idpersonaje === pj.idpersonaje);
+
+
+
+  console.log("el valor de consumision es: ",consumision)
 
   const [nombre, setNombre] = useState(p.nombre);
   //este se anulo de aca porque los state estan en el componenete PantallaDeslizable
@@ -14,7 +18,7 @@ export const BarraKi = ({ pj,ki,setKi, kiActual,setKiActual }) => {
   const [fortaleza, setFortaleza] = useState(p.fortaleza != null ? String(p.fortaleza) : '');
   //const [kiActual, setKiActual] = useState(p.kiActual != null ? String(p.kiActual) : '');
   const [consumir, setConsumir] = useState("0");
-  const [consumision, setConsumision] = useState(p.consumision != null ? String(p.consumision) : '');
+  //const [consumision, setConsumision] = useState(p.consumision != null ? String(p.consumision) : '');
 
 
 
@@ -70,6 +74,9 @@ export const BarraKi = ({ pj,ki,setKi, kiActual,setKiActual }) => {
     guardarCambios();
   }, [ki, kiActual, consumision]);
 
+
+
+  
   return (
    <View style={styles.container}>
    

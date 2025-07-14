@@ -382,6 +382,7 @@ app.post('/insert-personaje', async (req, res) => {
 //OK!!
 app.put('/update-personaje/:id', async (req, res) => {
   const idpersonaje = req.params.id;
+  console.log("se disparo")
   
 
   const {
@@ -399,7 +400,7 @@ app.put('/update-personaje/:id', async (req, res) => {
   } = req.body;
 
 
-  console.log(" los cambios de vida actual: ",vidaActual)
+  
   try {
     let imagenurl = null;
     let imagencloudid = null;

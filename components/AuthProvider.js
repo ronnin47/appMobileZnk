@@ -155,13 +155,6 @@ useEffect(() => {
 }, [userToken]);
 
 
-/*
-socket.on('chat-message', (mensaje) => {
-  console.log('Mensaje recibido en cliente:', mensaje);
-  setHistorialChat(prev => [...prev, mensaje]);
-});
-*/
-
 const handleMensaje = (mensaje) => {
   console.log('🟢 Mensaje recibido en cliente:', mensaje);
   setHistorialChat(prev => [...prev, mensaje]);

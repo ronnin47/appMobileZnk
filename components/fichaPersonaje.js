@@ -18,7 +18,7 @@ import { Historia } from './historia';
 import { TecnicaEspecial } from './tecEpecial';
 
 
-export const FichaPersonaje = ({ pj, ki, setKi, fortaleza, setFortaleza, ken,setKen,eliminarPersonaje,vidaActual,kiActual,kenActual,setVidaActual,setKiActual,setKenActual, }) => {
+export const FichaPersonaje = ({ pj, ki, setKi, fortaleza, setFortaleza, ken,setKen,eliminarPersonaje,vidaActual,kiActual,kenActual,setVidaActual,setKiActual,setKenActual,positiva,setPositiva,negativa,setNegativa,cicatriz,setCicatriz,consumision,setConsumision }) => {
   
   const { personajes, savePersonajes,coleccionPersonajes,saveColeccionPersonajes } = useContext(AuthContext);
  
@@ -106,12 +106,12 @@ export const FichaPersonaje = ({ pj, ki, setKi, fortaleza, setFortaleza, ken,set
 //*********************************************************** 
  // const [kenActual, setKenActual] = useState(p.kenActual != null ? String(p.kenActual) : '');
  // const [kiActual, setKiActual] = useState(p.kiActual != null ? String(p.kiActual) : '');
-  const [positiva, setPositiva] = useState(p.positiva != null ? String(p.positiva) : '');
-  const [negativa, setNegativa] = useState(p.negativa != null ? String(p.negativa) : '');
+ // const [positiva, setPositiva] = useState(p.positiva != null ? String(p.positiva) : '');
+ // const [negativa, setNegativa] = useState(p.negativa != null ? String(p.negativa) : '');
 
   //const [damageActual, setDamageActual] = useState(p.vidaActual);
  // const [vidaActual, setVidaActual] = useState(p.vidaActual != null ? String(p.vidaActual) : '');
-  const [consumision, setConsumision] = useState(p.consumision != null ? String(p.consumision) : '');
+  //const [consumision, setConsumision] = useState(p.consumision != null ? String(p.consumision) : '');
 
   const [apCombate,setApCombate]=useState(p.apCombate);
   const [valCombate, setValCombate] = useState(p.valCombate != null ? String(p.valCombate) : '');
@@ -131,7 +131,7 @@ export const FichaPersonaje = ({ pj, ki, setKi, fortaleza, setFortaleza, ken,set
   const [historia,setHistoria]=useState(p.historia);
   const [tecEspecial,setTecEspecial]=useState(p.tecEspecial);
   const [conviccion,setConviccion]=useState(p.conviccion);
-  const [cicatriz, setCicatriz] = useState(p.cicatriz != null ? String(p.cicatriz) : '');
+  //const [cicatriz, setCicatriz] = useState(p.cicatriz != null ? String(p.cicatriz) : '');
   const [resistencia, setResistencia] = useState(p.resistencia != null ? String(p.resistencia) : '');
   const [pjPnj,setPjPnj]=useState(p.pjPnj);
 

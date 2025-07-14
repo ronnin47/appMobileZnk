@@ -4,9 +4,10 @@ import { AuthContext } from './AuthContext';
 import socket from './socket';
 import { LinearGradient } from 'expo-linear-gradient';
 
-export const BarraVida = ({pj, ki, setKi, fortaleza, setFortaleza, positiva,negativa,cicatriz, vidaActual, setVidaActual,
-}) => {
-const { personajes, savePersonajes,estatus } = useContext(AuthContext);
+export const BarraVida = ({pj, ki, setKi, fortaleza, setFortaleza, positiva, negativa, cicatriz, vidaActual, setVidaActual,}) => {
+
+
+  const { personajes, savePersonajes,estatus } = useContext(AuthContext);
  //aca extrae el personaje
   const p = personajes.find(p => p.idpersonaje === pj.idpersonaje);
 

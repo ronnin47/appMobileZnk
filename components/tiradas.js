@@ -23,7 +23,16 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen,
             kiActual,
             setKiActual,
             vidaActual,
-            setVidaActual }) => {
+            setVidaActual,
+            positiva,
+            setPositiva,
+            negativa,
+            setNegativa,
+            cicatriz,
+            setCicatriz,
+            consumision,
+            setConsumision,
+           }) => {
   
   const { personajes, historialChat, setHistorialChat,savePersonajes,estatus } = useContext(AuthContext);
 
@@ -149,9 +158,9 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen,
 
 
   //aca los states de positiva, negativa, cicatriz
-  const [positiva, setPositiva] = useState(p.positiva != null ? String(p.positiva) : '');
-  const [negativa, setNegativa] = useState(p.negativa != null ? String(p.negativa) : '');
-  const [cicatriz, setCicatriz] = useState(p.cicatriz != null ? String(p.cicatriz) : '');
+ // const [positiva, setPositiva] = useState(p.positiva != null ? String(p.positiva) : '');
+ // const [negativa, setNegativa] = useState(p.negativa != null ? String(p.negativa) : '');
+  //const [cicatriz, setCicatriz] = useState(p.cicatriz != null ? String(p.cicatriz) : '');
 
 //ESTO ES PARA LA LOGICA INTERNA DE GUARDAR sobre el array que esta en el context
     const guardarCambios = () => {
@@ -288,8 +297,10 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen,
             <View>
               <BarraKi 
                 kiActual={Number(kiActual)||0}
-               setKiActual={setKiActual}
-            pj={p} ki={ki} setKi={setKi}></BarraKi>
+                setKiActual={setKiActual}
+                consumision={consumision}
+                setConsumision={setConsumision}
+                pj={p} ki={ki} setKi={setKi}></BarraKi>
             </View>
 
             <View>

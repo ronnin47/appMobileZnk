@@ -31,6 +31,13 @@ const [kenActual, setKenActual] = useState(pj.kenActual != null ? String(pj.kenA
 const [kiActual, setKiActual] = useState(pj.kiActual != null ? String(pj.kiActual) : '');
 const [vidaActual, setVidaActual] = useState(pj.vidaActual != null ? String(pj.vidaActual) : '');
 
+
+  const [positiva, setPositiva] = useState(pj.positiva != null ? String(pj.positiva) : '');
+  const [negativa, setNegativa] = useState(pj.negativa != null ? String(pj.negativa) : '');
+  const [cicatriz, setCicatriz] = useState(pj.cicatriz != null ? String(pj.cicatriz) : '');
+  const [consumision, setConsumision] = useState(pj.consumision != null ? String(pj.consumision) : '');
+
+
   // 🔄 Guardar cambios en el contexto al modificar valores
   const guardarCambios = () => {
     const index = personajes.findIndex(per => per.idpersonaje === pj.idpersonaje);
@@ -45,13 +52,16 @@ const [vidaActual, setVidaActual] = useState(pj.vidaActual != null ? String(pj.v
       vidaActual,
       kiActual,
       kenActual,
+      positiva,
+      negativa,
+      consumision,
     };
     savePersonajes(nuevosPersonajes);
   };
 
   useEffect(() => {
     guardarCambios();
-  }, [ken, ki, fortaleza, vidaActual, kenActual, kiActual]);
+  }, [ken, ki, fortaleza, vidaActual, kenActual, kiActual,positiva,negativa,cicatriz,consumision]);
 
 
 
@@ -122,6 +132,14 @@ const eliminarPersonaje = (idpersonaje) => {
             setKiActual={setKiActual}
             vidaActual={vidaActual}
             setVidaActual={setVidaActual}
+            positiva={positiva}
+            negativa={negativa}
+            setNegativa={setNegativa}
+            setPositiva={setPositiva}
+            cicatriz={cicatriz}
+            setCicatriz={setCicatriz}
+            consumision={consumision}
+            setConsumision={setConsumision}
         />
       </View>
       <View key="2" style={styles.page}>
@@ -140,6 +158,15 @@ const eliminarPersonaje = (idpersonaje) => {
             setKiActual={setKiActual}
             vidaActual={vidaActual}
             setVidaActual={setVidaActual}
+
+            positiva={positiva}
+            negativa={negativa}
+            setNegativa={setNegativa}
+            setPositiva={setPositiva}
+            cicatriz={cicatriz}
+            setCicatriz={setCicatriz}
+            consumision={consumision}
+            setConsumision={setConsumision}
         />
       </View>
     </PagerView>
