@@ -4,32 +4,18 @@ import { AuthContext } from './AuthContext';
 import socket from './socket';
 import { LinearGradient } from 'expo-linear-gradient';
 
-export const BarraVida = ({pj, ki, setKi, fortaleza, setFortaleza,positiva,negativa,cicatriz}) => {
+export const BarraVida = ({pj, ki, setKi, fortaleza, setFortaleza, positiva,negativa,cicatriz, vidaActual, setVidaActual,
+}) => {
 const { personajes, savePersonajes,estatus } = useContext(AuthContext);
  //aca extrae el personaje
   const p = personajes.find(p => p.idpersonaje === pj.idpersonaje);
 
-  //console.log("El persoanje que extraemos es: ",p.nombre)
-   // Normalizar valores que podrían ser NaN o undefined
 
-   //console.log("postiva ",typeof positiva)
-
-  
- 
-  //este se anulo de aca porque los state estan en el componenete PantallaDeslizable
-  //const [ki, setKi] = useState(ki);
-  //const [fortaleza, setFortaleza] = useState(fortaleza);
 //ACA LOS STATES
   const [nombre,setNombre]=useState(p.nombre);
-  /*
-  const [positiva, setPositiva] = useState(p.positiva != null ? String(p.positiva) : '');
-  const [negativa, setNegativa] = useState(p.negativa != null ? String(p.negativa) : '');
-  const [cicatriz, setCicatriz] = useState(p.cicatriz != null ? String(p.cicatriz) : '');
-  */
-  const [vidaActual, setVidaActual] = useState(p.vidaActual != null ? String(p.vidaActual) : '');
+
   const [resistencia, setResistencia] = useState(p.resistencia != null ? String(p.resistencia) : '');
   
-
 
   //se refiere a la cantidad de vida por fase 
   const faseSalud = parseInt(ki) + parseInt(fortaleza);
@@ -42,15 +28,11 @@ const { personajes, savePersonajes,estatus } = useContext(AuthContext);
   const vidaTotal = vidaTotalPositiva + vidaTotalNegativa;
    
 
-  //const damageActual= parseInt(vidaActual)
-
-  const [damageActual, setDamageActual] = useState(parseInt(vidaActual));
-
-  let porcentajeVidaPositivaInicial = (damageActual * 100) / vidaTotalPositiva;
+  let porcentajeVidaPositivaInicial = (vidaActual * 100) / vidaTotalPositiva;
   let porcentajeVidaNegativaInicial = 0;
 
   if (porcentajeVidaPositivaInicial > 100) {
-    porcentajeVidaNegativaInicial = ((damageActual - vidaTotalPositiva) * 100) / vidaTotalNegativa;
+    porcentajeVidaNegativaInicial = ((vidaActual - vidaTotalPositiva) * 100) / vidaTotalNegativa;
     porcentajeVidaPositivaInicial = 100;
     porcentajeVidaNegativaInicial = porcentajeVidaNegativaInicial > 100 ? 100 : porcentajeVidaNegativaInicial;
   }
@@ -63,25 +45,25 @@ const { personajes, savePersonajes,estatus } = useContext(AuthContext);
   
    useEffect(() => {
       const cicatrizValue = parseInt(cicatriz, 10);
-      if (cicatrizValue > 0 && damageActual < cicatrizValue) {
-        setDamageActual(cicatrizValue);
+      if (cicatrizValue > 0 && vidaActual < cicatrizValue) {
+        setVidaActual(cicatrizValue);
       }
-    }, [cicatriz, damageActual]);
+    }, [cicatriz, vidaActual]);
   
     useEffect(() => {
       if (parseInt(cicatriz) > 0) {
-        if (damageActual < parseInt(cicatriz)) {
-          setDamageActual(parseInt(cicatriz));
+        if (vidaActual < parseInt(cicatriz)) {
+          setVidaActual(parseInt(cicatriz));
         }
       }
-    }, [cicatriz, damageActual]);
+    }, [cicatriz, vidaActual]);
 
   useEffect(() => {
     calcularEstadoInicial();
   }, []);
 
   const calcularEstadoInicial = () => {
-    let newDamage = damageActual;
+    let newDamage = vidaActual;
 
     if (newDamage <= vidaTotalPositiva && newDamage >= vidaTotalPositiva - faseSalud) {
       if (newDamage !== 0) {
@@ -143,20 +125,10 @@ const { personajes, savePersonajes,estatus } = useContext(AuthContext);
 
 
 
-
-  //const [animacionActiva, setAnimacionActiva] = useState(true);
-/*
-  const handleChangeCicatriz=(event)=>{
-    setCicatriz(event.target.value);
-   }
-  */ 
-/*************************hasta aca llegue******************************* */
-
-
 const agregarDamage = async () => {
     console.log("FUE DAÑADO POR: ",consumirVida)
     let newValue = parseInt(consumirVida)|| 0;
-    let newDamage = damageActual + newValue;
+    let newDamage = vidaActual + newValue;
   
     console.log("FUNCIONA BOTON: ",consumirVida)
     
@@ -172,7 +144,7 @@ const agregarDamage = async () => {
        newDamage = cicatrizValue;
      }
   
-    setDamageActual(newDamage);
+    setVidaActual(newDamage);
    
     if (newDamage <= vidaTotalPositiva) {
       setPorcentajeVidaPositiva((newDamage * 100) / vidaTotalPositiva);
@@ -319,7 +291,7 @@ const agregarDamage = async () => {
 
 
 
-  const estaMuerto = damageActual > vidaTotal;
+  const estaMuerto = vidaActual> vidaTotal;
 
   const handlePos=(event)=>{
     const newPos=parseInt(event.target.value)
@@ -339,42 +311,7 @@ const agregarDamage = async () => {
    
   }
 
-//ESTO ES PARA LA LOGICA INTERNA DE GUARDAR LOS CAMBIOS EN CON STATES Y UN ARRAY CON USE CONTEXT
- const guardarCambios = () => {
-   
-  const index = personajes.findIndex(per => per.idpersonaje === p.idpersonaje);
-  if (index === -1) return; // por seguridad, si no se encuentra el personaje
- 
-  const nuevosPersonajes = [...personajes];
 
-
-  nuevosPersonajes[index] = {
-    ...nuevosPersonajes[index],
-
-   
-    //positiva:positiva,
-    //negativa:negativa,
-    vidaActual:damageActual,
-    //cicatriz: cicatriz,  
-    resistencia:resistencia,
-  
- 
-  };
-
-  savePersonajes(nuevosPersonajes); 
-}
-
-useEffect(() => {
- guardarCambios();
-}, [ 
-  
-  //positiva,
-  //negativa,
-  damageActual,
- // cicatriz,
-  resistencia,
-]);
-//<Text style={styles.estadoText}>{estadoDeFase}</Text>
 return (
   <View style={styles.container}>
     
@@ -389,21 +326,21 @@ return (
         end={{ x: 1, y: 0 }}
         style={[
           styles.barraRoja,
-          { width: `${Math.min((damageActual / vidaTotalPositiva) * 100, 100)}%` },
+          { width: `${Math.min((vidaActual / vidaTotalPositiva) * 100, 100)}%` },
         ]}
       />
 
       {/* Mostrar texto solo si NO hay daño negativo */}
-      {damageActual <= vidaTotalPositiva && (
+      {vidaActual <= vidaTotalPositiva && (
           <Text style={styles.textoVidaEnBarra}>
-        Vida: {damageActual}/{vidaTotal}{" "}
+        Vida: {vidaActual}/{vidaTotal}{" "}
         <Text style={styles.estadoText}>{estadoDeFase}</Text>
       </Text>
       )}
     </View>
 
     {/* Barra negativa, solo si hay daño más allá de la positiva */}
-    {damageActual > vidaTotalPositiva && (
+    {vidaActual > vidaTotalPositiva && (
       <View style={styles.barraContenedor}>
         <View style={[styles.barraAmarilla, { width: '100%' }]} />
 
@@ -415,7 +352,7 @@ return (
             styles.barraVioleta,
             {
               width: `${Math.min(
-                ((damageActual - vidaTotalPositiva) / vidaTotalNegativa) * 100,
+                ((vidaActual - vidaTotalPositiva) / vidaTotalNegativa) * 100,
                 100
               )}%`,
             },
@@ -424,7 +361,7 @@ return (
 
         {/* Mostrar texto dentro de la barra negativa si hay daño negativo */}
          <Text style={styles.textoVidaEnBarra}>
-        Vida: {damageActual}/{vidaTotal}{" "}
+        Vida: {vidaActual}/{vidaTotal}{" "}
         <Text style={styles.estadoText}>{estadoDeFase}</Text>
       </Text>
       </View>

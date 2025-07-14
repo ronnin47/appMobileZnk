@@ -26,6 +26,11 @@ export const PantallaDeslizable = () => {
   const [fortaleza, setFortaleza] = useState(pj.fortaleza != null ? String(pj.fortaleza) : '');
   const [ken, setKen] = useState(pj.ken != null ? String(pj.ken) : '');
 
+// 📌 Estado actual trabajado con formato unificado también
+const [kenActual, setKenActual] = useState(pj.kenActual != null ? String(pj.kenActual) : '');
+const [kiActual, setKiActual] = useState(pj.kiActual != null ? String(pj.kiActual) : '');
+const [vidaActual, setVidaActual] = useState(pj.vidaActual != null ? String(pj.vidaActual) : '');
+
   // 🔄 Guardar cambios en el contexto al modificar valores
   const guardarCambios = () => {
     const index = personajes.findIndex(per => per.idpersonaje === pj.idpersonaje);
@@ -37,13 +42,16 @@ export const PantallaDeslizable = () => {
       ken,
       ki,
       fortaleza,
+      vidaActual,
+      kiActual,
+      kenActual,
     };
     savePersonajes(nuevosPersonajes);
   };
 
   useEffect(() => {
     guardarCambios();
-  }, [ken, ki, fortaleza]);
+  }, [ken, ki, fortaleza, vidaActual, kenActual, kiActual]);
 
 
 
@@ -106,6 +114,14 @@ const eliminarPersonaje = (idpersonaje) => {
           setFortaleza={setFortaleza}
           ken={ken}
           setKen={setKen}
+
+
+          kenActual={kenActual}
+            setKenActual={setKenActual}
+            kiActual={kiActual}
+            setKiActual={setKiActual}
+            vidaActual={vidaActual}
+            setVidaActual={setVidaActual}
         />
       </View>
       <View key="2" style={styles.page}>
@@ -117,6 +133,13 @@ const eliminarPersonaje = (idpersonaje) => {
           setFortaleza={setFortaleza}
           ken={ken}
           setKen={setKen}
+
+           kenActual={kenActual}
+            setKenActual={setKenActual}
+            kiActual={kiActual}
+            setKiActual={setKiActual}
+            vidaActual={vidaActual}
+            setVidaActual={setVidaActual}
         />
       </View>
     </PagerView>

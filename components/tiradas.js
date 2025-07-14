@@ -17,7 +17,13 @@ const generarNumerosAzarSinRangoMin=(cantidad, rangoMax)=> {
   return numeros;
 }
 
-export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen }) => {
+export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen,
+            kenActual,
+            setKenActual,
+            kiActual,
+            setKiActual,
+            vidaActual,
+            setVidaActual }) => {
   
   const { personajes, historialChat, setHistorialChat,savePersonajes,estatus } = useContext(AuthContext);
 
@@ -272,15 +278,25 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen }) => {
 
         <View style={styles.barras}>
             <View >
-              <BarraVida pj={p} ki={ki} setKi={setKi} fortaleza={fortaleza} setFortaleza={setFortaleza}  positiva={Number(positiva) || 0} negativa={Number(negativa) || 0} cicatriz={Number(cicatriz) || 0}></BarraVida>
+              <BarraVida            setKenActual={setKenActual}
+          
+            vidaActual={Number(vidaActual)||0}
+            setVidaActual={setVidaActual}
+             pj={p} ki={ki} setKi={setKi} fortaleza={fortaleza} setFortaleza={setFortaleza}  positiva={Number(positiva) || 0} negativa={Number(negativa) || 0} cicatriz={Number(cicatriz) || 0}></BarraVida>
             </View>
 
             <View>
-              <BarraKi pj={p} ki={ki} setKi={setKi}></BarraKi>
+              <BarraKi 
+                kiActual={Number(kiActual)||0}
+               setKiActual={setKiActual}
+            pj={p} ki={ki} setKi={setKi}></BarraKi>
             </View>
 
             <View>
-              <BarraKen pj={p} ken={ken} setKen={setKen}></BarraKen>
+              <BarraKen
+              kenActual={Number(kenActual)||0}
+              setKenActual={setKenActual}
+              pj={p} ken={ken} setKen={setKen}></BarraKen>
             </View>       
         </View>
 

@@ -18,7 +18,7 @@ import { Historia } from './historia';
 import { TecnicaEspecial } from './tecEpecial';
 
 
-export const FichaPersonaje = ({ pj, ki, setKi, fortaleza, setFortaleza, ken,setKen,eliminarPersonaje }) => {
+export const FichaPersonaje = ({ pj, ki, setKi, fortaleza, setFortaleza, ken,setKen,eliminarPersonaje,vidaActual,kiActual,kenActual,setVidaActual,setKiActual,setKenActual, }) => {
   
   const { personajes, savePersonajes,coleccionPersonajes,saveColeccionPersonajes } = useContext(AuthContext);
  
@@ -104,13 +104,13 @@ export const FichaPersonaje = ({ pj, ki, setKi, fortaleza, setFortaleza, ken,set
   const [hechizos, setHechizos] = useState(p.hechizos);
 
 //*********************************************************** 
-  const [kenActual, setKenActual] = useState(p.kenActual != null ? String(p.kenActual) : '');
-  const [kiActual, setKiActual] = useState(p.kiActual != null ? String(p.kiActual) : '');
+ // const [kenActual, setKenActual] = useState(p.kenActual != null ? String(p.kenActual) : '');
+ // const [kiActual, setKiActual] = useState(p.kiActual != null ? String(p.kiActual) : '');
   const [positiva, setPositiva] = useState(p.positiva != null ? String(p.positiva) : '');
   const [negativa, setNegativa] = useState(p.negativa != null ? String(p.negativa) : '');
 
   //const [damageActual, setDamageActual] = useState(p.vidaActual);
-  const [vidaActual, setVidaActual] = useState(p.vidaActual != null ? String(p.vidaActual) : '');
+ // const [vidaActual, setVidaActual] = useState(p.vidaActual != null ? String(p.vidaActual) : '');
   const [consumision, setConsumision] = useState(p.consumision != null ? String(p.consumision) : '');
 
   const [apCombate,setApCombate]=useState(p.apCombate);

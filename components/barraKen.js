@@ -5,14 +5,14 @@ import socket from './socket';
 import { LinearGradient } from 'expo-linear-gradient';
 
 
-export const BarraKen = ({ pj, ken,setKen }) => {
+export const BarraKen = ({ pj, ken,setKen,kenActual,setKenActual }) => {
   const { personajes, savePersonajes,estatus } = useContext(AuthContext);
   const p = personajes.find(p => p.idpersonaje === pj.idpersonaje);
 
   const [nombre, setNombre] = useState(p.nombre);
   //este se anulo de aca porque los state estan en el componenete PantallaDeslizable
   //const [ken, setKen] = useState(p.ken != null ? String(p.ken) : '');
-  const [kenActual, setKenActual] = useState(p.kenActual != null ? String(p.kenActual) : '');
+  //const [kenActual, setKenActual] = useState(p.kenActual != null ? String(p.kenActual) : '');
   const [consumir, setConsumir] = useState("0");
   
 
