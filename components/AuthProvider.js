@@ -33,6 +33,11 @@ export const AuthProvider = ({ children }) => {
 //va tener el id de pj selecionado
 const [pjSeleccionado, setPjSeleccionado] = useState(null);
 
+//favoritos
+const [favoritos, setFavoritos] = useState([]);
+
+
+
 //mostramos ese id
  useEffect(()=>{
   console.log("El personaje selecionado en context es: ",pjSeleccionado)
@@ -232,7 +237,9 @@ const logout = async () => {
   setNick(null);
   setImagenurl(null);
   setImagencloudid(null);
-  setFavoritos(null);
+  
+    // Limpias favoritos
+  setFavoritos([]);
 };
 
 const consumir = async () => {
@@ -321,8 +328,7 @@ const consumir = async () => {
 };
 
 
-//favoritos
-const [favoritos, setFavoritos] = useState([]);
+
 
 useEffect(() => {
   const obtenerFavoritos = async () => {
