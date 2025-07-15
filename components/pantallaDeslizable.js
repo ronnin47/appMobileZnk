@@ -8,7 +8,7 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { showMessage } from 'react-native-flash-message';
 import axios from 'axios';
 import { Alert } from 'react-native';
-
+import { NotasUsuario } from './notasUsuario';
 
 
 export const PantallaDeslizable = () => {
@@ -223,6 +223,11 @@ return (
         consumision={consumision}
         setConsumision={setConsumision}
       />
+    </View>
+
+    <View key="3" style={styles.page}>
+      <NotasUsuario></NotasUsuario>
+      
     </View>
   </PagerView>
 );

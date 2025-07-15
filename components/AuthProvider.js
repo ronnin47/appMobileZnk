@@ -28,7 +28,8 @@ export const AuthProvider = ({ children }) => {
 
 
   const [historialChat, setHistorialChat] = useState([]);
-
+  
+const [notasUsuario, setNotasUsuario] = useState("");
 //**********PERSONAJE SELECIONADO***********
 //va tener el id de pj selecionado
 const [pjSeleccionado, setPjSeleccionado] = useState(null);
@@ -237,6 +238,7 @@ const logout = async () => {
   setNick(null);
   setImagenurl(null);
   setImagencloudid(null);
+  setNotasUsuario(null);
   
     // Limpias favoritos
   setFavoritos([]);
@@ -351,6 +353,57 @@ const toggleFavorito = async (idPersonaje) => {
 };
 
 
+
+
+
+
+const [cargandoNotas, setCargandoNotas] = useState(true);
+
+// Cargar notas guardadas al iniciar
+useEffect(() => {
+  if (!userToken || !pjSeleccionado) return;
+
+  const cargarNotas = async () => {
+    setCargandoNotas(true);
+
+    try {
+      const clave = `notasUsuario-${userToken}-${pjSeleccionado}`;
+      const guardado = await AsyncStorage.getItem(clave);
+      setNotasUsuario(guardado ?? ""); // default en ""
+    } catch (error) {
+      console.error("Error al cargar notas:", error);
+      setNotasUsuario(""); // por seguridad
+    } finally {
+      setCargandoNotas(false);
+    }
+  };
+
+  cargarNotas();
+}, [userToken, pjSeleccionado]);
+
+// Guardar notas cuando cambien (solo si no estamos cargando)
+useEffect(() => {
+  if (!userToken || !pjSeleccionado || cargandoNotas) return;
+
+  const guardarNotas = async () => {
+    try {
+      const clave = `notasUsuario-${userToken}-${pjSeleccionado}`;
+
+      if (typeof notasUsuario === "string") {
+        // Elimina si está vacío (opcional)
+        if (notasUsuario.trim() === "") {
+          await AsyncStorage.removeItem(clave);
+        } else {
+          await AsyncStorage.setItem(clave, notasUsuario);
+        }
+      }
+    } catch (error) {
+      console.error("Error al guardar notas:", error);
+    }
+  };
+
+  guardarNotas();
+}, [notasUsuario, userToken, pjSeleccionado, cargandoNotas]);
   
   return (
     <AuthContext.Provider
@@ -388,6 +441,8 @@ const toggleFavorito = async (idPersonaje) => {
         toggleFavorito,
         pjSeleccionado,
         setPjSeleccionado,
+        notasUsuario,
+        setNotasUsuario,
       }}
     >
       {children}

@@ -1,11 +1,11 @@
 import { useNavigationState } from '@react-navigation/native';
-import React, { useContext,useEffect } from 'react';
+import React, { useContext,useEffect,useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Image, Text, View, StyleSheet } from 'react-native';
-
+import * as SplashScreen from 'expo-splash-screen';
 import { AuthContext } from './components/AuthContext'; // <-- IMPORTAR EL CONTEXTO
 import { Provider as PaperProvider } from 'react-native-paper';
 // importaciones de COMPONENTS
@@ -39,27 +39,31 @@ import { Nuevo } from './components/nuevo';
 
 const socket = io('http://192.168.0.38:3000'); // IP y puerto de tu servidor
 
-
+SplashScreen.preventAutoHideAsync();
 // el Stack navigator es una PILA de pantallas
 export const App = () => {
-/*
-useEffect(() => {
-    // Emitir que un usuario se conectó (esto activa el 'user-connected' en el servidor)
-    socket.emit('user-connected', { usuarioId: '123', sesion: 'sesion1' });
 
-    // Escuchar eventos desde el servidor
-    socket.on('connected-users', (users) => {
-      console.log('Usuarios conectados:', users);
-    });
 
-    // Limpiar al desmontar
-    return () => {
-      socket.disconnect();
+
+  const [appIsReady, setAppIsReady] = useState(false);
+
+  useEffect(() => {
+    const prepararApp = async () => {
+      try {
+        // Podés cargar fuentes, datos del usuario, etc aquí si querés
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Simula 2 segundos de carga
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        setAppIsReady(true);
+        await SplashScreen.hideAsync(); // ✅ Oculta el splash cuando está todo listo
+      }
     };
+
+    prepararApp();
   }, []);
-  */
 
-
+  if (!appIsReady) return null; // No renderiza nada mientras carga
 
   return (
      <PaperProvider>
@@ -202,6 +206,7 @@ const styles = StyleSheet.create({
     color:"white",
       fontWeight: 'bold',
       fontSize:18,
+      backgroundColor: '#000',
 
   },
   nav:{
