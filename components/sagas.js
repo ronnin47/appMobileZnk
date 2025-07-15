@@ -24,7 +24,7 @@ export const Sagas = () => {
   
   
 useEffect(() => {
-  console.log("coleccionPersonajes se siente:");
+  
 }, [coleccionPersonajes]);
   const { sagaId } = route.params;
   const [sagaSeleccionada, setSagaSeleccionada] = useState(null);
@@ -53,13 +53,14 @@ const puedeEditarNotas = (personaje) => {
   const [notasSeleccionadas, setNotasSeleccionadas] = useState([]);
   const [personajeSeleccionadoModal, setPersonajeSeleccionadoModal] = useState(null);
 
-
+/*
   useEffect(() => {
   if (sagaSeleccionada?.personajes) {
     console.log("🆕 Cambiaron los personajes de la saga:");
     console.log("➡️ Nuevos IDs:", sagaSeleccionada.personajes);
   }
 }, [sagaSeleccionada?.personajes]);
+*/
 
 const abrirNotasPersonaje = (personaje) => {
   if (!sagaSeleccionada || !sagaSeleccionada.idsaga) {
@@ -349,7 +350,7 @@ const abrirNotasPersonaje = (personaje) => {
 const guardarNotaSaga = async (notasEditables, personaje, savePersonajes,savePersonajeUno) => {
 
 
-  console.log("entra en guardar nota")
+  //console.log("entra en guardar nota")
   //console.log("guardarNotaSaga llamada", { notasEditables, personaje });
   
 if (!personaje || !notasEditables || notasEditables.length === 0) {
@@ -409,7 +410,7 @@ if (!personaje || !notasEditables || notasEditables.length === 0) {
     });
 
     if (response.ok) {
-      console.log("Notasaga actualizada con éxito");
+      //console.log("Notasaga actualizada con éxito");
 
       
     } else {

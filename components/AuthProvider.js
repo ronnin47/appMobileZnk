@@ -29,8 +29,14 @@ export const AuthProvider = ({ children }) => {
 
   const [historialChat, setHistorialChat] = useState([]);
 
+//**********PERSONAJE SELECIONADO***********
+//va tener el id de pj selecionado
+const [pjSeleccionado, setPjSeleccionado] = useState(null);
 
-
+//mostramos ese id
+ useEffect(()=>{
+  console.log("El personaje selecionado en context es: ",pjSeleccionado)
+ },[pjSeleccionado])
 
 
   useEffect(() => {
@@ -98,9 +104,6 @@ export const AuthProvider = ({ children }) => {
   }, [userToken]);
 
 
-
-
-
  const fetchSagas = async () => {
     try {
       const res = await axios.get('http://192.168.0.38:3000/consumirSagas');
@@ -115,9 +118,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
 
-
-
-  //CONSUMIR TODOS LOS PERSONAJES
+//CONSUMIR TODOS LOS PERSONAJES
 useEffect(() => {
   const loadPersonajes = async () => {
 
@@ -156,32 +157,26 @@ useEffect(() => {
 
 
 const handleMensaje = (mensaje) => {
-  console.log('🟢 Mensaje recibido en cliente:', mensaje);
+ // console.log('🟢 Mensaje recibido en cliente:', mensaje);
   setHistorialChat(prev => [...prev, mensaje]);
 };
 
 socket.off('chat-message'); // Elimina cualquier duplicado anterior
 socket.on('chat-message', handleMensaje);
 
-
 socket.off("chat-chat");
 socket.on('chat-chat', handleMensaje);
 
 
+const savePersonajes = async (lista) => {
+  try {
+    const clon = lista.map((p) => ({ ...p }));
+    setPersonajes(clon);
 
-
-
-
-
-  const savePersonajes = async (lista) => {
-    try {
-      const clon = lista.map((p) => ({ ...p }));
-      setPersonajes(clon);
-
-    } catch (e) {
-      console.log('Error saving personajes', e);
-    }
-  };
+  } catch (e) {
+    console.log('Error saving personajes', e);
+  }
+};
 
 
 //ESTE SERA PARA GUARDAR EN TODOS LOS PERSONAJES
@@ -213,29 +208,32 @@ socket.on('chat-chat', handleMensaje);
   }
 };
 
-  const logout = async () => {
-    setUserToken(null);
-    await AsyncStorage.removeItem('userToken');
-    await AsyncStorage.removeItem('personajesUsuario');
-    await AsyncStorage.removeItem('userId');
-    await AsyncStorage.removeItem('estatus');
+const logout = async () => {
+  setUserToken(null);
+  await AsyncStorage.removeItem('userToken');
+  await AsyncStorage.removeItem('personajesUsuario');
+  await AsyncStorage.removeItem('userId');
+  await AsyncStorage.removeItem('estatus');
 
 
-    await AsyncStorage.removeItem('nick');
-    await AsyncStorage.removeItem('email');
-    await AsyncStorage.removeItem('contrasenia');
-    await AsyncStorage.removeItem('imagenurl');
-    await AsyncStorage.removeItem('imagencloudid');
-    
-    setPersonajes([]);
-     
-    setEstatus(null);
-    setEmail(null);
-    setContrasenia(null);
-    setNick(null);
-    setImagenurl(null);
-    setImagencloudid(null);
-  };
+  await AsyncStorage.removeItem('nick');
+  await AsyncStorage.removeItem('email');
+  await AsyncStorage.removeItem('contrasenia');
+  await AsyncStorage.removeItem('imagenurl');
+  await AsyncStorage.removeItem('imagencloudid');
+  await AsyncStorage.removeItem("favoritos");
+
+
+  setPersonajes([]);
+  
+  setEstatus(null);
+  setEmail(null);
+  setContrasenia(null);
+  setNick(null);
+  setImagenurl(null);
+  setImagencloudid(null);
+  setFavoritos(null);
+};
 
 const consumir = async () => {
 
@@ -262,8 +260,6 @@ const consumir = async () => {
     }
        
   };
-
-
 
  const cambiosUsuario = async ({ nuevoNick, nuevoEmail, nuevaContrasenia, usuarioId,nuevaImagenurl }) => {
  if (!usuarioId || usuarioId.toString().trim() === '') {
@@ -305,7 +301,7 @@ const consumir = async () => {
   await AsyncStorage.setItem('imagenurl', imagenFinal);
   await AsyncStorage.setItem('imagencloudid', cloudIdFinal);
   
-  console.log("guardado en el storage exitoso y servidor actualizado");
+  //console.log("guardado en el storage exitoso y servidor actualizado");
   setTimeout(() => {
     showMessage({
       message: 'Cambios guardados',
@@ -322,6 +318,30 @@ const consumir = async () => {
     console.error('Error al actualizar usuario:', error);
    
   }
+};
+
+
+//favoritos
+const [favoritos, setFavoritos] = useState([]);
+
+useEffect(() => {
+  const obtenerFavoritos = async () => {
+    const data = await AsyncStorage.getItem('favoritos');
+    setFavoritos(data ? JSON.parse(data) : []);
+  };
+  obtenerFavoritos();
+}, []);
+
+const toggleFavorito = async (idPersonaje) => {
+  let nuevos;
+  if (favoritos.includes(idPersonaje)) {
+    nuevos = favoritos.filter((id) => id !== idPersonaje);
+  } else {
+    nuevos = [...favoritos, idPersonaje];
+  }
+  console.log("FAVORITOS IDS: ", nuevos)
+  setFavoritos(nuevos);
+  await AsyncStorage.setItem('favoritos', JSON.stringify(nuevos));
 };
   
   return (
@@ -355,6 +375,11 @@ const consumir = async () => {
         setImagenurl,
         imagencloudid,
         setImagencloudid,
+        favoritos,
+        setFavoritos,
+        toggleFavorito,
+        pjSeleccionado,
+        setPjSeleccionado,
       }}
     >
       {children}

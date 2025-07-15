@@ -1,14 +1,23 @@
+import React, { useContext, useState, useEffect } from 'react';
 import { ScrollView, Text, View, Image, StyleSheet, TouchableOpacity } from 'react-native';
-import React from 'react';
 import { useNavigation } from '@react-navigation/native';
+import { AuthContext } from './AuthContext';
 
 export const Carrusel = ({ personajes }) => {
+
+
+  const {pjSeleccionado,setPjSeleccionado}=useContext(AuthContext)
+
   const imagenBase = require('../assets/imagenBase.jpeg');
   const navigation = useNavigation();
 
-  const handlePress = (pj) => {
-    navigation.navigate('PantallaDeslizable', { pj });
+
+  //CUANDO ELIJE UNA CARD DE PJ ENTRARA A PANTALLADESLIZABLE Y TAMBIEN VA SETEAR EL ID DE PJ SELECIONADO
+   const handlePress = (pj) => {
+    setPjSeleccionado(pj.idpersonaje);
+    navigation.navigate('PantallaDeslizable'); 
   };
+  
 
   return (
     <ScrollView

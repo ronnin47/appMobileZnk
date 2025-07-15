@@ -10,7 +10,7 @@ export const BarraKi = ({ pj,ki,setKi, kiActual,setKiActual,consumision,setConsu
 
 
 
-  console.log("el valor de consumision es: ",consumision)
+  
 
   const [nombre, setNombre] = useState(p.nombre);
   //este se anulo de aca porque los state estan en el componenete PantallaDeslizable

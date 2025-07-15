@@ -20,7 +20,7 @@ import { TecnicaEspecial } from './tecEpecial';
 
 export const FichaPersonaje = ({ pj, ki, setKi, fortaleza, setFortaleza, ken,setKen,eliminarPersonaje,vidaActual,kiActual,kenActual,setVidaActual,setKiActual,setKenActual,positiva,setPositiva,negativa,setNegativa,cicatriz,setCicatriz,consumision,setConsumision }) => {
   
-  const { personajes, savePersonajes,coleccionPersonajes,saveColeccionPersonajes } = useContext(AuthContext);
+  const { personajes, savePersonajes,coleccionPersonajes,saveColeccionPersonajes,pjSeleccionado,favoritos,toggleFavorito } = useContext(AuthContext);
  
   const imagenBase = require('../assets/imagenBase.jpeg');
 
@@ -44,6 +44,15 @@ export const FichaPersonaje = ({ pj, ki, setKi, fortaleza, setFortaleza, ken,set
     );
   }
 
+
+ 
+const check = Array.isArray(favoritos) && pjSeleccionado
+  ? favoritos.includes(pjSeleccionado)
+  : false;
+
+  const manejarToggle = () => {
+    toggleFavorito(pjSeleccionado);
+  };
 
 
 
@@ -241,9 +250,7 @@ const guardarCambiosBBDD = async () => {
     });
 
 
-    //console.log('Cambios guardados exitosamente:', response.data);
-    //console.log("vamos a ver que devuelve en imagenurl: ",response.data.imagenurl)
-    //console.log("vamos a ver que devuelve en imagenurl: ",response.data.idpersonaje)
+  
     
     if (response.data.imagenurl) {
       // Actualizás la imagen en el estado global personajes
@@ -495,7 +502,7 @@ const seleccionarImagen = async () => {
     const imagenEnBase64 = `data:image/${extension};base64,${base64}`;
 
     setImagen(imagenEnBase64); // ✅ imagen está lista para enviar
-    console.log("Imagen base64 lista para guardar.");
+   // console.log("Imagen base64 lista para guardar.");
   }
 };
 
@@ -527,6 +534,11 @@ const colorPlaceHolder="#888"
         value={nombre}
         onChangeText={setNombre}
       />
+
+       <TouchableOpacity onPress={manejarToggle} style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 10 }}>
+      <Text style={{ fontSize: 22, color: 'white',marginRight:0  }}>{check ? '✅' : '⬜'}</Text>
+      <Text style={{ marginLeft: 4, color: 'white',marginRight:4 }}>Favorito</Text>
+       </TouchableOpacity>
 
       <TouchableOpacity style={styles.botonGuardar} onPress={guardarCambiosBBDD}>
         <Icon name="save" size={24} color="#00FF00" />

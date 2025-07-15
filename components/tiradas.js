@@ -1,12 +1,15 @@
 import React, { useContext, useState, useRef, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
-import { View,Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { Dimensions,Animated, View,Text, TextInput, TouchableOpacity, StyleSheet, ScrollView,Image } from 'react-native';
 import { ChatTiradas } from './chatTiradas';
 import { BarraVida } from './barraVida';
 import { BarraKi } from './barraKi';
 import { BarraKen } from './barraKen';
 import socket from './socket';
 import { LinearGradient } from 'expo-linear-gradient';
+import { ActivityIndicator } from 'react-native';
+
+
 
 const generarNumerosAzarSinRangoMin=(cantidad, rangoMax)=> {
   var numeros = [];
@@ -33,10 +36,25 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen,
             consumision,
             setConsumision,
            }) => {
-  
-  const { personajes, historialChat, setHistorialChat,savePersonajes,estatus } = useContext(AuthContext);
 
-  const p = personajes.find((p) => p.idpersonaje === pj.idpersonaje);
+
+
+  //MEJORA
+    if (!pj || !pj.nombre) {
+    return <ActivityIndicator size="large" />;
+  }          
+  
+  const { personajes, historialChat, setHistorialChat,savePersonajes,estatus,favoritos,setFavoritos,pjSeleccionado,setPjSeleccionado } = useContext(AuthContext);
+  
+  const imagenBase = require('../assets/imagenBase.jpeg');
+ 
+  //const p = personajes.find((p) => p.idpersonaje === pj.idpersonaje);
+  const p = personajes.find(p => p.idpersonaje === pjSeleccionado);
+  
+  //BUSCA EN PERSOANJES LOS QUE ESTAN ACTIVOS COMO FAVORITOS
+  const personajesFavoritos = favoritos
+    .map(id => personajes.find(p => p.idpersonaje == id))
+    .filter(p => p); // evita los null por si no encuentra alguno
 
   const [valTirada, setValTirada] = useState("");
   const [sumaTirada, setSumaTirada] = useState("");
@@ -48,21 +66,17 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen,
   const [valTiradaD10Bono, setValTiradaD10Bono] = useState("");
   const [principal, setPrincipal] = useState("");
   const [secundaria, setSecundaria] = useState("");
-
   const [dadosD12Bono, setDadosD12Bono] = useState(0);
   const [dadosD6Bono, setDadosD6Bono] = useState(0);
   const [dadosD4Bono, setDadosD4Bono] = useState(0);
   const [dadosD10, setDadosD10] = useState(0);
   const [dadosD20, setDadosD20] = useState(0);
   const [dadosD10Bono, setDadosD10Bono] = useState(0);
-
-
- const [abierto, setAbierto] = useState(false);
+  const [abierto, setAbierto] = useState(false);
+  
   useEffect(() => {
-
     // Cuando el socket se conecta, enviamos info del usuario (ejemplo)
     socket.emit('user-connected', { usuarioId: p.usuarioId, sesion: 'algo' });
-
     // Cleanup al desmontar componente
     return () => {
       socket.off('chat-message');
@@ -151,16 +165,10 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen,
       estatus:estatus,
     }
 
-    console.log("***TIRADAS emite**",mensaje)
+    //console.log("***TIRADAS emite**",mensaje)
     socket.emit('chat-message', mensaje);
   };
 
-
-
-  //aca los states de positiva, negativa, cicatriz
- // const [positiva, setPositiva] = useState(p.positiva != null ? String(p.positiva) : '');
- // const [negativa, setNegativa] = useState(p.negativa != null ? String(p.negativa) : '');
-  //const [cicatriz, setCicatriz] = useState(p.cicatriz != null ? String(p.cicatriz) : '');
 
 //ESTO ES PARA LA LOGICA INTERNA DE GUARDAR sobre el array que esta en el context
     const guardarCambios = () => {
@@ -187,11 +195,111 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen,
     cicatriz,
   ]);
 
-    //se refiere a la cantidad de vida por fase 
+  //se refiere a la cantidad de vida por fase 
   const faseSalud = parseInt(ki) + parseInt(fortaleza);
 
+
+
+
+   const scrollRef = useRef(null);
+  const windowWidth = Dimensions.get('window').width;
+
+  // Ordenar personajes de mayor a menor id
+  const personajesOrdenados = [...personajesFavoritos].sort((a, b) => b.idpersonaje - a.idpersonaje);
+
+  // Ancho fijo del avatar card (ajusta según tu estilo real)
+  const avatarWidth = 80;
+  const avatarMargin = 10; // margen horizontal por avatarCard
+
+  // Scroll para centrar avatar seleccionado
+  useEffect(() => {
+    if (!scrollRef.current || personajesOrdenados.length === 0) return;
+
+    const index = personajesOrdenados.findIndex(pj => pj.idpersonaje === pjSeleccionado);
+    if (index >= 0) {
+      const scrollToX = index * (avatarWidth + avatarMargin) - windowWidth / 2 + (avatarWidth + avatarMargin) / 2;
+      scrollRef.current.scrollTo({ x: scrollToX > 0 ? scrollToX : 0, animated: true });
+    }
+  }, [pjSeleccionado, personajesFavoritos]);
+
+  // Animaciones para cada avatar: fade+scale cuando están seleccionados
+  // Guardamos un map de Animated.Values para cada personaje
+  const animValues = useRef(new Map()).current;
+
+  personajesOrdenados.forEach(pj => {
+    if (!animValues.has(pj.idpersonaje)) {
+      animValues.set(pj.idpersonaje, new Animated.Value(0));
+    }
+  });
+
+  useEffect(() => {
+    // Animar solo el avatar seleccionado a 1 y los otros a 0
+    personajesOrdenados.forEach(pj => {
+      Animated.timing(animValues.get(pj.idpersonaje), {
+        toValue: pj.idpersonaje === pjSeleccionado ? 1 : 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    });
+  }, [pjSeleccionado, personajesOrdenados]);
   return (
     <>
+
+
+   <View style={styles.containerAvatares}>
+  {personajesOrdenados.length === 0 ? (
+    <></>
+  ) : (
+    <ScrollView
+      horizontal
+      ref={scrollRef}
+      contentContainerStyle={styles.avatarContainer}
+      showsHorizontalScrollIndicator={false}
+    >
+      {personajesOrdenados.map((pj) => {
+        const isSelected = pj.idpersonaje === pjSeleccionado;
+        return (
+          <TouchableOpacity
+            key={pj.idpersonaje}
+            style={styles.avatarCard}
+            onPress={() => setPjSeleccionado(pj.idpersonaje)}
+          >
+            <Image
+              source={pj.imagenurl ? { uri: pj.imagenurl } : imagenBase}
+              style={[
+                styles.avatarImagen,
+                {
+                  opacity: isSelected ? 1 : 0.7,  // Opacidad total para seleccionado, 50% para los demás
+                },
+                isSelected && {
+                  borderWidth: 3,
+                  borderColor: 'cyan',
+                  shadowColor: 'black',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.4,
+                  shadowRadius: 6,
+                  elevation: 8,
+                  backgroundColor: 'white',
+                },
+              ]}
+            />
+            <Text
+              style={[
+                styles.avatarNombre,
+                {
+                  opacity: isSelected ? 1 : 0.5,
+                },
+                isSelected && { borderWidth: 0.9, color: 'cyan' },
+              ]}
+            >
+              {pj.nombre}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
+    </ScrollView>
+  )}
+</View>
      <ChatTiradas p={p}/>
 
       <ScrollView style={styles.container}>
@@ -553,5 +661,46 @@ botonPrincipalTexto: {
   color: 'white',
   fontSize: 18,
   fontWeight: 'bold',
-}
+},
+containerAvatares: {
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    backgroundColor:"black",
+  },
+  titulo: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    color: 'white',
+  },
+  noFavoritos: {
+    fontSize: 16,
+    color: '#ccc',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  avatarContainer: {
+    flexDirection: 'row',
+    gap: 14,
+  },
+  avatarCard: {
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  avatarImagen: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth:1,
+    borderColor:"gray",
+    backgroundColor: '#444',
+    
+  },
+  avatarNombre: {
+    marginTop: 3,
+    fontSize: 10,
+    color: 'white',
+    maxWidth: 72,
+    textAlign: 'center',
+  },
 });

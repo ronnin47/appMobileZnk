@@ -20,7 +20,7 @@ export const BarraVida = ({pj, ki, setKi, fortaleza, setFortaleza, positiva, neg
 
   //se refiere a la cantidad de vida por fase 
   const faseSalud = parseInt(ki) + parseInt(fortaleza);
-    console.log(typeof faseSalud)
+   // console.log(typeof faseSalud)
 
 
 //aca la vida total en barra positiva y en barra negativa y el total de la suma de ambas
@@ -127,11 +127,11 @@ export const BarraVida = ({pj, ki, setKi, fortaleza, setFortaleza, positiva, neg
 
 
 const agregarDamage = async () => {
-    console.log("FUE DAÑADO POR: ",consumirVida)
+    //console.log("FUE DAÑADO POR: ",consumirVida)
     let newValue = parseInt(consumirVida)|| 0;
     let newDamage = vidaActual + newValue;
   
-    console.log("FUNCIONA BOTON: ",consumirVida)
+    //console.log("FUNCIONA BOTON: ",consumirVida)
     
     
 

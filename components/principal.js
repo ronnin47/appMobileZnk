@@ -114,7 +114,7 @@ const crearFichaPersonaje = async () => {
     const { idpersonaje } = response.data;
 
 
-    console.log("+++++este es el id que RECIBE: ",idpersonaje)
+    //console.log("+++++este es el id que RECIBE: ",idpersonaje)
 
     // Puedes guardar el personaje en el estado o redirigir al formulario de edición
      // Actualiza la lista con el nuevo personaje, añadiendo el id recibido
@@ -141,7 +141,7 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
 
 
  const crearSaga = async () => {
-  console.log("FUNCIONA EL BOTÓN DE CREAR SAGAS");
+
 
   try {
     const datosSaga = {
@@ -155,8 +155,8 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
 
     if (response.status === 201) {
       const { idsaga, imagenurl, imagencloudid } = response.data;
-      console.log("Saga creada con ID:", idsaga);
-      console.log("URL imagen:", imagenurl);
+      //console.log("Saga creada con ID:", idsaga);
+      //console.log("URL imagen:", imagenurl);
 
 
       setSagas([...sagas, { ...datosSaga, idsaga }]);

@@ -59,7 +59,7 @@ export default function Perfil() {
       const extension = uri.split('.').pop().split('?')[0] || 'jpg';
       const imagenEnBase64 = `data:image/${extension};base64,${base64}`;
       setImagen(imagenEnBase64); // ✅ imagen lista
-      console.log("Imagen base64 lista para guardar.");
+      //console.log("Imagen base64 lista para guardar.");
     }
   };
 

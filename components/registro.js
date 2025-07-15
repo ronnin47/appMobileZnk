@@ -35,7 +35,7 @@ const RegisterScreen = ({ navigation }) => {
     });
 
     // Si llegas aquí, el registro fue exitoso
-    console.log('Usuario registrado:', response.data);
+    //console.log('Usuario registrado:', response.data);
     setError('');
      // Navegar a la pantalla de login
       navigation.navigate('Login');

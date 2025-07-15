@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect,useRef } from 'react';
 import { AuthContext } from './AuthContext';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import PagerView from 'react-native-pager-view';
@@ -8,10 +8,16 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { showMessage } from 'react-native-flash-message';
 import axios from 'axios';
 import { Alert } from 'react-native';
+
+
+
 export const PantallaDeslizable = () => {
-  const { personajes, savePersonajes } = useContext(AuthContext);
-  const route = useRoute();
+  const { personajes, savePersonajes, pjSeleccionado } = useContext(AuthContext);
+  
   const navigation = useNavigation();
+  /* YA NO USAMOS MAS ROUTE PARAMS
+  const route = useRoute();
+
 
   const { pj } = route.params;
 
@@ -20,50 +26,82 @@ export const PantallaDeslizable = () => {
   if (!personajeActual) {
     return <ActivityIndicator size="large" style={{ flex: 1, justifyContent: 'center' }} />;
   }
+*/
 
-  // 📌 Estados compartidos
-  const [ki, setKi] = useState(pj.ki != null ? String(pj.ki) : '');
-  const [fortaleza, setFortaleza] = useState(pj.fortaleza != null ? String(pj.fortaleza) : '');
-  const [ken, setKen] = useState(pj.ken != null ? String(pj.ken) : '');
+//OBTENEMOS DEL PERSONAJE DEL PJ SELECIOANDO QUE VIENE DEL CONTEXTO
+ const pj = personajes.find(per => per.idpersonaje === pjSeleccionado);
 
+
+ if (!pj) {
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <ActivityIndicator size="large" />
+    </View>
+  );
+}
+
+
+//ACA PONEMOS LOS STATES QUE USAREMOS EN FICHA PERSONAJE Y EN TIRADAS
+// 📌 Estados compartidos
+const [ki, setKi] = useState(pj.ki != null ? String(pj.ki) : '');
+const [fortaleza, setFortaleza] = useState(pj.fortaleza != null ? String(pj.fortaleza) : '');
+const [ken, setKen] = useState(pj.ken != null ? String(pj.ken) : '');
 // 📌 Estado actual trabajado con formato unificado también
 const [kenActual, setKenActual] = useState(pj.kenActual != null ? String(pj.kenActual) : '');
 const [kiActual, setKiActual] = useState(pj.kiActual != null ? String(pj.kiActual) : '');
 const [vidaActual, setVidaActual] = useState(pj.vidaActual != null ? String(pj.vidaActual) : '');
+const [positiva, setPositiva] = useState(pj.positiva != null ? String(pj.positiva) : '');
+const [negativa, setNegativa] = useState(pj.negativa != null ? String(pj.negativa) : '');
+const [cicatriz, setCicatriz] = useState(pj.cicatriz != null ? String(pj.cicatriz) : '');
+const [consumision, setConsumision] = useState(pj.consumision != null ? String(pj.consumision) : '');
 
 
-  const [positiva, setPositiva] = useState(pj.positiva != null ? String(pj.positiva) : '');
-  const [negativa, setNegativa] = useState(pj.negativa != null ? String(pj.negativa) : '');
-  const [cicatriz, setCicatriz] = useState(pj.cicatriz != null ? String(pj.cicatriz) : '');
-  const [consumision, setConsumision] = useState(pj.consumision != null ? String(pj.consumision) : '');
+useEffect(() => {
+  if (!pj) return;
 
+  setKi(String(pj.ki ?? ''));
+  setFortaleza(String(pj.fortaleza ?? ''));
+  setKen(String(pj.ken ?? ''));
+  setKenActual(String(pj.kenActual ?? ''));
+  setKiActual(String(pj.kiActual ?? ''));
+  setVidaActual(String(pj.vidaActual ?? ''));
+  setPositiva(String(pj.positiva ?? ''));
+  setNegativa(String(pj.negativa ?? ''));
+  setCicatriz(String(pj.cicatriz ?? ''));
+  setConsumision(String(pj.consumision ?? ''));
+}, [pjSeleccionado]);
 
-  // 🔄 Guardar cambios en el contexto al modificar valores
-  const guardarCambios = () => {
-    const index = personajes.findIndex(per => per.idpersonaje === pj.idpersonaje);
-    if (index === -1) return;
+// 🔄 Guardar cambios en el contexto al modificar valores
+const guardarCambios = () => {
+  const index = personajes.findIndex(per => per.idpersonaje === pj.idpersonaje);
+  if (index === -1) return;
 
-    const nuevosPersonajes = [...personajes];
-    nuevosPersonajes[index] = {
-      ...nuevosPersonajes[index],
-      ken,
-      ki,
-      fortaleza,
-      vidaActual,
-      kiActual,
-      kenActual,
-      positiva,
-      negativa,
-      consumision,
-    };
-    savePersonajes(nuevosPersonajes);
+  const nuevosPersonajes = [...personajes];
+  nuevosPersonajes[index] = {
+    ...nuevosPersonajes[index],
+    ken,
+    ki,
+    fortaleza,
+    vidaActual,
+    kiActual,
+    kenActual,
+    positiva,
+    negativa,
+    cicatriz,//***********************ESTO NO ESTABA ANTES */
+    consumision,
   };
+  savePersonajes(nuevosPersonajes);
+};
 
-  useEffect(() => {
-    guardarCambios();
-  }, [ken, ki, fortaleza, vidaActual, kenActual, kiActual,positiva,negativa,cicatriz,consumision]);
+const isInitialMount = useRef(true);
 
-
+useEffect(() => {
+  if (isInitialMount.current) {
+    isInitialMount.current = false;
+    return;
+  }
+  guardarCambios();
+}, [ken, ki, fortaleza, vidaActual, kenActual, kiActual, positiva, negativa, cicatriz, consumision]);
 
 
 // 🗑️ Lógica de eliminación segura con delay para evitar errores de hooks
@@ -112,65 +150,64 @@ const eliminarPersonaje = (idpersonaje) => {
 };
 
 
-  return (
-    <PagerView style={styles.pagerView} initialPage={0}>
-      <View key="1" style={styles.page}>
-        <FichaPersonaje
-          eliminarPersonaje={eliminarPersonaje}
-          pj={pj}
-          ki={ki}
-          setKi={setKi}
-          fortaleza={fortaleza}
-          setFortaleza={setFortaleza}
-          ken={ken}
-          setKen={setKen}
-
-
-          kenActual={kenActual}
-            setKenActual={setKenActual}
-            kiActual={kiActual}
-            setKiActual={setKiActual}
-            vidaActual={vidaActual}
-            setVidaActual={setVidaActual}
-            positiva={positiva}
-            negativa={negativa}
-            setNegativa={setNegativa}
-            setPositiva={setPositiva}
-            cicatriz={cicatriz}
-            setCicatriz={setCicatriz}
-            consumision={consumision}
-            setConsumision={setConsumision}
-        />
-      </View>
-      <View key="2" style={styles.page}>
-        <Tiradas
-          pj={pj}
-          ki={ki}
-          setKi={setKi}
-          fortaleza={fortaleza}
-          setFortaleza={setFortaleza}
-          ken={ken}
-          setKen={setKen}
-
-           kenActual={kenActual}
-            setKenActual={setKenActual}
-            kiActual={kiActual}
-            setKiActual={setKiActual}
-            vidaActual={vidaActual}
-            setVidaActual={setVidaActual}
-
-            positiva={positiva}
-            negativa={negativa}
-            setNegativa={setNegativa}
-            setPositiva={setPositiva}
-            cicatriz={cicatriz}
-            setCicatriz={setCicatriz}
-            consumision={consumision}
-            setConsumision={setConsumision}
-        />
-      </View>
-    </PagerView>
-  );
+return (
+  <PagerView style={styles.pagerView} initialPage={0}>
+    <View key="1" style={styles.page}>
+      <FichaPersonaje
+        eliminarPersonaje={eliminarPersonaje}
+        key={pjSeleccionado} 
+        pj={pj}
+        ki={ki}
+        setKi={setKi}
+        fortaleza={fortaleza}
+        setFortaleza={setFortaleza}
+        ken={ken}
+        setKen={setKen}
+        kenActual={kenActual}
+        setKenActual={setKenActual}
+        kiActual={kiActual}
+        setKiActual={setKiActual}
+        vidaActual={vidaActual}
+        setVidaActual={setVidaActual}
+        positiva={positiva}
+        negativa={negativa}
+        setNegativa={setNegativa}
+        setPositiva={setPositiva}
+        cicatriz={cicatriz}
+        setCicatriz={setCicatriz}
+        consumision={consumision}
+        setConsumision={setConsumision}
+      />
+    </View>
+    
+    <View key="2" style={styles.page}>
+      <Tiradas
+        key={pjSeleccionado} 
+        pj={pj}
+        ki={ki}
+        setKi={setKi}
+        fortaleza={fortaleza}
+        setFortaleza={setFortaleza}
+        ken={ken}
+        setKen={setKen}
+        kenActual={kenActual}
+        setKenActual={setKenActual}
+        kiActual={kiActual}
+        setKiActual={setKiActual}
+        vidaActual={vidaActual}
+        setVidaActual={setVidaActual}
+        positiva={positiva}
+        negativa={negativa}
+        setNegativa={setNegativa}
+        setPositiva={setPositiva}
+        cicatriz={cicatriz}
+        setCicatriz={setCicatriz}
+        consumision={consumision}
+        setConsumision={setConsumision}
+      />
+    </View>
+  </PagerView>
+);
 };
 
 const styles = StyleSheet.create({
