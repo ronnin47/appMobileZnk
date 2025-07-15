@@ -1,4 +1,4 @@
-import React, { useContext, useState, useRef, useEffect } from 'react';
+import React, { useContext, useState, useRef, useEffect,useMemo } from 'react';
 import { AuthContext } from './AuthContext';
 import { Dimensions,Animated, View,Text, TextInput, TouchableOpacity, StyleSheet, ScrollView,Image } from 'react-native';
 import { ChatTiradas } from './chatTiradas';
@@ -44,21 +44,28 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen,
     return <ActivityIndicator size="large" />;
   }          
   
-  const { personajes, historialChat, setHistorialChat,savePersonajes,estatus,favoritos,setFavoritos,pjSeleccionado,setPjSeleccionado } = useContext(AuthContext);
+  const { personajes, historialChat, setHistorialChat,savePersonajes,estatus,favoritos,setFavoritos,pjSeleccionado,setPjSeleccionado} = useContext(AuthContext);
   
   const imagenBase = require('../assets/imagenBase.jpeg');
  
   //const p = personajes.find((p) => p.idpersonaje === pj.idpersonaje);
   const p = personajes.find(p => p.idpersonaje === pjSeleccionado);
-  /*
+  
   //BUSCA EN PERSOANJES LOS QUE ESTAN ACTIVOS COMO FAVORITOS
-  const personajesFavoritos = favoritos
-    .map(id => personajes.find(p => p.idpersonaje == id))
-    .filter(p => p); // evita los null por si no encuentra alguno
-*/
+/*
     const personajesFavoritos = (favoritos ?? [])
   .map(id => (personajes ?? []).find(p => p.idpersonaje == id))
   .filter(p => p);
+*/
+
+
+
+const personajesFavoritos = useMemo(() => {
+  return (favoritos ?? [])
+    .map(id => (personajes ?? []).find(p => p.idpersonaje == id))
+    .filter(p => p);
+}, [favoritos, personajes]);
+
 
   const [valTirada, setValTirada] = useState("");
   const [sumaTirada, setSumaTirada] = useState("");
@@ -147,18 +154,20 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen,
     setValTiradaD20(d20.join(", "));
     setValTiradaD10Bono(d10Bono.join(", "));
     setSumaTirada(total);
+const baset = principalValue + secundariaValue;
 
-    const baset = principalValue + secundariaValue;
+let partes = [];
 
-    let mensajeChat = `Tirada    ${baset > 0 ? `Base: ${baset}` : ""}   ` +
-      `${tirada.length > 0 ? `D10 esfuerzo: ${tirada.join(", ")}` : ""}   ` +
-      `${d10.length > 0 ? `Bono D10 Ken: ${d10.join(", ")}` : ""}   ` +
-      `${d20.length > 0 ? `Bono D20: ${d20.join(", ")}` : ""}   ` +
-      `${d10Bono.length > 0 ? `Bono D10: ${d10Bono.join(", ")}` : ""}   ` +
-      `${d6.length > 0 ? `Bono D6: ${d6.join(", ")}` : ""}   ` +
-      `${d4.length > 0 ? `Bono D4: ${d4.join(", ")}` : ""}   ` +
-      `${d12.length > 0 ? `Bono D12: ${d12.join(", ")}` : ""}   
-                                   TOTAL: ${total}`;
+if (baset > 0) partes.push(`Base: ${baset}`);
+if (tirada.length > 0) partes.push(`D10 esfuerzo: ${tirada.join(", ")}`);
+if (d10.length > 0) partes.push(`D10 Ken: ${d10.join(", ")}`);
+if (d10Bono.length > 0) partes.push(`+D10: ${d10Bono.join(", ")}`);
+if (d20.length > 0) partes.push(`D20: ${d20.join(", ")}`);
+if (d6.length > 0) partes.push(`D6: ${d6.join(", ")}`);
+if (d4.length > 0) partes.push(`D4: ${d4.join(", ")}`);
+if (d12.length > 0) partes.push(`D12: ${d12.join(", ")}`);
+
+const mensajeChat = `🎲 Tirada   ${partes.join("   ")}                               Total: ${total}`;
 
   
     const mensaje={
@@ -209,9 +218,11 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen,
   const windowWidth = Dimensions.get('window').width;
 
   // Ordenar personajes de mayor a menor id
-  //const personajesOrdenados = [...personajesFavoritos].sort((a, b) => b.idpersonaje - a.idpersonaje);
-const personajesOrdenados = [...(personajesFavoritos || [])].sort((a, b) => b.idpersonaje - a.idpersonaje);
 
+//const personajesOrdenados = [...(personajesFavoritos || [])].sort((a, b) => b.idpersonaje - a.idpersonaje);
+const personajesOrdenados = useMemo(() => {
+  return [...(personajesFavoritos || [])].sort((a, b) => b.idpersonaje - a.idpersonaje);
+}, [personajesFavoritos]);
 
   // Ancho fijo del avatar card (ajusta según tu estilo real)
   const avatarWidth = 80;
@@ -248,6 +259,10 @@ const personajesOrdenados = [...(personajesFavoritos || [])].sort((a, b) => b.id
       }).start();
     });
   }, [pjSeleccionado, personajesOrdenados]);
+
+
+
+  
   return (
     <>
 
@@ -480,7 +495,6 @@ const personajesOrdenados = [...(personajesFavoritos || [])].sort((a, b) => b.id
 
 const styles = StyleSheet.create({
   panelHistorial: {
-
   top: 0,
   left: 0,
   right: 0,
@@ -669,7 +683,7 @@ botonPrincipalTexto: {
   fontWeight: 'bold',
 },
 containerAvatares: {
-    paddingVertical: 12,
+    paddingVertical: 6,
     paddingHorizontal: 10,
     backgroundColor:"black",
   },
@@ -687,15 +701,16 @@ containerAvatares: {
   },
   avatarContainer: {
     flexDirection: 'row',
-    gap: 14,
+    gap: 6,
+    marginBottom:0,
   },
   avatarCard: {
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 6,
   },
   avatarImagen: {
-    width: 64,
-    height: 64,
+    width: 60,
+    height: 60,
     borderRadius: 32,
     borderWidth:1,
     borderColor:"gray",

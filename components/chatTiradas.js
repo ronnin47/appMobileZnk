@@ -37,9 +37,9 @@ export const ChatTiradas = ({ p }) => {
 
             return (
               <View key={idx}  style={{
-                marginBottom: 8,
+                marginBottom: 4,
                 backgroundColor: '#222',
-                padding: 8,
+                padding: 4,
                 borderRadius: 8,
                 shadowColor: '#000',
                 shadowOffset: { width: 0, height: 1 },

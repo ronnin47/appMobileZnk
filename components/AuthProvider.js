@@ -349,6 +349,8 @@ const toggleFavorito = async (idPersonaje) => {
   setFavoritos(nuevos);
   await AsyncStorage.setItem('favoritos', JSON.stringify(nuevos));
 };
+
+
   
   return (
     <AuthContext.Provider

@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect,useRef } from 'react';
+import React, { useContext, useState, useEffect,useRef,useMemo } from 'react';
 import { AuthContext } from './AuthContext';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import PagerView from 'react-native-pager-view';
@@ -12,7 +12,7 @@ import { Alert } from 'react-native';
 
 
 export const PantallaDeslizable = () => {
-  const { personajes, savePersonajes, pjSeleccionado } = useContext(AuthContext);
+  const { personajes, savePersonajes, pjSeleccionado, tiempoSeleccionCarita,} = useContext(AuthContext);
   
   const navigation = useNavigation();
   /* YA NO USAMOS MAS ROUTE PARAMS
@@ -29,7 +29,13 @@ export const PantallaDeslizable = () => {
 */
 
 //OBTENEMOS DEL PERSONAJE DEL PJ SELECIOANDO QUE VIENE DEL CONTEXTO
- const pj = personajes.find(per => per.idpersonaje === pjSeleccionado);
+//const pj = personajes.find(per => per.idpersonaje === pjSeleccionado);
+const pj = useMemo(() => {
+  return personajes.find(per => per.idpersonaje === pjSeleccionado);
+}, [pjSeleccionado, personajes]);
+
+
+
 
 
  if (!pj) {
@@ -40,6 +46,15 @@ export const PantallaDeslizable = () => {
   );
 }
 
+
+/*
+useEffect(() => {
+  if (pj && tiempoSeleccionCarita) {
+    const tiempoTotal = Date.now() - tiempoSeleccionCarita;
+    console.log(`Tiempo desde toque hasta carga personaje: ${tiempoTotal} ms`);
+  }
+}, [pj, tiempoSeleccionCarita]);
+*/
 
 //ACA PONEMOS LOS STATES QUE USAREMOS EN FICHA PERSONAJE Y EN TIRADAS
 // 📌 Estados compartidos
@@ -148,6 +163,9 @@ const eliminarPersonaje = (idpersonaje) => {
     { cancelable: true }
   );
 };
+
+
+
 
 
 return (

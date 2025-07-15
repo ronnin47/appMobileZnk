@@ -52,17 +52,17 @@ io.on('connection', (socket) => {
   });
 
   socket.on('tirada', (mensaje) => {
-    console.log('Tirada recibida:', mensaje);
+   // console.log('Tirada recibida:', mensaje);
     io.emit('tirada', mensaje);
   });
 
   socket.on('chat-message', (mensaje) => {
-    console.log('Mensaje de chat recibido:', mensaje);
+    //console.log('Mensaje de chat recibido:', mensaje);
     io.emit('chat-message', mensaje);
   });
 
    socket.on('chat-chat', async (mensaje) => {
-    console.log('📥 Mensaje de chat-chat recibido:', mensaje);
+    //console.log('📥 Mensaje de chat-chat recibido:', mensaje);
 
     if (mensaje.imagenBase64) {
       try {
@@ -195,7 +195,7 @@ app.post('/insert-usuario', async (req, res) => {
 app.post('/loginUsuario', async (req, res) => {
   const { email, contrasenia } = req.body;
   
-  console.log("",req.body)
+  //console.log("",req.body)
 
   try {
     const userQuery = 'SELECT * FROM usuarios WHERE email = $1';
@@ -233,7 +233,7 @@ app.get('/consumirPersonajesUsuario', async (req, res) => {
   try {
     
     const { usuarioId } = req.query;
-    console.log("el id del usuario es: ",usuarioId)
+   // console.log("el id del usuario es: ",usuarioId)
     const userQuery = `
       SELECT 
         idpersonaje, nombre, dominio, raza, naturaleza, edad, ken, ki, destino, "pDestino",
@@ -382,7 +382,7 @@ app.post('/insert-personaje', async (req, res) => {
 //OK!!
 app.put('/update-personaje/:id', async (req, res) => {
   const idpersonaje = req.params.id;
-  console.log("se disparo")
+  //console.log("se disparo")
   
 
   const {
@@ -841,8 +841,8 @@ app.put('/personajes/:idpersonaje/notasaga', async (req, res) => {
   const { idpersonaje } = req.params;
   const { notasaga } = req.body;
 
-  console.log(" id personaje ",idpersonaje)
-  console.log("notasaga  ", notasaga)
+  //console.log(" id personaje ",idpersonaje)
+ // console.log("notasaga  ", notasaga)
 
   if (!notasaga) {
     return res.status(400).json({ error: 'Faltan datos de notasaga' });
