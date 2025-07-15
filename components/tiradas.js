@@ -50,11 +50,15 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen,
  
   //const p = personajes.find((p) => p.idpersonaje === pj.idpersonaje);
   const p = personajes.find(p => p.idpersonaje === pjSeleccionado);
-  
+  /*
   //BUSCA EN PERSOANJES LOS QUE ESTAN ACTIVOS COMO FAVORITOS
   const personajesFavoritos = favoritos
     .map(id => personajes.find(p => p.idpersonaje == id))
     .filter(p => p); // evita los null por si no encuentra alguno
+*/
+    const personajesFavoritos = (favoritos ?? [])
+  .map(id => (personajes ?? []).find(p => p.idpersonaje == id))
+  .filter(p => p);
 
   const [valTirada, setValTirada] = useState("");
   const [sumaTirada, setSumaTirada] = useState("");
@@ -205,7 +209,9 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen,
   const windowWidth = Dimensions.get('window').width;
 
   // Ordenar personajes de mayor a menor id
-  const personajesOrdenados = [...personajesFavoritos].sort((a, b) => b.idpersonaje - a.idpersonaje);
+  //const personajesOrdenados = [...personajesFavoritos].sort((a, b) => b.idpersonaje - a.idpersonaje);
+const personajesOrdenados = [...(personajesFavoritos || [])].sort((a, b) => b.idpersonaje - a.idpersonaje);
+
 
   // Ancho fijo del avatar card (ajusta según tu estilo real)
   const avatarWidth = 80;
