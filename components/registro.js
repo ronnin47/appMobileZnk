@@ -4,7 +4,7 @@ import axios from 'axios';
 import { showMessage } from 'react-native-flash-message';
 
 
-
+import { API_BASE_URL } from './config';
 
 
 
@@ -28,7 +28,7 @@ const RegisterScreen = ({ navigation }) => {
   }
 
   try {
-    const response = await axios.post('http://192.168.0.38:3000/insert-usuario', {
+    const response = await axios.post(`${API_BASE_URL}/insert-usuario`, {
       email,
       contrasenia: password,
      // username, 

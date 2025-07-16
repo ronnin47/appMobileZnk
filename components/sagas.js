@@ -17,6 +17,10 @@ import { AuthContext } from './AuthContext';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 
+import { API_BASE_URL } from './config';
+
+
+
 export const Sagas = () => {
   const route = useRoute();
   const { sagas, estatus, fetchSagas, coleccionPersonajes,saveColeccionPersonajes, personajes,userToken,savePersonajes,savePersonajeUno } = useContext(AuthContext);
@@ -105,7 +109,7 @@ const abrirNotasPersonaje = (personaje) => {
       const nuevosPersonajes = [...sagaSeleccionada.personajes, personajeSeleccionado];
 
       // Enviamos solo el array de personajes actualizado
-      await axios.put(`http://192.168.0.38:3000/agregarPersonajeSaga/${sagaSeleccionada.idsaga}`, {
+      await axios.put(`${API_BASE_URL}/agregarPersonajeSaga/${sagaSeleccionada.idsaga}`, {
         personajes: nuevosPersonajes,
       });
 
@@ -145,7 +149,7 @@ const abrirNotasPersonaje = (personaje) => {
     const obtenerSecciones = async () => {
       try {
         const response = await axios.get(
-          `http://192.168.0.38:3000/consumirSecciones?idsaga=${sagaId}`
+          `${API_BASE_URL}/consumirSecciones?idsaga=${sagaId}`
         );
         setSecciones(response.data.coleccionSecciones);
       } catch (error) {
@@ -246,7 +250,7 @@ const abrirNotasPersonaje = (personaje) => {
       };
 
       const response = await axios.put(
-        `http://192.168.0.38:3000/updateSagaCompleta/${sagaSeleccionada.idsaga}`,
+        `${API_BASE_URL}/updateSagaCompleta/${sagaSeleccionada.idsaga}`,
         payload
       );
 
@@ -401,7 +405,7 @@ if (!personaje || !notasEditables || notasEditables.length === 0) {
   //console.log("Enviando notasaga al backend:", nuevasNotas);
   // Enviar SOLO notasaga al backend
   try {
-    const response = await fetch(`http://192.168.0.38:3000/personajes/${personaje.idpersonaje}/notasaga`, {
+    const response = await fetch(`${API_BASE_URL}/personajes/${personaje.idpersonaje}/notasaga`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

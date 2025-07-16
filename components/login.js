@@ -6,6 +6,7 @@ import { AuthContext } from './AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { ImageBackground, StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { API_BASE_URL } from './config';
 
 
 
@@ -26,7 +27,7 @@ export const LoginScreen = ({ navigation}) => {
   }
 
   try {
-  const response = await axios.post('http://192.168.0.38:3000/loginUsuario', {
+  const response = await axios.post(`${API_BASE_URL}/loginUsuario`, {
     email,
     contrasenia: password,
   });
@@ -62,7 +63,7 @@ export const LoginScreen = ({ navigation}) => {
     setUserToken(token);
     setEstatus(estatus);
 
-    const personajesRes = await axios.get('http://192.168.0.38:3000/consumirPersonajesUsuario', {
+    const personajesRes = await axios.get(`${API_BASE_URL}/consumirPersonajesUsuario`, {
       params: { usuarioId: idusuario },
     });
 

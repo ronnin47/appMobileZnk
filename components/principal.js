@@ -13,6 +13,7 @@ import { Nuevo } from './nuevo';
 
 import { LinearGradient } from 'expo-linear-gradient';
 const windowWidth = Dimensions.get('window').width;
+import { API_BASE_URL } from './config';
 
 
 
@@ -106,7 +107,7 @@ const crearFichaPersonaje = async () => {
   };
 
   try {
-    const response = await axios.post(`http://192.168.0.38:3000/insert-personaje`, pjNew, {
+    const response = await axios.post(`${API_BASE_URL}/insert-personaje`, pjNew, {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -151,7 +152,7 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
       imagensaga: null, // algo tipo "data:image/png;base64,ABCDEF..."
     };
 
-    const response = await axios.post('http://192.168.0.38:3000/insert-saga', datosSaga);
+    const response = await axios.post(`${API_BASE_URL}/insert-saga`, datosSaga);
 
     if (response.status === 201) {
       const { idsaga, imagenurl, imagencloudid } = response.data;

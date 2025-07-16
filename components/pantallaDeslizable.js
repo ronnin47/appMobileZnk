@@ -8,6 +8,7 @@ import { NotasUsuario } from './notasUsuario';
 import { useNavigation } from '@react-navigation/native';
 import { showMessage } from 'react-native-flash-message';
 import axios from 'axios';
+import { API_BASE_URL } from './config';
 
 export const PantallaDeslizable = () => {
   const {
@@ -97,7 +98,7 @@ export const PantallaDeslizable = () => {
           style: 'destructive',
           onPress: async () => {
             try {
-              const response = await axios.delete(`http://192.168.0.38:3000/deletePersonaje/${idpersonaje}`);
+              const response = await axios.delete(`${API_BASE_URL}/deletePersonaje/${idpersonaje}`);
               if (response.status === 200) {
                 const nuevosPersonajes = personajes.filter(p => p.idpersonaje !== idpersonaje);
                 savePersonajes(nuevosPersonajes);

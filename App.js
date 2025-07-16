@@ -36,8 +36,10 @@ const Stack = createStackNavigator();
 
 import { io } from 'socket.io-client';
 import { Nuevo } from './components/nuevo';
+import { API_BASE_URL } from './components/config';
+const socket = io(`${API_BASE_URL}`); // IP y puerto de tu servidor
 
-const socket = io('http://192.168.0.38:3000'); // IP y puerto de tu servidor
+
 
 SplashScreen.preventAutoHideAsync();
 // el Stack navigator es una PILA de pantallas

@@ -1204,7 +1204,14 @@ async function migrarImagenesSecciones() {
 migrarImagenesSecciones();
 */
 
-
+/*
 server.listen(PORT, () => {
   console.log(`🟢 Servidor Socket.IO corriendo en http://localhost:${PORT}`);
+});
+*/
+
+
+
+server.listen(PORT, () => {
+  console.log(`🟢 Servidor Socket.IO corriendo en puerto ${PORT}`);
 });

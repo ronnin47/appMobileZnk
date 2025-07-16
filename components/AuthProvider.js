@@ -6,7 +6,7 @@ import axios from 'axios';
 import socket from './socket';
 import * as SplashScreen from 'expo-splash-screen';
 import { showMessage } from 'react-native-flash-message';
-
+import { API_BASE_URL } from './config'; 
 SplashScreen.preventAutoHideAsync();
 
 export const AuthProvider = ({ children }) => {
@@ -77,7 +77,8 @@ const [favoritos, setFavoritos] = useState([]);
 
           if (usuarioId) {
             const response = await axios.get(
-              'http://192.168.0.38:3000/consumirPersonajesUsuario',
+              //'http://192.168.0.38:3000/consumirPersonajesUsuario',
+              `${API_BASE_URL}/consumirPersonajesUsuario`,
               { params: { usuarioId } }
             );
 
@@ -112,7 +113,7 @@ const [favoritos, setFavoritos] = useState([]);
 
  const fetchSagas = async () => {
     try {
-      const res = await axios.get('http://192.168.0.38:3000/consumirSagas');
+      const res = await axios.get(`${API_BASE_URL}/consumirSagas`);
       setSagas(res.data.coleccionSagas || []);
     } catch (error) {
       console.error('Error al cargar sagas:', error);
@@ -136,7 +137,7 @@ useEffect(() => {
        if (!userToken) return; 
     try {
            
-        const response = await axios.get(`http://192.168.0.38:3000/consumirPersonajesTodos`, {
+        const response = await axios.get(`${API_BASE_URL}/consumirPersonajesTodos`, {
           headers: {
             'Content-Type': 'application/json',
           },
@@ -251,7 +252,7 @@ const consumir = async () => {
        if (!userToken) return; 
     try {
            
-        const response = await axios.get(`http://192.168.0.38:3000/consumirPersonajesTodos`, {
+        const response = await axios.get(`${API_BASE_URL}/consumirPersonajesTodos`, {
           headers: {
             'Content-Type': 'application/json',
           },
@@ -280,7 +281,7 @@ const consumir = async () => {
 
   try {
     // Petición al backend para actualizar usuario
-    const response = await axios.put(`http://192.168.0.38:3000/updateUsuarios/${usuarioId}`, {
+    const response = await axios.put(`${API_BASE_URL}/updateUsuarios/${usuarioId}`, {
       nick: nuevoNick || "",
       email: nuevoEmail,
       contrasenia: nuevaContrasenia,
