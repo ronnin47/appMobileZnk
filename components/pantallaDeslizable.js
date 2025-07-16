@@ -186,6 +186,7 @@ export const PantallaDeslizable = () => {
 const styles = StyleSheet.create({
   pagerView: {
     flex: 1,
+  
   },
   page: {
     flex: 1,

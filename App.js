@@ -96,16 +96,7 @@ const MainStack = () => {
       
       {/* Protegidas por userToken */}
       <Stack.Screen name="PantallaDeslizable" component={PantallaDeslizable}  
-       options={{
-    headerTitle: '', // Oculta el texto del título
-    headerBackTitleVisible: false,
-    headerStyle: {
-      backgroundColor: '#121212', // Color de fondo del header
-      height: 80, 
-                    
-    },
-    headerTintColor: 'white',
-  }}  />
+      options={{ headerShown: false }}  />
       <Stack.Screen name="Ranking" component={Ranking}   
       options={{
           headerTitle: 'Ranking', // o '' si no querés texto

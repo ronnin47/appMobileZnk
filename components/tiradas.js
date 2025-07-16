@@ -39,11 +39,7 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen,
 
 
 
-  //MEJORA
-    if (!pj || !pj.nombre) {
-    return <ActivityIndicator size="large" />;
-  }          
-  
+ 
   const { personajes, historialChat, setHistorialChat,savePersonajes,estatus,favoritos,setFavoritos,pjSeleccionado,setPjSeleccionado} = useContext(AuthContext);
   
   const imagenBase = require('../assets/imagenBase.jpeg');
@@ -60,11 +56,6 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen,
 
 
 
-const personajesFavoritos = useMemo(() => {
-  return (favoritos ?? [])
-    .map(id => (personajes ?? []).find(p => p.idpersonaje == id))
-    .filter(p => p);
-}, [favoritos, personajes]);
 
 
   const [valTirada, setValTirada] = useState("");
@@ -84,6 +75,27 @@ const personajesFavoritos = useMemo(() => {
   const [dadosD20, setDadosD20] = useState(0);
   const [dadosD10Bono, setDadosD10Bono] = useState(0);
   const [abierto, setAbierto] = useState(false);
+
+   const scrollRef = useRef(null);
+  const windowWidth = Dimensions.get('window').width;
+ //MEJORA
+    if (!pj || !pj.nombre) {
+    return <ActivityIndicator size="large" />;
+  }          
+  if (!p) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.error}>Personaje no encontrado</Text>
+      </View>
+    );
+  }
+
+  
+const personajesFavoritos = useMemo(() => {
+  return (favoritos ?? [])
+    .map(id => (personajes ?? []).find(p => p.idpersonaje == id))
+    .filter(p => p);
+}, [favoritos, personajes]);
   
   useEffect(() => {
     // Cuando el socket se conecta, enviamos info del usuario (ejemplo)
@@ -103,13 +115,14 @@ const personajesFavoritos = useMemo(() => {
     }
   }, [historialChat]);
 
-  if (!p) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.error}>Personaje no encontrado</Text>
-      </View>
-    );
-  }
+    useEffect(() => {
+   guardarCambios();
+  }, [ 
+    positiva,
+    negativa,
+    cicatriz,
+  ]);
+
 
   const tirarDados = () => {
     const principalValue = principal === "" ? 0 : parseInt(principal);
@@ -200,13 +213,6 @@ const mensajeChat = `🎲 Tirada   ${partes.join("   ")}                        
     savePersonajes(nuevosPersonajes);
   };
   
-  useEffect(() => {
-   guardarCambios();
-  }, [ 
-    positiva,
-    negativa,
-    cicatriz,
-  ]);
 
   //se refiere a la cantidad de vida por fase 
   const faseSalud = parseInt(ki) + parseInt(fortaleza);
@@ -214,8 +220,7 @@ const mensajeChat = `🎲 Tirada   ${partes.join("   ")}                        
 
 
 
-   const scrollRef = useRef(null);
-  const windowWidth = Dimensions.get('window').width;
+
 
   // Ordenar personajes de mayor a menor id
 
@@ -262,7 +267,7 @@ const personajesOrdenados = useMemo(() => {
 
 
 
-  
+  console.log("paso por el componente")
   return (
     <>
 
@@ -330,7 +335,7 @@ const personajesOrdenados = useMemo(() => {
           style={styles.input}
           placeholder="Atributo principal"
           placeholderTextColor="#ccc"
-          keyboardType="numeric"
+          keyboardType="default"
           value={principal}
           onChangeText={setPrincipal}
         />
@@ -338,7 +343,7 @@ const personajesOrdenados = useMemo(() => {
           style={styles.input}
           placeholder="Atributo secundario"
           placeholderTextColor="#ccc"
-          keyboardType="numeric"
+          keyboardType="default"
           value={secundaria}
           onChangeText={setSecundaria}
         />
@@ -683,9 +688,10 @@ botonPrincipalTexto: {
   fontWeight: 'bold',
 },
 containerAvatares: {
-    paddingVertical: 6,
+    paddingVertical: 2,
     paddingHorizontal: 10,
     backgroundColor:"black",
+    paddingTop:30,
   },
   titulo: {
     fontSize: 20,

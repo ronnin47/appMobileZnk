@@ -34,6 +34,8 @@ export const FichaPersonaje = ({ pj, ki, setKi, fortaleza, setFortaleza, ken,set
 
   //aca extrae el personaje
   const p = personajes.find(p => p.idpersonaje === pj.idpersonaje);
+  //const p = personajes.find(p => p.idpersonaje === pjSeleccionado);
+  
   //console.log("PERSONAJE: ",p)
 
     if (!p) {
@@ -57,7 +59,7 @@ const check = Array.isArray(favoritos) && pjSeleccionado
 
 
 //ACA LOS STATES
-  const [nombre,setNombre]=useState(p.nombre);
+  const [nombre,setNombre]=useState(p.nombre != null ? String(p.nombre) : '');
   const [imagen,setImagen]=useState(p.imagen);
   const [dominio,setDominio]=useState(p.dominio);
   const [raza,setRaza]=useState(p.raza);
@@ -305,7 +307,7 @@ const guardarCambiosBBDD = async () => {
   nuevosPersonajes[index] = {
     ...nuevosPersonajes[index],
 
-    nombre: nombre,
+    nombre: nombre || "Ficha Nueva",
     dominio: dominio,
     raza:raza,
     edad:edad,
@@ -512,20 +514,17 @@ const colorPlaceHolder="#888"
 
 
 
-
+console.log("**************** paso por ficha")
 
 
   return (
-    <KeyboardAvoidingView 
-      style={{ flex: 1 }} 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={100}
-    >
+  
   <ScrollView
       keyboardShouldPersistTaps="handled"
-      contentContainerStyle={[styles.container, { paddingBottom: 100, flexGrow: 1 }]}
+      contentContainerStyle={[styles.container, { flexGrow: 1, }]}
     >
-    <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 10 }}>
+         <View style={{ marginTop:20 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 10 }}>
       <TextInput
         placeholder="Nombre"
         placeholderTextColor={colorPlaceHolder}
@@ -579,7 +578,7 @@ const colorPlaceHolder="#888"
             <TextInput
               placeholder="Ki"
               placeholderTextColor={colorPlaceHolder}
-              keyboardType="numeric"
+              keyboardType="default"
               value={ki}
               onChangeText={setKi}
             style={styles.inputNumero}
@@ -591,7 +590,7 @@ const colorPlaceHolder="#888"
             <TextInput
               placeholder="Nivel de Destino"
               placeholderTextColor={colorPlaceHolder}
-              keyboardType="numeric"
+              keyboardType="default"
               value={destino}
               onChangeText={setDestino}
             style={styles.inputNumero}
@@ -604,7 +603,7 @@ const colorPlaceHolder="#888"
             <TextInput
               placeholder="Ken"
               placeholderTextColor={colorPlaceHolder}
-              keyboardType="numeric"
+              keyboardType="default"
               value={ken}
               onChangeText={setKen}
             style={styles.inputNumero}
@@ -616,7 +615,7 @@ const colorPlaceHolder="#888"
             <TextInput
               placeholder="P. de destino"
               placeholderTextColor={colorPlaceHolder}
-              keyboardType="numeric"
+              keyboardType="default"
               value={pDestino}
               onChangeText={setPdestino}
               style={styles.inputNumero}
@@ -647,7 +646,7 @@ const colorPlaceHolder="#888"
                   <View style={styles.inputGroup}>
                     <Text style={styles.label}>Fuerza</Text>
                     <TextInput
-                      keyboardType="numeric"
+                      keyboardType="default"
                       style={styles.inputNumero}
                       value={fuerza}
                       onChangeText={setFuerza}
@@ -659,7 +658,7 @@ const colorPlaceHolder="#888"
                   <View style={styles.inputGroup}>
                     <Text style={styles.label}>Fortaleza</Text>
                     <TextInput
-                      keyboardType="numeric"
+                      keyboardType="default"
                       style={styles.inputNumero}
                       value={fortaleza}
                       onChangeText={setFortaleza}
@@ -671,7 +670,7 @@ const colorPlaceHolder="#888"
                   <View style={styles.inputGroup}>
                     <Text style={styles.label}>Destreza</Text>
                     <TextInput
-                      keyboardType="numeric"
+                      keyboardType="default"
                       style={styles.inputNumero}
                       value={destreza}
                       onChangeText={setDestreza}
@@ -683,7 +682,7 @@ const colorPlaceHolder="#888"
                   <View style={styles.inputGroup}>
                     <Text style={styles.label}>Agilidad</Text>
                     <TextInput
-                      keyboardType="numeric"
+                      keyboardType="default"
                       style={styles.inputNumero}
                       value={agilidad}
                       onChangeText={setAgilidad}
@@ -695,7 +694,7 @@ const colorPlaceHolder="#888"
                   <View style={styles.inputGroup}>
                     <Text style={styles.label}>Sabiduria</Text>
                     <TextInput
-                      keyboardType="numeric"
+                      keyboardType="default"
                       style={styles.inputNumero}
                       value={sabiduria}
                       onChangeText={setSabiduria}
@@ -707,7 +706,7 @@ const colorPlaceHolder="#888"
                   <View style={styles.inputGroup}>
                     <Text style={styles.label}>Presencia</Text>
                     <TextInput
-                      keyboardType="numeric"
+                      keyboardType="default"
                       style={styles.inputNumero}
                       value={presencia}
                       onChangeText={setPresencia}
@@ -719,7 +718,7 @@ const colorPlaceHolder="#888"
                   <View style={styles.inputGroup}>
                     <Text style={styles.label}>Principio</Text>
                     <TextInput
-                      keyboardType="numeric"
+                      keyboardType="default"
                       style={styles.inputNumero}
                       value={principio}
                       onChangeText={setPrincipio}
@@ -731,7 +730,7 @@ const colorPlaceHolder="#888"
                   <View style={styles.inputGroup}>
                     <Text style={styles.label}>Sentidos</Text>
                     <TextInput
-                      keyboardType="numeric"
+                      keyboardType="default"
                       style={styles.inputNumero}
                       value={sentidos}
                       onChangeText={setSentidos}
@@ -743,19 +742,19 @@ const colorPlaceHolder="#888"
           
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
               <View style={{ flex: 1, marginRight: 8 }}>
-                <Text style={styles.label}>Academisismo</Text><TextInput placeholder="Academisismo" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={academisismo} onChangeText={setAcademisismo} />
-                <Text style={styles.label}>Atletismo</Text><TextInput placeholder="Atletismo" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={atletismo} onChangeText={setAtletismo} />
-                <Text style={styles.label}>Mentir</Text><TextInput placeholder="Mentir" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={mentir} onChangeText={setMentir} />
-                <Text style={styles.label}>Artes Marciales</Text><TextInput placeholder="Artes Marciales" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={artesMarciales} onChangeText={setArtesMarciales} />
-                <Text style={styles.label}>Con Obj. Mágicos</Text><TextInput placeholder="Con Obj. Mágicos" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={conObjMagicos} onChangeText={setConObjMagicos} />
-                <Text style={styles.label}>Con Leyendas</Text><TextInput placeholder="Con Leyendas" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={conLeyendas} onChangeText={setConLeyendas} />
-                <Text style={styles.label}>Con Espiritual</Text><TextInput placeholder="Con Espiritual" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={conEspiritual} onChangeText={setConEspiritual} />
-                <Text style={styles.label}>Manejo Sombras</Text><TextInput placeholder="Manejo Sombras" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={manejoSombras} onChangeText={setManejoSombras} />
-                <Text style={styles.label}>Con Hechicería</Text><TextInput placeholder="Con Hechicería" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={conHechiceria} onChangeText={setConHechiceria} />
-                <Text style={styles.label}>Med Espiritual</Text><TextInput placeholder="Med Espiritual" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={medEspiritual} onChangeText={setMedEspiritual} />
-                <Text style={styles.label}>Fuego</Text><TextInput placeholder="Fuego" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={fuego} onChangeText={setFuego} />
-                <Text style={styles.label}>Veneno</Text><TextInput placeholder="Veneno" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={veneno} onChangeText={setVeneno} />
-                <Text style={styles.label}>Energía</Text><TextInput placeholder="Energía" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={energia} onChangeText={setEnergia} />
+                <Text style={styles.label}>Academisismo</Text><TextInput placeholder="Academisismo" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={academisismo} onChangeText={setAcademisismo} />
+                <Text style={styles.label}>Atletismo</Text><TextInput placeholder="Atletismo" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={atletismo} onChangeText={setAtletismo} />
+                <Text style={styles.label}>Mentir</Text><TextInput placeholder="Mentir" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={mentir} onChangeText={setMentir} />
+                <Text style={styles.label}>Artes Marciales</Text><TextInput placeholder="Artes Marciales" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={artesMarciales} onChangeText={setArtesMarciales} />
+                <Text style={styles.label}>Con Obj. Mágicos</Text><TextInput placeholder="Con Obj. Mágicos" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={conObjMagicos} onChangeText={setConObjMagicos} />
+                <Text style={styles.label}>Con Leyendas</Text><TextInput placeholder="Con Leyendas" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={conLeyendas} onChangeText={setConLeyendas} />
+                <Text style={styles.label}>Con Espiritual</Text><TextInput placeholder="Con Espiritual" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={conEspiritual} onChangeText={setConEspiritual} />
+                <Text style={styles.label}>Manejo Sombras</Text><TextInput placeholder="Manejo Sombras" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={manejoSombras} onChangeText={setManejoSombras} />
+                <Text style={styles.label}>Con Hechicería</Text><TextInput placeholder="Con Hechicería" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={conHechiceria} onChangeText={setConHechiceria} />
+                <Text style={styles.label}>Med Espiritual</Text><TextInput placeholder="Med Espiritual" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={medEspiritual} onChangeText={setMedEspiritual} />
+                <Text style={styles.label}>Fuego</Text><TextInput placeholder="Fuego" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={fuego} onChangeText={setFuego} />
+                <Text style={styles.label}>Veneno</Text><TextInput placeholder="Veneno" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={veneno} onChangeText={setVeneno} />
+                <Text style={styles.label}>Energía</Text><TextInput placeholder="Energía" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={energia} onChangeText={setEnergia} />
                 
 
                 <TextInput
@@ -768,7 +767,7 @@ const colorPlaceHolder="#888"
                 <TextInput
                   placeholder="0"
                   placeholderTextColor={colorPlaceHolder}
-                  keyboardType="numeric"
+                  keyboardType="default"
                   style={[styles.inputNumero, { marginTop: 0 }]}
                   value={valCombate}
                   onChangeText={setValCombate}
@@ -784,7 +783,7 @@ const colorPlaceHolder="#888"
                 <TextInput
                   placeholder="0"
                   placeholderTextColor={colorPlaceHolder}
-                  keyboardType="numeric"
+                  keyboardType="default"
                   style={[styles.inputNumero, { marginTop: 0 }]}
                   value={valCombate2}
                   onChangeText={setValCombate2}
@@ -800,7 +799,7 @@ const colorPlaceHolder="#888"
                 <TextInput
                   placeholder="0"
                   placeholderTextColor={colorPlaceHolder}
-                  keyboardType="numeric"
+                  keyboardType="default"
                   style={[styles.inputNumero, { marginTop: 0 }]}
                   value={valAdd3}
                   onChangeText={setValAdd3}
@@ -816,7 +815,7 @@ const colorPlaceHolder="#888"
                 <TextInput
                   placeholder="0"
                   placeholderTextColor={colorPlaceHolder}
-                  keyboardType="numeric"
+                  keyboardType="default"
                   style={[styles.inputNumero, { marginTop: 0 }]}
                   value={valAdd4}
                   onChangeText={setValAdd4}
@@ -854,7 +853,7 @@ const colorPlaceHolder="#888"
                 <TextInput
                   placeholder="0"
                   placeholderTextColor={colorPlaceHolder}
-                  keyboardType="numeric"
+                  keyboardType="default"
                   style={[styles.inputNumero, { marginTop: 0 }]}
                   value={valAdd1}
                   onChangeText={setValAdd1}
@@ -870,7 +869,7 @@ const colorPlaceHolder="#888"
                 <TextInput
                   placeholder="0"
                   placeholderTextColor={colorPlaceHolder}
-                  keyboardType="numeric"
+                  keyboardType="default"
                   style={[styles.inputNumero, { marginTop: 0 }]}
                   value={valAdd2}
                   onChangeText={setValAdd2}
@@ -967,8 +966,11 @@ const colorPlaceHolder="#888"
 
 
           
+         </View>
+    
+          
         
-        </ScrollView>
+  </ScrollView>
 
 
         
@@ -976,8 +978,7 @@ const colorPlaceHolder="#888"
 
 
 
-   
-    </KeyboardAvoidingView>
+
   );
 };
 
