@@ -25,6 +25,7 @@ export default function Perfil() {
     imagencloudid,
     setEstatus,
     cambiosUsuario,
+    logout,
   } = useContext(AuthContext);
 
   const [nombreUsuario, setNombreUsuario] = useState(nick || '');
@@ -33,8 +34,15 @@ export default function Perfil() {
   const [mostrarContrasenia, setMostrarContrasenia] = useState(false);
   const [imagen, setImagen] = useState(null); // ✅ agregado
   const usuarioId = userToken ? userToken.split("-")[1] : null;
+const imagenBase = require('../assets/imagenBase.jpeg');
 
-  const imagenBase = require('../assets/imagenBase.jpeg');
+
+
+
+  const handleLogout = async () => {
+    await logout(); // 👈 Esto borra datos y setea el userToken en null
+    // No hace falta navigation.reset si tu App.js hace el cambio automático
+  };
 
   const getImageSource = () => {
     if (imagen && imagen.startsWith('data:image')) {
@@ -132,6 +140,15 @@ export default function Perfil() {
         >
           <Text style={styles.textoBoton}>💾 Guardar Cambios</Text>
         </TouchableOpacity>
+
+         <TouchableOpacity
+          style={[styles.botonGuardar, { backgroundColor: '#444' }]}
+          onPress={handleLogout}
+        >
+          <Text style={[styles.textoBoton,{color:"white"}]}>Cerrar sesion</Text>
+        </TouchableOpacity>
+
+
       </View>
     </ScrollView>
   );

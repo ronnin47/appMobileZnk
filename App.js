@@ -11,7 +11,7 @@ import { Provider as PaperProvider } from 'react-native-paper';
 // importaciones de COMPONENTS
 import { LoginScreen } from './components/login'; // Tu pantalla de Login
 import RegisterScreen from './components/registro';
-import Configuracion from './components/configuracion';
+//import Configuracion from './components/configuracion';
 import Perfil from './components/perfil';
 import Principal from './components/principal';
 import Chat from './components/chat';
@@ -95,11 +95,63 @@ const MainStack = () => {
       <Stack.Screen name="Home" component={TabNavigator} options={{ headerShown: false }} />
       
       {/* Protegidas por userToken */}
-      <Stack.Screen name="PantallaDeslizable" component={PantallaDeslizable} />
-      <Stack.Screen name="Ranking" component={Ranking} />
-      <Stack.Screen name="Sagas" component={Sagas} />
+      <Stack.Screen name="PantallaDeslizable" component={PantallaDeslizable}  
+       options={{
+    headerTitle: '', // Oculta el texto del título
+    headerBackTitleVisible: false,
+    headerStyle: {
+      backgroundColor: '#121212', // Color de fondo del header
+      height: 80, 
+                    
+    },
+    headerTintColor: 'white',
+  }}  />
+      <Stack.Screen name="Ranking" component={Ranking}   
+      options={{
+          headerTitle: 'Ranking', // o '' si no querés texto
+          headerBackTitleVisible: false,
+          headerStyle: {
+            backgroundColor: '#121212', // Fondo oscuro
+            height: 80,
+          },
+          headerTintColor: 'white', // Color de la flechita y backTitle
+          headerTitleStyle: {
+            color: 'white', // ✅ Color del texto del título
+            fontWeight: 'bold',
+            fontSize: 20,
+          },
+        }}   />
+      <Stack.Screen name="Sagas" component={Sagas} 
+       options={{
+          headerTitle: 'Sagas', // o '' si no querés texto
+          headerBackTitleVisible: false,
+          headerStyle: {
+            backgroundColor: '#121212', // Fondo oscuro
+            height: 80,
+          },
+          headerTintColor: 'white', // Color de la flechita y backTitle
+          headerTitleStyle: {
+            color: 'white', // ✅ Color del texto del título
+            fontWeight: 'bold',
+            fontSize: 20,
+          },
+        }}  />
       <Stack.Screen name="Nuevo" component={Nuevo} />
-      <Stack.Screen name="Poderes Unicos" component={PoderesUnicos} />
+      <Stack.Screen name="Poderes Unicos" component={PoderesUnicos}
+       options={{
+          headerTitle: 'Poderes Unicos', // o '' si no querés texto
+          headerBackTitleVisible: false,
+          headerStyle: {
+            backgroundColor: '#121212', // Fondo oscuro
+            height: 80,
+          },
+          headerTintColor: 'white', // Color de la flechita y backTitle
+          headerTitleStyle: {
+            color: 'white', // ✅ Color del texto del título
+            fontWeight: 'bold',
+            fontSize: 20,
+          },
+        }}   />
     </>
   )}
 </Stack.Navigator>
@@ -135,9 +187,9 @@ const TabNavigator = () => {
             iconName = 'chatbox-outline';
           } else if (route.name === 'Perfil') {
             iconName = 'person-outline';
-          } else if (route.name === 'Configuracion') {
+          } /*else if (route.name === 'Configuracion') {
             iconName = 'settings-outline';
-          }
+          }*/
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
@@ -174,7 +226,7 @@ const TabNavigator = () => {
       <Tab.Screen name="Principal" component={Principal} options={{ title: 'Inicio' }} />
       <Tab.Screen name="Chat" component={Chat} options={{ title: 'Chat' }} />
       <Tab.Screen name="Perfil" component={Perfil} options={{ title: 'Perfil' }} />
-      <Tab.Screen name="Configuracion" component={Configuracion} options={{ title: 'Configuración' }} />
+    
       
     </Tab.Navigator>
   );

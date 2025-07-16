@@ -41,13 +41,12 @@ export const PoderesUnicos = () => {
     <ScrollView
       style={{ backgroundColor: '#111' }}
       contentContainerStyle={styles.container}>
-      <Text style={styles.titulo}>Técnicas Especiales</Text>
-
+    
       <TextInput
         style={styles.input}
         value={tecBuscar}
         onChangeText={setTecBuscar}
-        placeholder="Buscar técnica especial"
+        placeholder="Ingresa el nombre de personaje o del poder único"
         placeholderTextColor="#aaa"
       />
 
