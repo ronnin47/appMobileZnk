@@ -84,47 +84,25 @@ const MainStack = () => {
 
   return (
     <>
-<Stack.Navigator initialRouteName={userToken ? 'Home' : 'Login'}>
-      {!userToken ? (
-        <>
-          {/* Primera pantalla---------Pantalla de Login */}
-          <Stack.Screen
-            name="Login"
-            component={LoginScreen}
-            options={{ headerShown: false }}
-          />
-          {/* Segunda pantalla---------Pantalla de Registro */}
-          <Stack.Screen
-            name="Register"
-            component={RegisterScreen}
-            options={{ headerShown: false }}
-          />
-        </>
-      ) : (
-        <>
-          {/* Pantalla principal de la aplicacion (con las pestañas) */}
-          <Stack.Screen
-            name="Home"
-            component={TabNavigator}
-            options={{ headerShown: false }}
-          />
-        </>
-      )}
-       <Stack.Screen 
-       name="PantallaDeslizable" 
-       component={PantallaDeslizable}
-       options={{
-          headerTitle: '', // Oculta el texto
-          headerBackTitleVisible: false, // Oculta texto al lado de la flecha en iOS
-        }} 
-       />
-         <Stack.Screen name="Ranking" component={Ranking} />
-          <Stack.Screen name="Sagas" component={Sagas} />
-          <Stack.Screen name="Nuevo" component={Nuevo} />
-          <Stack.Screen name="Poderes Unicos" component={PoderesUnicos} />
-
+  <Stack.Navigator initialRouteName={userToken ? 'Home' : 'Login'}>
+  {!userToken ? (
+    <>
+      <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
+    </>
+  ) : (
+    <>
+      <Stack.Screen name="Home" component={TabNavigator} options={{ headerShown: false }} />
       
-    </Stack.Navigator>
+      {/* Protegidas por userToken */}
+      <Stack.Screen name="PantallaDeslizable" component={PantallaDeslizable} />
+      <Stack.Screen name="Ranking" component={Ranking} />
+      <Stack.Screen name="Sagas" component={Sagas} />
+      <Stack.Screen name="Nuevo" component={Nuevo} />
+      <Stack.Screen name="Poderes Unicos" component={PoderesUnicos} />
+    </>
+  )}
+</Stack.Navigator>
     <FlashMessage position="top" />
     </>
     

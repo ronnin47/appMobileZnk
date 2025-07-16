@@ -242,6 +242,8 @@ const logout = async () => {
   
     // Limpias favoritos
   setFavoritos([]);
+   // 🔴 Muy importante
+  setPjSeleccionado(null);
 };
 
 const consumir = async () => {
