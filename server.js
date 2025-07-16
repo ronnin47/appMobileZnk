@@ -101,7 +101,7 @@ io.on('connection', (socket) => {
 
 
 
-
+/*
 //LOCAL HOST bbdd
 const pool = new Pool({
   user: 'postgres',
@@ -110,6 +110,21 @@ const pool = new Pool({
   password: '041183',
   port: 5432,
 });
+*/
+ 
+
+//LOCAL HOST bbdd
+const pool = new Pool({
+  user: 'gorda',
+  host: 'dpg-d1s01g7diees73akbt00-a.oregon-postgres.render.com',
+  database: 'appbasenative',
+  password: '7p1AkuNrAUkPQpM0i75VCA5Ljx71WLRC',
+  port: 5432,
+   ssl: {
+    rejectUnauthorized: false, // Esto es clave en conexiones con Render
+  },
+});
+
 
 //PARA GAURDADO DE IMAGENES Y OBTENER URLS
 cloudinary.config({
@@ -957,27 +972,162 @@ app.put('/updateUsuarios/:usuarioId', async (req, res) => {
 
 
 
+
+
+
+
 /*
-//ESTO ES PARA TODAS LAS SECCIONES
-app.get('/consumirSecciones', async (req, res) => {
+//******************PRIMER PASO 1*******************************
+//Script PARA MIGRAR PERSONAJES A CLOUDNARY y traerme la url y cludid a la base de datos OK!!
+//ESTE ES EL PRIMER PASO PARA EL TRATAMIENTO DE LA BASE DE DATOS
+async function migrarImagenesPersonajes() {
   try {
-    const result = await pool.query(`
-      SELECT idseccion, titulo, presentacion, idsaga, imagenurl, imagencloudid
-      FROM secciones
+    const resultado = await pool.query(`
+      SELECT idpersonaje, imagen, imagenurl
+      FROM personajes
+      WHERE imagen IS NOT NULL
+      AND (imagenurl IS NULL OR imagenurl NOT LIKE '%res.cloudinary.com%')
     `);
 
-    res.status(200).json({ coleccionSecciones: result.rows });
+    const personajes = resultado.rows;
+
+    for (const personaje of personajes) {
+      const { idpersonaje, imagen } = personaje;
+
+      if (!imagen) {
+        console.log(`⚠️ Personaje ${idpersonaje} no tiene imagen. Saltando...`);
+        continue;
+      }
+
+      // Verificar si es una ruta local de dispositivo móvil (que no se puede subir desde backend)
+      if (imagen.startsWith('file://')) {
+        console.log(`⛔ Imagen de personaje ${idpersonaje} es una ruta local (file://...) y no es accesible desde el backend. Saltando...`);
+        continue;
+      }
+
+      try {
+        // Subir imagen a Cloudinary (se asume que 'imagen' es base64 sin prefijo data:image/...)
+        // Si tiene prefijo, hay que limpiarlo antes, aquí asumo que es base64 limpio
+        let base64data = imagen;
+        // Si tiene prefijo "data:image/xxx;base64,", removerlo
+        const base64PrefixMatch = imagen.match(/^data:image\/\w+;base64,/);
+        if (base64PrefixMatch) {
+          base64data = imagen.replace(/^data:image\/\w+;base64,/, '');
+        }
+
+        const res = await cloudinary.uploader.upload(
+          `data:image/jpeg;base64,${base64data}`,
+          {
+            folder: 'personajes',
+            public_id: `personaje_${idpersonaje}`,
+            overwrite: true,
+          }
+        );
+
+        const url = res.secure_url;
+        const publicId = res.public_id;
+
+        await pool.query(
+          `UPDATE personajes SET imagenurl = $1, imagencloudid = $2 WHERE idpersonaje = $3`,
+          [url, publicId, idpersonaje]
+        );
+
+        console.log(`✅ Imagen del personaje ${idpersonaje} migrada con éxito.`);
+      } catch (error) {
+        console.error(`❌ Error subiendo imagen del personaje ${idpersonaje}:`, error.message);
+      }
+    }
+
+    console.log('🎉 Migración de imágenes completada.');
   } catch (error) {
-    console.error('Error al obtener secciones:', error);
-    res.status(500).json({ error: 'Error interno al obtener secciones' });
+    console.error('🚨 Error general al migrar:', error.message);
   }
-});
+}
+
+migrarImagenesPersonajes();
+*/
+
+/*
+//*********************** SEGUNDO PASO 2 *******************************
+//PARA MIGRAR LAS IMAGENES de SAGAS Y OBTENER URL Y ID DE CLUDNARY OK!!
+async function migrarImagenesSagas() {
+  try {
+    console.log('🔄 Iniciando migración de imágenes de sagas...');
+
+    const resultado = await pool.query(`
+      SELECT idsaga, imagensaga, imagenurl
+      FROM sagas
+      WHERE imagensaga IS NOT NULL
+      AND (imagenurl IS NULL OR imagenurl NOT LIKE '%res.cloudinary.com%')
+    `);
+
+    const sagas = resultado.rows;
+    console.log(`📝 Se encontraron ${sagas.length} sagas para migrar.`);
+
+    for (const saga of sagas) {
+      const { idsaga, imagensaga } = saga;
+
+      console.log(`➡️ Procesando saga ID: ${idsaga}...`);
+
+      if (!imagensaga) {
+        console.log(`⚠️ Saga ${idsaga} no tiene imagen base64, se omite.`);
+        continue;
+      }
+
+      if (imagensaga.startsWith('file://')) {
+        console.log(`⛔ Imagen de saga ${idsaga} es ruta local (file://...), no accesible para backend, se omite.`);
+        continue;
+      }
+
+      try {
+        let base64data = imagensaga;
+        const base64PrefixMatch = imagensaga.match(/^data:image\/\w+;base64,/);
+        if (base64PrefixMatch) {
+          base64data = imagensaga.replace(/^data:image\/\w+;base64,/, '');
+          console.log(`🔍 Se removió prefijo base64 de saga ${idsaga}`);
+        }
+
+        console.log(`🚀 Subiendo imagen de saga ${idsaga} a Cloudinary...`);
+
+        const res = await cloudinary.uploader.upload(
+          `data:image/jpeg;base64,${base64data}`,
+          {
+            folder: 'sagas',
+            public_id: `saga_${idsaga}`,
+            overwrite: true,
+          }
+        );
+
+        const url = res.secure_url;
+        const publicId = res.public_id;
+
+        console.log(`✅ Imagen subida con URL: ${url}`);
+
+        await pool.query(
+          `UPDATE sagas SET imagenurl = $1, imagencloudid = $2 WHERE idsaga = $3`,
+          [url, publicId, idsaga]
+        );
+
+        console.log(`🎉 Actualización DB saga ${idsaga} completada.`);
+      } catch (error) {
+        console.error(`❌ Error subiendo imagen de saga ${idsaga}:`, error.message);
+      }
+    }
+
+    console.log('🎉 Migración de imágenes de sagas finalizada exitosamente.');
+  } catch (error) {
+    console.error('🚨 Error general al migrar sagas:', error.message);
+  } finally {
+    await pool.end();
+  }
+}
+
+migrarImagenesSagas();
 */
 
 
-
 /*
-
+//*************************TERCER PASO*********************
 //PARA HACER LA MIGRACION DE LAS SECCIONES HACEMSO ESTO 
 async function migrarImagenesSecciones() {
   try {
@@ -1052,437 +1202,8 @@ async function migrarImagenesSecciones() {
 }
 
 migrarImagenesSecciones();
-
-*/
-/* PARA MIGRAR LAS IMAGENES Y OBTENER URL Y ID DE CLUDNARY
-async function migrarImagenesSagas() {
-  try {
-    console.log('🔄 Iniciando migración de imágenes de sagas...');
-
-    const resultado = await pool.query(`
-      SELECT idsaga, imagensaga, imagenurl
-      FROM sagas
-      WHERE imagensaga IS NOT NULL
-      AND (imagenurl IS NULL OR imagenurl NOT LIKE '%res.cloudinary.com%')
-    `);
-
-    const sagas = resultado.rows;
-    console.log(`📝 Se encontraron ${sagas.length} sagas para migrar.`);
-
-    for (const saga of sagas) {
-      const { idsaga, imagensaga } = saga;
-
-      console.log(`➡️ Procesando saga ID: ${idsaga}...`);
-
-      if (!imagensaga) {
-        console.log(`⚠️ Saga ${idsaga} no tiene imagen base64, se omite.`);
-        continue;
-      }
-
-      if (imagensaga.startsWith('file://')) {
-        console.log(`⛔ Imagen de saga ${idsaga} es ruta local (file://...), no accesible para backend, se omite.`);
-        continue;
-      }
-
-      try {
-        let base64data = imagensaga;
-        const base64PrefixMatch = imagensaga.match(/^data:image\/\w+;base64,/);
-        if (base64PrefixMatch) {
-          base64data = imagensaga.replace(/^data:image\/\w+;base64,/, '');
-          console.log(`🔍 Se removió prefijo base64 de saga ${idsaga}`);
-        }
-
-        console.log(`🚀 Subiendo imagen de saga ${idsaga} a Cloudinary...`);
-
-        const res = await cloudinary.uploader.upload(
-          `data:image/jpeg;base64,${base64data}`,
-          {
-            folder: 'sagas',
-            public_id: `saga_${idsaga}`,
-            overwrite: true,
-          }
-        );
-
-        const url = res.secure_url;
-        const publicId = res.public_id;
-
-        console.log(`✅ Imagen subida con URL: ${url}`);
-
-        await pool.query(
-          `UPDATE sagas SET imagenurl = $1, imagencloudid = $2 WHERE idsaga = $3`,
-          [url, publicId, idsaga]
-        );
-
-        console.log(`🎉 Actualización DB saga ${idsaga} completada.`);
-      } catch (error) {
-        console.error(`❌ Error subiendo imagen de saga ${idsaga}:`, error.message);
-      }
-    }
-
-    console.log('🎉 Migración de imágenes de sagas finalizada exitosamente.');
-  } catch (error) {
-    console.error('🚨 Error general al migrar sagas:', error.message);
-  } finally {
-    await pool.end();
-  }
-}
-
-migrarImagenesSagas();
-
 */
 
-/*
-
-
-
-
-
-
-
-
-
-
-// Actualizar presentación saga
-app.put('/updateSaga/:idsaga', async (req, res) => {
-  const { idsaga } = req.params;
-  const { presentacion } = req.body;
-
-  if (!presentacion) {
-    return res.status(400).json({ error: 'Presentacion es requerida' });
-  }
-
-  try {
-    const result = await pool.query(
-      'UPDATE sagas SET presentacion = $1 WHERE idsaga = $2 RETURNING *',
-      [presentacion, idsaga]
-    );
-    if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'Saga no encontrada' });
-    }
-    res.json({ message: 'Saga actualizada correctamente', saga: result.rows[0] });
-  } catch (error) {
-    console.error('Error al actualizar saga:', error);
-    res.status(500).json({ error: 'Error interno al actualizar saga' });
-  }
-});
-
-// Eliminar saga y sus secciones relacionadas
-app.delete('/deleteSaga/:idsaga', async (req, res) => {
-  const { idsaga } = req.params;
-
-  try {
-    await pool.query('BEGIN');
-
-    await pool.query('DELETE FROM secciones WHERE idsaga = $1', [idsaga]);
-    const result = await pool.query('DELETE FROM sagas WHERE idsaga = $1 RETURNING *', [idsaga]);
-
-    if (result.rowCount === 0) {
-      await pool.query('ROLLBACK');
-      return res.status(404).json({ error: 'Saga no encontrada' });
-    }
-
-    await pool.query('COMMIT');
-    res.json({ message: 'Saga eliminada correctamente' });
-  } catch (error) {
-    await pool.query('ROLLBACK');
-    console.error('Error al eliminar saga:', error);
-    res.status(500).json({ error: 'Error interno al eliminar saga' });
-  }
-});
-
-
-// SECCIONES
-
-// Obtener todas las secciones
-app.get('/consumirSecciones', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM secciones');
-    res.status(200).json({ coleccionSecciones: result.rows });
-  } catch (error) {
-    console.error('Error al obtener secciones:', error);
-    res.status(500).json({ error: 'Error interno al obtener secciones' });
-  }
-});
-
-// Insertar sección
-app.post('/insertSeccion', async (req, res) => {
-  const { titulo, presentacion, imagen, idsaga } = req.body;
-
-  if (!titulo || !presentacion || !imagen || !idsaga) {
-    return res.status(400).json({ error: 'Faltan campos obligatorios: titulo, presentacion, imagen o idsaga' });
-  }
-
-  try {
-    const result = await pool.query(
-      'INSERT INTO secciones (titulo, presentacion, imagen, idsaga) VALUES ($1, $2, $3, $4) RETURNING *',
-      [titulo, presentacion, imagen, idsaga]
-    );
-    res.status(201).json(result.rows[0]);
-  } catch (error) {
-    console.error('Error al insertar sección:', error);
-    res.status(500).json({ error: 'Error interno al crear sección' });
-  }
-});
-
-// Actualizar sección
-app.put('/updateSeccion/:idseccion', async (req, res) => {
-  const { idseccion } = req.params;
-  const { titulo, presentacion, imagen } = req.body;
-
-  if (!titulo || !presentacion || !imagen) {
-    return res.status(400).json({ error: 'Faltan campos obligatorios: titulo, presentacion o imagen' });
-  }
-
-  try {
-    const result = await pool.query(
-      'UPDATE secciones SET titulo = $1, presentacion = $2, imagen = $3 WHERE idseccion = $4 RETURNING *',
-      [titulo, presentacion, imagen, idseccion]
-    );
-    if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'Sección no encontrada' });
-    }
-    res.json({ message: 'Sección actualizada correctamente', seccion: result.rows[0] });
-  } catch (error) {
-    console.error('Error al actualizar sección:', error);
-    res.status(500).json({ error: 'Error interno al actualizar sección' });
-  }
-});
-
-// Eliminar sección
-app.delete('/deleteSeccion/:idseccion', async (req, res) => {
-  const { idseccion } = req.params;
-
-  try {
-    const result = await pool.query('DELETE FROM secciones WHERE idseccion = $1 RETURNING *', [idseccion]);
-    if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'Sección no encontrada' });
-    }
-    res.json({ message: 'Sección eliminada correctamente' });
-  } catch (error) {
-    console.error('Error al eliminar sección:', error);
-    res.status(500).json({ error: 'Error interno al eliminar sección' });
-  }
-});
-
-
-// Añadir personaje a saga
-app.post('/insertPjSaga', async (req, res) => {
-  const { idpersonaje, idsaga } = req.body;
-
-  if (!idpersonaje || !idsaga) {
-    return res.status(400).json({ error: 'Faltan campos obligatorios: idpersonaje o idsaga' });
-  }
-
-  try {
-    // Verificar que la saga exista y que el personaje no esté ya incluido puede ser buena idea
-
-    const query = `
-      UPDATE sagas
-      SET personajes = array_append(personajes, $1)
-      WHERE idsaga = $2 AND NOT personajes @> ARRAY[$1]
-      RETURNING *;
-    `;
-    const result = await pool.query(query, [idpersonaje, idsaga]);
-
-    if (result.rowCount === 0) {
-      return res.status(400).json({ message: 'Personaje ya está en la saga o saga no encontrada' });
-    }
-
-    res.json({ message: 'Personaje añadido correctamente' });
-  } catch (error) {
-    console.error('Error al añadir personaje a saga:', error);
-    res.status(500).json({ error: 'Error interno al añadir personaje a saga' });
-  }
-});
-
-
-// NOTAS
-
-app.put('/update-notas/:idpersonaje', async (req, res) => {
-  const { idpersonaje } = req.params;
-  const { nota, idsaga } = req.body;
-
-  if (!nota || !idsaga) {
-    return res.status(400).json({ error: 'Faltan campos obligatorios: nota o idsaga' });
-  }
-
-  try {
-    const result = await pool.query('SELECT notasaga FROM personajes WHERE idpersonaje = $1', [idpersonaje]);
-
-    if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'Personaje no encontrado' });
-    }
-
-    let notasaga = result.rows[0].notasaga;
-
-    if (notasaga) {
-      if (typeof notasaga === 'string') {
-        notasaga = JSON.parse(notasaga);
-      }
-      if (!Array.isArray(notasaga)) {
-        notasaga = [notasaga];
-      }
-
-      const index = notasaga.findIndex(n => n.idsaga === idsaga);
-      if (index !== -1) {
-        notasaga[index].nota = nota;
-      } else {
-        notasaga.push({ nota, idsaga });
-      }
-    } else {
-      notasaga = [{ nota, idsaga }];
-    }
-
-    await pool.query('UPDATE personajes SET notasaga = $1 WHERE idpersonaje = $2', [
-      JSON.stringify(notasaga),
-      idpersonaje,
-    ]);
-
-    res.json({ message: 'Nota actualizada correctamente', data: notasaga });
-  } catch (error) {
-    console.error('Error al actualizar nota:', error);
-    res.status(500).json({ error: 'Error interno al actualizar nota' });
-  }
-});
-*/
-
-//Script PARA MIGRAR PERSONAJES A CLOUDNARY y traerme la url y cludid a la base de datos OK!!
-/*
-async function migrarImagenesPersonajes() {
-  try {
-    const resultado = await pool.query(`
-      SELECT idpersonaje, imagen, imagenurl
-      FROM personajes
-      WHERE imagen IS NOT NULL
-      AND (imagenurl IS NULL OR imagenurl NOT LIKE '%res.cloudinary.com%')
-    `);
-
-    const personajes = resultado.rows;
-
-    for (const personaje of personajes) {
-      const { idpersonaje, imagen } = personaje;
-
-      if (!imagen) {
-        console.log(`⚠️ Personaje ${idpersonaje} no tiene imagen. Saltando...`);
-        continue;
-      }
-
-      // Verificar si es una ruta local de dispositivo móvil (que no se puede subir desde backend)
-      if (imagen.startsWith('file://')) {
-        console.log(`⛔ Imagen de personaje ${idpersonaje} es una ruta local (file://...) y no es accesible desde el backend. Saltando...`);
-        continue;
-      }
-
-      try {
-        // Subir imagen a Cloudinary (se asume que 'imagen' es base64 sin prefijo data:image/...)
-        // Si tiene prefijo, hay que limpiarlo antes, aquí asumo que es base64 limpio
-        let base64data = imagen;
-        // Si tiene prefijo "data:image/xxx;base64,", removerlo
-        const base64PrefixMatch = imagen.match(/^data:image\/\w+;base64,/);
-        if (base64PrefixMatch) {
-          base64data = imagen.replace(/^data:image\/\w+;base64,/, '');
-        }
-
-        const res = await cloudinary.uploader.upload(
-          `data:image/jpeg;base64,${base64data}`,
-          {
-            folder: 'personajes',
-            public_id: `personaje_${idpersonaje}`,
-            overwrite: true,
-          }
-        );
-
-        const url = res.secure_url;
-        const publicId = res.public_id;
-
-        await pool.query(
-          `UPDATE personajes SET imagenurl = $1, imagencloudid = $2 WHERE idpersonaje = $3`,
-          [url, publicId, idpersonaje]
-        );
-
-        console.log(`✅ Imagen del personaje ${idpersonaje} migrada con éxito.`);
-      } catch (error) {
-        console.error(`❌ Error subiendo imagen del personaje ${idpersonaje}:`, error.message);
-      }
-    }
-
-    console.log('🎉 Migración de imágenes completada.');
-  } catch (error) {
-    console.error('🚨 Error general al migrar:', error.message);
-  }
-}
-
-migrarImagenesPersonajes();
-*/
-
-
-/*
-
-
-
-
-
-
-
-
-
-// esto es para llenar los cloudnary id 
-async function rellenarImagenCloudId() {
-  try {
-    // 1. Traer personajes sin imagencloudid pero con imagenurl
-    const { rows: personajes } = await pool.query(`
-      SELECT idpersonaje, imagenurl
-      FROM personajes
-      WHERE imagenurl IS NOT NULL
-      AND (imagencloudid IS NULL OR imagencloudid = '')
-    `);
-
-    for (const pj of personajes) {
-      const { idpersonaje, imagenurl } = pj;
-
-      // 2. Extraer public_id de la URL
-      const publicId = getPublicIdFromUrl(imagenurl);
-
-      if (publicId) {
-        // 3. Actualizar en la base
-        await pool.query(
-          'UPDATE personajes SET imagencloudid = $1 WHERE idpersonaje = $2',
-          [publicId, idpersonaje]
-        );
-        console.log(`Actualizado personaje ${idpersonaje} con imagencloudid: ${publicId}`);
-      } else {
-        console.log(`No se pudo extraer public_id para personaje ${idpersonaje}`);
-      }
-    }
-
-    console.log('Proceso terminado.');
-  } catch (error) {
-    console.error('Error en rellenarImagenCloudId:', error);
-  }
-}
-
-// Función para extraer public_id de URL de Cloudinary
-function getPublicIdFromUrl(url) {
-  try {
-    const parts = url.split('/');
-    const uploadIndex = parts.findIndex(part => part === 'upload');
-    if (uploadIndex === -1) return null;
-
-    // Obtenemos la parte después de 'upload' y la versión
-    const publicIdWithExt = parts.slice(uploadIndex + 2).join('/');
-
-    // Quitamos la extensión (ejemplo .jpg)
-    const publicId = publicIdWithExt.replace(/\.[^/.]+$/, "");
-
-    return publicId;
-  } catch {
-    return null;
-  }
-}
-
-
-rellenarImagenCloudId()
-*/
 
 server.listen(PORT, () => {
   console.log(`🟢 Servidor Socket.IO corriendo en http://localhost:${PORT}`);

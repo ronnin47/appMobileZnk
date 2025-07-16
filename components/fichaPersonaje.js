@@ -521,7 +521,7 @@ console.log("**************** paso por ficha")
   
   <ScrollView
       keyboardShouldPersistTaps="handled"
-      contentContainerStyle={[styles.container, { flexGrow: 1, }]}
+      contentContainerStyle={[styles.container, { flexGrow: 1}]}
     >
          <View style={{ marginTop:20 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 10 }}>
@@ -987,6 +987,7 @@ const styles = StyleSheet.create({
     padding: 12, // antes: 20
     backgroundColor: '#000',
     justifyContent: 'flex-start',
+    paddingBottom:80,
   },
   titulo: {
     fontSize: 24,

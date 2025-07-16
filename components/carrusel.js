@@ -1,67 +1,79 @@
-import React, { useContext, useState, useEffect } from 'react';
-import { ScrollView, Text, View, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import {
+  FlatList,
+  Text,
+  View,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from './AuthContext';
 
 export const Carrusel = ({ personajes }) => {
-
-
-  const {pjSeleccionado,setPjSeleccionado}=useContext(AuthContext)
-
+  const { setPjSeleccionado } = useContext(AuthContext);
   const imagenBase = require('../assets/imagenBase.jpeg');
   const navigation = useNavigation();
 
-
-  //CUANDO ELIJE UNA CARD DE PJ ENTRARA A PANTALLADESLIZABLE Y TAMBIEN VA SETEAR EL ID DE PJ SELECIONADO
-   const handlePress = (pj) => {
+  const handlePress = (pj) => {
     setPjSeleccionado(pj.idpersonaje);
-    navigation.navigate('PantallaDeslizable'); 
+    navigation.navigate('PantallaDeslizable');
   };
-  
 
   return (
-    <ScrollView
-      horizontal={true}
-      pagingEnabled={true}
-      showsHorizontalScrollIndicator={false}
-    >
-      <View style={styles.row}>
-            {personajes.slice().reverse().map((pj, index) => (
-              <TouchableOpacity
-                key={pj.idpersonaje || index}
-                onPress={() => handlePress(pj)}
-                style={styles.card}
-                activeOpacity={0.9}
-              >
-                <ImageWrapper 
-                  uri={
-                    pj.imagen && pj.imagen.startsWith && pj.imagen.startsWith('data:image')
-                      ? pj.imagen
-                      : pj.imagenurl
-                  } 
-                  fallback={imagenBase} 
-                />
-                <Text
-                  style={styles.text}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit={true}
-                  minimumFontScale={0.5}
-                  ellipsizeMode="tail"
-                >
-                  {pj.nombre}
-                </Text>
-              </TouchableOpacity>
-            ))}
-       </View>
-      
-    </ScrollView>
+    <View style={styles.carruselContainer}>
+      <FlatList
+        horizontal
+        data={[...personajes].reverse()}
+        keyExtractor={(item) =>
+          item.idpersonaje?.toString() || Math.random().toString()
+        }
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            onPress={() => handlePress(item)}
+            style={styles.card}
+            activeOpacity={0.9}
+          >
+            <ImageWrapper
+              uri={
+                item.imagen?.startsWith?.('data:image')
+                  ? item.imagen
+                  : item.imagenurl
+              }
+              fallback={imagenBase}
+            />
+            <Text
+              style={styles.text}
+              numberOfLines={1}
+              adjustsFontSizeToFit={true}
+              minimumFontScale={0.5}
+              ellipsizeMode="tail"
+            >
+              {item.nombre}
+            </Text>
+          </TouchableOpacity>
+        )}
+        showsHorizontalScrollIndicator={false}
+        snapToInterval={136} // 120 imagen + 16 margen horizontal
+        decelerationRate="fast"
+        contentContainerStyle={styles.row}
+        getItemLayout={(data, index) => ({
+          length: 136,
+          offset: 136 * index,
+          index,
+        })}
+        initialNumToRender={5}
+        maxToRenderPerBatch={10}
+        windowSize={5}
+      />
+    </View>
   );
 };
 
 const ImageWrapper = ({ uri, fallback }) => {
-  const [source, setSource] = React.useState(fallback);
+  const [source, setSource] = useState(fallback);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (uri && typeof uri === 'string' && uri.trim() !== '') {
       setSource({ uri });
     } else {
@@ -79,12 +91,9 @@ const ImageWrapper = ({ uri, fallback }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 0,
+  carruselContainer: {
+    height: 220,
     justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5F5F5',
   },
   text: {
     fontSize: 16,
@@ -96,8 +105,8 @@ const styles = StyleSheet.create({
   imagen: {
     width: 120,
     height: 160,
-      borderWidth: 0.35,
-    borderColor: "white",
+    borderWidth: 0.35,
+    borderColor: 'white',
     borderRadius: 8,
     marginBottom: 15,
     shadowColor: '#fff',
@@ -113,10 +122,7 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
-    justifyContent: 'flex-start',
     alignItems: 'center',
-    gap: 10,
-    width: '100%',
     paddingHorizontal: 10,
   },
   card: {
