@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState ,useEffect} from 'react';
 import {
   View,
   Text,
@@ -37,7 +37,18 @@ export default function Perfil() {
 const imagenBase = require('../assets/imagenBase.jpeg');
 
 
+// Sincronizar estados locales cuando cambian los valores del contexto
+  useEffect(() => {
+    setNombreUsuario(nick || '');
+    setEmailEditable(email || '');
+    setContraseniaEditable(contrasenia || '');
+  }, [nick, email, contrasenia]);
 
+  useEffect(() => {
+    if (!imagen) {
+      setImagen(imagenurl || null);
+    }
+  }, [imagenurl]);
 
   const handleLogout = async () => {
     await logout(); // 👈 Esto borra datos y setea el userToken en null

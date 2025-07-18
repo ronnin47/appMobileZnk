@@ -1,4 +1,3 @@
-//LA PRUEBA FUNCIONA!!
 import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from './AuthContext';
@@ -6,109 +5,146 @@ import axios from 'axios';
 import socket from './socket';
 import * as SplashScreen from 'expo-splash-screen';
 import { showMessage } from 'react-native-flash-message';
+import { Alert } from 'react-native'; // 👈 AÑADÍ ESTO
 import { API_BASE_URL } from './config'; 
-SplashScreen.preventAutoHideAsync();
+//SplashScreen.preventAutoHideAsync();
 
 export const AuthProvider = ({ children }) => {
-  const [userToken, setUserToken] = useState(null);
-  const [estatus,setEstatus]=useState(null)
-  const [email,setEmail]=useState(null)
-  const [contrasenia,setContrasenia]=useState(null)
-  const [nick,setNick]=useState(null)
-  const [imagenurl,setImagenurl]=useState(null)
-  const [imagencloudid, setImagencloudid]=useState(null)
-
-
-  const [isLoading, setIsLoading] = useState(true);
-  const [personajes, setPersonajes] = useState([]);
-
-  const [coleccionPersonajes, setColeccionPersonajes] = useState([]);
-
-   const [sagas, setSagas] = useState([]);
-
-
-  const [historialChat, setHistorialChat] = useState([]);
-  
+const [userToken, setUserToken] = useState(null);
+const [estatus,setEstatus]=useState(null);
+const [email,setEmail]=useState(null);
+const [contrasenia,setContrasenia]=useState(null);
+const [nick,setNick]=useState(null);
+const [imagenurl,setImagenurl]=useState(null);
+const [imagencloudid, setImagencloudid]=useState(null);
+const [isLoading, setIsLoading] = useState(true);
+const [personajes, setPersonajes] = useState([]);
+const [coleccionPersonajes, setColeccionPersonajes] = useState([]);
+const [sagas, setSagas] = useState([]);
+const [historialChat, setHistorialChat] = useState([]);
 const [notasUsuario, setNotasUsuario] = useState("");
-//**********PERSONAJE SELECIONADO***********
-//va tener el id de pj selecionado
 const [pjSeleccionado, setPjSeleccionado] = useState(null);
-
-//favoritos
 const [favoritos, setFavoritos] = useState([]);
+const [cargandoNotas, setCargandoNotas] = useState(true);
 
+/*
+useEffect(() => {
+  //SplashScreen.preventAutoHideAsync();
 
+  const loadData = async () => {
+    
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      const estatus = await AsyncStorage.getItem('estatus');
+      const email = await AsyncStorage.getItem('email');
+      const contrasenia = await AsyncStorage.getItem('contrasenia');
+      const nick = await AsyncStorage.getItem('nick');
+      const imagenurl = await AsyncStorage.getItem("imagenurl");
+      const imagencloudid = await AsyncStorage.getItem("imagencloudid");
 
-//mostramos ese id
- useEffect(()=>{
-  console.log("El personaje selecionado en context es: ",pjSeleccionado)
- },[pjSeleccionado])
+      if (token) {
+        setUserToken(token);
+        setEstatus(estatus);
+        setEmail(email);
+        setContrasenia(contrasenia);
+        setNick(nick);
+        setImagenurl(imagenurl);
+        setImagencloudid(imagencloudid);
 
+        const usuarioIdStr = await AsyncStorage.getItem('userId');
+        const usuarioId = usuarioIdStr ? parseInt(usuarioIdStr, 10) : null;
 
-  useEffect(() => {
-    SplashScreen.preventAutoHideAsync();
+        if (usuarioId) {
+          const response = await axios.get(`${API_BASE_URL}/consumirPersonajesUsuario`, {
+            params: { usuarioId }
+          });
 
-    const loadData = async () => {
-      console.time('loadData');
-      try {
-        const token = await AsyncStorage.getItem('userToken');
-        const estatus = await AsyncStorage.getItem('estatus');
-          const email = await AsyncStorage.getItem('email');
-          const contrasenia = await AsyncStorage.getItem('contrasenia');
-          const nick = await AsyncStorage.getItem('nick');
-          const imagenurl= await AsyncStorage.getItem("imagenurl");
-          const imagencloudid= await AsyncStorage.getItem("imagencloudid");
-
-
-
-
-
-        if (token) {
-          setUserToken(token);
-          setEstatus(estatus);
-          setEmail(email);
-          setContrasenia(contrasenia);
-          setNick(nick);
-          setImagenurl(imagenurl);
-          setImagencloudid(imagencloudid);
-
-          const usuarioIdStr = await AsyncStorage.getItem('userId');
-          const usuarioId = usuarioIdStr ? parseInt(usuarioIdStr, 10) : null;
-
-          if (usuarioId) {
-            const response = await axios.get(
-              //'http://192.168.0.38:3000/consumirPersonajesUsuario',
-              `${API_BASE_URL}/consumirPersonajesUsuario`,
-              { params: { usuarioId } }
-            );
-
-            const coleccion = response.data.coleccionPersonajes || [];
-            setPersonajes(coleccion);
-          } else {
-            /*const coleccionPersonajes = await AsyncStorage.getItem('personajesUsuario');
-            if (coleccionPersonajes) {
-              setPersonajes(JSON.parse(coleccionPersonajes));
-            }*/
-          }
-        } else {
-          setUserToken(null);
-          setPersonajes([]);
-          setEstatus(null)
+          const coleccion = response.data.coleccionPersonajes || [];
+          setPersonajes(coleccion);
         }
-      } catch (e) {
-        console.log('Error loading token or personajes:', e);
+      } else {
         setUserToken(null);
         setPersonajes([]);
-        setEstatus(null)
-      } finally {
-        setIsLoading(false);
-        console.timeEnd('loadData');
-        await SplashScreen.hideAsync();
+        setEstatus(null);
       }
-    };
+    } catch (e) {
+      console.log('Error loading token or personajes:', e);
+      Alert.alert('Error', 'Error al ocultar splash screen: ' + e.message);
+      setUserToken(null);
+      setPersonajes([]);
+      setEstatus(null);
+    } finally {
+      Alert.alert("FINALLY DE PROVIDER", "Se ejecutó el finally del provider");
+      setIsLoading(false);
+      console.timeEnd('loadData');
+   
+    }
+   
+  };
 
-    loadData();
-  }, [userToken]);
+  loadData();
+}, []); // 👈 SOLO una vez al iniciar (no depende de userToken)
+
+*/
+
+const loadData = async () => {
+  try {
+    const token = await AsyncStorage.getItem('userToken');
+    const estatus = await AsyncStorage.getItem('estatus');
+    const email = await AsyncStorage.getItem('email');
+    const contrasenia = await AsyncStorage.getItem('contrasenia');
+    const nick = await AsyncStorage.getItem('nick');
+    const imagenurl = await AsyncStorage.getItem('imagenurl');
+    const imagencloudid = await AsyncStorage.getItem('imagencloudid');
+
+    if (token) {
+      setUserToken(token);
+      setEstatus(estatus);
+      setEmail(email);
+      setContrasenia(contrasenia);
+      setNick(nick);
+      setImagenurl(imagenurl);
+      setImagencloudid(imagencloudid);
+
+      const usuarioIdStr = await AsyncStorage.getItem('userId');
+      const usuarioId = usuarioIdStr ? parseInt(usuarioIdStr, 10) : null;
+
+      if (usuarioId) {
+        const response = await axios.get(`${API_BASE_URL}/consumirPersonajesUsuario`, {
+          params: { usuarioId },
+        });
+        const coleccion = response.data.coleccionPersonajes || [];
+        setPersonajes(coleccion);
+      }
+    } else {
+      setUserToken(null);
+      setPersonajes([]);
+      setEstatus(null);
+    }
+  } catch (e) {
+    console.log('Error loading data:', e);
+    Alert.alert('Error', 'No se pudo cargar el usuario');
+    setUserToken(null);
+    setPersonajes([]);
+    setEstatus(null);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+useEffect(() => {
+  loadData(); // al montar la app
+}, []);
+
+useEffect(() => {
+  if (userToken) {
+    loadData(); // refresca datos al loguearse de nuevo
+  }
+}, [userToken]);
+
+
+
+
 
 
  const fetchSagas = async () => {
@@ -163,6 +199,62 @@ useEffect(() => {
 }, [userToken]);
 
 
+
+useEffect(() => {
+  const obtenerFavoritos = async () => {
+    const data = await AsyncStorage.getItem('favoritos');
+    setFavoritos(data ? JSON.parse(data) : []);
+  };
+  obtenerFavoritos();
+}, []);
+
+
+// Cargar notas guardadas al iniciar
+useEffect(() => {
+  if (!userToken || !pjSeleccionado) return;
+
+  const cargarNotas = async () => {
+    setCargandoNotas(true);
+
+    try {
+      const clave = `notasUsuario-${userToken}-${pjSeleccionado}`;
+      const guardado = await AsyncStorage.getItem(clave);
+      setNotasUsuario(guardado ?? ""); // default en ""
+    } catch (error) {
+      console.error("Error al cargar notas:", error);
+      setNotasUsuario(""); // por seguridad
+    } finally {
+      setCargandoNotas(false);
+    }
+  };
+
+  cargarNotas();
+}, [userToken, pjSeleccionado]);
+
+// Guardar notas cuando cambien (solo si no estamos cargando)
+useEffect(() => {
+  if (!userToken || !pjSeleccionado || cargandoNotas) return;
+
+  const guardarNotas = async () => {
+    try {
+      const clave = `notasUsuario-${userToken}-${pjSeleccionado}`;
+
+      if (typeof notasUsuario === "string") {
+        // Elimina si está vacío (opcional)
+        if (notasUsuario.trim() === "") {
+          await AsyncStorage.removeItem(clave);
+        } else {
+          await AsyncStorage.setItem(clave, notasUsuario);
+        }
+      }
+    } catch (error) {
+      console.error("Error al guardar notas:", error);
+    }
+  };
+
+  guardarNotas();
+}, [notasUsuario, userToken, pjSeleccionado, cargandoNotas]);
+
 const handleMensaje = (mensaje) => {
  // console.log('🟢 Mensaje recibido en cliente:', mensaje);
   setHistorialChat(prev => [...prev, mensaje]);
@@ -201,7 +293,7 @@ const savePersonajes = async (lista) => {
 }; 
 
 
-  const savePersonajeUno = async (personajeActualizado) => {
+const savePersonajeUno = async (personajeActualizado) => {
   try {
     setPersonajes((anteriores) =>
       anteriores.map((p) =>
@@ -271,7 +363,7 @@ const consumir = async () => {
       console.error("Cliente: Fallo al consumir personajes narrador TODOS", error.message);
     }
        
-  };
+};
 
  const cambiosUsuario = async ({ nuevoNick, nuevoEmail, nuevaContrasenia, usuarioId,nuevaImagenurl }) => {
  if (!usuarioId || usuarioId.toString().trim() === '') {
@@ -333,16 +425,6 @@ const consumir = async () => {
 };
 
 
-
-
-useEffect(() => {
-  const obtenerFavoritos = async () => {
-    const data = await AsyncStorage.getItem('favoritos');
-    setFavoritos(data ? JSON.parse(data) : []);
-  };
-  obtenerFavoritos();
-}, []);
-
 const toggleFavorito = async (idPersonaje) => {
   let nuevos;
   if (favoritos.includes(idPersonaje)) {
@@ -356,57 +438,6 @@ const toggleFavorito = async (idPersonaje) => {
 };
 
 
-
-
-
-
-const [cargandoNotas, setCargandoNotas] = useState(true);
-
-// Cargar notas guardadas al iniciar
-useEffect(() => {
-  if (!userToken || !pjSeleccionado) return;
-
-  const cargarNotas = async () => {
-    setCargandoNotas(true);
-
-    try {
-      const clave = `notasUsuario-${userToken}-${pjSeleccionado}`;
-      const guardado = await AsyncStorage.getItem(clave);
-      setNotasUsuario(guardado ?? ""); // default en ""
-    } catch (error) {
-      console.error("Error al cargar notas:", error);
-      setNotasUsuario(""); // por seguridad
-    } finally {
-      setCargandoNotas(false);
-    }
-  };
-
-  cargarNotas();
-}, [userToken, pjSeleccionado]);
-
-// Guardar notas cuando cambien (solo si no estamos cargando)
-useEffect(() => {
-  if (!userToken || !pjSeleccionado || cargandoNotas) return;
-
-  const guardarNotas = async () => {
-    try {
-      const clave = `notasUsuario-${userToken}-${pjSeleccionado}`;
-
-      if (typeof notasUsuario === "string") {
-        // Elimina si está vacío (opcional)
-        if (notasUsuario.trim() === "") {
-          await AsyncStorage.removeItem(clave);
-        } else {
-          await AsyncStorage.setItem(clave, notasUsuario);
-        }
-      }
-    } catch (error) {
-      console.error("Error al guardar notas:", error);
-    }
-  };
-
-  guardarNotas();
-}, [notasUsuario, userToken, pjSeleccionado, cargandoNotas]);
   
   return (
     <AuthContext.Provider

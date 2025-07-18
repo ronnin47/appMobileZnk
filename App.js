@@ -4,85 +4,84 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Image, Text, View, StyleSheet } from 'react-native';
+import { Image, Text, View, StyleSheet, Alert } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import { AuthContext } from './components/AuthContext'; // <-- IMPORTAR EL CONTEXTO
 import { Provider as PaperProvider } from 'react-native-paper';
-// importaciones de COMPONENTS
 import { LoginScreen } from './components/login'; // Tu pantalla de Login
 import RegisterScreen from './components/registro';
-//import Configuracion from './components/configuracion';
 import Perfil from './components/perfil';
 import Principal from './components/principal';
 import Chat from './components/chat';
-import { FichaPersonaje } from './components/fichaPersonaje';
 import { PantallaDeslizable } from './components/pantallaDeslizable';
-
 import { AuthProvider } from './components/AuthProvider';
 import { Ranking } from './components/ranking';
 import { Sagas } from './components/sagas';
 import { PoderesUnicos } from './components/poderesUnicos';
-
-
-
+import { ErrorBoundary } from './ErrorBoundary'; // o la ruta correcta
 import FlashMessage from 'react-native-flash-message';
 import { Platform } from 'react-native';
-
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-
-
-import { io } from 'socket.io-client';
 import { Nuevo } from './components/nuevo';
-import { API_BASE_URL } from './components/config';
-const socket = io(`${API_BASE_URL}`); // IP y puerto de tu servidor
 
+//SplashScreen.preventAutoHideAsync();
 
-
-SplashScreen.preventAutoHideAsync();
-// el Stack navigator es una PILA de pantallas
 export const App = () => {
-
-
-
-  const [appIsReady, setAppIsReady] = useState(false);
+   const [appIsReady, setAppIsReady] = useState(false);
 
   useEffect(() => {
-    const prepararApp = async () => {
-      try {
-        // Podés cargar fuentes, datos del usuario, etc aquí si querés
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Simula 2 segundos de carga
-      } catch (e) {
-        console.warn(e);
-      } finally {
-        setAppIsReady(true);
-        await SplashScreen.hideAsync(); // ✅ Oculta el splash cuando está todo listo
-      }
-    };
+  const prepararApp = async () => {
+    try {
+      await SplashScreen.preventAutoHideAsync(); // 👈 Agregá esto acá
+      await new Promise(resolve => setTimeout(resolve, 3000)); // Simula carga
+    } catch (e) {
+      console.warn(e);
+    } finally {
+      setAppIsReady(true);
+      await SplashScreen.hideAsync(); // Oculta splash al terminar todo
+    }
+  };
 
-    prepararApp();
-  }, []);
-
-  if (!appIsReady) return null; // No renderiza nada mientras carga
-
+  prepararApp();
+}, []);
+  
+if (!appIsReady) {
   return (
-     <PaperProvider>
-        <AuthProvider>
-          <NavigationContainer>
-            <MainStack />
-          </NavigationContainer>
-        </AuthProvider>
-     </PaperProvider>   
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'black' }}>
+      <Text style={{ color: 'white' }}>Cargando aplicación...</Text>
+    </View>
+  );
+}
+  return (
+       <ErrorBoundary>
+          <PaperProvider>
+                <AuthProvider>
+                  <NavigationContainer>
+                    <MainStack />
+                  </NavigationContainer>
+                </AuthProvider>
+            </PaperProvider>   
+       </ErrorBoundary>  
   );
 };
 
   // Lógica para mostrar pantallas según login
 const MainStack = () => {
   const { userToken, isLoading } = useContext(AuthContext);
+   //Alert.alert("DEBUG", `MainStack: isLoading=${isLoading}, token=${userToken}`);
 
-  if (isLoading) return null; // o un loader
+  
+   if (isLoading) {
+   // Alert.alert("DEBUG", "Entró al isLoading === true");
+    return (
+      <View style={{flex:1, justifyContent:'center', alignItems:'center', backgroundColor:'black'}}>
+        <Text style={{color:'white'}}>No te rindas...</Text>
+      </View>
+    );
+  }
 
   return (
     <>
@@ -154,8 +153,6 @@ const MainStack = () => {
   );
 };
 
-
-
 // esto es para cuando ya ingresamos a la pantalla de navegacion principal
 const TabNavigator = () => {
 
@@ -224,6 +221,7 @@ const TabNavigator = () => {
     </Tab.Navigator>
   );
 };
+
 const styles = StyleSheet.create({
   tituloNav: {
     color:"white",

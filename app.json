@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Z.N.K.",
+    "name": "ZNK",
     "slug": "aplicaiconZnk",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,7 +8,7 @@
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/viejoDragon.jpg",
+      "image": "./assets/mitamaDorada.png",
       "resizeMode": "contain",
       "backgroundColor": "#000000"
     },
@@ -20,10 +20,16 @@
         "foregroundImage": "./assets/mitamaDorada.png",
         "backgroundColor": "#000000"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.gorda.aplicaiconZnk"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "063cd553-9949-44fc-9841-fcf8f5ca8f23"
+      }
     }
   }
 }

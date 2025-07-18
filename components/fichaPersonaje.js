@@ -16,7 +16,7 @@ import { Dominios } from './dominios';
 import { Hechizos } from './hechizos';
 import { Historia } from './historia';
 import { TecnicaEspecial } from './tecEpecial';
-
+import { API_BASE_URL } from './config'; 
 
 export const FichaPersonaje = ({ pj, ki, setKi, fortaleza, setFortaleza, ken,setKen,eliminarPersonaje,vidaActual,kiActual,kenActual,setVidaActual,setKiActual,setKenActual,positiva,setPositiva,negativa,setNegativa,cicatriz,setCicatriz,consumision,setConsumision }) => {
   
@@ -245,7 +245,7 @@ const guardarCambiosBBDD = async () => {
     };
     
    
-    const response = await axios.put(`http://192.168.0.38:3000/update-personaje/${p.idpersonaje}`, personaje, {
+    const response = await axios.put(`${API_BASE_URL}/update-personaje/${p.idpersonaje}`, personaje, {
       headers: {
         'Content-Type': 'application/json',
       }

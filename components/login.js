@@ -104,6 +104,7 @@ const handleRegister = () => {
         <TextInput
           style={styles.input}
           placeholder="Correo Electrónico"
+          placeholderTextColor="#666666" 
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
@@ -113,9 +114,10 @@ const handleRegister = () => {
         <TextInput
           style={styles.input}
           placeholder="Contraseña"
+          placeholderTextColor="#666666" 
           value={password}
           onChangeText={setPassword}
-          secureTextEntry
+          secureTextEntry={true}
         />
 
         {/* Mostrar mensaje de error si es necesario */}
@@ -173,6 +175,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     paddingHorizontal: 10,
     backgroundColor: 'white',
+    color: '#000', 
   },
   error: {
     color: 'red',
