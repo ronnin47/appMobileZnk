@@ -514,7 +514,7 @@ const colorPlaceHolder="#888"
 
 
 
-console.log("**************** paso por ficha")
+
 
 
   return (

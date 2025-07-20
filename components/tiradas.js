@@ -269,7 +269,7 @@ const personajesOrdenados = useMemo(() => {
 
 
 
-  console.log("paso por el componente")
+  //console.log("paso por el componente")
   return (
     <>
 

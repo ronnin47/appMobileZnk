@@ -195,7 +195,7 @@ const imagenBase = require('../assets/imagenBase.jpeg');
               }
               style={{ width: 32, height: 32, borderRadius: 15 }}
             />
-            <Text style={{ color: 'gray', fontSize: 10 }}>{item.nombre || item.nick }</Text>
+            <Text style={{ color: 'aliceblue', fontSize: 12 }}>{item.nombre || item.nick }</Text>
           </View>
           {esImagen ? (
             <TouchableOpacity onPress={() => setImagenAmpliada(item.mensaje)}>
@@ -208,7 +208,7 @@ const imagenBase = require('../assets/imagenBase.jpeg');
                 ? { color: 'yellow' }
                 : estilos.includes(styles.mensajePropio)
                 ? { color: 'greenyellow' }
-                : { color: '#e0e0ff' },
+                : { color: '#f2f2f2c4' },
               { marginLeft: 30 },
             ]}
           >
@@ -326,25 +326,34 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   mensaje: {
-    color: '#e0e0ff',
-    backgroundColor: '#222',
+    color: "#f2f2f2c4",
+    backgroundColor: 'black',
     padding: 8,
     marginVertical: 4,
     borderRadius: 6,
     alignSelf: 'flex-start',
     maxWidth: '95%',
+      borderRadius: 8,
+      borderWidth:0.2,
+      borderColor:"white"
   },
 
   mensajePropio: {
     backgroundColor: '#222',
     color: 'greenyellow',
     alignSelf: 'flex-end',
+    borderWidth:0.5,
+    borderColor:"cyan",
+    borderRadius: 8,
   },
 
   mensajeNarrador: {
     backgroundColor: '#333',
     color: 'yellow',
     fontStyle: 'italic',
+    borderWidth:0.5,
+    borderColor:"cyan",
+    borderRadius: 8,
   },
   inputBox: {
     flexDirection: 'row',
