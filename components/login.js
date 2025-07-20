@@ -25,7 +25,7 @@ export const LoginScreen = ({ navigation}) => {
     setError('Por favor ingrese ambos campos.');
     return;
   }
-  console.log("Intentando login con:", email, password);
+
   try {
   const response = await axios.post(`${API_BASE_URL}/loginUsuario`, {
     email,
@@ -36,8 +36,6 @@ export const LoginScreen = ({ navigation}) => {
   if (response.status === 200 && response.data?.idusuario) {
     const { idusuario, estatus, user } = response.data;
     //console.log("dta usuario: " ,user)
-
-    console.log("Respuesta del login:", response.data);
     
     await AsyncStorage.setItem('estatus', estatus);
 
@@ -65,31 +63,18 @@ export const LoginScreen = ({ navigation}) => {
     setUserToken(token);
     setEstatus(estatus);
 
-    
-    console.log("id usuario",typeof idusuario)
     const personajesRes = await axios.get(`${API_BASE_URL}/consumirPersonajesUsuario`, {
       params: { usuarioId: idusuario },
     });
-    console.log("llego aca------------------",personajesRes)
-/*
+
     const coleccion = personajesRes.data.coleccionPersonajes;
     savePersonajes(coleccion);
-*/
-/*
-console.log("personajes res ",personajesRes)
-const coleccion = Array.isArray(personajesRes.data.coleccionPersonajes)
-  ? personajesRes.data.coleccionPersonajes
-  : [];
-
-savePersonajes(coleccion);
-console.log("LOGIN EXITOSO")
-  */  
   } else {
     setError('Login inválido: no se pudo autenticar');
   }
 
 } catch (error) {
-  console.error('Error en login FALLO EN LOGIN :', error);
+  console.error('Error en login:', error);
 
   if (error.response?.status === 401) {
     setError('Correo o contraseña incorrectos');

@@ -31,7 +31,7 @@ const RegisterScreen = ({ navigation }) => {
     const response = await axios.post(`${API_BASE_URL}/insert-usuario`, {
       email,
       contrasenia: password,
-     // username, 
+      username, 
     });
 
     // Si llegas aquí, el registro fue exitoso

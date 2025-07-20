@@ -174,18 +174,18 @@ app.get('/test-db', async (req, res) => {
 
 //insert de usuario OK!!
 app.post('/insert-usuario', async (req, res) => {
-  const { email, contrasenia } = req.body;
+  const { email, contrasenia,username } = req.body;
     const estatus="jugador"
     console.log("REQ: ",req.body)
   
   try {
     const query = `
-      INSERT INTO usuarios (email, contrasenia, estatus)
-      VALUES ($1, $2, $3)
+      INSERT INTO usuarios (email, contrasenia, estatus, nick)
+      VALUES ($1, $2, $3, $4)
       RETURNING idusuario
     `;
 
-    const values = [email, contrasenia, estatus];
+    const values = [email, contrasenia, estatus,username];
     const result = await pool.query(query, values);
 
     const newId = result.rows[0].idusuario;
