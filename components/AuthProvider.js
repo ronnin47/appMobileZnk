@@ -113,8 +113,14 @@ const loadData = async () => {
         const response = await axios.get(`${API_BASE_URL}/consumirPersonajesUsuario`, {
           params: { usuarioId },
         });
-        const coleccion = response.data.coleccionPersonajes || [];
+
+        const coleccion = Array.isArray(response?.data?.coleccionPersonajes)
+          ? response.data.coleccionPersonajes
+          : [];
+
         setPersonajes(coleccion);
+      } else {
+        setPersonajes([]); // usuario sin ID válido
       }
     } else {
       setUserToken(null);
@@ -123,7 +129,11 @@ const loadData = async () => {
     }
   } catch (e) {
     console.log('Error loading data:', e);
-    Alert.alert('Error', 'No se pudo cargar el usuario');
+      console.log('Error loading data:', e.response?.data || e.message || e);
+  Alert.alert(
+    'Error',
+    e.response?.data?.error || 'No se pudo cargar el usuario'
+  );
     setUserToken(null);
     setPersonajes([]);
     setEstatus(null);

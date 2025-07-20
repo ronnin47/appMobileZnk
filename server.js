@@ -269,9 +269,12 @@ app.get('/consumirPersonajesUsuario', async (req, res) => {
     const userResult = await pool.query(userQuery,[usuarioId]);
 
    
-    if (userResult.rows.length === 0) {
-      return res.status(401).json({ message: 'No se recupero personajes para Usuario' });
-    }
+   if (userResult.rows.length === 0) {
+  return res.status(200).json({
+    message: 'Usuario sin personajes aún',
+    coleccionPersonajes: [],  // ← importante
+  });
+}
 
     const coleccionPersonajes = userResult.rows;
 
