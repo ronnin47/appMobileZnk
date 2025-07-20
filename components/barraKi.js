@@ -5,7 +5,7 @@ import socket from './socket';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export const BarraKi = ({ pj,ki,setKi, kiActual,setKiActual,consumision,setConsumision }) => {
-  const { personajes, savePersonajes,estatus } = useContext(AuthContext);
+  const { personajes, savePersonajes,estatus,nick } = useContext(AuthContext);
   const p = personajes.find(p => p.idpersonaje === pj.idpersonaje);
 
 
@@ -33,12 +33,12 @@ export const BarraKi = ({ pj,ki,setKi, kiActual,setKiActual,consumision,setConsu
 
       let message;
       if (parseInt(consumir) > 0) {
-        message = `Consumió ${consumir} p de KI             KI: ${newValue} / ${ki}`;
+        message = `🔷 Consumió ${consumir} p de KI             KI: ${newValue} / ${ki}`;
       } else if (parseInt(consumir) < 0) {
         let recuperado = -(parseInt(consumir));
-        message = `Recuperó ${recuperado} p de KI             KI: ${newValue} / ${ki}`;
+        message = `🔷 Recuperó ${recuperado} p de KI             KI: ${newValue} / ${ki}`;
       } else {
-        message = `    KI: ${newValue} / ${ki}`;
+        message = `  🔷 KI: ${newValue} / ${ki}`;
       }
 
       const msgEnviar = {
@@ -49,6 +49,8 @@ export const BarraKi = ({ pj,ki,setKi, kiActual,setKiActual,consumision,setConsu
         ki: ki,
         mensaje: message,
         estatus:estatus,
+        imagenPjUrl:p.imagenurl || "",
+        nick: nick || "",
       };
 
       socket.emit('chat-message', msgEnviar);

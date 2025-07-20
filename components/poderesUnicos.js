@@ -61,9 +61,16 @@ export const PoderesUnicos = () => {
                     style={styles.avatar}
                   />
                 )}
-                <Text style={styles.nombre}>{personaje.nombre || 'Desconocido'}</Text>
+                    <View style={styles.par}>
+                    <Text style={styles.nombre}>{personaje.nombre || 'Desconocido'}</Text>
+                    <View style={styles.estrellasAbajo}>
+                    <Estrellitas ken={personaje.ken} />
+                    </View>
+                
               </View>
-              <Estrellitas ken={personaje.ken} />
+             
+              </View>
+             
             </View>
 
             {personaje.tecEspecial.map((tecnica, idx) => (
@@ -124,22 +131,24 @@ const styles = StyleSheet.create({
   elevation: 16,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  nombreContenedor: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+  flexDirection: 'column',  // ahora apila verticalmente
+  alignItems: 'start', // alineado al inicio (izquierda)
+  marginBottom: 8,
+},
+
+nombreContenedor: {
+  flexDirection: 'row',
+  alignItems: 'flex-start',
+  marginBottom: 4,   // espacio abajo para separar del bloque estrellas
+
+},
   avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 120,
+    height: 120,
+    borderRadius: 10,
     marginRight: 8,
-    borderWidth: 1,
-    borderColor: 'cyan',
+    borderWidth: 4,
+    borderColor: 'black',
   },
   nombre: {
     color: '#00FFB3',
@@ -168,4 +177,17 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontFamily: 'sans-serif',
   },
+  estrellasAbajo: {
+  flexDirection: 'row',     // fila para las estrellas
+  maxWidth: 150,            // ancho máximo para que no desborden
+  overflow: 'hidden',
+},
+par: {
+  flexDirection: 'column',     // coloca los elementos en vertical
+  marginTop: 6,
+  marginLeft: 6,
+  alignItems: 'center',  
+     // centra horizontalmente
+}
+
 });

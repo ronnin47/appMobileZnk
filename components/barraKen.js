@@ -6,7 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 
 export const BarraKen = ({ pj, ken,setKen,kenActual,setKenActual }) => {
-  const { personajes, savePersonajes,estatus } = useContext(AuthContext);
+  const { personajes, savePersonajes,estatus,nick } = useContext(AuthContext);
   const p = personajes.find(p => p.idpersonaje === pj.idpersonaje);
 
   const [nombre, setNombre] = useState(p.nombre);
@@ -26,12 +26,12 @@ export const BarraKen = ({ pj, ken,setKen,kenActual,setKenActual }) => {
 
       let message;
       if (parseInt(consumir) > 0) {
-        message = `Consumió ${consumir} p de KEN         KEN: ${newValue} / ${ken}`;
+        message = `✨ Consumió ${consumir} p de KEN         KEN: ${newValue} / ${ken}`;
       } else if (parseInt(consumir) < 0) {
         let recuperado = -(parseInt(consumir));
-        message = `Recuperó ${recuperado} p de KEN         KEN: ${newValue} / ${ken}`;
+        message = `✨ Recuperó ${recuperado} p de KEN         KEN: ${newValue} / ${ken}`;
       } else {
-        message = `    KEN: ${newValue} / ${ken}`;
+        message = `  ✨ KEN: ${newValue} / ${ken}`;
       }
 
       const msgEnviar = {
@@ -42,6 +42,8 @@ export const BarraKen = ({ pj, ken,setKen,kenActual,setKenActual }) => {
         ken: ken,
         mensaje: message,
         estatus:estatus,
+        imagenPjUrl:p.imagenurl || "",
+        nick: nick || "",
       };
 
       socket.emit('chat-message', msgEnviar);

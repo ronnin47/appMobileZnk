@@ -22,7 +22,7 @@ export default function Chat() {
   const [imagenPreview, setImagenPreview] = useState(null);
   const [imagenAmpliada, setImagenAmpliada] = useState(null);
   const { historialChat, setHistorialChat, userToken, personajeActual, estatus, imagenurl, nick } = useContext(AuthContext);
-
+const imagenBase = require('../assets/imagenBase.jpeg');
   const usuarioId = userToken ? userToken.split("-")[1] : null;
 
   useEffect(() => {
@@ -99,7 +99,7 @@ export default function Chat() {
 
     if (!resultadoTexto) return mensaje;
 
-    return `${textoAntes} ${resultadoTexto.trim()}\nTotal final: ${totalFinal}`;
+    return `🎲 ${textoAntes} ${resultadoTexto.trim()}\nTotal final: ${totalFinal}`;
   };
 
   const enviar = async () => {
@@ -113,7 +113,7 @@ export default function Chat() {
           id: Date.now().toString() + Math.random().toString(36).substring(2),
           usuarioId: Number(usuarioId),
           idpersonaje: personajeActual?.idpersonaje || 0,
-          nombre: personajeActual?.nombre || estatus,
+          nombre: nick || estatus,
           estatus: estatus,
           imagenBase64: `data:image/jpeg;base64,${imagenBase64}`,
           imagenurl: imagenurl || "",
@@ -136,7 +136,7 @@ export default function Chat() {
         id: Date.now().toString() + Math.random().toString(36).substring(2),
         usuarioId: Number(usuarioId),
         idpersonaje: personajeActual?.idpersonaje || 0,
-        nombre: personajeActual?.nombre || estatus,
+        nombre: nick || estatus,
         mensaje: mensaje,
         estatus: estatus,
         imagenurl: imagenurl || '',
@@ -185,25 +185,35 @@ export default function Chat() {
       return (
         <View key={item.id || index.toString()} style={estilos}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-            {item.imagenurl ? (
-              <Image
-                source={{ uri: item.imagenurl }}
-                style={{ width: 32, height: 32, borderRadius: 15 }}
-              />
-            ) : null}
-            <Text style={{ color: 'gray', fontSize: 10 }}>{item.nick || item.nombre}</Text>
+           <Image
+              source={
+                item.imagenPjUrl
+                  ? { uri: item.imagenPjUrl }
+                  : item.imagenurl
+                  ? { uri: item.imagenurl }
+                  : imagenBase
+              }
+              style={{ width: 32, height: 32, borderRadius: 15 }}
+            />
+            <Text style={{ color: 'gray', fontSize: 10 }}>{item.nombre || item.nick }</Text>
           </View>
           {esImagen ? (
             <TouchableOpacity onPress={() => setImagenAmpliada(item.mensaje)}>
               <Image source={{ uri: item.mensaje }} style={{ width: 200, height: 200, borderRadius: 8, marginTop: 4 }} />
             </TouchableOpacity>
           ) : (
-            <Text style={{
-              color: estilos.includes(styles.mensajeNarrador) ? 'yellow' :
-                estilos.includes(styles.mensajePropio) ? 'greenyellow' : '#e0e0ff'
-            }}>
-              {item.mensaje}
-            </Text>
+          <Text
+            style={[
+              estilos.includes(styles.mensajeNarrador)
+                ? { color: 'yellow' }
+                : estilos.includes(styles.mensajePropio)
+                ? { color: 'greenyellow' }
+                : { color: '#e0e0ff' },
+              { marginLeft: 30 },
+            ]}
+          >
+            {item.mensaje}
+          </Text>
           )}
         </View>
       );

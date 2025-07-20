@@ -40,7 +40,7 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen,
 
 
  
-  const { personajes, historialChat, setHistorialChat,savePersonajes,estatus,favoritos,setFavoritos,pjSeleccionado,setPjSeleccionado} = useContext(AuthContext);
+  const { personajes, historialChat, setHistorialChat,savePersonajes,estatus,favoritos,setFavoritos,pjSeleccionado,setPjSeleccionado,nick} = useContext(AuthContext);
   
   const imagenBase = require('../assets/imagenBase.jpeg');
  
@@ -189,6 +189,8 @@ const mensajeChat = `🎲 Tirada   ${partes.join("   ")}                        
       nombre:p.nombre,
       mensaje:mensajeChat,
       estatus:estatus,
+      imagenPjUrl:p.imagenurl || "",
+      nick: nick || "",
     }
 
     //console.log("***TIRADAS emite**",mensaje)
@@ -325,7 +327,7 @@ const personajesOrdenados = useMemo(() => {
       })}
     </ScrollView>
   )}
-</View>
+   </View>
      <ChatTiradas p={p}/>
 
       <ScrollView style={styles.container}>
@@ -352,14 +354,22 @@ const personajesOrdenados = useMemo(() => {
   {/* Primera columna con primeros 3 dados */}
   <View style={styles.columna}>
     {[
+       { label: "D10 bono", valor: dadosD10Bono, add: () => setDadosD10Bono(d => d + 1), rest: () => setDadosD10Bono(d => Math.max(0, d - 1)) },
       { label: "D12 bono", valor: dadosD12Bono, add: () => setDadosD12Bono(d => d + 1), rest: () => setDadosD12Bono(d => Math.max(0, d - 1)) },
       { label: "D4 bono", valor: dadosD4Bono, add: () => setDadosD4Bono(d => d + 1), rest: () => setDadosD4Bono(d => Math.max(0, d - 1)) },
       
-      { label: "D10 bono", valor: dadosD10Bono, add: () => setDadosD10Bono(d => d + 1), rest: () => setDadosD10Bono(d => Math.max(0, d - 1)) },
+     
      
     ].map((dado, idx) => (
       <View key={idx} style={styles.dadoRow}>
-        <Text style={styles.dadoLabel}>{dado.label}: {dado.valor}</Text>
+        <Text style={styles.dadoLabel}>
+          {dado.label}:{' '}
+           <Text style={{
+              color: dado.valor > 0 ? 'yellow' : 'white',
+              fontWeight: 'bold',
+              
+            }}>{dado.valor}</Text>
+        </Text>
         <View style={styles.botones}>
           <TouchableOpacity style={styles.boton} onPress={dado.rest}>
             <Text style={styles.botonTexto}>-</Text>
@@ -375,13 +385,20 @@ const personajesOrdenados = useMemo(() => {
   {/* Segunda columna con los otros 3 dados */}
   <View style={styles.columna}>
     {[
+       { label: "D10 Ken", valor: dadosD10, add: () => setDadosD10(d => d + 1), rest: () => setDadosD10(d => Math.max(0, d - 1)) },
       { label: "D20", valor: dadosD20, add: () => setDadosD20(d => d + 1), rest: () => setDadosD20(d => Math.max(0, d - 1)) },
       { label: "D6 bono", valor: dadosD6Bono, add: () => setDadosD6Bono(d => d + 1), rest: () => setDadosD6Bono(d => Math.max(0, d - 1)) },
-       { label: "D10", valor: dadosD10, add: () => setDadosD10(d => d + 1), rest: () => setDadosD10(d => Math.max(0, d - 1)) },
+      
       
     ].map((dado, idx) => (
       <View key={idx} style={styles.dadoRow}>
-        <Text style={styles.dadoLabel}>{dado.label}: {dado.valor}</Text>
+        <Text style={styles.dadoLabel}>
+          {dado.label}:{' '}
+          <Text style={{
+              color: dado.valor > 0 ? 'yellow' : 'white',
+              fontWeight: 'bold'
+            }}>{dado.valor}</Text>
+        </Text>
         <View style={styles.botones}>
            <TouchableOpacity style={styles.boton} onPress={dado.rest}>
             <Text style={styles.botonTexto}>-</Text>
@@ -527,7 +544,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   container: {
-    padding: 16,
+    padding: 12,
     backgroundColor: "#1a1a1a",
     flex: 1,
   },
@@ -611,7 +628,7 @@ const styles = StyleSheet.create({
 },
 columna: {
   flex: 1,
-  marginHorizontal: 5,
+  marginHorizontal: 2,
 },
 dadoRow: {
   flexDirection: "row",

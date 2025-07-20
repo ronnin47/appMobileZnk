@@ -4,10 +4,10 @@ import { AuthContext } from './AuthContext';
 import socket from './socket';
 import { LinearGradient } from 'expo-linear-gradient';
 
-export const BarraVida = ({pj, ki, setKi, fortaleza, setFortaleza, positiva, negativa, cicatriz, vidaActual, setVidaActual,}) => {
+export const BarraVida = ({pj, ki, setKi, fortaleza, setFortaleza, positiva, negativa, cicatriz, vidaActual, setVidaActual}) => {
 
 
-  const { personajes, savePersonajes,estatus } = useContext(AuthContext);
+  const { personajes, savePersonajes,estatus,pjSeleccionado,nick } = useContext(AuthContext);
  //aca extrae el personaje
   const p = personajes.find(p => p.idpersonaje === pj.idpersonaje);
 
@@ -59,9 +59,11 @@ export const BarraVida = ({pj, ki, setKi, fortaleza, setFortaleza, positiva, neg
       }
     }, [cicatriz, vidaActual]);
 
-  useEffect(() => {
+useEffect(() => {
+  if (pjSeleccionado) {
     calcularEstadoInicial();
-  }, []);
+  }
+}, [pjSeleccionado, vidaActual, ki, fortaleza, positiva, negativa, cicatriz]);
 
   const calcularEstadoInicial = () => {
     let newDamage = vidaActual;
@@ -265,10 +267,10 @@ const agregarDamage = async () => {
     let message
 
     if(newValue>0){
-        message = `  Recibio ${newValue} p de DAÑO    VITALIDAD: ${newDamage} / ${vidaTotal}    ${estadoDeFaseActual}   ${estadoSalud}`;
+        message = ` 💥 Recibio ${newValue} p de DAÑO    VITALIDAD: ${newDamage} / ${vidaTotal}    ${estadoDeFaseActual}   ${estadoSalud}`;
     }else if(newValue<0){
         let recuperado=-(newValue)
-        message = `   Restauro ${recuperado} p de VIDA     VITALIDAD: ${newDamage} / ${vidaTotal}                             ${estadoDeFaseActual}   ${estadoSalud}`;
+        message = ` Restauro ${recuperado} p de VIDA     VITALIDAD: ${newDamage} / ${vidaTotal}                             ${estadoDeFaseActual}   ${estadoSalud}`;
     }else {
         message = `    VITALIDAD: ${newDamage} / ${vidaTotal}     ${estadoDeFaseActual}  ${estadoSalud}`;
     }
@@ -283,7 +285,9 @@ const agregarDamage = async () => {
         vidaActual: newDamage,         
         vidaTotal: vidaTotal,                   
         mensaje: message,
-        estatus:estatus,            
+        estatus:estatus, 
+        imagenPjUrl:p.imagenurl || "",
+        nick: nick || "",           
     };
     
     socket.emit('chat-message', msgEnviar);
