@@ -102,7 +102,7 @@ io.on('connection', (socket) => {
 
 
 
-
+/*
 //LOCAL HOST bbdd
 const pool = new Pool({
   user: 'postgres',
@@ -111,9 +111,9 @@ const pool = new Pool({
   password: '041183',
   port: 5432,
 });
-
+*/
  
-/*
+
 //LOCAL HOST bbdd
 const pool = new Pool({
   user: 'gorda',
@@ -125,7 +125,7 @@ const pool = new Pool({
     rejectUnauthorized: false, // Esto es clave en conexiones con Render
   },
 });
-*/
+
 
 //PARA GAURDADO DE IMAGENES Y OBTENER URLS
 cloudinary.config({
@@ -976,7 +976,7 @@ app.put('/updateUsuarios/:usuarioId', async (req, res) => {
 
 
 
-//consmumir sagas ok!!
+//consmumir objetos ok!!
 app.get('/consumirObjetosMagicos', async (req, res) => {
   try {
     const result = await pool.query(`
@@ -1057,6 +1057,7 @@ app.post('/insertObjetoMagico', async (req, res) => {
   }
 });
 
+//ok!!
 app.put('/updateObjetoMagico/:id', async (req, res) => {
   const { id } = req.params;
   const {
@@ -1132,10 +1133,10 @@ app.put('/updateObjetoMagico/:id', async (req, res) => {
 });
 
 
-
+//ok!!
 app.delete('/deleteObjetoMagico/:idobjeto', async (req, res) => {
   const { idobjeto } = req.params;
-    console.log('Intentando eliminar objeto con id:', idobjeto);
+    //console.log('Intentando eliminar objeto con id:', idobjeto);
 
   try {
     // Opcional: verificar que el objeto exista antes de eliminar

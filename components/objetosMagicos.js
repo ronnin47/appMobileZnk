@@ -78,7 +78,7 @@ export const ObjetosMagicos = () => {
     const objetoVacio = {
       nombre: 'Nuevo Objeto',
       rareza: '',
-      nivel: '',
+      nivel: '' || "1",
       costeVentaja: '',
       precio: "",
       descripcion: '',
@@ -290,7 +290,7 @@ useEffect(() => {
       ) : null}
 
       <TituloGrupoToggle
-        titulo="Raros (Nivel 5-7)"
+        titulo="Raros (Nivel 5-7-8)"
         expandido={rarosExpandido}
         setExpandido={setRarosExpandido}
         color="#2196F3"
@@ -313,21 +313,34 @@ useEffect(() => {
 
       {estatus === 'narrador' && (
         <>
-          <TouchableOpacity style={styles.boton} onPress={crearObjetoVacioEnDB}>
-            <Text style={styles.botonTexto}>+ Objeto mágico</Text>
-          </TouchableOpacity>
+          <View style={{ alignItems: 'center', marginTop: 10 }}>
+            <TouchableOpacity
+              style={[styles.boton, { backgroundColor:'#ffc107', width: '50%' }]}
+              onPress={crearObjetoVacioEnDB}
+            >
+              <Text style={styles.botonTexto}>+ Objeto mágico</Text>
+            </TouchableOpacity>
+          </View>
 
           {nuevoObjeto && (
-            <>
-              <Text style={styles.subtitulo}>Editar Objeto</Text>
+            <View style={styles.cargarObjeto}>
+
+               <View style={styles.cargarImagen}>
+                <Text style={styles.subtitulo}>{nuevoObjeto.nombre}</Text>
               <Image
                 source={{ uri: nuevoObjeto.imagenurl || Image.resolveAssetSource(imagenBase).uri }}
-                style={styles.imagen}
+                style={styles.imagenCargar}
               />
-
-              <TouchableOpacity style={styles.boton} onPress={abrirGaleria}>
+              <View style={{ alignItems: 'center', marginTop: 5 }}>
+                 <TouchableOpacity style={styles.boton} onPress={abrirGaleria}>
                 <Text style={styles.botonTexto}>Seleccionar imagen</Text>
               </TouchableOpacity>
+              </View>
+
+               </View>
+
+              
+             
 
               {/* Inputs */}
               <TextInput
@@ -339,6 +352,7 @@ useEffect(() => {
               />
               <TextInput
                 placeholder="Rareza"
+                placeholderTextColor="#aaa"
                 style={styles.input}
                 keyboardType="default"
                 value={nuevoObjeto.rareza}
@@ -346,6 +360,7 @@ useEffect(() => {
               />
               <TextInput
                 placeholder="Nivel"
+                placeholderTextColor="#aaa"
                 style={styles.input}
                 keyboardType="default"
                 value={nuevoObjeto.nivel}
@@ -353,6 +368,7 @@ useEffect(() => {
               />
               <TextInput
                 placeholder="Coste ventaja"
+                placeholderTextColor="#aaa"
                 style={styles.input}
                 keyboardType="default"
                 value={nuevoObjeto.costeVentaja}
@@ -360,6 +376,7 @@ useEffect(() => {
               />
               <TextInput
                 placeholder="Precio"
+                placeholderTextColor="#aaa"
                 style={styles.input}
                 keyboardType="default"
                 value={nuevoObjeto.precio.toString()}
@@ -367,30 +384,29 @@ useEffect(() => {
               />
               <TextInput
                 placeholder="Descripción"
+                 placeholderTextColor="#aaa"
                 style={styles.input}
                 multiline
                 keyboardType="default"
-                numberOfLines={3}
+                numberOfLines={6}
                 value={nuevoObjeto.descripcion}
                 onChangeText={text => setNuevoObjeto({ ...nuevoObjeto, descripcion: text })}
               />
               <TextInput
                 placeholder="Sistema"
+                placeholderTextColor="#aaa"
                 style={styles.input}
                 keyboardType="default"
+                multiline
+                numberOfLines={6}
                 value={nuevoObjeto.sistema}
                 onChangeText={text => setNuevoObjeto({ ...nuevoObjeto, sistema: text })}
               />
 
-              <TouchableOpacity
-                style={[styles.boton, styles.botonGuardar]}
-                onPress={guardarCambiosObjeto}
-              >
-                <Text style={styles.botonTexto}>Guardar cambios</Text>
-              </TouchableOpacity>
+            <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 30,gap:40 }}>
 
-              <TouchableOpacity
-                style={[styles.boton, { backgroundColor: '#a00' }]}
+               <TouchableOpacity
+                style={[styles.boton, styles.botonGuardar,{ backgroundColor: '#dc3545' }]}
                 onPress={() => {
                   if (nuevoObjeto?.idobjeto) {
                     Alert.alert(
@@ -410,7 +426,19 @@ useEffect(() => {
               >
                 <Text style={styles.botonTexto}>Eliminar objeto</Text>
               </TouchableOpacity>
-            </>
+
+              <TouchableOpacity
+                style={[styles.boton, styles.botonGuardar, { marginRight: 10 }]}
+                onPress={guardarCambiosObjeto}
+              >
+                <Text style={styles.botonTexto}>Guardar cambios</Text>
+              </TouchableOpacity>
+
+             
+            </View>
+                      
+             
+            </View>
           )}
         </>
       )}
@@ -456,6 +484,7 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 6,
     marginBottom: 8,
+    textAlignVertical: 'top', // ← asegura que el texto comience arriba
   },
   boton: {
     backgroundColor: '#444',
@@ -467,11 +496,20 @@ const styles = StyleSheet.create({
   botonTexto: {
     color: 'white',
     fontWeight: 'bold',
+   
   },
   imagen: {
     width: 150,
     height: 150,
     marginTop: 10,
+    borderRadius: 25,
+  },
+   imagenCargar: {
+    width: 220,
+    height: 220,
+    marginTop: 10,
+    borderWidth:2,
+    borderColor:"white",
     borderRadius: 25,
   },
   objetoCard: {
@@ -492,6 +530,7 @@ const styles = StyleSheet.create({
   },
   botonGuardar: {
     marginBottom: 30, // margen extra para que no quede abajo pegado
+    backgroundColor:'#28a745'
   },
   objetoFila: {
     flexDirection: 'row',
@@ -511,4 +550,26 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 10,
   },
+ cargarObjeto: {
+  borderWidth: 1,
+  borderColor: "cyan",
+  padding: 10,
+  borderRadius: 10,
+  marginTop: 30,
+  backgroundColor: "#111", // Fondo opcional
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.3,
+  shadowRadius: 4,
+  elevation: 3, // para Android
+},
+cargarImagen: {
+
+
+
+
+
+  alignItems: "center",   // ← Centra horizontalmente los hijos
+  justifyContent: "center", // ← Opcional, útil si querés centrar verticalmente también
+}
 });
