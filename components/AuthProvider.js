@@ -265,9 +265,6 @@ useEffect(() => {
   guardarNotas();
 }, [notasUsuario, userToken, pjSeleccionado, cargandoNotas]);
 
-
-//ACA HICE EL CAMBIO
-/*
 const handleMensaje = (mensaje) => {
  // console.log('🟢 Mensaje recibido en cliente:', mensaje);
   setHistorialChat(prev => [...prev, mensaje]);
@@ -278,20 +275,7 @@ socket.on('chat-message', handleMensaje);
 
 socket.off("chat-chat");
 socket.on('chat-chat', handleMensaje);
-*/
-useEffect(() => {
-  const handleMensaje = (mensaje) => {
-    setHistorialChat((prev) => [...prev, mensaje]);
-  };
 
-  socket.on('chat-message', handleMensaje);
-  socket.on('chat-chat', handleMensaje);
-
-  return () => {
-    socket.off('chat-message', handleMensaje);
-    socket.off('chat-chat', handleMensaje);
-  };
-}, []);
 
 const savePersonajes = async (lista) => {
   try {
