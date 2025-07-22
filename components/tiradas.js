@@ -97,14 +97,11 @@ const personajesFavoritos = useMemo(() => {
     .filter(p => p);
 }, [favoritos, personajes]);
   
-  useEffect(() => {
-    // Cuando el socket se conecta, enviamos info del usuario (ejemplo)
-    socket.emit('user-connected', { usuarioId: p.usuarioId, sesion: 'algo' });
-    // Cleanup al desmontar componente
-    return () => {
-      socket.off('chat-message');
-    };
-  }, []);
+
+//no es necesario para poder emitir a chat-chat
+ useEffect(() => {
+  socket.emit('user-connected', { usuarioId: p.usuarioId, sesion: 'algo' });
+}, []);
  
 
   const scrollViewRef = useRef();
@@ -194,7 +191,7 @@ const mensajeChat = `🎲 Tirada   ${partes.join("   ")}                        
     }
 
     //console.log("***TIRADAS emite**",mensaje)
-    socket.emit('chat-message', mensaje);
+    socket.emit('chat-chat', mensaje);
   };
 
 

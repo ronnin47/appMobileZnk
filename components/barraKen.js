@@ -10,7 +10,7 @@ export const BarraKen = ({ pj, ken,setKen,kenActual,setKenActual }) => {
   const p = personajes.find(p => p.idpersonaje === pj.idpersonaje);
 
   const [nombre, setNombre] = useState(p.nombre);
-  
+
   const [consumir, setConsumir] = useState("0");
   
 
@@ -44,7 +44,7 @@ export const BarraKen = ({ pj, ken,setKen,kenActual,setKenActual }) => {
         nick: nick || "",
       };
 
-      socket.emit('chat-message', msgEnviar);
+      socket.emit('chat-chat', msgEnviar);
     }
   };
 

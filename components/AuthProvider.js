@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from './AuthContext';
 import axios from 'axios';
@@ -7,9 +7,12 @@ import * as SplashScreen from 'expo-splash-screen';
 import { showMessage } from 'react-native-flash-message';
 import { Alert } from 'react-native'; // 👈 AÑADÍ ESTO
 import { API_BASE_URL } from './config'; 
+import { AppState } from 'react-native';
+
 //SplashScreen.preventAutoHideAsync();
 
 export const AuthProvider = ({ children }) => {
+
 const [userToken, setUserToken] = useState(null);
 const [estatus,setEstatus]=useState(null);
 const [email,setEmail]=useState(null);
@@ -26,66 +29,26 @@ const [notasUsuario, setNotasUsuario] = useState("");
 const [pjSeleccionado, setPjSeleccionado] = useState(null);
 const [favoritos, setFavoritos] = useState([]);
 const [cargandoNotas, setCargandoNotas] = useState(true);
+  const appState = useRef(AppState.currentState);
 
-/*
-useEffect(() => {
-  //SplashScreen.preventAutoHideAsync();
 
-  const loadData = async () => {
-    
-    try {
-      const token = await AsyncStorage.getItem('userToken');
-      const estatus = await AsyncStorage.getItem('estatus');
-      const email = await AsyncStorage.getItem('email');
-      const contrasenia = await AsyncStorage.getItem('contrasenia');
-      const nick = await AsyncStorage.getItem('nick');
-      const imagenurl = await AsyncStorage.getItem("imagenurl");
-      const imagencloudid = await AsyncStorage.getItem("imagencloudid");
-
-      if (token) {
-        setUserToken(token);
-        setEstatus(estatus);
-        setEmail(email);
-        setContrasenia(contrasenia);
-        setNick(nick);
-        setImagenurl(imagenurl);
-        setImagencloudid(imagencloudid);
-
-        const usuarioIdStr = await AsyncStorage.getItem('userId');
-        const usuarioId = usuarioIdStr ? parseInt(usuarioIdStr, 10) : null;
-
-        if (usuarioId) {
-          const response = await axios.get(`${API_BASE_URL}/consumirPersonajesUsuario`, {
-            params: { usuarioId }
-          });
-
-          const coleccion = response.data.coleccionPersonajes || [];
-          setPersonajes(coleccion);
-        }
-      } else {
-        setUserToken(null);
-        setPersonajes([]);
-        setEstatus(null);
-      }
-    } catch (e) {
-      console.log('Error loading token or personajes:', e);
-      Alert.alert('Error', 'Error al ocultar splash screen: ' + e.message);
-      setUserToken(null);
-      setPersonajes([]);
-      setEstatus(null);
-    } finally {
-      Alert.alert("FINALLY DE PROVIDER", "Se ejecutó el finally del provider");
-      setIsLoading(false);
-      console.timeEnd('loadData');
-   
+  useEffect(() => {
+  const subscription = AppState.addEventListener('change', nextAppState => {
+    if (
+      appState.current.match(/inactive|background/) &&
+      nextAppState === 'active' &&
+      userToken
+    ) {
+      socket.emit('solicitar-historial');
     }
-   
+    appState.current = nextAppState;
+  });
+
+  return () => {
+    subscription.remove();
   };
+}, [userToken]);
 
-  loadData();
-}, []); // 👈 SOLO una vez al iniciar (no depende de userToken)
-
-*/
 
 const loadData = async () => {
   try {
@@ -151,9 +114,6 @@ useEffect(() => {
     loadData(); // refresca datos al loguearse de nuevo
   }
 }, [userToken]);
-
-
-
 
 
 
@@ -265,16 +225,42 @@ useEffect(() => {
   guardarNotas();
 }, [notasUsuario, userToken, pjSeleccionado, cargandoNotas]);
 
-const handleMensaje = (mensaje) => {
- // console.log('🟢 Mensaje recibido en cliente:', mensaje);
-  setHistorialChat(prev => [...prev, mensaje]);
-};
 
-socket.off('chat-message'); // Elimina cualquier duplicado anterior
-socket.on('chat-message', handleMensaje);
+useEffect(() => {
+  const handleMensaje = (mensaje) => {
+    setHistorialChat(prev => [...prev, mensaje]);
+  };
 
-socket.off("chat-chat");
-socket.on('chat-chat', handleMensaje);
+ 
+  socket.off('chat-chat');
+  socket.on('chat-chat', handleMensaje);
+
+  return () => {
+  //  socket.off('chat-message', handleMensaje);
+    socket.off('chat-chat', handleMensaje);
+  };
+}, []);
+
+
+useEffect(() => {
+  if (!userToken) return;
+
+  socket.emit('solicitar-historial');
+
+  const handleHistorial = (mensajes) => {
+    if (Array.isArray(mensajes)) {
+      setHistorialChat(mensajes);
+    }
+  };
+
+  socket.off('historial-chat');
+  socket.on('historial-chat', handleHistorial);
+
+  return () => {
+    socket.off('historial-chat', handleHistorial);
+  };
+}, [userToken]);
+
 
 
 const savePersonajes = async (lista) => {
@@ -291,11 +277,6 @@ const savePersonajes = async (lista) => {
 //ESTE SERA PARA GUARDAR EN TODOS LOS PERSONAJES
  const saveColeccionPersonajes = async (nuevaColeccion) => {
   try {
-/*
-    nuevaColeccion.forEach((pj) => {
-      console.log(`Extos en el contexto id: ${pj.idpersonaje} - ${pj.nombre}- ${pj.imagenurl}`);
-    });
-*/
     setColeccionPersonajes([...nuevaColeccion]);
   } catch (e) {
     console.log('Error guardando colección de personajes', e);

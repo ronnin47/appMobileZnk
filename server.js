@@ -39,10 +39,13 @@ const io = new Server(server, {
 
 const connectedUsers = new Map();
 
-// Escucha cuando un cliente se conecta
+// Array global para guardar mensajes en memoria
+const mensajesChat = [];
+
 io.on('connection', (socket) => {
   console.log(`Socket conectado: ${socket.id}`);
 
+  // Cuando un usuario se conecta con su data
   socket.on('user-connected', (userData) => {
     const { usuarioId, sesion } = userData;
     if (usuarioId && sesion) {
@@ -52,44 +55,44 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('tirada', (mensaje) => {
-   // console.log('Tirada recibida:', mensaje);
-    io.emit('tirada', mensaje);
+  // Evento para que el cliente solicite el historial de mensajes
+  socket.on('solicitar-historial', () => {
+    // Enviamos el historial guardado solo a ese socket
+    socket.emit('historial-chat', mensajesChat);
   });
 
-  socket.on('chat-message', (mensaje) => {
-    //console.log('Mensaje de chat recibido:', mensaje);
-    io.emit('chat-message', mensaje);
-  });
 
-   socket.on('chat-chat', async (mensaje) => {
-    //console.log('📥 Mensaje de chat-chat recibido:', mensaje);
-
+  // Manejo de chat con posible imagen
+  socket.on('chat-chat', async (mensaje) => {
     if (mensaje.imagenBase64) {
       try {
-        // Subir a Cloudinary
         const resultado = await cloudinary.uploader.upload(mensaje.imagenBase64, {
           folder: 'chat-imagenes',
         });
-
-        // Reemplazamos el contenido del mensaje con la URL
         mensaje.mensaje = resultado.secure_url;
-
-        // Ya no necesitamos la imagen base64
         delete mensaje.imagenBase64;
-
         console.log('✅ Imagen subida a Cloudinary:', resultado.secure_url);
       } catch (error) {
         console.error('❌ Error al subir imagen:', error);
-        return; // No emitimos si falló
+        return; // No emitimos si falla
       }
     }
 
-    // Emitimos el mensaje (texto o con imagen)
+    // Guardamos mensaje con timestamp
+    mensajesChat.push({
+      ...mensaje,
+      timestamp: Date.now(),
+    });
+
+    // Limitar tamaño del array a los últimos 100 mensajes (opcional)
+    if (mensajesChat.length > 100) mensajesChat.shift();
+
     io.emit('chat-chat', mensaje);
-    console.log('📤 Mensaje emitido a clientes:', mensaje);
+   // console.log('📤 Mensaje emitido de cliente chat-chat:', mensaje);
+   // console.log(" MENSAJES GUARDADOS: ",mensajesChat)
   });
 
+  // Cuando se desconecta un socket
   socket.on('disconnect', () => {
     const usuarioDesconectado = connectedUsers.get(socket.id);
     if (usuarioDesconectado) {
@@ -114,7 +117,7 @@ const pool = new Pool({
 */
  
 
-//LOCAL HOST bbdd
+//base de datos en RENDER
 const pool = new Pool({
   user: 'gorda',
   host: 'dpg-d1s01g7diees73akbt00-a.oregon-postgres.render.com',

@@ -290,7 +290,7 @@ const agregarDamage = async () => {
         nick: nick || "",           
     };
     
-    socket.emit('chat-message', msgEnviar);
+    socket.emit('chat-chat', msgEnviar);
    
   };
 

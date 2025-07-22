@@ -53,7 +53,7 @@ export const BarraKi = ({ pj,ki,setKi, kiActual,setKiActual,consumision,setConsu
         nick: nick || "",
       };
 
-      socket.emit('chat-message', msgEnviar);
+      socket.emit('chat-chat', msgEnviar);
     }
   };
 
