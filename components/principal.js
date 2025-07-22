@@ -9,7 +9,7 @@ import { TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native'; // para navegar
-import { Nuevo } from './nuevo';
+//import { Nuevo } from './nuevo';
 
 import { LinearGradient } from 'expo-linear-gradient';
 const windowWidth = Dimensions.get('window').width;
@@ -139,8 +139,6 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
 };
 
 
-
-
  const crearSaga = async () => {
 
 
@@ -170,13 +168,18 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
   }
 };
 
-
-
   const universoCelesteItems = [
     { id: 'ranking', nombre: 'Ranking', imagen: require('../assets/ranker.jpg') },
     { id: 'poderesUnicos', nombre: 'Poderes Unicos', imagen: require('../assets/tecnicaEspecial.jpg') },
     { id: 'otro2', nombre: 'Mundo 2', imagen: require('../assets/imagenBase.jpeg') },
   ];
+
+    const componentesManual = [
+    { id: 'objetosMagicos', nombre: 'Tesoros del universo', imagen: require('../assets/tesoros.jpg') },
+    { id: 'neotecnia', nombre: 'Neotecnia', imagen: require('../assets/neotecnia.jpg') },
+    { id: 'herbolaria', nombre: 'Herbolaria', imagen: require('../assets/herbolaria.jpg') },
+  ];
+
   return (
     <ScrollView 
       style={styles.container}
@@ -188,9 +191,6 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
       <View style={styles.contenedorPrincipal}>
         <View style={styles.tituloYBotonContainer}>
           <Text style={styles.tituloSeccion}>Mis Personajes</Text>
-
-
-
            <TouchableOpacity onPress={crearFichaPersonaje} activeOpacity={0.8} style={styles.botonWrapper}>
               <LinearGradient
                 colors={['#f6f7f8', '#d9d9d9', '#a3a3a3', '#eaeaea']}
@@ -209,7 +209,7 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
         <Carrusel personajes={personajes} />
       </View>
 
-     <View style={[styles.contenedorPrincipal, { marginTop: 20 }]}>
+     <View style={[styles.contenedorPrincipal, { marginTop: 0 }]}>
   <Text style={styles.tituloSeccion}>Universo Celeste</Text>
   <ScrollView horizontal showsHorizontalScrollIndicator={false}>
     <View style={styles.row}>
@@ -246,7 +246,7 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
 
 
         {/* Contenedor de Sagas con botón Crear Saga */}
-      <View style={[styles.contenedorPrincipal, { marginTop: 20, marginBottom: 80 }]}>
+      <View style={[styles.contenedorPrincipal, { marginTop: 20}]}>
         <View style={styles.tituloYBotonContainer}>
           <Text style={styles.tituloSeccion}>Sagas</Text>
 
@@ -293,17 +293,50 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
         </ScrollView>
       </View>
 
-
-      <View style={styles.contenedorPrincipal}>
-        <View style={styles.tituloYBotonContainer}>
-          <Text style={styles.tituloSeccion}>Nuevo componenete</Text>
+         {/* Contenedor de nuevos componentes orientado hacia Herbolaria, Neotecnia y Objetos Magicos*/}
+       <View style={[styles.contenedorPrincipal, { marginTop: 20, marginBottom: 80 }]}>
+       
+          <Text style={styles.tituloSeccion}>Manual ZNK</Text>
+           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+    <View style={styles.row}>
+      {componentesManual.map((item) => (
+        <TouchableOpacity
+          key={item.id}
+          style={styles.card}
+          activeOpacity={0.9}
+          onPress={() => {
+            if (item.id === 'objetosMagicos') {
+              navigation.navigate('Tesoros del universo');
+            } else if(item.id=="neotecnia") {
+               navigation.navigate('Neotecnia');
+            }else if(item.id=="herbolaria") {
+               navigation.navigate('Herbolaria');
+            }else {
+              alert(`Seleccionaste ${item.nombre}`);
+            }
+          }}
+        >
+          <ImageWrapper uri={item.imagen} fallback={require('../assets/imagenBase.jpeg')} />
+          <Text
+            style={styles.text}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.5}
+            ellipsizeMode="tail"
+          >
+            {item.nombre}
+          </Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  </ScrollView>
 
         </View>
 
        
 
-        <Nuevo></Nuevo>
-      </View>
+      
+    
     </ScrollView>
   );
 }

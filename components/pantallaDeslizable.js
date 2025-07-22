@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect, useRef, useMemo } from 'react';
 import { AuthContext } from './AuthContext';
-import { View, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, Alert,Text } from 'react-native';
 import PagerView from 'react-native-pager-view';
 import { FichaPersonaje } from './fichaPersonaje';
 import { Tiradas } from './tiradas';
@@ -134,8 +134,9 @@ export const PantallaDeslizable = () => {
   // ⚠️ Mostrar cargando si pj no está disponible
   if (!pj) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'black' }}>
+       <ActivityIndicator size="large" color="#ffffff" />
+       <Text style={{ color: 'white', marginTop: 10 }}>Cargando personaje...</Text>
       </View>
     );
   }

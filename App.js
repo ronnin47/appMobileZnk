@@ -7,7 +7,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Image, Text, View, StyleSheet, Alert } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import { AuthContext } from './components/AuthContext'; // <-- IMPORTAR EL CONTEXTO
-import { Provider as PaperProvider } from 'react-native-paper';
+import { ActivityIndicator, Provider as PaperProvider } from 'react-native-paper';
 import { LoginScreen } from './components/login'; // Tu pantalla de Login
 import RegisterScreen from './components/registro';
 import Perfil from './components/perfil';
@@ -22,10 +22,17 @@ import { ErrorBoundary } from './ErrorBoundary'; // o la ruta correcta
 import FlashMessage from 'react-native-flash-message';
 import { Platform } from 'react-native';
 
+
+import { ObjetosMagicos } from './components/objetosMagicos';
+import { Neotecnia } from './components/neotecnia';
+import { Herbolaria} from './components/herbolaria';
+
+
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-import { Nuevo } from './components/nuevo';
+
+
 
 //SplashScreen.preventAutoHideAsync();
 
@@ -36,7 +43,7 @@ export const App = () => {
   const prepararApp = async () => {
     try {
       await SplashScreen.preventAutoHideAsync(); // 👈 Agregá esto acá
-      await new Promise(resolve => setTimeout(resolve, 3000)); // Simula carga
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simula carga
     } catch (e) {
       console.warn(e);
     } finally {
@@ -78,6 +85,7 @@ const MainStack = () => {
    // Alert.alert("DEBUG", "Entró al isLoading === true");
     return (
       <View style={{flex:1, justifyContent:'center', alignItems:'center', backgroundColor:'black'}}>
+         <ActivityIndicator size="large" color="cyan" />
         <Text style={{color:'white'}}>No te rindas...</Text>
       </View>
     );
@@ -98,6 +106,7 @@ const MainStack = () => {
       {/* Protegidas por userToken */}
       <Stack.Screen name="PantallaDeslizable" component={PantallaDeslizable}  
       options={{ headerShown: false }}  />
+      
       <Stack.Screen name="Ranking" component={Ranking}   
       options={{
           headerTitle: 'Ranking', // o '' si no querés texto
@@ -112,7 +121,8 @@ const MainStack = () => {
             fontWeight: 'bold',
             fontSize: 20,
           },
-        }}   />
+        }}/>
+      
       <Stack.Screen name="Sagas" component={Sagas} 
        options={{
           headerTitle: 'Sagas', // o '' si no querés texto
@@ -127,8 +137,10 @@ const MainStack = () => {
             fontWeight: 'bold',
             fontSize: 20,
           },
-        }}  />
-      <Stack.Screen name="Nuevo" component={Nuevo} />
+        }}/>
+      
+    
+      
       <Stack.Screen name="Poderes Unicos" component={PoderesUnicos}
        options={{
           headerTitle: 'Poderes Unicos', // o '' si no querés texto
@@ -143,7 +155,57 @@ const MainStack = () => {
             fontWeight: 'bold',
             fontSize: 20,
           },
-        }}   />
+        }} />
+
+
+
+      <Stack.Screen name="Tesoros del universo" component={ObjetosMagicos}
+        options={{
+            headerTitle: 'Tesoros del universo', // o '' si no querés texto
+            headerBackTitleVisible: false,
+            headerStyle: {
+              backgroundColor: '#121212', // Fondo oscuro
+              height: 80,
+            },
+            headerTintColor: 'white', // Color de la flechita y backTitle
+            headerTitleStyle: {
+              color: 'white', // ✅ Color del texto del título
+              fontWeight: 'bold',
+              fontSize: 20,
+            },
+          }} />
+
+        <Stack.Screen name="Neotecnia" component={Neotecnia}
+        options={{
+            headerTitle: 'Neotecnia', // o '' si no querés texto
+            headerBackTitleVisible: false,
+            headerStyle: {
+              backgroundColor: '#121212', // Fondo oscuro
+              height: 80,
+            },
+            headerTintColor: 'white', // Color de la flechita y backTitle
+            headerTitleStyle: {
+              color: 'white', // ✅ Color del texto del título
+              fontWeight: 'bold',
+              fontSize: 20,
+            },
+          }} />
+      
+        <Stack.Screen name="Herbolaria" component={Herbolaria}
+        options={{
+            headerTitle: 'Herbolaria', // o '' si no querés texto
+            headerBackTitleVisible: false,
+            headerStyle: {
+              backgroundColor: '#121212', // Fondo oscuro
+              height: 80,
+            },
+            headerTintColor: 'white', // Color de la flechita y backTitle
+            headerTitleStyle: {
+              color: 'white', // ✅ Color del texto del título
+              fontWeight: 'bold',
+              fontSize: 20,
+            },
+          }} />
     </>
   )}
 </Stack.Navigator>

@@ -9,6 +9,7 @@ const path = require('path');
 
 
 
+
 //para la carpeta de imagene sy sus urls
 const cloudinary = require('cloudinary').v2;
 
@@ -101,7 +102,7 @@ io.on('connection', (socket) => {
 
 
 
-/*
+
 //LOCAL HOST bbdd
 const pool = new Pool({
   user: 'postgres',
@@ -110,9 +111,9 @@ const pool = new Pool({
   password: '041183',
   port: 5432,
 });
-*/
- 
 
+ 
+/*
 //LOCAL HOST bbdd
 const pool = new Pool({
   user: 'gorda',
@@ -124,7 +125,7 @@ const pool = new Pool({
     rejectUnauthorized: false, // Esto es clave en conexiones con Render
   },
 });
-
+*/
 
 //PARA GAURDADO DE IMAGENES Y OBTENER URLS
 cloudinary.config({
@@ -601,7 +602,7 @@ app.get('/consumirPersonajesTodos', async (req, res) => {
 //insert saga ok!!
 app.post('/insert-saga', async (req, res) => {
 
-  console.log("esto viene del cliente: ",req.body)
+ // console.log("esto viene del cliente: ",req.body)
   const {
     titulo,
     presentacion,
@@ -975,8 +976,183 @@ app.put('/updateUsuarios/:usuarioId', async (req, res) => {
 
 
 
+//consmumir sagas ok!!
+app.get('/consumirObjetosMagicos', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT *
+      FROM tesoros
+    `);
+
+    res.status(200).json({ objetosMagicos: result.rows });
+  } catch (error) {
+    console.error('Error al consumir objetos magicos:', error);
+    res.status(500).json({ error: 'Error interno al obtener objetos magicos' });
+  }
+});
 
 
+
+//OK
+app.post('/insertObjetoMagico', async (req, res) => {
+  const {
+    nombre, rareza, nivel, costeVentaja, precio, descripcion, sistema, imagen
+  } = req.body;
+
+  try {
+    // 1. Insertar personaje sin imagenurl
+    const query = `
+      INSERT INTO tesoros (
+        nombre, rareza, nivel, "costeVentaja", precio, descripcion, sistema
+      )
+      VALUES (
+        $1, $2, $3, $4, $5, $6, $7
+      )
+      RETURNING idobjeto
+    `;
+
+    const values = [
+      nombre, rareza, nivel, costeVentaja, precio, descripcion, sistema
+    ];
+
+    const result = await pool.query(query, values);
+    const newId = result.rows[0].idobjeto;
+
+    let imageUrl = null;
+
+    if (imagen) {
+      const matches = imagen.match(/^data:image\/(\w+);base64,(.+)$/);
+      if (!matches) return res.status(400).json({ error: 'Imagen base64 inválida.' });
+
+      const ext = matches[1];
+      const data = matches[2];
+
+      // 2. Subir la imagen a Cloudinary
+      const uploadResult = await cloudinary.uploader.upload(`data:image/${ext};base64,${data}`, {
+        folder: 'tesoros',
+        public_id: `tesoro_${newId}`,
+        overwrite: true,
+      });
+
+      imageUrl = uploadResult.secure_url;
+      const imageCloudId = uploadResult.public_id;
+
+      // 3. Actualizar la URL y el ID cloud en la base de datos
+      await pool.query(
+        'UPDATE tesoros SET imagenurl = $1, imagencloudid = $2 WHERE idobjeto = $3',
+        [imageUrl, imageCloudId, newId]
+      );
+    }
+
+    // 4. Responder con éxito y URL
+    res.status(201).json({
+      message: 'tesoro creado exitosamente.',
+      idobjeto: newId,
+      imagenurl: imageUrl,
+    });
+
+  } catch (err) {
+    console.error('Error al insertar objeto magico nuevo:', err);
+    res.status(500).json({ error: 'Error al insertar objeto magico nuevo.' });
+  }
+});
+
+app.put('/updateObjetoMagico/:id', async (req, res) => {
+  const { id } = req.params;
+  const {
+    nombre,
+    rareza,
+    nivel,
+    costeVentaja,
+    precio,
+    descripcion,
+    sistema,
+    imagen,
+  } = req.body;
+
+  try {
+    let imageUrl = null;
+    let imageCloudId = null;
+
+    // Si viene una nueva imagen en base64, subirla a Cloudinary
+    if (imagen && imagen.startsWith('data:image/')) {
+      const matches = imagen.match(/^data:image\/(\w+);base64,(.+)$/);
+      if (!matches) return res.status(400).json({ error: 'Imagen base64 inválida.' });
+
+      const ext = matches[1];
+      const data = matches[2];
+
+      const uploadResult = await cloudinary.uploader.upload(`data:image/${ext};base64,${data}`, {
+        folder: 'tesoros',
+        public_id: `tesoro_${id}`,
+        overwrite: true,
+      });
+
+      imageUrl = uploadResult.secure_url;
+      imageCloudId = uploadResult.public_id;
+    }
+
+    // Armar la query de actualización (incluye imagen si se subió)
+    let updateQuery = `
+      UPDATE tesoros SET
+        nombre = $1,
+        rareza = $2,
+        nivel = $3,
+        "costeVentaja" = $4,
+        precio = $5,
+        descripcion = $6,
+        sistema = $7
+    `;
+    const updateValues = [
+      nombre,
+      rareza,
+      nivel,
+      costeVentaja,
+      precio,
+      descripcion,
+      sistema,
+    ];
+
+    if (imageUrl) {
+      updateQuery += `, imagenurl = $8, imagencloudid = $9`;
+      updateValues.push(imageUrl, imageCloudId);
+    }
+
+    updateQuery += ` WHERE idobjeto = $${updateValues.length + 1}`;
+    updateValues.push(id);
+
+    await pool.query(updateQuery, updateValues);
+
+    res.json({ message: 'Objeto mágico actualizado exitosamente.' });
+
+  } catch (err) {
+    console.error('Error al actualizar objeto mágico:', err);
+    res.status(500).json({ error: 'Error al actualizar objeto mágico.' });
+  }
+});
+
+
+
+app.delete('/deleteObjetoMagico/:idobjeto', async (req, res) => {
+  const { idobjeto } = req.params;
+    console.log('Intentando eliminar objeto con id:', idobjeto);
+
+  try {
+    // Opcional: verificar que el objeto exista antes de eliminar
+
+    const deleteQuery = 'DELETE FROM tesoros WHERE idobjeto = $1';
+    const result = await pool.query(deleteQuery, [idobjeto]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Objeto mágico no encontrado.' });
+    }
+
+    res.json({ message: 'Objeto mágico eliminado correctamente.' });
+  } catch (error) {
+    console.error('Error al eliminar objeto mágico:', error);
+    res.status(500).json({ error: 'Error al eliminar objeto mágico.' });
+  }
+});
 
 
 /*
