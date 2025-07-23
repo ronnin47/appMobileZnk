@@ -195,7 +195,7 @@ useEffect(() => {
   }
 }, [filtro, objetosMagicos]);
 
-  // RENDER DE CADA ITEM
+  // Función para renderizar cada objeto
   const renderObjeto = (obj) => {
     const expandido = idExpandido === obj.idobjeto;
     return (
@@ -303,10 +303,10 @@ useEffect(() => {
               renderItem={({ item }) => renderObjeto(item)}
               keyExtractor={(item) => item.idobjeto?.toString() ?? Math.random().toString()}
               scrollEnabled={false} // importante para evitar conflicto con ScrollView
-             initialNumToRender={10}
+              initialNumToRender={10}
               maxToRenderPerBatch={10}       // Renderiza máximo 10 ítems por lote en scroll
-            windowSize={5} 
-            removeClippedSubviews={true}
+              windowSize={5} 
+              removeClippedSubviews={true}
             />
           ) : (
             <Text style={styles.noResultados}>No hay objetos comunes.</Text>
@@ -326,10 +326,10 @@ useEffect(() => {
             renderItem={({ item }) => renderObjeto(item)}
             keyExtractor={(item) => item.idobjeto?.toString() ?? Math.random().toString()}
             scrollEnabled={false}
-           initialNumToRender={10}
-                 maxToRenderPerBatch={10}       // Renderiza máximo 10 ítems por lote en scroll
-                windowSize={5} 
-                removeClippedSubviews={true}
+            initialNumToRender={10}
+            maxToRenderPerBatch={10}       // Renderiza máximo 10 ítems por lote en scroll
+            windowSize={5} 
+            removeClippedSubviews={true}
           />
         ) : (
           <Text style={styles.noResultados}>No hay objetos poco comunes.</Text>
@@ -350,9 +350,9 @@ useEffect(() => {
             keyExtractor={(item) => item.idobjeto?.toString() ?? Math.random().toString()}
             scrollEnabled={false}
             initialNumToRender={10}
-                 maxToRenderPerBatch={10}       // Renderiza máximo 10 ítems por lote en scroll
-                windowSize={5} 
-                removeClippedSubviews={true}
+            maxToRenderPerBatch={10}       // Renderiza máximo 10 ítems por lote en scroll
+            windowSize={5} 
+            removeClippedSubviews={true}
           />
         ) : (
           <Text style={styles.noResultados}>No hay objetos raros.</Text>
@@ -373,7 +373,7 @@ useEffect(() => {
                 keyExtractor={(item) => item.idobjeto?.toString() ?? Math.random().toString()}
                 scrollEnabled={false}
                 initialNumToRender={10}
-                 maxToRenderPerBatch={10}       // Renderiza máximo 10 ítems por lote en scroll
+                maxToRenderPerBatch={10}       // Renderiza máximo 10 ítems por lote en scroll
                 windowSize={5} 
                 removeClippedSubviews={true}
               />
@@ -545,7 +545,8 @@ const styles = StyleSheet.create({
   },
   subtitulo: {
     fontSize: 18,
-    color: 'white',
+    color: 'yellow',
+     fontStyle: 'italic',
     marginTop: 20,
     marginBottom: 5,
   },
@@ -583,34 +584,24 @@ const styles = StyleSheet.create({
     borderColor:"white",
     borderRadius: 25,
   },
-objetoCard: {
-  backgroundColor: '#111',
-  borderRadius: 8,
-  padding: 10,
-  paddingBottom: 5,
-  marginVertical: 6,
-  borderWidth: 0.2,
-  borderColor: '#444',
-
-  // Sombra para iOS
-  shadowColor: 'cyan', // violeta claro
-  shadowOffset: { width: 0, height: 6 },
-  shadowOpacity: 0.9,
-  shadowRadius: 10,
-
-  // Sombra para Android
-  elevation: 12,
-},
-objetoNombre: {
+  objetoCard: {
+    backgroundColor: '#111',
+    borderRadius: 8,
+    padding: 8,
+    paddingBottom:0,
+    marginVertical: 6,
+    borderWidth: 0.2,
+  },
+ objetoNombre: {
   fontSize: 17,
   color: 'white',
   fontWeight: 'bold',
-
   fontStyle: 'italic',
 },
   objetoDetalle: {
     fontSize: 14,
     color: '#ccc',
+   
   },
   botonGuardar: {
     marginBottom: 30, // margen extra para que no quede abajo pegado
@@ -634,8 +625,7 @@ objetoNombre: {
     marginTop: 10,
     marginBottom: 10,
     borderWidth:0.5,
-    borderColor:"gray",
-    elevation:15,
+    borderColor:"gray"
   },
  cargarObjeto: {
   borderWidth: 1,
@@ -657,7 +647,7 @@ cargarImagen: {
 objetoDetalle: {
     fontSize: 16,
     color: '#ccc',
-    marginBottom: 2,
+    marginBottom: 3,
   },
   label: {
     color: '#D4AF37', // Dorado, o el color que prefieras
