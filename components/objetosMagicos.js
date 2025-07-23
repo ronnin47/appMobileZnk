@@ -16,7 +16,7 @@ export const ObjetosMagicos = () => {
 
   // Un único estado para manejar qué grupos están expandido
   const [expandidoKeys, setExpandidoKeys] = useState([]);
-
+const [grupoExpandido, setGrupoExpandido] = useState(null);
   useEffect(() => {
     consumirObjetosMagicos();
     pedirPermisoGaleria();
@@ -174,19 +174,19 @@ export const ObjetosMagicos = () => {
     return nivel >= 8;
   });
 
-  // Actualizar expandidoKeys cuando cambia el filtro o objetos
   useEffect(() => {
-    if (filtro.trim() === '') {
-      setExpandidoKeys([]); // Todos cerrados
+  if (filtro.trim() === '') {
+    setExpandidoKeys([]); // Todos cerrados
+  } else {
+    // Encontrar el primer grupo con datos para expandir sólo ese
+    const primerGrupoConDatos = grupos.find(grupo => grupo.data.length > 0);
+    if (primerGrupoConDatos) {
+      setExpandidoKeys([primerGrupoConDatos.key]); // Sólo ese grupo expandido
     } else {
-      const keys = [];
-      if (comunes.length > 0) keys.push('comunes');
-      if (pocoComunes.length > 0) keys.push('pocoComunes');
-      if (raros.length > 0) keys.push('raros');
-      if (unicos.length > 0) keys.push('unicos');
-      setExpandidoKeys(keys);
+      setExpandidoKeys([]); // Ningún grupo si no hay datos
     }
-  }, [filtro, objetosMagicos]);
+  }
+}, [filtro, objetosMagicos]);
 
   // Armar array combinado para el FlatList
   const grupos = [
@@ -323,36 +323,40 @@ export const ObjetosMagicos = () => {
     );
   };
 
-  // Render para FlatList único
-  const renderItem = ({ item }) => {
-    if (item.tipo === 'header') {
-      return (
-        <TouchableOpacity
-          activeOpacity={0.5}
-          onPress={() => {
-            setExpandidoKeys((prev) =>
-              prev.includes(item.key)
-                ? prev.filter((k) => k !== item.key)
-                : [...prev, item.key]
-            );
-          }}
-          style={{ marginVertical: 10 }}
-        >
-          <Text style={{ color: item.color, fontSize: 18, fontWeight: 'bold' }}>
-            {expandidoKeys.includes(item.key) ? '▼ ' : '▶ '}
-            {item.titulo}
-          </Text>
-        </TouchableOpacity>
-      );
-    }
-    if (item.tipo === 'item') {
-      return renderObjeto(item.objeto);
-    }
-    if (item.tipo === 'noData') {
-      return <Text style={styles.noResultados}>{item.texto}</Text>;
-    }
-    return null;
-  };
+ // Render para FlatList único
+const renderItem = ({ item }) => {
+  if (item.tipo === 'header') {
+    return (
+      <TouchableOpacity
+        activeOpacity={0.5}
+        onPress={() => {
+          setExpandidoKeys((prev) => {
+            if (prev.includes(item.key)) {
+              // Si el grupo ya está abierto, lo cerramos
+              return [];
+            } else {
+              // Si no, cerramos otros y abrimos sólo este
+              return [item.key];
+            }
+          });
+        }}
+        style={{ marginVertical: 10 }}
+      >
+        <Text style={{ color: item.color, fontSize: 18, fontWeight: 'bold' }}>
+          {expandidoKeys.includes(item.key) ? '▼ ' : '▶ '}
+          {item.titulo}
+        </Text>
+      </TouchableOpacity>
+    );
+  }
+  if (item.tipo === 'item') {
+    return renderObjeto(item.objeto);
+  }
+  if (item.tipo === 'noData') {
+    return <Text style={styles.noResultados}>{item.texto}</Text>;
+  }
+  return null;
+};
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 200 }}>
