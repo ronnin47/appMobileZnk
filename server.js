@@ -8,8 +8,6 @@ const fs = require('fs');
 const path = require('path');
 
 
-
-
 //para la carpeta de imagene sy sus urls
 const cloudinary = require('cloudinary').v2;
 
@@ -90,8 +88,6 @@ io.on('connection', (socket) => {
     if (mensajesChat.length > 100) mensajesChat.shift();
 
     io.emit('chat-chat', mensaje);
-   // console.log('📤 Mensaje emitido de cliente chat-chat:', mensaje);
-   // console.log(" MENSAJES GUARDADOS: ",mensajesChat)
   });
 
   // Cuando se desconecta un socket
