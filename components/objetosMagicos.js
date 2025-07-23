@@ -1,11 +1,11 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, ScrollView, Alert,FlatList } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, ScrollView, Alert, FlatList } from 'react-native';
 import axios from 'axios';
 import { useState, useEffect, useContext } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import { API_BASE_URL } from './config';
 import { AuthContext } from './AuthContext';
 
-const imagenBase = require('../assets/imagenBase.jpeg'); 
+const imagenBase = require('../assets/imagenBase.jpeg');
 
 export const ObjetosMagicos = () => {
   const [objetosMagicos, setObjetosMagicos] = useState([]);
@@ -14,11 +14,8 @@ export const ObjetosMagicos = () => {
   const [filtro, setFiltro] = useState('');
   const [idExpandido, setIdExpandido] = useState(null);
 
-  // Estados para controlar si cada grupo está expandido o no
-  const [comunesExpandido, setComunesExpandido] = useState(false);
-  const [pocoComunesExpandido, setPocoComunesExpandido] = useState(false);
-  const [rarosExpandido, setRarosExpandido] = useState(false);
-  const [unicosExpandido, setUnicosExpandido] = useState(false);
+  // Un único estado para manejar qué grupos están expandido
+  const [expandidoKeys, setExpandidoKeys] = useState([]);
 
   useEffect(() => {
     consumirObjetosMagicos();
@@ -62,14 +59,14 @@ export const ObjetosMagicos = () => {
       setNuevoObjeto({
         ...nuevoObjeto,
         imagen: base64Img,
-        imagenurl: base64Img
+        imagenurl: base64Img,
       });
     } else {
       const defaultUri = Image.resolveAssetSource(imagenBase).uri;
       setNuevoObjeto({
         ...nuevoObjeto,
         imagen: null,
-        imagenurl: defaultUri
+        imagenurl: defaultUri,
       });
     }
   };
@@ -78,9 +75,9 @@ export const ObjetosMagicos = () => {
     const objetoVacio = {
       nombre: 'Nuevo Objeto',
       rareza: '',
-      nivel: '' || "1",
+      nivel: '' || '1',
       costeVentaja: '',
-      precio: "",
+      precio: '',
       descripcion: '',
       sistema: '',
       imagen: '',
@@ -94,7 +91,7 @@ export const ObjetosMagicos = () => {
       const { idobjeto, imagenurl } = response.data;
 
       const nuevo = { ...objetoVacio, idobjeto, imagen: imagenurl || '' };
-      setObjetosMagicos(prev => [...prev, nuevo]);
+      setObjetosMagicos((prev) => [...prev, nuevo]);
       setNuevoObjeto(nuevo);
     } catch (error) {
       console.error('Error al crear objeto nuevo vacío:', error.message);
@@ -107,10 +104,8 @@ export const ObjetosMagicos = () => {
         headers: { 'Content-Type': 'application/json' },
       });
 
-      setObjetosMagicos(prev =>
-        prev.map(obj =>
-          obj.idobjeto === nuevoObjeto.idobjeto ? nuevoObjeto : obj
-        )
+      setObjetosMagicos((prev) =>
+        prev.map((obj) => (obj.idobjeto === nuevoObjeto.idobjeto ? nuevoObjeto : obj))
       );
 
       alert('Objeto actualizado');
@@ -123,7 +118,7 @@ export const ObjetosMagicos = () => {
   const eliminarObjeto = async (idobjeto) => {
     try {
       await axios.delete(`${API_BASE_URL}/deleteObjetoMagico/${idobjeto}`);
-      setObjetosMagicos(prev => prev.filter(obj => obj.idobjeto !== idobjeto));
+      setObjetosMagicos((prev) => prev.filter((obj) => obj.idobjeto !== idobjeto));
       setNuevoObjeto(null);
       alert('Objeto eliminado correctamente');
     } catch (error) {
@@ -134,16 +129,16 @@ export const ObjetosMagicos = () => {
 
   const colorPorNivel = (nivel) => {
     const n = parseInt(nivel) || 0;
-    if (n === 1 || n === 2) return '#FFFFFF';         // Blanco para nivel 1 y 2
-    if (n === 3 || n === 4) return '#4CAF50';         // Verde para nivel 3 y 4
-    if (n >= 5 && n <= 7) return '#2196F3';           // Azul para nivel 5, 6 y 7
-    if (n >= 8) return '#FF9800';                      // Naranja para nivel 8, 9, 10 y más
-    return '#FFFFFF';                                  // Default blanco
+    if (n === 1 || n === 2) return '#FFFFFF'; // Blanco para nivel 1 y 2
+    if (n === 3 || n === 4) return '#4CAF50'; // Verde para nivel 3 y 4
+    if (n >= 5 && n <= 7) return '#2196F3'; // Azul para nivel 5, 6 y 7
+    if (n >= 8) return '#FF9800'; // Naranja para nivel 8, 9, 10 y más
+    return '#FFFFFF'; // Default blanco
   };
 
   // Filtrar y ordenar objetos según filtro
   const objetosFiltrados = objetosMagicos
-    .filter(obj => {
+    .filter((obj) => {
       const texto = filtro.toLowerCase();
       return (
         obj.nombre.toLowerCase().includes(texto) ||
@@ -159,65 +154,131 @@ export const ObjetosMagicos = () => {
     });
 
   // Dividir en grupos por nivel
-  const comunes = objetosFiltrados.filter(obj => {
+  const comunes = objetosFiltrados.filter((obj) => {
     const nivel = parseInt(obj.nivel) || 0;
     return nivel >= 1 && nivel <= 2;
   });
 
-  const pocoComunes = objetosFiltrados.filter(obj => {
+  const pocoComunes = objetosFiltrados.filter((obj) => {
     const nivel = parseInt(obj.nivel) || 0;
     return nivel >= 3 && nivel <= 4;
   });
 
-  const raros = objetosFiltrados.filter(obj => {
+  const raros = objetosFiltrados.filter((obj) => {
     const nivel = parseInt(obj.nivel) || 0;
     return nivel >= 5 && nivel <= 7;
   });
 
-  const unicos = objetosFiltrados.filter(obj => {
+  const unicos = objetosFiltrados.filter((obj) => {
     const nivel = parseInt(obj.nivel) || 0;
     return nivel >= 8;
   });
 
-useEffect(() => {
-  if (filtro.trim() === '') {
-    // Si el filtro está vacío, no abrir automáticamente ningún grupo (los cerramos)
-    setComunesExpandido(false);
-    setPocoComunesExpandido(false);
-    setRarosExpandido(false);
-    setUnicosExpandido(false);
-  } else {
-    // Si hay texto en filtro, abrir grupos con resultados, cerrar sin resultados
-    setComunesExpandido(comunes.length > 0);
-    setPocoComunesExpandido(pocoComunes.length > 0);
-    setRarosExpandido(raros.length > 0);
-    setUnicosExpandido(unicos.length > 0);
-  }
-}, [filtro, objetosMagicos]);
+  // Actualizar expandidoKeys cuando cambia el filtro o objetos
+  useEffect(() => {
+    if (filtro.trim() === '') {
+      setExpandidoKeys([]); // Todos cerrados
+    } else {
+      const keys = [];
+      if (comunes.length > 0) keys.push('comunes');
+      if (pocoComunes.length > 0) keys.push('pocoComunes');
+      if (raros.length > 0) keys.push('raros');
+      if (unicos.length > 0) keys.push('unicos');
+      setExpandidoKeys(keys);
+    }
+  }, [filtro, objetosMagicos]);
 
-  // Función para renderizar cada objeto
+  // Armar array combinado para el FlatList
+  const grupos = [
+    {
+      key: 'comunes',
+      titulo: 'Comunes (Nivel 1-2)',
+      color: 'white',
+      data: comunes,
+      textoNoHay: 'No hay objetos comunes.',
+    },
+    {
+      key: 'pocoComunes',
+      titulo: 'Poco Comunes (Nivel 3-4)',
+      color: '#4CAF50',
+      data: pocoComunes,
+      textoNoHay: 'No hay objetos poco comunes.',
+    },
+    {
+      key: 'raros',
+      titulo: 'Raros (Nivel 5-6-7)',
+      color: '#2196F3',
+      data: raros,
+      textoNoHay: 'No hay objetos raros.',
+    },
+    {
+      key: 'unicos',
+      titulo: 'Únicos (Nivel 8+)',
+      color: '#FF9800',
+      data: unicos,
+      textoNoHay: 'No hay objetos únicos.',
+    },
+  ];
+
+  const datosFlatList = [];
+  grupos.forEach((grupo) => {
+    datosFlatList.push({
+      tipo: 'header',
+      key: grupo.key,
+      titulo: grupo.titulo,
+      color: grupo.color,
+      textoNoHay: grupo.textoNoHay,
+    });
+    if (expandidoKeys.includes(grupo.key)) {
+      if (grupo.data.length === 0) {
+        datosFlatList.push({
+          tipo: 'noData',
+          key: grupo.key + '-noData',
+          texto: grupo.textoNoHay,
+        });
+      } else {
+        grupo.data.forEach((objeto) => {
+          datosFlatList.push({
+            tipo: 'item',
+            key: `${grupo.key}-${objeto.idobjeto}`,
+            objeto,
+          });
+        });
+      }
+    }
+  });
+
+  // Tu renderObjeto sin cambios
   const renderObjeto = (obj) => {
     const expandido = idExpandido === obj.idobjeto;
     return (
       <TouchableOpacity
-         activeOpacity={0.98} 
-         key={obj.idobjeto}
-          onPress={() => {
-            setIdExpandido(prev => (prev === obj.idobjeto ? null : obj.idobjeto));
-            if (estatus === 'narrador') {
-              setNuevoObjeto(obj);
-            }
-          }}
-         style={[styles.objetoCard, { borderColor: colorPorNivel(obj.nivel) }]}
+        activeOpacity={0.98}
+        key={obj.idobjeto}
+        onPress={() => {
+          setIdExpandido((prev) => (prev === obj.idobjeto ? null : obj.idobjeto));
+          if (estatus === 'narrador') {
+            setNuevoObjeto(obj);
+          }
+        }}
+        style={[styles.objetoCard, { borderColor: colorPorNivel(obj.nivel) }]}
       >
         <View style={styles.objetoFila}>
           {obj.imagenurl ? (
-            <Image source={{ uri: obj.imagenurl }} style={[styles.objetoImagenMini, { borderColor: colorPorNivel(obj.nivel) }]} />
+            <Image
+              source={{ uri: obj.imagenurl }}
+              style={[styles.objetoImagenMini, { borderColor: colorPorNivel(obj.nivel) }]}
+            />
           ) : (
-            <Image source={imagenBase} style={[styles.objetoImagenMini, { borderColor: colorPorNivel(obj.nivel) }]} />
+            <Image
+              source={imagenBase}
+              style={[styles.objetoImagenMini, { borderColor: colorPorNivel(obj.nivel) }]}
+            />
           )}
           <View style={{ flex: 1, paddingLeft: 10 }}>
-            <Text style={[styles.objetoNombre, { color: colorPorNivel(obj.nivel), opacity: 0.8 }]}>{obj.nombre}</Text>
+            <Text style={[styles.objetoNombre, { color: colorPorNivel(obj.nivel), opacity: 0.8 }]}>
+              {obj.nombre}
+            </Text>
             <Text style={styles.objetoDetalle}>
               <Text style={styles.label}>Rareza: </Text>
               {obj.rareza}
@@ -262,23 +323,36 @@ useEffect(() => {
     );
   };
 
-  // Componente para los títulos de grupos con toggle y triángulo
-  const TituloGrupoToggle = ({ titulo, expandido, setExpandido,style, color, fontSize }) => (
-    <TouchableOpacity
-      activeOpacity={0.5} 
-      onPress={() => setExpandido(prev => !prev)}
-      style={{ marginVertical: 10 }}
-    >
-      <Text style={{
-      color: color ?? (expandido ? color : 'white'),
-      fontSize: 18,
-      fontWeight: 'bold',
-    }}>
-      {expandido ? '▼ ' : '▶ '}
-      {titulo}
-    </Text>
-    </TouchableOpacity>
-  );
+  // Render para FlatList único
+  const renderItem = ({ item }) => {
+    if (item.tipo === 'header') {
+      return (
+        <TouchableOpacity
+          activeOpacity={0.5}
+          onPress={() => {
+            setExpandidoKeys((prev) =>
+              prev.includes(item.key)
+                ? prev.filter((k) => k !== item.key)
+                : [...prev, item.key]
+            );
+          }}
+          style={{ marginVertical: 10 }}
+        >
+          <Text style={{ color: item.color, fontSize: 18, fontWeight: 'bold' }}>
+            {expandidoKeys.includes(item.key) ? '▼ ' : '▶ '}
+            {item.titulo}
+          </Text>
+        </TouchableOpacity>
+      );
+    }
+    if (item.tipo === 'item') {
+      return renderObjeto(item.objeto);
+    }
+    if (item.tipo === 'noData') {
+      return <Text style={styles.noResultados}>{item.texto}</Text>;
+    }
+    return null;
+  };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 200 }}>
@@ -290,103 +364,22 @@ useEffect(() => {
         onChangeText={setFiltro}
       />
 
-      <TituloGrupoToggle
-        titulo="Comunes (Nivel 1-2)"
-        expandido={comunesExpandido}
-        setExpandido={setComunesExpandido}
-        color="white"              
+      <FlatList
+        data={datosFlatList}
+        keyExtractor={(item) => item.key}
+        renderItem={renderItem}
+        scrollEnabled={false}
+        initialNumToRender={10}
+        maxToRenderPerBatch={10}
+        windowSize={5}
+        removeClippedSubviews={true}
       />
-      {comunesExpandido && (
-          comunes.length > 0 ? (
-            <FlatList
-              data={comunes}
-              renderItem={({ item }) => renderObjeto(item)}
-              keyExtractor={(item) => item.idobjeto?.toString() ?? Math.random().toString()}
-              scrollEnabled={false} // importante para evitar conflicto con ScrollView
-              initialNumToRender={10}
-              maxToRenderPerBatch={10}       // Renderiza máximo 10 ítems por lote en scroll
-              windowSize={5} 
-              removeClippedSubviews={true}
-            />
-          ) : (
-            <Text style={styles.noResultados}>No hay objetos comunes.</Text>
-          )
-        )}
-
-     <TituloGrupoToggle
-        titulo="Poco Comunes (Nivel 3-4)"
-        expandido={pocoComunesExpandido}
-        setExpandido={setPocoComunesExpandido}
-        color="#4CAF50"
-      />
-      {pocoComunesExpandido && (
-        pocoComunes.length > 0 ? (
-          <FlatList
-            data={pocoComunes}
-            renderItem={({ item }) => renderObjeto(item)}
-            keyExtractor={(item) => item.idobjeto?.toString() ?? Math.random().toString()}
-            scrollEnabled={false}
-            initialNumToRender={10}
-            maxToRenderPerBatch={10}       // Renderiza máximo 10 ítems por lote en scroll
-            windowSize={5} 
-            removeClippedSubviews={true}
-          />
-        ) : (
-          <Text style={styles.noResultados}>No hay objetos poco comunes.</Text>
-        )
-      )}
-
-     <TituloGrupoToggle
-        titulo="Raros (Nivel 5-6-7)"
-        expandido={rarosExpandido}
-        setExpandido={setRarosExpandido}
-        color="#2196F3"      
-      />
-      {rarosExpandido && (
-        raros.length > 0 ? (
-          <FlatList
-            data={raros}
-            renderItem={({ item }) => renderObjeto(item)}
-            keyExtractor={(item) => item.idobjeto?.toString() ?? Math.random().toString()}
-            scrollEnabled={false}
-            initialNumToRender={10}
-            maxToRenderPerBatch={10}       // Renderiza máximo 10 ítems por lote en scroll
-            windowSize={5} 
-            removeClippedSubviews={true}
-          />
-        ) : (
-          <Text style={styles.noResultados}>No hay objetos raros.</Text>
-        )
-      )}
-
-     <TituloGrupoToggle
-            titulo="Únicos (Nivel 8+)"
-            expandido={unicosExpandido}
-            setExpandido={setUnicosExpandido}
-            color="#FF9800"   
-          />
-          {unicosExpandido && (
-            unicos.length > 0 ? (
-              <FlatList
-                data={unicos}
-                renderItem={({ item }) => renderObjeto(item)}
-                keyExtractor={(item) => item.idobjeto?.toString() ?? Math.random().toString()}
-                scrollEnabled={false}
-                initialNumToRender={10}
-                maxToRenderPerBatch={10}       // Renderiza máximo 10 ítems por lote en scroll
-                windowSize={5} 
-                removeClippedSubviews={true}
-              />
-            ) : (
-              <Text style={styles.noResultados}>No hay objetos únicos.</Text>
-            )
-          )}
 
       {estatus === 'narrador' && (
         <>
           <View style={{ alignItems: 'center', marginTop: 10 }}>
             <TouchableOpacity
-              style={[styles.boton, { backgroundColor:'#ffc107', width: '50%' }]}
+              style={[styles.boton, { backgroundColor: '#D4AF37', width: '50%' }]}
               onPress={crearObjetoVacioEnDB}
             >
               <Text style={styles.botonTexto}>+ Objeto mágico</Text>
@@ -395,31 +388,25 @@ useEffect(() => {
 
           {nuevoObjeto && (
             <View style={styles.cargarObjeto}>
-
-               <View style={styles.cargarImagen}>
+              <View style={styles.cargarImagen}>
                 <Text style={styles.subtitulo}>{nuevoObjeto.nombre}</Text>
-              <Image
-                source={{ uri: nuevoObjeto.imagenurl || Image.resolveAssetSource(imagenBase).uri }}
-                style={styles.imagenCargar}
-              />
-              <View style={{ alignItems: 'center', marginTop: 5 }}>
-                 <TouchableOpacity style={styles.boton} onPress={abrirGaleria}>
-                <Text style={styles.botonTexto}>Seleccionar imagen</Text>
-              </TouchableOpacity>
+                <Image
+                  source={{ uri: nuevoObjeto.imagenurl || Image.resolveAssetSource(imagenBase).uri }}
+                  style={styles.imagenCargar}
+                />
+                <View style={{ alignItems: 'center', marginTop: 5 }}>
+                  <TouchableOpacity style={styles.boton} onPress={abrirGaleria}>
+                    <Text style={styles.botonTexto}>Seleccionar imagen</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
 
-               </View>
-
-              
-             
-
-              {/* Inputs */}
               <TextInput
                 placeholder="Nombre"
                 style={styles.input}
                 keyboardType="default"
                 value={nuevoObjeto.nombre}
-                onChangeText={text => setNuevoObjeto({ ...nuevoObjeto, nombre: text })}
+                onChangeText={(text) => setNuevoObjeto({ ...nuevoObjeto, nombre: text })}
               />
               <TextInput
                 placeholder="Rareza"
@@ -427,7 +414,7 @@ useEffect(() => {
                 style={styles.input}
                 keyboardType="default"
                 value={nuevoObjeto.rareza}
-                onChangeText={text => setNuevoObjeto({ ...nuevoObjeto, rareza: text })}
+                onChangeText={(text) => setNuevoObjeto({ ...nuevoObjeto, rareza: text })}
               />
               <TextInput
                 placeholder="Nivel"
@@ -435,7 +422,7 @@ useEffect(() => {
                 style={styles.input}
                 keyboardType="default"
                 value={nuevoObjeto.nivel}
-                onChangeText={text => setNuevoObjeto({ ...nuevoObjeto, nivel: text })}
+                onChangeText={(text) => setNuevoObjeto({ ...nuevoObjeto, nivel: text })}
               />
               <TextInput
                 placeholder="Coste ventaja"
@@ -443,7 +430,7 @@ useEffect(() => {
                 style={styles.input}
                 keyboardType="default"
                 value={nuevoObjeto.costeVentaja}
-                onChangeText={text => setNuevoObjeto({ ...nuevoObjeto, costeVentaja: text })}
+                onChangeText={(text) => setNuevoObjeto({ ...nuevoObjeto, costeVentaja: text })}
               />
               <TextInput
                 placeholder="Precio"
@@ -451,17 +438,17 @@ useEffect(() => {
                 style={styles.input}
                 keyboardType="default"
                 value={nuevoObjeto.precio.toString()}
-                onChangeText={text => setNuevoObjeto({ ...nuevoObjeto, precio: text })}
+                onChangeText={(text) => setNuevoObjeto({ ...nuevoObjeto, precio: text })}
               />
               <TextInput
                 placeholder="Descripción"
-                 placeholderTextColor="#aaa"
+                placeholderTextColor="#aaa"
                 style={styles.input}
                 multiline
                 keyboardType="default"
                 numberOfLines={6}
                 value={nuevoObjeto.descripcion}
-                onChangeText={text => setNuevoObjeto({ ...nuevoObjeto, descripcion: text })}
+                onChangeText={(text) => setNuevoObjeto({ ...nuevoObjeto, descripcion: text })}
               />
               <TextInput
                 placeholder="Sistema"
@@ -471,44 +458,35 @@ useEffect(() => {
                 multiline
                 numberOfLines={6}
                 value={nuevoObjeto.sistema}
-                onChangeText={text => setNuevoObjeto({ ...nuevoObjeto, sistema: text })}
+                onChangeText={(text) => setNuevoObjeto({ ...nuevoObjeto, sistema: text })}
               />
 
-            <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 30,gap:40 }}>
-
-               <TouchableOpacity
-                style={[styles.boton, styles.botonGuardar,{ backgroundColor: '#dc3545' }]}
-                onPress={() => {
-                  if (nuevoObjeto?.idobjeto) {
-                    Alert.alert(
-                      'Confirmar eliminación',
-                      '¿Seguro que querés eliminar este objeto?',
-                      [
+              <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 30, gap: 40 }}>
+                <TouchableOpacity
+                  style={[styles.boton, styles.botonGuardar, { backgroundColor: '#dc3545' }]}
+                  onPress={() => {
+                    if (nuevoObjeto?.idobjeto) {
+                      Alert.alert('Confirmar eliminación', '¿Seguro que querés eliminar este objeto?', [
                         { text: 'Cancelar', style: 'cancel' },
                         {
                           text: 'Eliminar',
                           style: 'destructive',
                           onPress: () => eliminarObjeto(nuevoObjeto.idobjeto),
                         },
-                      ]
-                    );
-                  }
-                }}
-              >
-                <Text style={styles.botonTexto}>Eliminar objeto</Text>
-              </TouchableOpacity>
+                      ]);
+                    }
+                  }}
+                >
+                  <Text style={styles.botonTexto}>Eliminar objeto</Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[styles.boton, styles.botonGuardar, { marginRight: 10 }]}
-                onPress={guardarCambiosObjeto}
-              >
-                <Text style={styles.botonTexto}>Guardar cambios</Text>
-              </TouchableOpacity>
-
-             
-            </View>
-                      
-             
+                <TouchableOpacity
+                  style={[styles.boton, styles.botonGuardar, { marginRight: 10 }]}
+                  onPress={guardarCambiosObjeto}
+                >
+                  <Text style={styles.botonTexto}>Guardar cambios</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           )}
         </>
