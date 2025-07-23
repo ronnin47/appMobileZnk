@@ -218,8 +218,15 @@ useEffect(() => {
           )}
           <View style={{ flex: 1, paddingLeft: 10 }}>
             <Text style={[styles.objetoNombre, { color: colorPorNivel(obj.nivel), opacity: 0.8 }]}>{obj.nombre}</Text>
-            <Text style={styles.objetoDetalle}>Rareza: {obj.rareza}</Text>
-            <Text style={styles.objetoDetalle}>Nivel: {obj.nivel}</Text>
+            <Text style={styles.objetoDetalle}>
+              <Text style={styles.label}>Rareza: </Text>
+              {obj.rareza}
+            </Text>
+
+            <Text style={styles.objetoDetalle}>
+              <Text style={styles.label}>Nivel: </Text>
+              {obj.nivel}
+            </Text>
           </View>
         </View>
 
@@ -230,10 +237,25 @@ useEffect(() => {
             ) : (
               <Image source={imagenBase} style={styles.objetoImagenExpandida} />
             )}
-            <Text style={styles.objetoDetalle}>Descripción: {obj.descripcion}</Text>
-            <Text style={styles.objetoDetalle}>Sistema: {obj.sistema}</Text>
-            <Text style={styles.objetoDetalle}>Precio: {obj.precio}</Text>
-            <Text style={styles.objetoDetalle}>Coste ventaja: {obj.costeVentaja}</Text>
+            <Text style={styles.objetoDetalle}>
+              <Text style={styles.label}>Descripción: </Text>
+              {obj.descripcion}
+            </Text>
+
+            <Text style={styles.objetoDetalle}>
+              <Text style={styles.label}>Sistema: </Text>
+              {obj.sistema}
+            </Text>
+
+            <Text style={styles.objetoDetalle}>
+              <Text style={styles.label}>Precio: </Text>
+              {obj.precio}
+            </Text>
+
+            <Text style={styles.objetoDetalle}>
+              <Text style={styles.label}>Coste ventaja: </Text>
+              {obj.costeVentaja}
+            </Text>
           </View>
         )}
       </TouchableOpacity>
@@ -597,12 +619,16 @@ const styles = StyleSheet.create({
   elevation: 3, // para Android
 },
 cargarImagen: {
-
-
-
-
-
   alignItems: "center",   // ← Centra horizontalmente los hijos
   justifyContent: "center", // ← Opcional, útil si querés centrar verticalmente también
-}
+},
+objetoDetalle: {
+    fontSize: 16,
+    color: '#ccc',
+    marginBottom: 4,
+  },
+  label: {
+    color: '#D4AF37', // Dorado, o el color que prefieras
+    fontWeight: 'bold',
+  },
 });
