@@ -37,6 +37,8 @@ const io = new Server(server, {
   },
 });
 
+
+console.trace("🚨 server.js ejecutado");
 const connectedUsers = new Map();
 
 // Array global para guardar mensajes en memoria
@@ -103,8 +105,6 @@ io.on('connection', (socket) => {
   });
 });
 
-
-
 /*
 //LOCAL HOST bbdd
 const pool = new Pool({
@@ -114,8 +114,7 @@ const pool = new Pool({
   password: '041183',
   port: 5432,
 });
-*/
- 
+ */
 
 //base de datos en RENDER
 const pool = new Pool({
@@ -175,8 +174,7 @@ app.get('/test-db', async (req, res) => {
 
 
 //aca los enpoits
-
-//insert de usuario OK!!
+//REGISTRO DE USUARIO -insert de usuario OK!!
 app.post('/insert-usuario', async (req, res) => {
   const { email, contrasenia,username } = req.body;
     const estatus="jugador"
@@ -208,7 +206,6 @@ app.post('/insert-usuario', async (req, res) => {
     
   }
 });
-
 
 //login OK!
 app.post('/loginUsuario', async (req, res) => {
@@ -400,7 +397,6 @@ app.post('/insert-personaje', async (req, res) => {
   }
 });
 
-
 //OK!!
 app.put('/update-personaje/:id', async (req, res) => {
   const idpersonaje = req.params.id;
@@ -502,10 +498,6 @@ app.put('/update-personaje/:id', async (req, res) => {
   }
 });
 
-
-
-
-
 //aca vamos a probar el delete
 app.delete('/deletePersonaje/:id', async (req, res) => {
   const idpersonaje = parseInt(req.params.id, 10);
@@ -554,11 +546,6 @@ app.delete('/deletePersonaje/:id', async (req, res) => {
     res.status(500).json({ message: 'Error interno del servidor.' });
   }
 });
-
-
-
-
-
 
 //consumir los todos los personajes
 app.get('/consumirPersonajesTodos', async (req, res) => {
@@ -683,8 +670,6 @@ app.get('/consumirSagas', async (req, res) => {
   }
 });
 
-
-
 //update sagas y secciones ok!!
 app.put('/updateSagaCompleta/:idsaga', async (req, res) => {
   const { idsaga } = req.params;
@@ -807,7 +792,6 @@ app.put('/updateSagaCompleta/:idsaga', async (req, res) => {
   }
 });
 
-
 // Endpoint para agregar personaje a una saga
 app.put('/agregarPersonajeSaga/:idsaga', async (req, res) => {
   const { idsaga } = req.params;
@@ -834,9 +818,6 @@ app.put('/agregarPersonajeSaga/:idsaga', async (req, res) => {
   }
 });
 
-
-
-
 //PARA LA SECCION DE LA SAGA  ok!!
 app.get('/consumirSecciones', async (req, res) => {
   const { idsaga } = req.query;
@@ -857,8 +838,6 @@ app.get('/consumirSecciones', async (req, res) => {
 
 
 //notas 
-
-
 app.put('/personajes/:idpersonaje/notasaga', async (req, res) => {
   const { idpersonaje } = req.params;
   const { notasaga } = req.body;
@@ -886,11 +865,6 @@ app.put('/personajes/:idpersonaje/notasaga', async (req, res) => {
     res.status(500).json({ error: 'Error en el servidor' });
   }
 });
-
-
-
-
-
 
 app.put('/updateUsuarios/:usuarioId', async (req, res) => {
   const usuarioId = req.params.usuarioId;
@@ -976,9 +950,6 @@ app.put('/updateUsuarios/:usuarioId', async (req, res) => {
   }
 });
 
-
-
-
 //consmumir objetos ok!!
 app.get('/consumirObjetosMagicos', async (req, res) => {
   try {
@@ -993,8 +964,6 @@ app.get('/consumirObjetosMagicos', async (req, res) => {
     res.status(500).json({ error: 'Error interno al obtener objetos magicos' });
   }
 });
-
-
 
 //OK
 app.post('/insertObjetoMagico', async (req, res) => {
@@ -1135,7 +1104,6 @@ app.put('/updateObjetoMagico/:id', async (req, res) => {
   }
 });
 
-
 //ok!!
 app.delete('/deleteObjetoMagico/:idobjeto', async (req, res) => {
   const { idobjeto } = req.params;
@@ -1157,6 +1125,9 @@ app.delete('/deleteObjetoMagico/:idobjeto', async (req, res) => {
     res.status(500).json({ error: 'Error al eliminar objeto mágico.' });
   }
 });
+
+
+
 
 
 /*

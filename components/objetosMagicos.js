@@ -1,11 +1,11 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, ScrollView, Alert,FlatList } from 'react-native';
 import axios from 'axios';
 import { useState, useEffect, useContext } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import { API_BASE_URL } from './config';
 import { AuthContext } from './AuthContext';
 
-const imagenBase = require('../assets/imagenBase.jpeg'); // Asegúrate que esta ruta sea correcta
+const imagenBase = require('../assets/imagenBase.jpeg'); 
 
 export const ObjetosMagicos = () => {
   const [objetosMagicos, setObjetosMagicos] = useState([]);
@@ -200,14 +200,15 @@ useEffect(() => {
     const expandido = idExpandido === obj.idobjeto;
     return (
       <TouchableOpacity
+         activeOpacity={0.98} 
          key={obj.idobjeto}
-  onPress={() => {
-    setIdExpandido(prev => (prev === obj.idobjeto ? null : obj.idobjeto));
-    if (estatus === 'narrador') {
-      setNuevoObjeto(obj);
-    }
-  }}
-        style={[styles.objetoCard, { borderColor: colorPorNivel(obj.nivel) }]}
+          onPress={() => {
+            setIdExpandido(prev => (prev === obj.idobjeto ? null : obj.idobjeto));
+            if (estatus === 'narrador') {
+              setNuevoObjeto(obj);
+            }
+          }}
+         style={[styles.objetoCard, { borderColor: colorPorNivel(obj.nivel) }]}
       >
         <View style={styles.objetoFila}>
           {obj.imagenurl ? (
@@ -242,6 +243,7 @@ useEffect(() => {
   // Componente para los títulos de grupos con toggle y triángulo
   const TituloGrupoToggle = ({ titulo, expandido, setExpandido,style, color, fontSize }) => (
     <TouchableOpacity
+      activeOpacity={0.5} 
       onPress={() => setExpandido(prev => !prev)}
       style={{ marginVertical: 10 }}
     >
@@ -270,46 +272,77 @@ useEffect(() => {
         titulo="Comunes (Nivel 1-2)"
         expandido={comunesExpandido}
         setExpandido={setComunesExpandido}
-        color="white"
-          
-                
+        color="white"              
       />
-      {comunesExpandido ? (
-        comunes.length > 0 ? comunes.map(renderObjeto) : <Text style={styles.noResultados}>No hay objetos comunes.</Text>
-      ) : null}
+      {comunesExpandido && (
+          comunes.length > 0 ? (
+            <FlatList
+              data={comunes}
+              renderItem={({ item }) => renderObjeto(item)}
+              keyExtractor={(item) => item.idobjeto?.toString() ?? Math.random().toString()}
+              scrollEnabled={false} // importante para evitar conflicto con ScrollView
+            />
+          ) : (
+            <Text style={styles.noResultados}>No hay objetos comunes.</Text>
+          )
+        )}
 
-      <TituloGrupoToggle
+     <TituloGrupoToggle
         titulo="Poco Comunes (Nivel 3-4)"
         expandido={pocoComunesExpandido}
         setExpandido={setPocoComunesExpandido}
         color="#4CAF50"
-     
       />
-      {pocoComunesExpandido ? (
-        pocoComunes.length > 0 ? pocoComunes.map(renderObjeto) : <Text style={styles.noResultados}>No hay objetos poco comunes.</Text>
-      ) : null}
+      {pocoComunesExpandido && (
+        pocoComunes.length > 0 ? (
+          <FlatList
+            data={pocoComunes}
+            renderItem={({ item }) => renderObjeto(item)}
+            keyExtractor={(item) => item.idobjeto?.toString() ?? Math.random().toString()}
+            scrollEnabled={false}
+          />
+        ) : (
+          <Text style={styles.noResultados}>No hay objetos poco comunes.</Text>
+        )
+      )}
 
-      <TituloGrupoToggle
-        titulo="Raros (Nivel 5-7-8)"
+     <TituloGrupoToggle
+        titulo="Raros (Nivel 5-6-7)"
         expandido={rarosExpandido}
         setExpandido={setRarosExpandido}
-        color="#2196F3"
-       
+        color="#2196F3"      
       />
-      {rarosExpandido ? (
-        raros.length > 0 ? raros.map(renderObjeto) : <Text style={styles.noResultados}>No hay objetos raros.</Text>
-      ) : null}
+      {rarosExpandido && (
+        raros.length > 0 ? (
+          <FlatList
+            data={raros}
+            renderItem={({ item }) => renderObjeto(item)}
+            keyExtractor={(item) => item.idobjeto?.toString() ?? Math.random().toString()}
+            scrollEnabled={false}
+          />
+        ) : (
+          <Text style={styles.noResultados}>No hay objetos raros.</Text>
+        )
+      )}
 
-      <TituloGrupoToggle
-        titulo="Únicos (Nivel 8+)"
-        expandido={unicosExpandido}
-        setExpandido={setUnicosExpandido}
-        color="#FF9800"
-     
-      />
-      {unicosExpandido ? (
-        unicos.length > 0 ? unicos.map(renderObjeto) : <Text style={styles.noResultados}>No hay objetos únicos.</Text>
-      ) : null}
+     <TituloGrupoToggle
+            titulo="Únicos (Nivel 8+)"
+            expandido={unicosExpandido}
+            setExpandido={setUnicosExpandido}
+            color="#FF9800"   
+          />
+          {unicosExpandido && (
+            unicos.length > 0 ? (
+              <FlatList
+                data={unicos}
+                renderItem={({ item }) => renderObjeto(item)}
+                keyExtractor={(item) => item.idobjeto?.toString() ?? Math.random().toString()}
+                scrollEnabled={false}
+              />
+            ) : (
+              <Text style={styles.noResultados}>No hay objetos únicos.</Text>
+            )
+          )}
 
       {estatus === 'narrador' && (
         <>
