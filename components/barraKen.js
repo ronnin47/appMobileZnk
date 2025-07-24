@@ -33,6 +33,7 @@ export const BarraKen = ({ pj, ken,setKen,kenActual,setKenActual }) => {
       }
 
       const msgEnviar = {
+        //id: Date.now().toString() + Math.random().toString(36).substring(2),
         usuarioId:p.usuarioId,
         idpersonaje: p.idpersonaje,
         nombre: nombre,

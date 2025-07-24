@@ -181,6 +181,7 @@ const mensajeChat = `🎲 Tirada   ${partes.join("   ")}                        
 
   
     const mensaje={
+     // id: Date.now().toString() + Math.random().toString(36).substring(2),
       usuarioId:p.usuarioId,
       idpersonaje:p.idpersonaje,
       nombre:p.nombre,

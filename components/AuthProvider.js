@@ -241,7 +241,7 @@ useEffect(() => {
   };
 }, []);
 
-
+/*
 useEffect(() => {
   if (!userToken) return;
 
@@ -260,7 +260,42 @@ useEffect(() => {
     socket.off('historial-chat', handleHistorial);
   };
 }, [userToken]);
+*/
 
+
+useEffect(() => {
+  if (!userToken) return;
+
+  // Función para pedir historial
+  const pedirHistorial = () => {
+    socket.emit('solicitar-historial');
+  };
+
+  // Pedir historial al montar
+  pedirHistorial();
+
+  // Manejar mensaje de historial
+  const handleHistorial = (mensajes) => {
+    if (Array.isArray(mensajes)) {
+      setHistorialChat(mensajes);
+    }
+  };
+
+  // Escuchar evento historial-chat
+  socket.off('historial-chat');
+  socket.on('historial-chat', handleHistorial);
+
+  // Escuchar evento connect para reconexiones
+  socket.on('connect', () => {
+    console.log('Socket conectado/reconectado');
+    pedirHistorial();
+  });
+
+  return () => {
+    socket.off('historial-chat', handleHistorial);
+    socket.off('connect');
+  };
+}, [userToken]);
 
 
 const savePersonajes = async (lista) => {

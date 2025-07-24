@@ -279,6 +279,7 @@ const agregarDamage = async () => {
    
      // Emitiendo el objeto con idpersonaje, kenActual y ken
       const msgEnviar = {
+        //id: Date.now().toString() + Math.random().toString(36).substring(2),
         usuarioId:p.usuarioId,
         idpersonaje: p.idpersonaje,    
         nombre:nombre,

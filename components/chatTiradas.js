@@ -26,7 +26,7 @@ const imagenBase = require('../assets/imagenBase.jpeg');
           <></>
         ) : (
           historialChat.map((msg, idx) => {
-            const esPropio = msg.idpersonaje === p.idpersonaje;
+            const esPropio = msg.idpersonaje == p.idpersonaje;
             const esImagen =
               typeof msg.mensaje === 'string' &&
               (msg.mensaje.startsWith('http://') || msg.mensaje.startsWith('https://')) &&
@@ -37,7 +37,7 @@ const imagenBase = require('../assets/imagenBase.jpeg');
 
             return (
               <View
-                key={idx}
+                key={`comp2-${Number(msg.id) || idx.toString()}`}
                 style={{
                   marginBottom: 6,
                   backgroundColor: esPropio ? "#222" : 'black',
@@ -72,6 +72,12 @@ const imagenBase = require('../assets/imagenBase.jpeg');
                     >
                       {msg.nombre}:
                     </Text>
+                     <Text style={{ color: '#888', fontSize: 10, flex: 1, textAlign: 'right' }}>
+                      {msg.timestamp
+                        ? new Date(Number(msg.timestamp)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        : ''}
+                    </Text>
+                    
                 </View>
                  
              
@@ -95,6 +101,7 @@ const imagenBase = require('../assets/imagenBase.jpeg');
                   >
                     {msg.mensaje}
                   </Text>
+                  
                 )}
               </View>
             );

@@ -37,15 +37,34 @@ const io = new Server(server, {
 
 
 console.trace("🚨 server.js ejecutado");
-const connectedUsers = new Map();
 
-// Array global para guardar mensajes en memoria
+
+const connectedUsers = new Map();
 const mensajesChat = [];
+
+function normalizarMensaje(mensaje) {
+  return {
+    usuarioId: mensaje.usuarioId?.toString() ?? '',
+    idpersonaje: mensaje.idpersonaje?.toString() ?? '',
+    nombre: mensaje.nombre?.toString() ?? '',
+    mensaje: mensaje.mensaje?.toString() ?? '',
+    estatus: mensaje.estatus?.toString() ?? '',
+    imagenurl: mensaje.imagenurl?.toString() ?? '',
+    imagenPjUrl: mensaje.imagenPjUrl?.toString() ?? '',
+    nick: mensaje.nick?.toString() ?? '',
+    kenActual: mensaje.kenActual?.toString() ?? '',
+    ken: mensaje.ken?.toString() ?? '',
+    kiActual: mensaje.kiActual?.toString() ?? '',
+    ki: mensaje.ki?.toString() ?? '',
+    vidaActual: mensaje.vidaActual?.toString() ?? '',
+    vidaTotal: mensaje.vidaTotal?.toString() ?? '',
+    timestamp: Date.now(),
+  };
+}
 
 io.on('connection', (socket) => {
   console.log(`Socket conectado: ${socket.id}`);
 
-  // Cuando un usuario se conecta con su data
   socket.on('user-connected', (userData) => {
     const { usuarioId, sesion } = userData;
     if (usuarioId && sesion) {
@@ -55,14 +74,18 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Evento para que el cliente solicite el historial de mensajes
-  socket.on('solicitar-historial', () => {
-    // Enviamos el historial guardado solo a ese socket
-    socket.emit('historial-chat', mensajesChat);
+  socket.on('solicitar-historial', async () => {
+    try {
+      const resultado = await pool.query(
+        `SELECT * FROM mensajes ORDER BY timestamp DESC LIMIT 100`
+      );
+      socket.emit('historial-chat', resultado.rows.reverse());
+    } catch (error) {
+      console.error('Error al cargar historial:', error);
+      socket.emit('historial-chat', []);
+    }
   });
 
-
-  // Manejo de chat con posible imagen
   socket.on('chat-chat', async (mensaje) => {
     if (mensaje.imagenBase64) {
       try {
@@ -74,23 +97,55 @@ io.on('connection', (socket) => {
         console.log('✅ Imagen subida a Cloudinary:', resultado.secure_url);
       } catch (error) {
         console.error('❌ Error al subir imagen:', error);
-        return; // No emitimos si falla
+        return; // No emitir si falla la subida
       }
     }
 
-    // Guardamos mensaje con timestamp
-    mensajesChat.push({
-      ...mensaje,
-      timestamp: Date.now(),
-    });
+    const msgNormalizado = normalizarMensaje(mensaje);
 
-    // Limitar tamaño del array a los últimos 100 mensajes (opcional)
+    try {
+      const insertQuery = `
+        INSERT INTO mensajes (
+          "usuarioId", idpersonaje, nombre, mensaje, estatus,
+          imagenurl, "imagenPjUrl", nick,
+          "kenActual", ken, "kiActual", ki,
+          "vidaActual", "vidaTotal", timestamp
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+        RETURNING id
+      `;
+
+      const { rows } = await pool.query(insertQuery, [
+        msgNormalizado.usuarioId,
+        msgNormalizado.idpersonaje,
+        msgNormalizado.nombre,
+        msgNormalizado.mensaje,
+        msgNormalizado.estatus,
+        msgNormalizado.imagenurl,
+        msgNormalizado.imagenPjUrl,
+        msgNormalizado.nick,
+        msgNormalizado.kenActual,
+        msgNormalizado.ken,
+        msgNormalizado.kiActual,
+        msgNormalizado.ki,
+        msgNormalizado.vidaActual,
+        msgNormalizado.vidaTotal,
+        msgNormalizado.timestamp,
+      ]);
+
+      msgNormalizado.id = rows[0].id;
+
+    } catch (error) {
+      console.error('❌ Error al guardar mensaje en DB:', error);
+      // Opcional: asignar un id temporal para no romper la UI
+      msgNormalizado.id = Date.now().toString() + Math.random().toString(36).substring(2);
+    }
+
+    mensajesChat.push(msgNormalizado);
     if (mensajesChat.length > 100) mensajesChat.shift();
 
-    io.emit('chat-chat', mensaje);
+    io.emit('chat-chat', msgNormalizado);
   });
 
-  // Cuando se desconecta un socket
   socket.on('disconnect', () => {
     const usuarioDesconectado = connectedUsers.get(socket.id);
     if (usuarioDesconectado) {

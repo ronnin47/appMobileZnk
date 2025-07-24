@@ -42,6 +42,7 @@ export const BarraKi = ({ pj,ki,setKi, kiActual,setKiActual,consumision,setConsu
       }
 
       const msgEnviar = {
+        //id: Date.now().toString() + Math.random().toString(36).substring(2),
           usuarioId:p.usuarioId,
         idpersonaje: p.idpersonaje,
         nombre: nombre,

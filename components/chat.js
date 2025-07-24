@@ -110,7 +110,7 @@ const imagenBase = require('../assets/imagenBase.jpeg');
         });
 
         const mensajeImagen = {
-          id: Date.now().toString() + Math.random().toString(36).substring(2),
+         // id: Date.now().toString() + Math.random().toString(36).substring(2),
           usuarioId: Number(usuarioId),
           idpersonaje: personajeActual?.idpersonaje || 0,
           nombre: nick || estatus,
@@ -133,7 +133,7 @@ const imagenBase = require('../assets/imagenBase.jpeg');
       const mensaje = activarTirada(input);
 
       const msgEnviar = {
-        id: Date.now().toString() + Math.random().toString(36).substring(2),
+       // id: Date.now().toString() + Math.random().toString(36).substring(2),
         usuarioId: Number(usuarioId),
         idpersonaje: personajeActual?.idpersonaje || 0,
         nombre: nick || estatus,
@@ -182,8 +182,14 @@ const imagenBase = require('../assets/imagenBase.jpeg');
       const esImagen = typeof item.mensaje === 'string' && item.mensaje.startsWith('http') &&
         (item.mensaje.endsWith('.jpg') || item.mensaje.endsWith('.jpeg') || item.mensaje.endsWith('.png') || item.mensaje.endsWith('.webp'));
 
+
+
+
+     // console.log(historialChat.map(m => m.id));
+     // console.log(historialChat.map(m => m.mensaje));
+
       return (
-        <View key={item.id || index.toString()} style={estilos}>
+       <View key={`comp1-${Number(item.id) || index.toString()}`}style={estilos}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
            <Image
               source={
@@ -196,6 +202,11 @@ const imagenBase = require('../assets/imagenBase.jpeg');
               style={{ width: 32, height: 32, borderRadius: 15 }}
             />
             <Text style={{ color: 'aliceblue', fontSize: 12 }}>{item.nombre || item.nick }</Text>
+             <Text style={{ color: '#888', fontSize: 10, flex: 1, textAlign: 'right' }}>
+              {item.timestamp
+                ? new Date(Number(item.timestamp)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                : ''}
+            </Text>
           </View>
           {esImagen ? (
             <TouchableOpacity onPress={() => setImagenAmpliada(item.mensaje)}>
@@ -209,7 +220,7 @@ const imagenBase = require('../assets/imagenBase.jpeg');
                 : estilos.includes(styles.mensajePropio)
                 ? { color: 'greenyellow' }
                 : { color: '#f2f2f2c4' },
-              { marginLeft: 30 },
+              { marginLeft: 30, minWidth: 85 }, 
             ]}
           >
             {item.mensaje}
