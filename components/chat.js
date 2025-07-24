@@ -220,7 +220,7 @@ const imagenBase = require('../assets/imagenBase.jpeg');
                 : estilos.includes(styles.mensajePropio)
                 ? { color: 'greenyellow' }
                 : { color: '#f2f2f2c4' },
-              { marginLeft: 30, minWidth: 85 }, 
+              { marginLeft: 30, minWidth: 100 }, 
             ]}
           >
             {item.mensaje}
