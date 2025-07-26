@@ -77,7 +77,7 @@ io.on('connection', (socket) => {
   socket.on('solicitar-historial', async () => {
     try {
       const resultado = await pool.query(
-        `SELECT * FROM mensajes ORDER BY timestamp DESC LIMIT 100`
+        `SELECT * FROM mensajes ORDER BY timestamp DESC LIMIT 80`
       );
       socket.emit('historial-chat', resultado.rows.reverse());
     } catch (error) {
@@ -141,7 +141,7 @@ io.on('connection', (socket) => {
     }
 
     mensajesChat.push(msgNormalizado);
-    if (mensajesChat.length > 100) mensajesChat.shift();
+    if (mensajesChat.length > 80) mensajesChat.shift();
 
     io.emit('chat-chat', msgNormalizado);
   });
@@ -156,7 +156,7 @@ io.on('connection', (socket) => {
   });
 });
 
-/*
+
 //LOCAL HOST bbdd
 const pool = new Pool({
   user: 'postgres',
@@ -165,9 +165,9 @@ const pool = new Pool({
   password: '041183',
   port: 5432,
 });
-*/
 
 
+/*
 //base de datos en RENDER
 const pool = new Pool({
   user: 'gorda',
@@ -179,7 +179,7 @@ const pool = new Pool({
     rejectUnauthorized: false, // Esto es clave en conexiones con Render
   },
 });
-
+*/
 
 //PARA GAURDADO DE IMAGENES Y OBTENER URLS
 cloudinary.config({

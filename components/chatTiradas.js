@@ -2,11 +2,20 @@ import React, { useEffect, useRef, useContext } from 'react';
 import { View, ScrollView, Text, StyleSheet, Image } from 'react-native';
 import { AuthContext } from './AuthContext';
 
-
 export const ChatTiradas = ({ p }) => {
   const scrollViewRef = useRef();
   const { historialChat, setHistorialChat } = useContext(AuthContext);
-const imagenBase = require('../assets/imagenBase.jpeg');
+  const imagenBase = require('../assets/imagenBase.jpeg');
+
+  // Función para optimizar URL de avatar (solo si es Cloudinary)
+  const optimizarAvatarUrl = (url) => {
+    if (!url) return null;
+    if (url.includes('/upload/')) {
+      return url.replace('/upload/', '/upload/w_64,h_64,c_fill/');
+    }
+    return url;
+  };
+
   useEffect(() => {
     if (scrollViewRef.current) {
       scrollViewRef.current.scrollToEnd({ animated: true });
@@ -35,6 +44,11 @@ const imagenBase = require('../assets/imagenBase.jpeg');
                 msg.mensaje.endsWith('.png') ||
                 msg.mensaje.includes('cloudinary'));
 
+            // Optimizo solo la URL del avatar
+            const avatarUrlOptimizada = optimizarAvatarUrl(
+              msg.imagenPjUrl ? msg.imagenPjUrl : msg.imagenurl
+            );
+
             return (
               <View
                 key={`comp2-${Number(msg.id) || idx.toString()}`}
@@ -44,7 +58,7 @@ const imagenBase = require('../assets/imagenBase.jpeg');
                   padding: 4,
                   borderRadius: 10,
                   borderWidth: esPropio ? 0.5 : 0.1,
-                  borderColor: esPropio ? "cyan": 'cyan',
+                  borderColor: esPropio ? "cyan" : 'cyan',
                   shadowColor: esPropio ? 'white' : '#000',
                   shadowOffset: { width: 0, height: 0 },
                   shadowOpacity: esPropio ? 0.9 : 0.2,
@@ -52,35 +66,29 @@ const imagenBase = require('../assets/imagenBase.jpeg');
                   elevation: esPropio ? 18 : 4,
                 }}
               >
-             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                     <Image
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Image
                     source={
-                      msg.imagenPjUrl
-                        ? { uri: msg.imagenPjUrl }
-                        : msg.imagenurl
-                        ? { uri: msg.imagenurl }
+                      avatarUrlOptimizada
+                        ? { uri: avatarUrlOptimizada }
                         : imagenBase
                     }
                     style={{ width: 32, height: 32, borderRadius: 15 }}
                   />
-                    <Text
-                      style={[
-                        styles.textoHistorial,
-                        esPropio && styles.mensajePropio,
-                         
-                      ]}
-                    >
-                      {msg.nombre}:
-                    </Text>
-                     <Text style={{ color: '#888', fontSize: 10, flex: 1, textAlign: 'right' }}>
-                      {msg.timestamp
-                        ? new Date(Number(msg.timestamp)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                        : ''}
-                    </Text>
-                    
+                  <Text
+                    style={[
+                      styles.textoHistorial,
+                      esPropio && styles.mensajePropio,
+                    ]}
+                  >
+                    {msg.nombre}:
+                  </Text>
+                  <Text style={{ color: '#888', fontSize: 10, flex: 1, textAlign: 'right' }}>
+                    {msg.timestamp
+                      ? new Date(Number(msg.timestamp)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                      : ''}
+                  </Text>
                 </View>
-                 
-             
 
                 {esImagen ? (
                   <Image
@@ -96,12 +104,11 @@ const imagenBase = require('../assets/imagenBase.jpeg');
                     style={[
                       styles.textoHistorial,
                       esPropio && styles.mensajePropio,
-                        { marginLeft: 40 }
+                      { marginLeft: 40 },
                     ]}
                   >
                     {msg.mensaje}
                   </Text>
-                  
                 )}
               </View>
             );
@@ -132,14 +139,12 @@ const styles = StyleSheet.create({
     color: "#f2f2f2c4",
     fontSize: 14,
     marginBottom: 1,
-    
   },
   textoHistorialVacio: {
     color: "#ADFF2F",
     fontStyle: "italic",
     textAlign: "center",
     marginTop: 20,
-
   },
   mensajePropio: {
     color: "yellow",
@@ -152,3 +157,4 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
 });
+

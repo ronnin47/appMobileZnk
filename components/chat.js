@@ -1,4 +1,4 @@
-import React, { useState, useContext, useRef, useEffect } from 'react';
+import React, { useState, useContext, useRef, useEffect, useMemo } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
   ScrollView, StyleSheet, KeyboardAvoidingView, Platform, Image
@@ -22,7 +22,7 @@ export default function Chat() {
   const [imagenPreview, setImagenPreview] = useState(null);
   const [imagenAmpliada, setImagenAmpliada] = useState(null);
   const { historialChat, setHistorialChat, userToken, personajeActual, estatus, imagenurl, nick } = useContext(AuthContext);
-const imagenBase = require('../assets/imagenBase.jpeg');
+  const imagenBase = require('../assets/imagenBase.jpeg');
   const usuarioId = userToken ? userToken.split("-")[1] : null;
 
   useEffect(() => {
@@ -30,6 +30,15 @@ const imagenBase = require('../assets/imagenBase.jpeg');
       scrollViewRef.current.scrollToEnd({ animated: true });
     }
   }, [historialChat]);
+
+  // Función para optimizar URL de avatar (solo si es Cloudinary)
+  const optimizarAvatarUrl = (url) => {
+    if (!url) return null;
+    if (url.includes('/upload/')) {
+      return url.replace('/upload/', '/upload/w_64,h_64,c_fill/');
+    }
+    return url;
+  };
 
   // Variables para mantener escala acumulada y punto inicial
   const scale = useSharedValue(1);
@@ -110,7 +119,6 @@ const imagenBase = require('../assets/imagenBase.jpeg');
         });
 
         const mensajeImagen = {
-         // id: Date.now().toString() + Math.random().toString(36).substring(2),
           usuarioId: Number(usuarioId),
           idpersonaje: personajeActual?.idpersonaje || 0,
           nombre: nick || estatus,
@@ -133,7 +141,6 @@ const imagenBase = require('../assets/imagenBase.jpeg');
       const mensaje = activarTirada(input);
 
       const msgEnviar = {
-       // id: Date.now().toString() + Math.random().toString(36).substring(2),
         usuarioId: Number(usuarioId),
         idpersonaje: personajeActual?.idpersonaje || 0,
         nombre: nick || estatus,
@@ -162,7 +169,8 @@ const imagenBase = require('../assets/imagenBase.jpeg');
     }
   };
 
-  const renderMensajes = () => {
+  // Aquí uso useMemo para memoizar la lista renderizada de mensajes
+  const renderMensajesMemo = useMemo(() => {
     return historialChat.map((item, index) => {
       const esPropio = item.usuarioId == usuarioId;
       const esNarrador = item.estatus === 'narrador';
@@ -182,27 +190,23 @@ const imagenBase = require('../assets/imagenBase.jpeg');
       const esImagen = typeof item.mensaje === 'string' && item.mensaje.startsWith('http') &&
         (item.mensaje.endsWith('.jpg') || item.mensaje.endsWith('.jpeg') || item.mensaje.endsWith('.png') || item.mensaje.endsWith('.webp'));
 
-
-
-
-     // console.log(historialChat.map(m => m.id));
-     // console.log(historialChat.map(m => m.mensaje));
+      const avatarUrlOptimizada = optimizarAvatarUrl(
+        item.imagenPjUrl ? item.imagenPjUrl : item.imagenurl
+      );
 
       return (
-       <View key={`comp1-${Number(item.id) || index.toString()}`}style={estilos}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-           <Image
+        <View key={`comp1-${Number(item.id) || index.toString()}`} style={[estilos, { paddingRight: 6 }]}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, minWidth: 200 }}>
+            <Image
               source={
-                item.imagenPjUrl
-                  ? { uri: item.imagenPjUrl }
-                  : item.imagenurl
-                  ? { uri: item.imagenurl }
+                avatarUrlOptimizada
+                  ? { uri: avatarUrlOptimizada }
                   : imagenBase
               }
               style={{ width: 32, height: 32, borderRadius: 15 }}
             />
-            <Text style={{ color: 'aliceblue', fontSize: 12 }}>{item.nombre || item.nick }</Text>
-             <Text style={{ color: '#888', fontSize: 10, flex: 1, textAlign: 'right' }}>
+            <Text style={{ color: 'aliceblue', fontSize: 12 }}>{item.nombre || item.nick}</Text>
+            <Text style={{ color: '#888', fontSize: 10, flex: 1, textAlign: 'right' }}>
               {item.timestamp
                 ? new Date(Number(item.timestamp)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                 : ''}
@@ -210,26 +214,26 @@ const imagenBase = require('../assets/imagenBase.jpeg');
           </View>
           {esImagen ? (
             <TouchableOpacity onPress={() => setImagenAmpliada(item.mensaje)}>
-              <Image source={{ uri: item.mensaje }} style={{ width: 200, height: 200, borderRadius: 8, marginTop: 4 }} />
+              <Image source={{ uri: item.mensaje }} style={{ width: 200, height: 200, borderRadius: 8, marginTop: 4, marginRight: 2 }} />
             </TouchableOpacity>
           ) : (
-          <Text
-            style={[
-              estilos.includes(styles.mensajeNarrador)
-                ? { color: 'yellow' }
-                : estilos.includes(styles.mensajePropio)
-                ? { color: 'greenyellow' }
-                : { color: '#f2f2f2c4' },
-              { marginLeft: 30, minWidth: 100 }, 
-            ]}
-          >
-            {item.mensaje}
-          </Text>
+            <Text
+              style={[
+                estilos.includes(styles.mensajeNarrador)
+                  ? { color: 'yellow' }
+                  : estilos.includes(styles.mensajePropio)
+                    ? { color: 'greenyellow' }
+                    : { color: '#f2f2f2c4' },
+                { marginLeft: 30, minWidth: 180 },
+              ]}
+            >
+              {item.mensaje}
+            </Text>
           )}
         </View>
       );
     });
-  };
+  }, [historialChat, usuarioId, imagenBase]);
 
   return (
     <KeyboardAvoidingView
@@ -243,7 +247,7 @@ const imagenBase = require('../assets/imagenBase.jpeg');
         onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
         keyboardShouldPersistTaps="handled"
       >
-        {renderMensajes()}
+        {renderMensajesMemo}
       </ScrollView>
 
       <View style={styles.inputBox}>
@@ -276,52 +280,52 @@ const imagenBase = require('../assets/imagenBase.jpeg');
       </View>
 
       {/* Modal para imagen ampliada con zoom */}
-     {imagenAmpliada && (
-  <ScrollView
-    style={{
-      position: 'absolute',
-      top: 0, left: 0, right: 0, bottom: 0,
-      backgroundColor: 'rgba(0,0,0,0.95)',
-      zIndex: 999,
-    }}
-    contentContainerStyle={{
-      flexGrow: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingVertical: 60,
-    }}
-  >
-    <TouchableOpacity
-      onPress={() => {
-        setImagenAmpliada(null);
-        scale.value = 1;
-        savedScale.value = 1;
-      }}
-      style={{
-        position: 'absolute',
-        top: 40,
-        right: 20,
-        zIndex: 1000,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-        borderRadius: 20,
-        padding: 2,
-      }}
-    >
-      <MaterialCommunityIcons name="close-circle" size={36} color="white" />
-    </TouchableOpacity>
+      {imagenAmpliada && (
+        <ScrollView
+          style={{
+            position: 'absolute',
+            top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.95)',
+            zIndex: 999,
+          }}
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingVertical: 60,
+          }}
+        >
+          <TouchableOpacity
+            onPress={() => {
+              setImagenAmpliada(null);
+              scale.value = 1;
+              savedScale.value = 1;
+            }}
+            style={{
+              position: 'absolute',
+              top: 40,
+              right: 20,
+              zIndex: 1000,
+              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+              borderRadius: 20,
+              padding: 2,
+            }}
+          >
+            <MaterialCommunityIcons name="close-circle" size={36} color="white" />
+          </TouchableOpacity>
 
-    <PinchGestureHandler onGestureEvent={pinchHandler}>
-      <Animated.Image
-        source={{ uri: imagenAmpliada }}
-        style={[{
-          width: '90%',
-          height: 500, // Altura fija o relativa si preferís
-          resizeMode: 'contain',
-        }, animatedStyle]}
-      />
-    </PinchGestureHandler>
-  </ScrollView>
-)}
+          <PinchGestureHandler onGestureEvent={pinchHandler}>
+            <Animated.Image
+              source={{ uri: imagenAmpliada }}
+              style={[{
+                width: '90%',
+                height: 500, // Altura fija o relativa si preferís
+                resizeMode: 'contain',
+              }, animatedStyle]}
+            />
+          </PinchGestureHandler>
+        </ScrollView>
+      )}
 
     </KeyboardAvoidingView>
   );
@@ -331,7 +335,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#0d0d0d',
-    padding: 10,
+    padding: 13,
   },
   chatBox: {
     paddingBottom: 40,
@@ -344,17 +348,17 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     alignSelf: 'flex-start',
     maxWidth: '95%',
-      borderRadius: 8,
-      borderWidth:0.2,
-      borderColor:"white"
+    borderRadius: 8,
+    borderWidth: 0.2,
+    borderColor: "white"
   },
 
   mensajePropio: {
     backgroundColor: '#222',
     color: 'greenyellow',
     alignSelf: 'flex-end',
-    borderWidth:0.5,
-    borderColor:"cyan",
+    borderWidth: 0.5,
+    borderColor: "cyan",
     borderRadius: 8,
   },
 
@@ -362,9 +366,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#333',
     color: 'yellow',
     fontStyle: 'italic',
-    borderWidth:0.5,
-    borderColor:"cyan",
+    borderWidth: 0.5,
+    borderColor: "cyan",
     borderRadius: 8,
+    paddingRight: 2
   },
   inputBox: {
     flexDirection: 'row',

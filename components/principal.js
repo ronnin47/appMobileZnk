@@ -169,15 +169,16 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
 };
 
   const universoCelesteItems = [
-    { id: 'ranking', nombre: 'Ranking', imagen: require('../assets/ranker.jpg') },
-    { id: 'poderesUnicos', nombre: 'Poderes Unicos', imagen: require('../assets/tecnicaEspecial.jpg') },
-    { id: 'otro2', nombre: 'Mundo 2', imagen: require('../assets/imagenBase.jpeg') },
+    { id: 'ranking', nombre: 'Ranking', imagen:"https://res.cloudinary.com/dzul1hatw/image/upload/v1753555471/puerta_mo6o6p.jpg"},
+    { id: 'poderesUnicos', nombre: 'Poderes Unicos', imagen:"https://res.cloudinary.com/dzul1hatw/image/upload/v1753555606/tecnicaEspecial_e0glko.jpg" },
+    { id: 'reglas', nombre: 'Reglas', imagen: "https://res.cloudinary.com/dzul1hatw/image/upload/v1753280092/tesoros/tesoro_24.jpg" },
   ];
 
+
     const componentesManual = [
-    { id: 'objetosMagicos', nombre: 'Tesoros del universo', imagen: require('../assets/tesoros.jpg') },
-    { id: 'neotecnia', nombre: 'Neotecnia', imagen: require('../assets/neotecnia.jpg') },
-    { id: 'herbolaria', nombre: 'Herbolaria', imagen: require('../assets/herbolaria.jpg') },
+    { id: 'objetosMagicos', nombre: 'Tesoros del universo', imagen:"https://res.cloudinary.com/dzul1hatw/image/upload/v1753555060/tesoros_mmmtau.jpg"  },
+    { id: 'neotecnia', nombre: 'Neotecnia', imagen:"https://res.cloudinary.com/dzul1hatw/image/upload/v1753555392/neotecnia_yliqxe.jpg" },
+    { id: 'herbolaria', nombre: 'Herbolaria', imagen: "https://res.cloudinary.com/dzul1hatw/image/upload/v1753555998/herbolaria_tnhxjw.jpg" },
   ];
 
   return (

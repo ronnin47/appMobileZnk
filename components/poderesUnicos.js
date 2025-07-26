@@ -1,47 +1,67 @@
-import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, TextInput, ScrollView, StyleSheet, Image } from 'react-native';
+import React, { useContext, useState, useEffect, useMemo } from 'react';
+import { View, Text, TextInput, FlatList, StyleSheet, Image } from 'react-native';
 import { AuthContext } from './AuthContext';
-import { Estrellitas } from './estrellitas'; // Asegurate de tener este componente adaptado a React Native
+import { Estrellitas } from './estrellitas';
 
 export const PoderesUnicos = () => {
   const { coleccionPersonajes } = useContext(AuthContext);
   const [tecBuscar, setTecBuscar] = useState('');
-  const [poderesFiltrados, setPoderesFiltrados] = useState([]);
 
-  useEffect(() => {
-    const filtrarPoderes = () => {
-      const filtro = tecBuscar.toLowerCase();
+  // Memoizamos el filtrado para que solo se recalculen los datos cuando cambie el filtro o la colección
+  const poderesFiltrados = useMemo(() => {
+    const filtro = tecBuscar.toLowerCase();
 
-      const filtrados = coleccionPersonajes.reduce((acc, personaje) => {
-        const tecnicasActivas = (personaje.tecEspecial || []).filter(t => t.check === true);
-        if (tecnicasActivas.length === 0) return acc;
+    return coleccionPersonajes.reduce((acc, personaje) => {
+      const tecnicasActivas = (personaje.tecEspecial || []).filter(t => t.check === true);
+      if (tecnicasActivas.length === 0) return acc;
 
-        const coincideNombrePersonaje = personaje.nombre?.toLowerCase().includes(filtro);
-        const tecnicasFiltradas = tecnicasActivas.filter(t =>
-          t.nombre?.toLowerCase().includes(filtro)
-        );
+      const coincideNombrePersonaje = personaje.nombre?.toLowerCase().includes(filtro);
+      const tecnicasFiltradas = tecnicasActivas.filter(t =>
+        t.nombre?.toLowerCase().includes(filtro)
+      );
 
-        if (coincideNombrePersonaje || tecnicasFiltradas.length > 0) {
-          acc.push({
-            ...personaje,
-            tecEspecial: tecnicasFiltradas.length > 0 ? tecnicasFiltradas : tecnicasActivas,
-          });
-        }
+      if (coincideNombrePersonaje || tecnicasFiltradas.length > 0) {
+        acc.push({
+          ...personaje,
+          tecEspecial: tecnicasFiltradas.length > 0 ? tecnicasFiltradas : tecnicasActivas,
+        });
+      }
 
-        return acc;
-      }, []);
-
-      setPoderesFiltrados(filtrados);
-    };
-
-    filtrarPoderes();
+      return acc;
+    }, []);
   }, [tecBuscar, coleccionPersonajes]);
 
+  // Renderizado individual para FlatList
+  const renderPersonaje = ({ item }) => (
+    <View style={styles.card}>
+      <View style={styles.header}>
+        <View style={styles.nombreContenedor}>
+          {item.imagenurl && (
+            <Image source={{ uri: item.imagenurl }} style={styles.avatar} />
+          )}
+          <View style={styles.par}>
+            <Text style={styles.nombre}>{item.nombre || 'Desconocido'}</Text>
+            <View style={styles.estrellasAbajo}>
+              <Estrellitas ken={item.ken} />
+            </View>
+          </View>
+        </View>
+      </View>
+
+      {item.tecEspecial.map((tecnica, idx) => (
+        <View key={idx} style={styles.tecnica}>
+          <Text style={styles.tecnicaNombre}>{tecnica.nombre || 'Sin nombre'}</Text>
+          <Text style={styles.tecnicaDesc}>
+            <Text style={styles.label}>Descripción: </Text>
+            {tecnica.presentacion || 'No disponible'}
+          </Text>
+        </View>
+      ))}
+    </View>
+  );
+
   return (
-    <ScrollView
-      style={{ backgroundColor: '#111' }}
-      contentContainerStyle={styles.container}>
-    
+    <View style={{ flex: 1, backgroundColor: '#111' }}>
       <TextInput
         style={styles.input}
         value={tecBuscar}
@@ -51,43 +71,17 @@ export const PoderesUnicos = () => {
       />
 
       {poderesFiltrados.length > 0 ? (
-        poderesFiltrados.map((personaje, index) => (
-          <View key={index} style={styles.card}>
-            <View style={styles.header}>
-              <View style={styles.nombreContenedor}>
-                {personaje.imagenurl && (
-                  <Image
-                    source={{ uri: personaje.imagenurl }}
-                    style={styles.avatar}
-                  />
-                )}
-                    <View style={styles.par}>
-                    <Text style={styles.nombre}>{personaje.nombre || 'Desconocido'}</Text>
-                    <View style={styles.estrellasAbajo}>
-                    <Estrellitas ken={personaje.ken} />
-                    </View>
-                
-              </View>
-             
-              </View>
-             
-            </View>
-
-            {personaje.tecEspecial.map((tecnica, idx) => (
-              <View key={idx} style={styles.tecnica}>
-                <Text style={styles.tecnicaNombre}>{tecnica.nombre || 'Sin nombre'}</Text>
-                <Text style={styles.tecnicaDesc}>
-                  <Text style={styles.label}>Descripción: </Text>
-                  {tecnica.presentacion || 'No disponible'}
-                </Text>
-              </View>
-            ))}
-          </View>
-        ))
+        <FlatList
+          data={poderesFiltrados}
+          keyExtractor={(_, index) => index.toString()}
+          renderItem={renderPersonaje}
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+        />
       ) : (
         <Text style={styles.noEncontrado}>No se encontró la técnica especial buscada.</Text>
       )}
-    </ScrollView>
+    </View>
   );
 };
 
@@ -95,22 +89,13 @@ const styles = StyleSheet.create({
   container: {
     padding: 16,
     paddingBottom: 40,
-    backgroundColor: '#111',
-  },
-  titulo: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'yellow',
-    fontFamily: 'sans-serif',
-    marginBottom: 16,
-    textAlign: 'center',
   },
   input: {
     backgroundColor: '#222',
     color: '#fff',
     padding: 10,
     borderRadius: 8,
-    marginBottom: 20,
+    margin: 16,
     borderWidth: 1,
     borderColor: '#555',
   },
@@ -121,27 +106,22 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderWidth: 0.5,
     borderColor: 'cyan',
-    // Sombra en iOS
-  shadowColor: 'cyan',
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.4,
-  shadowRadius: 6,
-
-  // Sombra en Android
-  elevation: 16,
+    shadowColor: 'cyan',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+    elevation: 16,
   },
   header: {
-  flexDirection: 'column',  // ahora apila verticalmente
-  alignItems: 'start', // alineado al inicio (izquierda)
-  marginBottom: 8,
-},
-
-nombreContenedor: {
-  flexDirection: 'row',
-  alignItems: 'flex-start',
-  marginBottom: 4,   // espacio abajo para separar del bloque estrellas
-
-},
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+  },
+  nombreContenedor: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 4,
+  },
   avatar: {
     width: 120,
     height: 120,
@@ -178,16 +158,14 @@ nombreContenedor: {
     fontFamily: 'sans-serif',
   },
   estrellasAbajo: {
-  flexDirection: 'row',     // fila para las estrellas
-  maxWidth: 150,            // ancho máximo para que no desborden
-  overflow: 'hidden',
-},
-par: {
-  flexDirection: 'column',     // coloca los elementos en vertical
-  marginTop: 6,
-  marginLeft: 6,
-  alignItems: 'center',  
-     // centra horizontalmente
-}
-
+    flexDirection: 'row',
+    maxWidth: 150,
+    overflow: 'hidden',
+  },
+  par: {
+    flexDirection: 'column',
+    marginTop: 6,
+    marginLeft: 6,
+    alignItems: 'center',
+  },
 });

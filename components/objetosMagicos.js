@@ -16,7 +16,7 @@ export const ObjetosMagicos = () => {
 
   // Un único estado para manejar qué grupos están expandido
   const [expandidoKeys, setExpandidoKeys] = useState([]);
-const [grupoExpandido, setGrupoExpandido] = useState(null);
+  const [grupoExpandido, setGrupoExpandido] = useState(null);
   useEffect(() => {
     consumirObjetosMagicos();
     pedirPermisoGaleria();
