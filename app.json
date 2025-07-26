@@ -21,15 +21,17 @@
         "backgroundColor": "#000000"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.gorda.aplicaiconZnk"
+      "package": "com.gorda.aplicaiconZnk",
+      "versionCode": 2
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "extra": {
       "eas": {
-        "projectId": "063cd553-9949-44fc-9841-fcf8f5ca8f23"
+        "projectId": "4ffbb6bb-b7a9-4d47-9be6-4c6163a69e54"
       }
-    }
+    },
+    "owner": "gorda47"
   }
 }

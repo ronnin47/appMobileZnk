@@ -156,7 +156,7 @@ io.on('connection', (socket) => {
   });
 });
 
-
+/*
 //LOCAL HOST bbdd
 const pool = new Pool({
   user: 'postgres',
@@ -165,9 +165,9 @@ const pool = new Pool({
   password: '041183',
   port: 5432,
 });
+*/
 
 
-/*
 //base de datos en RENDER
 const pool = new Pool({
   user: 'gorda',
@@ -179,7 +179,7 @@ const pool = new Pool({
     rejectUnauthorized: false, // Esto es clave en conexiones con Render
   },
 });
-*/
+
 
 //PARA GAURDADO DE IMAGENES Y OBTENER URLS
 cloudinary.config({
