@@ -29,7 +29,7 @@ export const BarraKen = ({ pj, ken,setKen,kenActual,setKenActual }) => {
         let recuperado = -(parseInt(consumir));
         message = `✨ Recuperó ${recuperado} p de KEN         KEN: ${newValue} / ${ken}`;
       } else {
-        message = `  ✨ KEN: ${newValue} / ${ken}`;
+        message = `✨ KEN: ${newValue} / ${ken}`;
       }
 
       const msgEnviar = {

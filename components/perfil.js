@@ -170,13 +170,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#0d0d0d',
     flexGrow: 1,
     padding: 24,
-    paddingTop: 40,
+    paddingTop: 10,
     justifyContent: 'flex-start',
   },
   card: {
     backgroundColor: '#1a1a1a',
     borderRadius: 16,
-    padding: 20,
+    padding: 10,
     shadowColor: '#00FFC6',
     shadowOpacity: 0.2,
     shadowOffset: { width: 0, height: 6 },
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   botonGuardar: {
-    marginTop: 28,
+    marginTop: 24,
     backgroundColor: '#00FFC6',
     paddingVertical: 12,
     borderRadius: 10,
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
   },
    imageContainer: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 10,
   },
   imagen: {
     width: 120,

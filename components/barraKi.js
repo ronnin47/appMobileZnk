@@ -38,7 +38,7 @@ export const BarraKi = ({ pj,ki,setKi, kiActual,setKiActual,consumision,setConsu
         let recuperado = -(parseInt(consumir));
         message = `🔷 Recuperó ${recuperado} p de KI             KI: ${newValue} / ${ki}`;
       } else {
-        message = `  🔷 KI: ${newValue} / ${ki}`;
+        message = `🔷 KI: ${newValue} / ${ki}`;
       }
 
       const msgEnviar = {

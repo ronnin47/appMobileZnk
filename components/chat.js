@@ -168,7 +168,7 @@ export default function Chat() {
       setImagenPreview(imagenUri);
     }
   };
-
+/*
   // Aquí uso useMemo para memoizar la lista renderizada de mensajes
   const renderMensajesMemo = useMemo(() => {
     return historialChat.map((item, index) => {
@@ -234,7 +234,122 @@ export default function Chat() {
       );
     });
   }, [historialChat, usuarioId, imagenBase]);
+*/
 
+
+  
+  const renderMensajesMemo = useMemo(() => {
+  return historialChat.map((item, index) => {
+    const esPropio = item.usuarioId == usuarioId;
+    const esNarrador = item.estatus === 'narrador';
+    const anterior = historialChat[index - 1];
+
+    const mismoRemitenteAnterior =
+      anterior &&
+      anterior.usuarioId === item.usuarioId &&
+      anterior.nombre === item.nombre;
+
+    const mostrarAvatar = !mismoRemitenteAnterior;
+
+    const estilos = [styles.mensaje];
+    if (esNarrador) {
+      estilos.push(styles.mensajeNarrador);
+    } else if (esPropio) {
+      estilos.push(styles.mensajePropio);
+    }
+
+    estilos.push(esPropio ? styles.alinearDerecha : styles.alinearIzquierda);
+
+    const esImagen = typeof item.mensaje === 'string' &&
+      item.mensaje.startsWith('http') &&
+      (item.mensaje.endsWith('.jpg') ||
+        item.mensaje.endsWith('.jpeg') ||
+        item.mensaje.endsWith('.png') ||
+        item.mensaje.endsWith('.webp'));
+
+    const avatarUrlOptimizada = optimizarAvatarUrl(
+      item.imagenPjUrl ? item.imagenPjUrl : item.imagenurl
+    );
+
+    return (
+      <View
+        key={`comp1-${Number(item.id) || index.toString()}`}
+        style={[estilos, { paddingRight: 6, marginBottom: mostrarAvatar ? 6 : 2 }]}
+      >
+     
+        {mostrarAvatar ? (
+          <View style={{ flexDirection: 'row', alignItems: 'center', minWidth: 200 }}>
+            <Image
+              source={
+                avatarUrlOptimizada
+                  ? { uri: avatarUrlOptimizada }
+                  : imagenBase
+              }
+              style={{ width: 32, height: 32, borderRadius: 15, marginRight: 4 }}
+            />
+            <Text style={{ color: 'aliceblue', fontSize: 12 }}>
+              {item.nombre || item.nick}
+            </Text>
+            <Text style={{ color: '#888', fontSize: 10, flex: 1, textAlign: 'right' }}>
+              {item.timestamp
+                ? new Date(Number(item.timestamp)).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })
+                : ''}
+            </Text>
+          </View>
+        ) : (
+         
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 6 }}>
+            <Text style={{ color: 'aliceblue', fontSize: 12 }}>
+              {item.nombre || item.nick}
+            </Text>
+            <Text style={{ color: '#888', fontSize: 10 }}>
+              {item.timestamp
+                ? new Date(Number(item.timestamp)).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })
+                : ''}
+            </Text>
+          </View>
+        )}
+
+       
+        {esImagen ? (
+          <TouchableOpacity onPress={() => setImagenAmpliada(item.mensaje)}>
+            <Image
+              source={{ uri: item.mensaje }}
+              style={{
+                width: 200,
+                height: 200,
+                borderRadius: 8,
+                marginTop: 4,
+                marginRight: 2,
+              }}
+            />
+          </TouchableOpacity>
+        ) : (
+          <Text
+            style={[
+              estilos.includes(styles.mensajeNarrador)
+                ? { color: 'yellow' }
+                : estilos.includes(styles.mensajePropio)
+                  ? { color: 'greenyellow' }
+                  : { color: '#f2f2f2c4' },
+              { marginLeft: mostrarAvatar ? 30 : 6, minWidth: 180, marginTop: 2 },
+            ]}
+          >
+            {item.mensaje}
+          </Text>
+        )}
+      </View>
+    );
+  });
+}, [historialChat, usuarioId, imagenBase]);
+ 
+  
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

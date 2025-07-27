@@ -171,13 +171,13 @@ let partes = [];
 if (baset > 0) partes.push(`Base: ${baset}`);
 if (tirada.length > 0) partes.push(`D10 esfuerzo: ${tirada.join(", ")}`);
 if (d10.length > 0) partes.push(`D10 Ken: ${d10.join(", ")}`);
-if (d10Bono.length > 0) partes.push(`+D10: ${d10Bono.join(", ")}`);
+if (d10Bono.length > 0) partes.push(`D10 bono: ${d10Bono.join(", ")}`);
 if (d20.length > 0) partes.push(`D20: ${d20.join(", ")}`);
 if (d6.length > 0) partes.push(`D6: ${d6.join(", ")}`);
 if (d4.length > 0) partes.push(`D4: ${d4.join(", ")}`);
 if (d12.length > 0) partes.push(`D12: ${d12.join(", ")}`);
 
-const mensajeChat = `🎲 Tirada   ${partes.join("   ")}                               Total: ${total}`;
+const mensajeChat = `🎲 Tirada   ${partes.join("   ")}                        Total: ${total}`;
 
   
     const mensaje={

@@ -7,7 +7,6 @@ export const ChatTiradas = ({ p }) => {
   const { historialChat, setHistorialChat } = useContext(AuthContext);
   const imagenBase = require('../assets/imagenBase.jpeg');
 
-  // Función para optimizar URL de avatar (solo si es Cloudinary)
   const optimizarAvatarUrl = (url) => {
     if (!url) return null;
     if (url.includes('/upload/')) {
@@ -44,10 +43,13 @@ export const ChatTiradas = ({ p }) => {
                 msg.mensaje.endsWith('.png') ||
                 msg.mensaje.includes('cloudinary'));
 
-            // Optimizo solo la URL del avatar
             const avatarUrlOptimizada = optimizarAvatarUrl(
               msg.imagenPjUrl ? msg.imagenPjUrl : msg.imagenurl
             );
+
+            // Si el anterior es diferente o no existe, mostrar avatar
+            const anterior = historialChat[idx - 1];
+            const mostrarAvatar = !anterior || anterior.idpersonaje !== msg.idpersonaje;
 
             return (
               <View
@@ -67,14 +69,18 @@ export const ChatTiradas = ({ p }) => {
                 }}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <Image
-                    source={
-                      avatarUrlOptimizada
-                        ? { uri: avatarUrlOptimizada }
-                        : imagenBase
-                    }
-                    style={{ width: 32, height: 32, borderRadius: 15 }}
-                  />
+                  {mostrarAvatar ? (
+                    <Image
+                      source={
+                        avatarUrlOptimizada
+                          ? { uri: avatarUrlOptimizada }
+                          : imagenBase
+                      }
+                      style={{ width: 32, height: 32, borderRadius: 15 }}
+                    />
+                  ) : (
+                    <View style={{ width: 0, height: 0}} /> // espacio reservado
+                  )}
                   <Text
                     style={[
                       styles.textoHistorial,
@@ -101,14 +107,14 @@ export const ChatTiradas = ({ p }) => {
                   />
                 ) : (
                   <Text
-                    style={[
-                      styles.textoHistorial,
-                      esPropio && styles.mensajePropio,
-                      { marginLeft: 40 },
-                    ]}
-                  >
-                    {msg.mensaje}
-                  </Text>
+                      style={[
+                        styles.textoHistorial,
+                        esPropio && styles.mensajePropio,
+                        { marginLeft: mostrarAvatar ? 15 : 15 },
+                      ]}
+                    >
+                      {msg.mensaje}
+                    </Text>
                 )}
               </View>
             );
@@ -157,4 +163,3 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
 });
-
