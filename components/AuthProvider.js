@@ -52,13 +52,27 @@ const [cargandoNotas, setCargandoNotas] = useState(true);
 
 const loadData = async () => {
   try {
-    const token = await AsyncStorage.getItem('userToken');
-    const estatus = await AsyncStorage.getItem('estatus');
-    const email = await AsyncStorage.getItem('email');
-    const contrasenia = await AsyncStorage.getItem('contrasenia');
-    const nick = await AsyncStorage.getItem('nick');
-    const imagenurl = await AsyncStorage.getItem('imagenurl');
-    const imagencloudid = await AsyncStorage.getItem('imagencloudid');
+    const keys = [
+      'userToken',
+      'estatus',
+      'email',
+      'contrasenia',
+      'nick',
+      'imagenurl',
+      'imagencloudid',
+      'userId'
+    ];
+
+    const result = await AsyncStorage.multiGet(keys);
+    const data = Object.fromEntries(result);
+
+    const token = data.userToken;
+    const estatus = data.estatus;
+    const email = data.email;
+    const contrasenia = data.contrasenia;
+    const nick = data.nick;
+    const imagenurl = data.imagenurl;
+    const imagencloudid = data.imagencloudid;
 
     if (token) {
       setUserToken(token);
@@ -69,8 +83,7 @@ const loadData = async () => {
       setImagenurl(imagenurl);
       setImagencloudid(imagencloudid);
 
-      const usuarioIdStr = await AsyncStorage.getItem('userId');
-      const usuarioId = usuarioIdStr ? parseInt(usuarioIdStr, 10) : null;
+      const usuarioId = data.userId ? parseInt(data.userId, 10) : null;
 
       if (usuarioId) {
         const response = await axios.get(`${API_BASE_URL}/consumirPersonajesUsuario`, {
@@ -92,11 +105,11 @@ const loadData = async () => {
     }
   } catch (e) {
     console.log('Error loading data:', e);
-      console.log('Error loading data:', e.response?.data || e.message || e);
-  Alert.alert(
-    'Error',
-    e.response?.data?.error || 'No se pudo cargar el usuario'
-  );
+    console.log('Error loading data:', e.response?.data || e.message || e);
+    Alert.alert(
+      'Error',
+      e.response?.data?.error || 'No se pudo cargar el usuario'
+    );
     setUserToken(null);
     setPersonajes([]);
     setEstatus(null);
@@ -104,7 +117,6 @@ const loadData = async () => {
     setIsLoading(false);
   }
 };
-
 useEffect(() => {
   loadData(); // al montar la app
 }, []);
@@ -240,27 +252,6 @@ useEffect(() => {
     socket.off('chat-chat', handleMensaje);
   };
 }, []);
-
-/*
-useEffect(() => {
-  if (!userToken) return;
-
-  socket.emit('solicitar-historial');
-
-  const handleHistorial = (mensajes) => {
-    if (Array.isArray(mensajes)) {
-      setHistorialChat(mensajes);
-    }
-  };
-
-  socket.off('historial-chat');
-  socket.on('historial-chat', handleHistorial);
-
-  return () => {
-    socket.off('historial-chat', handleHistorial);
-  };
-}, [userToken]);
-*/
 
 
 useEffect(() => {
@@ -503,6 +494,7 @@ const toggleFavorito = async (idPersonaje) => {
         setPjSeleccionado,
         notasUsuario,
         setNotasUsuario,
+        loadData,
       }}
     >
       {children}

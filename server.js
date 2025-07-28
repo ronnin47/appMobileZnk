@@ -1002,6 +1002,9 @@ app.put('/updateUsuarios/:usuarioId', async (req, res) => {
   }
 });
 
+
+
+
 //consmumir objetos ok!!
 app.get('/consumirObjetosMagicos', async (req, res) => {
   try {
@@ -1175,6 +1178,379 @@ app.delete('/deleteObjetoMagico/:idobjeto', async (req, res) => {
   } catch (error) {
     console.error('Error al eliminar objeto mágico:', error);
     res.status(500).json({ error: 'Error al eliminar objeto mágico.' });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+//consmumir dispositivos Neo 
+app.get('/consumirObjetosNeo', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT *
+      FROM dispositivos
+    `);
+
+    res.status(200).json({ objetosNeo: result.rows });
+  } catch (error) {
+    console.error('Error al consumir dispositivos Neotecnicos:', error);
+    res.status(500).json({ error: 'Error interno al obtener dispositivos Neotecnicos' });
+  }
+});
+
+//OK
+app.post('/insertObjetoNeo', async (req, res) => {
+
+  console.log(" red : ",req.body)
+  const {
+    nombre, rareza, nivel, costeVentaja, precio, descripcion, sistema, imagen
+  } = req.body;
+
+  try {
+    // 1. Insertar personaje sin imagenurl
+    const query = `
+      INSERT INTO dispositivos (
+        nombre, rareza, nivel, "costeVentaja", precio, descripcion, sistema
+      )
+      VALUES (
+        $1, $2, $3, $4, $5, $6, $7
+      )
+      RETURNING idobjeto
+    `;
+
+    const values = [
+      nombre, rareza, nivel, costeVentaja, precio, descripcion, sistema
+    ];
+
+    const result = await pool.query(query, values);
+    const newId = result.rows[0].idobjeto;
+
+    let imageUrl = null;
+
+    if (imagen) {
+      const matches = imagen.match(/^data:image\/(\w+);base64,(.+)$/);
+      if (!matches) return res.status(400).json({ error: 'Imagen base64 inválida.' });
+
+      const ext = matches[1];
+      const data = matches[2];
+
+      // 2. Subir la imagen a Cloudinary
+      const uploadResult = await cloudinary.uploader.upload(`data:image/${ext};base64,${data}`, {
+        folder: 'dispositivos',
+        public_id: `dispositivo_${newId}`,
+        overwrite: true,
+      });
+
+      imageUrl = uploadResult.secure_url;
+      const imageCloudId = uploadResult.public_id;
+
+      // 3. Actualizar la URL y el ID cloud en la base de datos
+      await pool.query(
+        'UPDATE dispositivos SET imagenurl = $1, imagencloudid = $2 WHERE idobjeto = $3',
+        [imageUrl, imageCloudId, newId]
+      );
+    }
+
+    // 4. Responder con éxito y URL
+    res.status(201).json({
+      message: 'dispositivo creado exitosamente.',
+      idobjeto: newId,
+      imagenurl: imageUrl,
+    });
+
+  } catch (err) {
+    console.error('Error al insertar dispositivo Neotecnico nuevo:', err);
+    res.status(500).json({ error: 'Error al insertar dispositivo Neotecnico nuevo.' });
+  }
+});
+
+//ok!!
+app.put('/updateObjetoNeo/:id', async (req, res) => {
+  const { id } = req.params;
+  const {
+    nombre,
+    rareza,
+    nivel,
+    costeVentaja,
+    precio,
+    descripcion,
+    sistema,
+    imagen,
+  } = req.body;
+
+  try {
+    let imageUrl = null;
+    let imageCloudId = null;
+
+    // Si viene una nueva imagen en base64, subirla a Cloudinary
+    if (imagen && imagen.startsWith('data:image/')) {
+      const matches = imagen.match(/^data:image\/(\w+);base64,(.+)$/);
+      if (!matches) return res.status(400).json({ error: 'Imagen base64 inválida.' });
+
+      const ext = matches[1];
+      const data = matches[2];
+
+      const uploadResult = await cloudinary.uploader.upload(`data:image/${ext};base64,${data}`, {
+        folder: 'dispositivos',
+        public_id: `dispositivo_${id}`,
+        overwrite: true,
+      });
+
+      imageUrl = uploadResult.secure_url;
+      imageCloudId = uploadResult.public_id;
+    }
+
+    // Armar la query de actualización (incluye imagen si se subió)
+    let updateQuery = `
+      UPDATE dispositivos SET
+        nombre = $1,
+        rareza = $2,
+        nivel = $3,
+        "costeVentaja" = $4,
+        precio = $5,
+        descripcion = $6,
+        sistema = $7
+    `;
+    const updateValues = [
+      nombre,
+      rareza,
+      nivel,
+      costeVentaja,
+      precio,
+      descripcion,
+      sistema,
+    ];
+
+    if (imageUrl) {
+      updateQuery += `, imagenurl = $8, imagencloudid = $9`;
+      updateValues.push(imageUrl, imageCloudId);
+    }
+
+    updateQuery += ` WHERE idobjeto = $${updateValues.length + 1}`;
+    updateValues.push(id);
+
+    await pool.query(updateQuery, updateValues);
+
+    res.json({ message: 'Dispositivo Neotecnico actualizado exitosamente.' });
+
+  } catch (err) {
+    console.error('Error al actualizar dispositivo Neotecnico:', err);
+    res.status(500).json({ error: 'Error al actualizar Dispositivo Neotecnico.' });
+  }
+});
+
+//ok!!
+app.delete('/deleteObjetoNeo/:idobjeto', async (req, res) => {
+  const { idobjeto } = req.params;
+    //console.log('Intentando eliminar objeto con id:', idobjeto);
+
+  try {
+    // Opcional: verificar que el objeto exista antes de eliminar
+
+    const deleteQuery = 'DELETE FROM dispositivos WHERE idobjeto = $1';
+    const result = await pool.query(deleteQuery, [idobjeto]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Dispositivo Neotecnico no encontrado.' });
+    }
+
+    res.json({ message: 'Dispositivo Neotecnico eliminado correctamente.' });
+  } catch (error) {
+    console.error('Error al eliminar Dispositivo Neotecnico:', error);
+    res.status(500).json({ error: 'Error al eliminar Dispositivo Neotecnico.' });
+  }
+});
+
+
+
+
+
+
+
+
+
+//consmumir elementos Herbolaria
+app.get('/consumirObjetosH', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT *
+      FROM elementos
+    `);
+
+    res.status(200).json({ objetosH: result.rows });
+  } catch (error) {
+    console.error('Error al consumir elementos de Herbolaria:', error);
+    res.status(500).json({ error: 'Error interno al obtener elementos de Herbolaria' });
+  }
+});
+
+
+app.post('/insertObjetoH', async (req, res) => {
+
+  console.log(" red : ",req.body)
+  const {
+    nombre, rareza, nivel, costeVentaja, precio, descripcion, sistema, imagen
+  } = req.body;
+
+  try {
+    // 1. Insertar personaje sin imagenurl
+    const query = `
+      INSERT INTO elementos (
+        nombre, rareza, nivel, "costeVentaja", precio, descripcion, sistema
+      )
+      VALUES (
+        $1, $2, $3, $4, $5, $6, $7
+      )
+      RETURNING idobjeto
+    `;
+
+    const values = [
+      nombre, rareza, nivel, costeVentaja, precio, descripcion, sistema
+    ];
+
+    const result = await pool.query(query, values);
+    const newId = result.rows[0].idobjeto;
+
+    let imageUrl = null;
+
+    if (imagen) {
+      const matches = imagen.match(/^data:image\/(\w+);base64,(.+)$/);
+      if (!matches) return res.status(400).json({ error: 'Imagen base64 inválida.' });
+
+      const ext = matches[1];
+      const data = matches[2];
+
+      // 2. Subir la imagen a Cloudinary
+      const uploadResult = await cloudinary.uploader.upload(`data:image/${ext};base64,${data}`, {
+        folder: 'elementos',
+        public_id: `elemento_${newId}`,
+        overwrite: true,
+      });
+
+      imageUrl = uploadResult.secure_url;
+      const imageCloudId = uploadResult.public_id;
+
+      // 3. Actualizar la URL y el ID cloud en la base de datos
+      await pool.query(
+        'UPDATE elementos SET imagenurl = $1, imagencloudid = $2 WHERE idobjeto = $3',
+        [imageUrl, imageCloudId, newId]
+      );
+    }
+
+    // 4. Responder con éxito y URL
+    res.status(201).json({
+      message: 'elemento de Herbolaria creado exitosamente.',
+      idobjeto: newId,
+      imagenurl: imageUrl,
+    });
+
+  } catch (err) {
+    console.error('Error al insertar elemento de Herbolaria nuevo:', err);
+    res.status(500).json({ error: 'Error al insertar elemento de Herbolaria nuevo.' });
+  }
+});
+
+//ok!!
+app.put('/updateObjetoH/:id', async (req, res) => {
+  const { id } = req.params;
+  const {
+    nombre,
+    rareza,
+    nivel,
+    costeVentaja,
+    precio,
+    descripcion,
+    sistema,
+    imagen,
+  } = req.body;
+
+  try {
+    let imageUrl = null;
+    let imageCloudId = null;
+
+    // Si viene una nueva imagen en base64, subirla a Cloudinary
+    if (imagen && imagen.startsWith('data:image/')) {
+      const matches = imagen.match(/^data:image\/(\w+);base64,(.+)$/);
+      if (!matches) return res.status(400).json({ error: 'Imagen base64 inválida.' });
+
+      const ext = matches[1];
+      const data = matches[2];
+
+      const uploadResult = await cloudinary.uploader.upload(`data:image/${ext};base64,${data}`, {
+        folder: 'elementos',
+        public_id: `elemento_${id}`,
+        overwrite: true,
+      });
+
+      imageUrl = uploadResult.secure_url;
+      imageCloudId = uploadResult.public_id;
+    }
+
+    // Armar la query de actualización (incluye imagen si se subió)
+    let updateQuery = `
+      UPDATE elementos SET
+        nombre = $1,
+        rareza = $2,
+        nivel = $3,
+        "costeVentaja" = $4,
+        precio = $5,
+        descripcion = $6,
+        sistema = $7
+    `;
+    const updateValues = [
+      nombre,
+      rareza,
+      nivel,
+      costeVentaja,
+      precio,
+      descripcion,
+      sistema,
+    ];
+
+    if (imageUrl) {
+      updateQuery += `, imagenurl = $8, imagencloudid = $9`;
+      updateValues.push(imageUrl, imageCloudId);
+    }
+
+    updateQuery += ` WHERE idobjeto = $${updateValues.length + 1}`;
+    updateValues.push(id);
+
+    await pool.query(updateQuery, updateValues);
+
+    res.json({ message: 'Elemento de Herbolaria actualizado exitosamente.' });
+
+  } catch (err) {
+    console.error('Error al actualizar elemento de Herbolaria:', err);
+    res.status(500).json({ error: 'Error al actualizar elemento de Herbolaria.' });
+  }
+});
+
+//ok!!
+app.delete('/deleteObjetoH/:idobjeto', async (req, res) => {
+  const { idobjeto } = req.params;
+    //console.log('Intentando eliminar objeto con id:', idobjeto);
+
+  try {
+    // Opcional: verificar que el objeto exista antes de eliminar
+
+    const deleteQuery = 'DELETE FROM elementos WHERE idobjeto = $1';
+    const result = await pool.query(deleteQuery, [idobjeto]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Elemento de Herbolaria no encontrado.' });
+    }
+
+    res.json({ message: 'Elemento de Herbolaria eliminado correctamente.' });
+  } catch (error) {
+    console.error('Error al eliminar elemento de Herbolaria:', error);
+    res.status(500).json({ error: 'Error al eliminar elemento de Herbolaria.' });
   }
 });
 
