@@ -50,7 +50,11 @@ const [cargandoNotas, setCargandoNotas] = useState(true);
 }, [userToken]);
 
 
+const esperar = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 const loadData = async () => {
+  const inicio = Date.now();
+
   try {
     const keys = [
       'userToken',
@@ -96,7 +100,7 @@ const loadData = async () => {
 
         setPersonajes(coleccion);
       } else {
-        setPersonajes([]); // usuario sin ID válido
+        setPersonajes([]);
       }
     } else {
       setUserToken(null);
@@ -104,19 +108,23 @@ const loadData = async () => {
       setEstatus(null);
     }
   } catch (e) {
-    console.log('Error loading data:', e);
     console.log('Error loading data:', e.response?.data || e.message || e);
-    Alert.alert(
-      'Error',
-      e.response?.data?.error || 'No se pudo cargar el usuario'
-    );
+    Alert.alert('Error', e.response?.data?.error || 'No se pudo cargar el usuario');
     setUserToken(null);
     setPersonajes([]);
     setEstatus(null);
   } finally {
+    const transcurrido = Date.now() - inicio;
+    const restante = 6000 - transcurrido;
+
+    if (restante > 0) {
+      await esperar(restante);
+    }
+
     setIsLoading(false);
   }
 };
+
 useEffect(() => {
   loadData(); // al montar la app
 }, []);
