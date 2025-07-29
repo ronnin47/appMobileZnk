@@ -1,10 +1,10 @@
 import { useNavigationState } from '@react-navigation/native';
-import React, { useContext,useEffect,useState } from 'react';
+import React, { useContext,useEffect,useState,useRef } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Image, Text, View, StyleSheet, Alert } from 'react-native';
+import { Image, Text, View, StyleSheet, Alert ,ImageBackground, Animated,} from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import { AuthContext } from './components/AuthContext'; // <-- IMPORTAR EL CONTEXTO
 import { ActivityIndicator, Provider as PaperProvider } from 'react-native-paper';
@@ -81,15 +81,66 @@ const MainStack = () => {
    //Alert.alert("DEBUG", `MainStack: isLoading=${isLoading}, token=${userToken}`);
 
   
-   if (isLoading) {
-   // Alert.alert("DEBUG", "Entró al isLoading === true");
-    return (
-      <View style={{flex:1, justifyContent:'center', alignItems:'center', backgroundColor:'black'}}>
-         <ActivityIndicator size="large" color="cyan" />
-        <Text style={{color:'white'}}>No te rindas...</Text>
+
+const translateY = useRef(new Animated.Value(0)).current;
+
+useEffect(() => {
+  Animated.loop(
+    Animated.sequence([
+      Animated.timing(translateY, {
+        toValue: -800, // valor alto para subir todo el texto
+        duration: 40000,
+        useNativeDriver: true,
+      }),
+      Animated.delay(1000),
+      Animated.timing(translateY, {
+        toValue: 0,
+        duration: 0,
+        useNativeDriver: true,
+      }),
+    ])
+  ).start();
+}, []);
+
+const textoCarga = `
+Pero las castas seguían enviando hordas, y los mismísimos hijos mayores de los señores oscuros comenzaron a llegar uno tras otro.
+
+Las luchas de Susanowo eran cada vez más riesgosas, dejándolo casi al borde de la aniquilación en una oportunidad.
+
+Amaterasu deseaba que aquellos que llevarían las marcas del destino —las futuras estrellas— nacieran en un lugar apacible.
+
+Eran la única esperanza de poder darle a todos los seres, nuevamente, una vida armoniosa.
+`;
+
+if (isLoading) {
+  return (
+    <ImageBackground
+      source={{ uri: 'https://res.cloudinary.com/dzul1hatw/image/upload/v1753555471/puerta_mo6o6p.jpg' }}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.overlay}>
+          <View style={{ height:"95%", overflow: 'hidden', width: '100%', marginTop: 60, }}>
+             <Animated.View
+          style={{
+            transform: [{ translateY }],
+            width: '90%',
+            marginTop: 30,
+          }}
+        >
+          <Text style={styles.loadingText}>
+            {textoCarga}
+          </Text>
+        </Animated.View>
+
+          </View>
+        
+       
+        <ActivityIndicator size="large" color="cyan" />
       </View>
-    );
-  }
+    </ImageBackground>
+  );
+}
 
   return (
     <>
@@ -295,6 +346,36 @@ const styles = StyleSheet.create({
   nav:{
     flexDirection:"row",
     alignItems:"center",
-  }
+  },
+background: {
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center',
+  padding:20,
+},
+
+overlay: {
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center',
+  paddingHorizontal: 40,
+  backgroundColor: 'rgba(0, 0, 0, 0.6)',
+  paddingBottom:60,
+  borderRadius:15,
+  borderWidth:0.4,
+  borderColor:"gold"
+},
+
+loadingText: {
+  color: 'gold',
+  fontSize: 16,
+  textAlign: 'center',
+  lineHeight: 28,
+  fontFamily: 'System',
+  textShadowColor: 'rgba(0, 0, 0, 0.75)',  // sombra negra semitransparente
+  textShadowOffset: { width: 1, height: 1 }, // desplazamiento de la sombra
+  textShadowRadius: 2,                      // difuminado de la sombra
+  fontWeight: '600',                        // un poco más grueso pero no muy pesado
+},
   
 });

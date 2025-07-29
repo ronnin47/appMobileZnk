@@ -199,11 +199,12 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 10,
   },
-  name: {
-    color: 'yellow',
-    fontSize: 18,
-    marginTop: 5,
-  },
+name: {
+  color: 'yellow',
+  fontSize: 18,
+  marginTop: 5,
+  textAlign: 'center',
+},
   domain: {
     color: 'white',
     fontSize: 14,
@@ -299,27 +300,3 @@ rankNumber: {
 },
 });
 
-/*
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-
-export const Ranking = () => {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Ranking</Text>
-    </View>
-  );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-});
-*/

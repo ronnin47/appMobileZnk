@@ -42,5 +42,6 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     maxWidth: 220, // Limita el espacio total disponible para las estrellas
     justifyContent: 'center',
+    marginTop:10,
   },
 });
