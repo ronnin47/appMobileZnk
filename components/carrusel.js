@@ -6,18 +6,85 @@ import {
   Image,
   StyleSheet,
   TouchableOpacity,
+  Pressable
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from './AuthContext';
+import * as Animatable from 'react-native-animatable';
 
 export const Carrusel = ({ personajes }) => {
   const { setPjSeleccionado } = useContext(AuthContext);
   const imagenBase = require('../assets/imagenBase.jpeg');
   const navigation = useNavigation();
+  const [animados, setAnimados] = useState({});
 
   const handlePress = (pj) => {
     setPjSeleccionado(pj.idpersonaje);
     navigation.navigate('PantallaDeslizable');
+  };
+
+  const renderItem = ({ item }) => {
+    const id = item.idpersonaje;
+    const animar = animados[id];
+
+    const onPress = () => {
+      setAnimados((prev) => ({ ...prev, [id]: true }));
+      setTimeout(() => {
+        setAnimados((prev) => ({ ...prev, [id]: false }));
+        handlePress(item);
+      }, 300); // espera un poco antes de navegar
+    };
+
+    return (
+      <Animatable.View
+        animation={animar ? 'swing' : undefined}
+        duration={1600}
+        useNativeDriver
+      >
+       
+
+        <Pressable
+          style={({ pressed }) => [
+              styles.card,
+              pressed && {
+              transform: [{ scale: 0.97 }],
+              opacity: 0.8,
+              borderWidth: 3,
+              padding:0.9,
+              borderColor: "white", // cyan
+              borderRadius: 6,
+              backgroundColor: '#0a0a0a', // un fondo oscuro elegante
+              shadowColor: '#00ffff',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.3,
+              shadowRadius: 6,
+              elevation: 6,
+            } 
+            ]}
+            onPress={onPress}
+          >
+          <ImageWrapper
+            uri={
+              item.imagen?.startsWith?.('data:image')
+                ? item.imagen
+                : item.imagenurl
+            }
+            fallback={imagenBase}
+          />
+          
+          <Text
+            style={styles.text}
+            numberOfLines={1}
+            adjustsFontSizeToFit={true}
+            minimumFontScale={0.5}
+            ellipsizeMode="tail"
+          >
+            {item.nombre}
+          </Text>
+          </Pressable>
+        
+      </Animatable.View>
+    );
   };
 
   return (
@@ -28,33 +95,9 @@ export const Carrusel = ({ personajes }) => {
         keyExtractor={(item) =>
           item.idpersonaje?.toString() || Math.random().toString()
         }
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            onPress={() => handlePress(item)}
-            style={styles.card}
-            activeOpacity={0.9}
-          >
-            <ImageWrapper
-              uri={
-                item.imagen?.startsWith?.('data:image')
-                  ? item.imagen
-                  : item.imagenurl
-              }
-              fallback={imagenBase}
-            />
-            <Text
-              style={styles.text}
-              numberOfLines={1}
-              adjustsFontSizeToFit={true}
-              minimumFontScale={0.5}
-              ellipsizeMode="tail"
-            >
-              {item.nombre}
-            </Text>
-          </TouchableOpacity>
-        )}
+        renderItem={renderItem}
         showsHorizontalScrollIndicator={false}
-        snapToInterval={136} // 120 imagen + 16 margen horizontal
+        snapToInterval={136}
         decelerationRate="fast"
         contentContainerStyle={styles.row}
         getItemLayout={(data, index) => ({

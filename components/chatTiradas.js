@@ -68,7 +68,7 @@ const timestampEntradaChat = useRef(Date.now());
             const mostrarAvatar = !anterior || anterior.idpersonaje !== msg.idpersonaje;
 
           const esReciente = Number(msg.timestamp) > timestampEntradaChat.current;
-const animacion = esReciente ? animacionPorTipo[msg.tipo] || 'fadeIn' : undefined;
+          const animacion = esReciente ? animacionPorTipo[msg.tipo] || 'fadeIn' : undefined;
 
 return (
   <Animatable.View

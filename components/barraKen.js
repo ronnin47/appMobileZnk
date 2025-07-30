@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View,Text, TextInput, TouchableOpacity, StyleSheet} from 'react-native';
+import { View,Text, TextInput, TouchableOpacity, StyleSheet,Pressable} from 'react-native';
 import { AuthContext } from './AuthContext';
 import socket from './socket';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -103,9 +103,18 @@ export const BarraKen = ({ pj, ken,setKen,kenActual,setKenActual }) => {
         end={{ x: 1, y: 1 }}
         style={styles.boton}
       >
-        <TouchableOpacity style={styles.botonInterno} onPress={consumirKen}>
-          <Text style={styles.botonTexto}>Consumir Ken</Text>
-        </TouchableOpacity>
+       <Pressable
+        style={({ pressed }) => [
+            styles.botonInterno,
+            pressed && { opacity: 0.8, backgroundColor: "white" }, // opacidad y color cuando presiona
+          ]}
+          onPress={consumirKen}
+        
+        >
+           <Text style={styles.botonTexto}>Consumir Ken</Text>
+        </Pressable>
+         
+       
     </LinearGradient>
   </View>
 

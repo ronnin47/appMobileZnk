@@ -153,7 +153,7 @@ export default function Chat() {
       const mensaje = activarTirada(input);
 
       //si el string del mensaje incluye # es de tipo tirada sino chat
-      console.log("",mensaje)
+      //console.log("",mensaje)
       const esTirada=mensaje.includes("🎲")
 
       const msgEnviar = {

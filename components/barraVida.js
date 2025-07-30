@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Animated } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Animated ,Pressable} from 'react-native';
 import { AuthContext } from './AuthContext';
 import socket from './socket';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -390,9 +390,16 @@ return (
       end={{ x: 1, y: 1 }}
       style={styles.boton}
     >
-      <TouchableOpacity style={styles.botonInterno} onPress={agregarDamage}>
+      <Pressable
+       style={({ pressed }) => [
+          styles.botonInterno,
+          pressed && { opacity: 0.8, backgroundColor: 'red'}, // opacidad y color cuando presiona
+        ]}
+        onPress={agregarDamage}
+       
+      >
         <Text style={styles.botonTexto}>Aplicar Daño</Text>
-      </TouchableOpacity>
+      </Pressable>
   </LinearGradient>
     </View>
   </View>
