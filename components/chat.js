@@ -27,7 +27,15 @@ export default function Chat() {
   const { historialChat, setHistorialChat, userToken, personajeActual, estatus, imagenurl, nick } = useContext(AuthContext);
   const imagenBase = require('../assets/imagenBase.jpeg');
   const usuarioId = userToken ? userToken.split("-")[1] : null;
-
+  const animacionPorTipo = {
+  'tirada': 'bounce',
+  'vida': 'rubberBand',
+  'ki': 'zoomIn',
+  'ken': 'zoomIn',
+  'imagen': 'zoomIn',
+  'chat': 'fadeIn',
+  
+};
   useEffect(() => {
     if (scrollViewRef.current) {
       scrollViewRef.current.scrollToEnd({ animated: true });
@@ -144,6 +152,10 @@ export default function Chat() {
     if (input.trim()) {
       const mensaje = activarTirada(input);
 
+      //si el string del mensaje incluye # es de tipo tirada sino chat
+      console.log("",mensaje)
+      const esTirada=mensaje.includes("🎲")
+
       const msgEnviar = {
         usuarioId: Number(usuarioId),
         idpersonaje: personajeActual?.idpersonaje || 0,
@@ -152,7 +164,7 @@ export default function Chat() {
         estatus: estatus,
         imagenurl: imagenurl || '',
         nick: nick || "",
-        tipo: "chat",
+       tipo: esTirada ? "tirada" : "chat",
       };
 
       socket.emit('chat-chat', msgEnviar);
@@ -276,11 +288,12 @@ export default function Chat() {
       item.imagenPjUrl ? item.imagenPjUrl : item.imagenurl
     );
     const esUltimo = index === historialChat.length - 1;
+    const animacion = esUltimo ? animacionPorTipo[item.tipo] || 'fadeIn' : undefined;
 
     return (
         <Animatable.View
-          animation={esUltimo ? 'rubberBand' : undefined}
-          duration={600}
+          animation={animacion}
+          duration={1000}
           easing="ease-out"
         key={`comp1-${Number(item.id) || index.toString()}`}
         style={[estilos, { paddingRight: 6, marginBottom: mostrarAvatar ? 6 : 2 }]}
@@ -359,6 +372,9 @@ export default function Chat() {
 }, [historialChat, usuarioId, imagenBase]);
  
   
+ 
+
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

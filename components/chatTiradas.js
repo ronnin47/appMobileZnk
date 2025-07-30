@@ -8,7 +8,7 @@ export const ChatTiradas = ({ p }) => {
   const scrollViewRef = useRef();
   const { historialChat, setHistorialChat } = useContext(AuthContext);
   const imagenBase = require('../assets/imagenBase.jpeg');
-
+const timestampEntradaChat = useRef(Date.now());
   const optimizarAvatarUrl = (url) => {
     if (!url) return null;
     if (url.includes('/upload/')) {
@@ -28,6 +28,20 @@ export const ChatTiradas = ({ p }) => {
       scrollViewRef.current.scrollToEnd({ animated: true });
     }
   }, []);
+
+// para tirada bounce 'rubberBand'
+//normalcito 'fadeIn'
+
+  const animacionPorTipo = {
+  'tirada': 'bounce',
+  'vida': 'rubberBand',
+  'ki': 'zoomIn',
+  'ken': 'zoomIn',
+  'imagen': 'zoomIn',
+  'chat': 'fadeIn',
+  
+};
+
 
   return (
     <View style={styles.panelHistorial}>
@@ -53,11 +67,12 @@ export const ChatTiradas = ({ p }) => {
             const anterior = historialChat[idx - 1];
             const mostrarAvatar = !anterior || anterior.idpersonaje !== msg.idpersonaje;
 
-           const esUltimo = idx === historialChat.length - 1;
+          const esReciente = Number(msg.timestamp) > timestampEntradaChat.current;
+const animacion = esReciente ? animacionPorTipo[msg.tipo] || 'fadeIn' : undefined;
 
 return (
   <Animatable.View
-    animation={esUltimo ? 'rubberBand' : undefined}
+     animation={animacion}
     duration={1200}
     easing="ease-out"
     key={`comp2-${Number(msg.id) || idx.toString()}`}

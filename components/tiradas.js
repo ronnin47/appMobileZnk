@@ -189,6 +189,7 @@ const mensajeChat = `🎲 Tirada   ${partes.join("   ")}                        
       estatus:estatus,
       imagenPjUrl:p.imagenurl || "",
       nick: nick || "",
+      tipo:"tirada",
     }
 
     //console.log("***TIRADAS emite**",mensaje)
