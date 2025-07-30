@@ -59,6 +59,7 @@ function normalizarMensaje(mensaje) {
     vidaActual: mensaje.vidaActual?.toString() ?? '',
     vidaTotal: mensaje.vidaTotal?.toString() ?? '',
     timestamp: Date.now(),
+    tipo: mensaje.tipo?.toString() ?? '',
   };
 }
 
@@ -109,8 +110,8 @@ io.on('connection', (socket) => {
           "usuarioId", idpersonaje, nombre, mensaje, estatus,
           imagenurl, "imagenPjUrl", nick,
           "kenActual", ken, "kiActual", ki,
-          "vidaActual", "vidaTotal", timestamp
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+          "vidaActual", "vidaTotal", timestamp, tipo
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
         RETURNING id
       `;
 
@@ -130,6 +131,7 @@ io.on('connection', (socket) => {
         msgNormalizado.vidaActual,
         msgNormalizado.vidaTotal,
         msgNormalizado.timestamp,
+        msgNormalizado.tipo,
       ]);
 
       msgNormalizado.id = rows[0].id;

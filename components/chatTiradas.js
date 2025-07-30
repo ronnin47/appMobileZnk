@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useContext } from 'react';
 import { View, ScrollView, Text, StyleSheet, Image } from 'react-native';
 import { AuthContext } from './AuthContext';
+import * as Animatable from 'react-native-animatable';
+
 
 export const ChatTiradas = ({ p }) => {
   const scrollViewRef = useRef();
@@ -51,73 +53,82 @@ export const ChatTiradas = ({ p }) => {
             const anterior = historialChat[idx - 1];
             const mostrarAvatar = !anterior || anterior.idpersonaje !== msg.idpersonaje;
 
-            return (
-              <View
-                key={`comp2-${Number(msg.id) || idx.toString()}`}
-                style={{
-                  marginBottom: 6,
-                  backgroundColor: esPropio ? "#222" : 'black',
-                  padding: 4,
-                  borderRadius: 10,
-                  borderWidth: esPropio ? 0.5 : 0.1,
-                  borderColor: esPropio ? "cyan" : 'cyan',
-                  shadowColor: esPropio ? 'white' : '#000',
-                  shadowOffset: { width: 0, height: 0 },
-                  shadowOpacity: esPropio ? 0.9 : 0.2,
-                  shadowRadius: esPropio ? 18 : 4,
-                  elevation: esPropio ? 18 : 4,
-                }}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  {mostrarAvatar ? (
-                    <Image
-                      source={
-                        avatarUrlOptimizada
-                          ? { uri: avatarUrlOptimizada }
-                          : imagenBase
-                      }
-                      style={{ width: 32, height: 32, borderRadius: 15 }}
-                    />
-                  ) : (
-                    <View style={{ width: 0, height: 0}} /> // espacio reservado
-                  )}
-                  <Text
-                    style={[
-                      styles.textoHistorial,
-                      esPropio && styles.mensajePropio,
-                    ]}
-                  >
-                    {msg.nombre}:
-                  </Text>
-                  <Text style={{ color: '#888', fontSize: 10, flex: 1, textAlign: 'right' }}>
-                    {msg.timestamp
-                      ? new Date(Number(msg.timestamp)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                      : ''}
-                  </Text>
-                </View>
+           const esUltimo = idx === historialChat.length - 1;
 
-                {esImagen ? (
-                  <Image
-                    source={{ uri: msg.mensaje }}
-                    style={[
-                      styles.imagenChat,
-                      esPropio && { alignSelf: 'flex-end' },
-                    ]}
-                    resizeMode="cover"
-                  />
-                ) : (
-                  <Text
-                      style={[
-                        styles.textoHistorial,
-                        esPropio && styles.mensajePropio,
-                        { marginLeft: mostrarAvatar ? 15 : 15 },
-                      ]}
-                    >
-                      {msg.mensaje}
-                    </Text>
-                )}
-              </View>
-            );
+return (
+  <Animatable.View
+    animation={esUltimo ? 'rubberBand' : undefined}
+    duration={1200}
+    easing="ease-out"
+    key={`comp2-${Number(msg.id) || idx.toString()}`}
+    style={{
+      marginBottom: 6,
+      backgroundColor: esPropio ? "#222" : 'black',
+      padding: 4,
+      borderRadius: 10,
+      borderWidth: esPropio ? 0.5 : 0.1,
+      borderColor: esPropio ? "cyan" : 'cyan',
+      shadowColor: esPropio ? 'white' : '#000',
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: esPropio ? 0.9 : 0.2,
+      shadowRadius: esPropio ? 18 : 4,
+      elevation: esPropio ? 18 : 4,
+    }}
+  >
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+      {mostrarAvatar ? (
+        <Image
+          source={
+            avatarUrlOptimizada
+              ? { uri: avatarUrlOptimizada }
+              : imagenBase
+          }
+          style={{ width: 32, height: 32, borderRadius: 15 }}
+        />
+      ) : (
+        <View style={{ width: 0, height: 0 }} />
+      )}
+      <Text
+        style={[
+          styles.textoHistorial,
+          esPropio && styles.mensajePropio,
+        ]}
+      >
+        {msg.nombre}:
+      </Text>
+      <Text style={{ color: '#888', fontSize: 10, flex: 1, textAlign: 'right' }}>
+        {msg.timestamp
+          ? new Date(Number(msg.timestamp)).toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            })
+          : ''}
+      </Text>
+    </View>
+
+    {esImagen ? (
+      <Image
+        source={{ uri: msg.mensaje }}
+        style={[
+          styles.imagenChat,
+          esPropio && { alignSelf: 'flex-end' },
+        ]}
+        resizeMode="cover"
+      />
+    ) : (
+      <Text
+        style={[
+          styles.textoHistorial,
+          esPropio && styles.mensajePropio,
+          { marginLeft: mostrarAvatar ? 15 : 15 },
+        ]}
+      >
+        {msg.mensaje}
+      </Text>
+    )}
+  </Animatable.View>
+);
+
           })
         )}
       </ScrollView>

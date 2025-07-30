@@ -43,6 +43,7 @@ export const BarraKen = ({ pj, ken,setKen,kenActual,setKenActual }) => {
         estatus:estatus,
         imagenPjUrl:p.imagenurl || "",
         nick: nick || "",
+        tipo: "ken",
       };
 
       socket.emit('chat-chat', msgEnviar);

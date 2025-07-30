@@ -288,7 +288,8 @@ const agregarDamage = async () => {
         mensaje: message,
         estatus:estatus, 
         imagenPjUrl:p.imagenurl || "",
-        nick: nick || "",           
+        nick: nick || "",        
+        tipo: "vida",   
     };
     
     socket.emit('chat-chat', msgEnviar);

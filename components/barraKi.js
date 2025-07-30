@@ -52,6 +52,7 @@ export const BarraKi = ({ pj,ki,setKi, kiActual,setKiActual,consumision,setConsu
         estatus:estatus,
         imagenPjUrl:p.imagenurl || "",
         nick: nick || "",
+        tipo: "ki",
       };
 
       socket.emit('chat-chat', msgEnviar);

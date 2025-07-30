@@ -16,6 +16,9 @@ import Animated, {
   useSharedValue,
 } from 'react-native-reanimated';
 
+import * as Animatable from 'react-native-animatable';
+
+
 export default function Chat() {
   const scrollViewRef = useRef();
   const [input, setInput] = useState('');
@@ -126,6 +129,7 @@ export default function Chat() {
           imagenBase64: `data:image/jpeg;base64,${imagenBase64}`,
           imagenurl: imagenurl || "",
           nick: nick || "",
+          tipo: "imagen",
         };
 
         socket.emit('chat-chat', mensajeImagen);
@@ -148,6 +152,7 @@ export default function Chat() {
         estatus: estatus,
         imagenurl: imagenurl || '',
         nick: nick || "",
+        tipo: "chat",
       };
 
       socket.emit('chat-chat', msgEnviar);
@@ -270,9 +275,13 @@ export default function Chat() {
     const avatarUrlOptimizada = optimizarAvatarUrl(
       item.imagenPjUrl ? item.imagenPjUrl : item.imagenurl
     );
+    const esUltimo = index === historialChat.length - 1;
 
     return (
-      <View
+        <Animatable.View
+          animation={esUltimo ? 'rubberBand' : undefined}
+          duration={600}
+          easing="ease-out"
         key={`comp1-${Number(item.id) || index.toString()}`}
         style={[estilos, { paddingRight: 6, marginBottom: mostrarAvatar ? 6 : 2 }]}
       >
@@ -344,7 +353,7 @@ export default function Chat() {
             {item.mensaje}
           </Text>
         )}
-      </View>
+      </Animatable.View>
     );
   });
 }, [historialChat, usuarioId, imagenBase]);
