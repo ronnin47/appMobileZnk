@@ -12,7 +12,7 @@ import { LoginScreen } from './components/login'; // Tu pantalla de Login
 import RegisterScreen from './components/registro';
 import Perfil from './components/perfil';
 import Principal from './components/principal';
-import Chat from './components/chat';
+import { PagerChat } from './components/pagerChat';
 import { PantallaDeslizable } from './components/pantallaDeslizable';
 import { AuthProvider } from './components/AuthProvider';
 import { Ranking } from './components/ranking';
@@ -327,7 +327,7 @@ const TabNavigator = () => {
       })}
     >
       <Tab.Screen name="Principal" component={Principal} options={{ title: 'Inicio' }} />
-      <Tab.Screen name="Chat" component={Chat} options={{ title: 'Chat' }} />
+      <Tab.Screen name="Chat" component={PagerChat} options={{ title: 'Chat' }} />
       <Tab.Screen name="Perfil" component={Perfil} options={{ title: 'Perfil' }} />
     
       

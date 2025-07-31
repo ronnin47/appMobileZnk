@@ -19,7 +19,7 @@ import Animated, {
 import * as Animatable from 'react-native-animatable';
 
 
-export default function Chat() {
+export default function Chat({tiradasGuardadas}) {
   const scrollViewRef = useRef();
   const [input, setInput] = useState('');
   const [imagenPreview, setImagenPreview] = useState(null);
@@ -71,56 +71,63 @@ export default function Chat() {
     transform: [{ scale: scale.value }],
   }));
 
-  const activarTirada = (mensaje) => {
-    if (!mensaje.includes('#')) return mensaje;
 
-    const partes = mensaje.split('#');
-    const textoAntes = partes[0].trim();
-    const contenidoTirada = partes.slice(1).join('#').trim();
 
-    const normalizado = contenidoTirada.replace(/\s+/g, '');
-    const regex = /([+-]?)(\d+)(d(\d+))?/gi;
+const activarTirada = (mensaje) => {
+  if (!mensaje.includes('#')) return mensaje;
 
-    let totalFinal = 0;
-    let resultadoTexto = '';
-    let match;
-    let esPrimero = true;
+  const partes = mensaje.split('#');
+  const textoAntes = partes[0].trim();
+  const resto = partes[1].trim();
 
-    while ((match = regex.exec(normalizado)) !== null) {
-      const signoStr = match[1] || '+';
-      const signo = signoStr === '-' ? -1 : 1;
-      const cantidad = parseInt(match[2], 10);
-      const esDado = !!match[3];
-      const caras = parseInt(match[4], 10);
+  // Separar la clave de tirada del posible añadido (ej. "+20+3d20")
+  const matchClaveYExtras = /^([^\s+]+(?:\s+[^\s+]+)*)(.*)$/i.exec(resto);
+  if (!matchClaveYExtras) return mensaje;
 
-      const prefix = esPrimero
-        ? ''
-        : signo === 1
-          ? '+ '
-          : '- ';
+  const claveTirada = matchClaveYExtras[1].trim().toLowerCase();
+  const extraFormula = (matchClaveYExtras[2] || '').replace(/\s+/g, '');
 
-      if (esDado) {
-        const tiradas = [];
-        for (let i = 0; i < cantidad; i++) {
-          const resultado = Math.floor(Math.random() * caras) + 1;
-          tiradas.push(resultado);
-        }
-        const suma = tiradas.reduce((a, b) => a + b, 0) * signo;
-        totalFinal += suma;
-        resultadoTexto += `${prefix}${cantidad}d${caras} → [${tiradas.join(', ')}] `;
-      } else {
-        const modificador = cantidad * signo;
-        totalFinal += modificador;
-        resultadoTexto += `${prefix}${Math.abs(modificador)} `;
+  const tiradaBase = tiradasGuardadas.find(t => t.nombre === claveTirada);
+  const formulaBase = tiradaBase?.tirada?.replace(/\s+/g, '') || claveTirada;
+
+  const formulaFinal = `${formulaBase}${extraFormula}`;
+
+  const regex = /([+-]?)(\d+)(d(\d+))?/gi;
+
+  let totalFinal = 0;
+  let resultadoTexto = '';
+  let match;
+  let esPrimero = true;
+
+  while ((match = regex.exec(formulaFinal)) !== null) {
+    const signoStr = match[1] || '+';
+    const signo = signoStr === '-' ? -1 : 1;
+    const cantidad = parseInt(match[2], 10);
+    const esDado = !!match[3];
+    const caras = parseInt(match[4], 10);
+
+    const prefix = esPrimero ? '' : signo === 1 ? '+ ' : '- ';
+
+    if (esDado) {
+      const tiradas = [];
+      for (let i = 0; i < cantidad; i++) {
+        const resultado = Math.floor(Math.random() * caras) + 1;
+        tiradas.push(resultado);
       }
-
-      esPrimero = false;
+      const suma = tiradas.reduce((a, b) => a + b, 0) * signo;
+      totalFinal += suma;
+      resultadoTexto += `${prefix}${cantidad}d${caras} → [${tiradas.join(', ')}] `;
+    } else {
+      const modificador = cantidad * signo;
+      totalFinal += modificador;
+      resultadoTexto += `${prefix}${Math.abs(modificador)} `;
     }
 
-    if (!resultadoTexto) return mensaje;
+    esPrimero = false;
+  }
 
-    return `🎲 ${textoAntes} ${resultadoTexto.trim()}\nTotal final: ${totalFinal}`;
-  };
+  return `🎲 ${textoAntes} "${claveTirada}" ${resultadoTexto.trim()}\nTotal final: ${totalFinal}`;
+};
 
   const enviar = async () => {
     if (imagenPreview) {
