@@ -17,6 +17,8 @@ import { Hechizos } from './hechizos';
 import { Historia } from './historia';
 import { TecnicaEspecial } from './tecEpecial';
 import { API_BASE_URL } from './config'; 
+import { LinearGradient } from 'expo-linear-gradient';
+
 
 export const FichaPersonaje = ({ pj, ki, setKi, fortaleza, setFortaleza, ken,setKen,eliminarPersonaje,vidaActual,kiActual,kenActual,setVidaActual,setKiActual,setKenActual,positiva,setPositiva,negativa,setNegativa,cicatriz,setCicatriz,consumision,setConsumision }) => {
   
@@ -623,7 +625,7 @@ const colorPlaceHolder="#888"
           </View>
       </View>
       <Text style={styles.label}>Convicción</Text>
-          <TextInput placeholder="Convicción" placeholderTextColor={colorPlaceHolder} keyboardType="default" multiline={true} style={styles.inputTextoConv} value={conviccion} onChangeText={setConviccion} />
+          <TextInput  placeholder="Convicción" placeholderTextColor={colorPlaceHolder} keyboardType="default" multiline={true} style={styles.inputTextoConv} value={conviccion} onChangeText={setConviccion} />
 
 
      
@@ -642,9 +644,19 @@ const colorPlaceHolder="#888"
         >
 
           <View style={{ marginTop: 12 }}>
-            <View style={styles.gridContainer}>
+            <LinearGradient
+               colors={['#aa6b270c', '#99e2e7e5']}// naranja a rojo anaranjado
+              style={[styles.gridContainer, {
+                padding: 10,
+                borderWidth: 1,
+                borderColor: 'gray',
+                marginBottom: 20,
+                borderRadius: 5,
+                paddingLeft:22
+              }]}
+>
                   <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Fuerza</Text>
+                    <Text style={styles.labelTronco}>Fuerza</Text>
                     <TextInput
                       keyboardType="default"
                       style={styles.inputNumero}
@@ -656,7 +668,7 @@ const colorPlaceHolder="#888"
                   </View>
 
                   <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Fortaleza</Text>
+                    <Text style={styles.labelTronco}>Fortaleza</Text>
                     <TextInput
                       keyboardType="default"
                       style={styles.inputNumero}
@@ -668,7 +680,7 @@ const colorPlaceHolder="#888"
                   </View>
 
                   <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Destreza</Text>
+                    <Text style={styles.labelTronco}>Destreza</Text>
                     <TextInput
                       keyboardType="default"
                       style={styles.inputNumero}
@@ -680,7 +692,7 @@ const colorPlaceHolder="#888"
                   </View>
 
                   <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Agilidad</Text>
+                    <Text style={styles.labelTronco}>Agilidad</Text>
                     <TextInput
                       keyboardType="default"
                       style={styles.inputNumero}
@@ -692,7 +704,7 @@ const colorPlaceHolder="#888"
                   </View>
 
                   <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Sabiduria</Text>
+                    <Text style={styles.labelTronco}>Sabiduria</Text>
                     <TextInput
                       keyboardType="default"
                       style={styles.inputNumero}
@@ -704,7 +716,7 @@ const colorPlaceHolder="#888"
                   </View>
 
                   <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Presencia</Text>
+                    <Text style={styles.labelTronco}>Presencia</Text>
                     <TextInput
                       keyboardType="default"
                       style={styles.inputNumero}
@@ -716,7 +728,7 @@ const colorPlaceHolder="#888"
                   </View>
 
                   <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Principio</Text>
+                    <Text style={styles.labelTronco}>Principio</Text>
                     <TextInput
                       keyboardType="default"
                       style={styles.inputNumero}
@@ -728,7 +740,7 @@ const colorPlaceHolder="#888"
                   </View>
 
                   <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Sentidos</Text>
+                    <Text style={styles.labelTronco}>Sentidos</Text>
                     <TextInput
                       keyboardType="default"
                       style={styles.inputNumero}
@@ -738,10 +750,24 @@ const colorPlaceHolder="#888"
                       placeholderTextColor={colorPlaceHolder}
                     />
                   </View>
-           </View>
+           </LinearGradient>
           
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <View style={{ flex: 1, marginRight: 8 }}>
+           <LinearGradient
+           colors={['#6857450c', '#99e2e7ea']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              paddingLeft: 15,
+              padding: 10,
+              borderRadius: 6,
+              borderWidth:0.3,
+              borderColor:"white",
+              borderRadius:5
+            }}
+>
+              <View style={{ flex: 1, marginRight: 8,  }}>
                 <Text style={styles.label}>Academisismo</Text><TextInput placeholder="Academisismo" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={academisismo} onChangeText={setAcademisismo} />
                 <Text style={styles.label}>Atletismo</Text><TextInput placeholder="Atletismo" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={atletismo} onChangeText={setAtletismo} />
                 <Text style={styles.label}>Mentir</Text><TextInput placeholder="Mentir" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={mentir} onChangeText={setMentir} />
@@ -882,7 +908,7 @@ const colorPlaceHolder="#888"
 
                 
               </View>
-            </View>
+            </LinearGradient>
           </View>
            
          
@@ -1059,7 +1085,7 @@ const styles = StyleSheet.create({
     fontSize: 14, // antes: 15
   },
   inputTextoConv: {
-  borderWidth: 1,
+  borderWidth: 0.5,
   borderColor: '#a16207',
   backgroundColor: '#1a1a1a',
   paddingVertical: 8,  // aumenta el padding vertical para más espacio interno
@@ -1070,6 +1096,7 @@ const styles = StyleSheet.create({
   fontSize: 14,
   minHeight: 60, // altura mínima, ajusta a lo que necesites
   textAlignVertical: 'top', // para que el texto empiece desde arriba
+  textAlign:"center"
 },
   inputNumero: {
     borderWidth: 1,
@@ -1081,6 +1108,7 @@ const styles = StyleSheet.create({
     marginBottom: 6, // antes: 10
     color: '#d1fae5',
     fontSize: 14, // antes: 15
+    width:"90%",
     fontWeight: '500',
   },
   gridContainer: {
@@ -1098,6 +1126,17 @@ const styles = StyleSheet.create({
     fontSize: 13, // antes: 14
     fontWeight: '600',
   },
+  labelTronco: {
+  color: '#fff200', // amarillo dorado
+  marginBottom: 2,
+  fontSize: 13,
+  fontWeight: 'bold',
+  letterSpacing: 0.5,
+  textShadowColor: 'rgba(0, 0, 0, 0.68)',
+  textShadowOffset: { width: 1, height: 1 },
+  textShadowRadius: 2,
+  textTransform: 'uppercase',
+},
   botonGuardar: {
   backgroundColor: '#28a745', // verde success estilo Bootstrap
   paddingVertical: 10,
@@ -1135,4 +1174,5 @@ inputTextoNombre: {
   // sombra Android
   elevation: 10,
 }, 
+
 });
