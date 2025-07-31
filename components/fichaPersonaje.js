@@ -760,6 +760,7 @@ const colorPlaceHolder="#888"
                 <TextInput
                   placeholder="Ingresa Armamento"
                   placeholderTextColor={colorPlaceHolder}
+                   keyboardType="default"
                   style={[styles.label, {  height: 19 ,marginTop: 0,marginBottom: 0, paddingTop:0, paddingBottom: 2 }]} 
                   value={apCombate}
                   onChangeText={setApCombate}
@@ -776,6 +777,7 @@ const colorPlaceHolder="#888"
                 <TextInput
                   placeholder="Ingresa Armamento"
                   placeholderTextColor={colorPlaceHolder}
+                   keyboardType="default"
                   style={[styles.label, { height: 19, marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 2 }]}
                   value={apCombate2}
                   onChangeText={setApCombate2}
@@ -792,6 +794,7 @@ const colorPlaceHolder="#888"
                 <TextInput
                   placeholder="Aptitud nueva"
                   placeholderTextColor={colorPlaceHolder}
+                   keyboardType="default"
                   style={[styles.label, { height: 19, marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 2 }]}
                   value={add3}
                   onChangeText={setAdd3}
@@ -808,6 +811,7 @@ const colorPlaceHolder="#888"
                 <TextInput
                   placeholder="Aptitud nueva"
                   placeholderTextColor={colorPlaceHolder}
+                   keyboardType="default"
                   style={[styles.label, { height: 19, marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 2 }]}
                   value={add4}
                   onChangeText={setAdd4}
@@ -826,20 +830,20 @@ const colorPlaceHolder="#888"
               </View>
 
               <View style={{ flex: 1, marginLeft: 8 }}>
-                <Text style={styles.label}>Alerta</Text><TextInput placeholder="Alerta" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={alerta} onChangeText={setAlerta} />
-                <Text style={styles.label}>Con Bakemono</Text><TextInput placeholder="Con Bakemono" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={conBakemono} onChangeText={setConBakemono} />
-                <Text style={styles.label}>Pilotear</Text><TextInput placeholder="Pilotear" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={pilotear} onChangeText={setPilotear} />
-                <Text style={styles.label}>Medicina</Text><TextInput placeholder="Medicina" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={medicina} onChangeText={setMedicina} />
-                <Text style={styles.label}>Sigilo</Text><TextInput placeholder="Sigilo" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={sigilo} onChangeText={setSigilo} />
-                <Text style={styles.label}>Con Esferas</Text><TextInput placeholder="Con Esferas" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={conEsferas} onChangeText={setConEsferas} />
-                <Text style={styles.label}>Forja</Text><TextInput placeholder="Forja" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={forja} onChangeText={setForja} />
-                <Text style={styles.label}>Con Demonio</Text><TextInput placeholder="Con Demonio" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={conDemonio} onChangeText={setConDemonio} />
-                <Text style={styles.label}>Manejo Blaster</Text><TextInput placeholder="Manejo Blaster" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={manejoBlaster} onChangeText={setManejoBlaster} />
-                <Text style={styles.label}>Trato Bakemono</Text><TextInput placeholder="Trato Bakemono" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={tratoBakemono} onChangeText={setTratoBakemono} />
-                <Text style={styles.label}>Med Vital</Text><TextInput placeholder="Med Vital" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={medVital} onChangeText={setMedVital} />
-                <Text style={styles.label}>Rayo</Text><TextInput placeholder="Rayo" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={rayo} onChangeText={setRayo} />
-                <Text style={styles.label}>Frío</Text><TextInput placeholder="Frío" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={frio} onChangeText={setFrio} />
-                <Text style={styles.label}>Corte</Text><TextInput placeholder="Corte" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={corte} onChangeText={setCorte} /> 
+                <Text style={styles.label}>Alerta</Text><TextInput placeholder="Alerta" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={alerta} onChangeText={setAlerta} />
+                <Text style={styles.label}>Con Bakemono</Text><TextInput placeholder="Con Bakemono" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={conBakemono} onChangeText={setConBakemono} />
+                <Text style={styles.label}>Pilotear</Text><TextInput placeholder="Pilotear" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={pilotear} onChangeText={setPilotear} />
+                <Text style={styles.label}>Medicina</Text><TextInput placeholder="Medicina" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={medicina} onChangeText={setMedicina} />
+                <Text style={styles.label}>Sigilo</Text><TextInput placeholder="Sigilo" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={sigilo} onChangeText={setSigilo} />
+                <Text style={styles.label}>Con Esferas</Text><TextInput placeholder="Con Esferas" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={conEsferas} onChangeText={setConEsferas} />
+                <Text style={styles.label}>Forja</Text><TextInput placeholder="Forja" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={forja} onChangeText={setForja} />
+                <Text style={styles.label}>Con Demonio</Text><TextInput placeholder="Con Demonio" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={conDemonio} onChangeText={setConDemonio} />
+                <Text style={styles.label}>Manejo Blaster</Text><TextInput placeholder="Manejo Blaster" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={manejoBlaster} onChangeText={setManejoBlaster} />
+                <Text style={styles.label}>Trato Bakemono</Text><TextInput placeholder="Trato Bakemono" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={tratoBakemono} onChangeText={setTratoBakemono} />
+                <Text style={styles.label}>Med Vital</Text><TextInput placeholder="Med Vital" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={medVital} onChangeText={setMedVital} />
+                <Text style={styles.label}>Rayo</Text><TextInput placeholder="Rayo" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={rayo} onChangeText={setRayo} />
+                <Text style={styles.label}>Frío</Text><TextInput placeholder="Frío" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={frio} onChangeText={setFrio} />
+                <Text style={styles.label}>Corte</Text><TextInput placeholder="Corte" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={corte} onChangeText={setCorte} /> 
 
 
 
