@@ -544,7 +544,7 @@ const colorPlaceHolder="#888"
       <TouchableOpacity style={styles.botonGuardar} onPress={guardarCambiosBBDD}>
         <Icon name="save" size={24} color="#00FF00" />
       </TouchableOpacity>
-    </View>
+          </View>
 
           <View style={styles.rowContainer}>
           <View style={styles.imageContainer}>
@@ -573,6 +573,8 @@ const colorPlaceHolder="#888"
         </View>
 
           </View>
+
+          
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10 }}>
           {/* Columna 1 */}
           <View style={{ flex: 1, marginRight: 10 }}>
@@ -624,8 +626,8 @@ const colorPlaceHolder="#888"
             />
           </View>
       </View>
-      <Text style={styles.label}>Convicción</Text>
-          <TextInput  placeholder="Convicción" placeholderTextColor={colorPlaceHolder} keyboardType="default" multiline={true} style={styles.inputTextoConv} value={conviccion} onChangeText={setConviccion} />
+      <Text style={[styles.label,{textAlign:"center"}]}>Convicción</Text>
+      <TextInput  placeholder="Convicción" placeholderTextColor={colorPlaceHolder} keyboardType="default" multiline={true} style={styles.inputTextoConv} value={conviccion} onChangeText={setConviccion} />
 
 
      
@@ -1084,19 +1086,24 @@ const styles = StyleSheet.create({
     color: '#e0e0e0',
     fontSize: 14, // antes: 15
   },
-  inputTextoConv: {
-  borderWidth: 0.5,
-  borderColor: '#a16207',
-  backgroundColor: '#1a1a1a',
-  paddingVertical: 8,  // aumenta el padding vertical para más espacio interno
-  paddingHorizontal: 6,
-  borderRadius: 6,
-  marginBottom: 6,
-  color: '#e0e0e0',
-  fontSize: 14,
-  minHeight: 60, // altura mínima, ajusta a lo que necesites
-  textAlignVertical: 'top', // para que el texto empiece desde arriba
-  textAlign:"center"
+ inputTextoConv: {
+  borderWidth: 0.3,
+  borderColor: 'white', // amarillo dorado
+backgroundColor: 'black' , // negro más profundo
+  paddingVertical: 10,
+  paddingHorizontal: 8,
+  borderRadius: 1,
+  marginBottom: 8,
+  color: '#e9e8e0ff', // amarillo claro más suave
+  fontSize: 16,
+  minHeight: 30,
+  textAlignVertical: 'top',
+  textAlign: "center",
+  fontStyle: 'italic',
+  fontWeight: '600',
+  textShadowColor: '#facc15',
+  textShadowOffset: { width: 0.2, height: 0.2 },
+  textShadowRadius: 2,
 },
   inputNumero: {
     borderWidth: 1,
