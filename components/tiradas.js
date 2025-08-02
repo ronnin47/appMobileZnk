@@ -1,6 +1,6 @@
 import React, { useContext, useState, useRef, useEffect,useMemo } from 'react';
 import { AuthContext } from './AuthContext';
-import { Dimensions,Animated, View,Text, TextInput, TouchableOpacity, StyleSheet, ScrollView,Image } from 'react-native';
+import { Dimensions,Animated, View,Text, TextInput, TouchableOpacity, StyleSheet, ScrollView,Image,Modal,Pressable,FlatList } from 'react-native';
 import { ChatTiradas } from './chatTiradas';
 import { BarraVida } from './barraVida';
 import { BarraKi } from './barraKi';
@@ -8,8 +8,12 @@ import { BarraKen } from './barraKen';
 import socket from './socket';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ActivityIndicator } from 'react-native';
+import { showMessage } from 'react-native-flash-message';
+import { Vibration } from 'react-native';
 
+import * as Animatable from 'react-native-animatable';
 
+import { TouchableWithoutFeedback, Keyboard } from 'react-native';
 
 const generarNumerosAzarSinRangoMin=(cantidad, rangoMax)=> {
   var numeros = [];
@@ -35,6 +39,13 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen,
             setCicatriz,
             consumision,
             setConsumision,
+
+
+
+          tiradasGuardadasPj,
+          setTiradasGuardadasPj,
+          agregarTiradaPj,
+          eliminarTiradasPj,
            }) => {
 
 
@@ -57,6 +68,7 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen,
 
 
 
+const botonAnimRef = useRef(null);
 
   const [valTirada, setValTirada] = useState("");
   const [sumaTirada, setSumaTirada] = useState("");
@@ -124,6 +136,8 @@ const personajesFavoritos = useMemo(() => {
   const tirarDados = () => {
     const principalValue = principal === "" ? 0 : parseInt(principal);
     const secundariaValue = secundaria === "" ? 0 : parseInt(secundaria);
+    const nombre = nombreTirada ? nombreTirada : "";
+
     let base = 1;
     if (principal == 0) {
       base = 0;
@@ -177,7 +191,7 @@ if (d6.length > 0) partes.push(`D6: ${d6.join(", ")}`);
 if (d4.length > 0) partes.push(`D4: ${d4.join(", ")}`);
 if (d12.length > 0) partes.push(`D12: ${d12.join(", ")}`);
 
-const mensajeChat = `🎲 Tirada   ${partes.join("   ")}                        Total: ${total}`;
+const mensajeChat = `🎲 Tirada  ${nombre?.trim() ? `"${nombre.toUpperCase()}"  ` : ""}  ${partes.join("   ")}                        Total: ${total}`;
 
   
     const mensaje={
@@ -194,6 +208,8 @@ const mensajeChat = `🎲 Tirada   ${partes.join("   ")}                        
 
     //console.log("***TIRADAS emite**",mensaje)
     socket.emit('chat-chat', mensaje);
+
+   setTiradaSeleccionada(null);
   };
 
 
@@ -266,8 +282,57 @@ const personajesOrdenados = useMemo(() => {
     });
   }, [pjSeleccionado, personajesOrdenados]);
 
+const [modalVisibleTirada, setModalVisibleTirada] = useState(false);
 
 
+
+
+const [nombreTirada, setNombreTirada] = useState('');
+const [tiradaSeleccionada, setTiradaSeleccionada] = useState(null);
+
+
+
+const setearTiradas = (item) => {
+  if (tiradaSeleccionada && tiradaSeleccionada.idtirada === item.idtirada) {
+    // Deselecciona y limpia todo
+    setTiradaSeleccionada(null);
+    console.log("Tirada deseleccionada");
+
+    setNombreTirada("");
+    setPrincipal(0);
+    setSecundaria(0);
+    setDadosD12Bono(0);
+    setDadosD6Bono(0);
+    setDadosD4Bono(0);
+    setDadosD10(0);
+    setDadosD20(0);
+    setDadosD10Bono(0);
+    
+    return;
+  }
+
+  // Si no está seleccionada, seleccionarla y setear los valores
+  setTiradaSeleccionada(item);
+  console.log("Tirada seleccionada: ", item);
+
+  setNombreTirada(item.nombre || "");
+  setPrincipal(item.principal || 0);
+  setSecundaria(item.secundaria || 0);
+  setDadosD12Bono(item.dadosD12Bono || 0);
+  setDadosD6Bono(item.dadosD6Bono || 0);
+  setDadosD4Bono(item.dadosD4Bono || 0);
+  setDadosD10(item.dadosD10 || 0);
+  setDadosD20(item.dadosD20 || 0);
+  setDadosD10Bono(item.dadosD10Bono || 0);
+};
+
+useEffect(() => {
+  if (!tiradaSeleccionada) {
+    setNombreTirada("");
+  }
+}, [tiradaSeleccionada]);
+
+//console.log("TIRADAS EN ASYNC: ",tiradasGuardadasPj)
   //console.log("paso por el componente")
   return (
     <>
@@ -327,11 +392,14 @@ const personajesOrdenados = useMemo(() => {
     </ScrollView>
   )}
    </View>
+
+
+
      <ChatTiradas p={p}/>
 
       <ScrollView style={styles.container}>
       
-
+        
         <TextInput
           style={styles.input}
           placeholder="Atributo principal"
@@ -411,16 +479,320 @@ const personajesOrdenados = useMemo(() => {
     ))}
   </View>
 </View>
-        <LinearGradient
-            colors={['#EF6C00', '#E65100', '#BF360C']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.botonPrincipal}
+
+
+
+
+
+
+
+<Modal
+  visible={modalVisibleTirada}
+  animationType="slide"
+  transparent={true}
+   onRequestClose={() => {
+    setTiradaSeleccionada(null);
+    setModalVisibleTirada(false);
+  }}
+>
+
+   <TouchableWithoutFeedback
+    onPress={() => {
+      Keyboard.dismiss(); // opcional, para cerrar teclado si está abierto
+      setModalVisibleTirada(false);
+      setTiradaSeleccionada(null); // si querés limpiar selección al cerrar modal tocando fuera
+    }}
+  >
+
+    <View style={styles.modalFondo}>
+    <View style={styles.modalContenidoGrande}>
+      <Text style={styles.modalTitulo}>⚔️ Armar Tirada</Text>
+       <TextInput
+        style={styles.input}
+        placeholder="Nombre de la tirada"
+        placeholderTextColor="#ccc"
+        keyboardType="default"
+        value={nombreTirada}
+        onChangeText={setNombreTirada}
+      />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Atributo principal"
+        placeholderTextColor="#ccc"
+        keyboardType="default"
+        value={principal}
+        onChangeText={setPrincipal}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Atributo secundario"
+        placeholderTextColor="#ccc"
+        keyboardType="default"
+        value={secundaria}
+        onChangeText={setSecundaria}
+      />
+
+      <View style={styles.dadosContainer}>
+        {/* Columna izquierda */}
+        <View style={styles.columna}>
+          {[{ label: "D10 bono", valor: dadosD10Bono, add: () => setDadosD10Bono(d => d + 1), rest: () => setDadosD10Bono(d => Math.max(0, d - 1)) },
+            { label: "D12 bono", valor: dadosD12Bono, add: () => setDadosD12Bono(d => d + 1), rest: () => setDadosD12Bono(d => Math.max(0, d - 1)) },
+            { label: "D4 bono", valor: dadosD4Bono, add: () => setDadosD4Bono(d => d + 1), rest: () => setDadosD4Bono(d => Math.max(0, d - 1)) },
+          ].map((dado, idx) => (
+            <View key={idx} style={styles.dadoRow}>
+              <Text style={styles.dadoLabel}>
+                {dado.label}:{' '}
+                <Text style={{
+                  color: dado.valor > 0 ? 'yellow' : 'white',
+                  fontWeight: 'bold',
+                }}>{dado.valor}</Text>
+              </Text>
+              <View style={styles.botones}>
+                <TouchableOpacity style={styles.boton} onPress={dado.rest}>
+                  <Text style={styles.botonTexto}>-</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.boton} onPress={dado.add}>
+                  <Text style={styles.botonTexto}>+</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        {/* Columna derecha */}
+        <View style={styles.columna}>
+          {[{ label: "D10 Ken", valor: dadosD10, add: () => setDadosD10(d => d + 1), rest: () => setDadosD10(d => Math.max(0, d - 1)) },
+            { label: "D20", valor: dadosD20, add: () => setDadosD20(d => d + 1), rest: () => setDadosD20(d => Math.max(0, d - 1)) },
+            { label: "D6 bono", valor: dadosD6Bono, add: () => setDadosD6Bono(d => d + 1), rest: () => setDadosD6Bono(d => Math.max(0, d - 1)) },
+          ].map((dado, idx) => (
+            <View key={idx} style={styles.dadoRow}>
+              <Text style={styles.dadoLabel}>
+                {dado.label}:{' '}
+                <Text style={{
+                  color: dado.valor > 0 ? 'yellow' : 'white',
+                  fontWeight: 'bold'
+                }}>{dado.valor}</Text>
+              </Text>
+              <View style={styles.botones}>
+                <TouchableOpacity style={styles.boton} onPress={dado.rest}>
+                  <Text style={styles.botonTexto}>-</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.boton} onPress={dado.add}>
+                  <Text style={styles.botonTexto}>+</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ))}
+        </View>
+      </View>
+
+ <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginBottom:20, }}>
+
+      <Pressable 
+           style={({ pressed }) => [
+            styles.confirmarBoton,
+            pressed && { opacity: 0.7, transform: [{ scale: 0.97 }] } // efecto al presionar
+          ]} 
+          onPress={() => {
+            // Aquí ejecutás la lógica de tirada
+            //console.log("Guardando tirada con:",nombreTirada, principal, secundaria, dadosD20, dadosD10Bono);
+            const idtirada = tiradaSeleccionada ? tiradaSeleccionada.idtirada : Date.now();
+            const tiradaPj={
+              idtirada, 
+              ippersonajes:p.idpersonaje,
+              nombre: nombreTirada || "",
+              principal:principal || 0,
+              secundaria:secundaria || 0,
+              dadosD20:dadosD20 || 0,
+              dadosD10Bono:dadosD10Bono|| 0,
+              dadosD10:dadosD10|| 0,
+              dadosD4Bono:dadosD4Bono || 0,
+              dadosD6Bono:dadosD6Bono || 0,
+              dadosD12Bono:dadosD12Bono|| 0,
+            }
+            agregarTiradaPj(tiradaPj)
+            setTiradaSeleccionada(null);
+            setNombreTirada("")
+            setModalVisibleTirada(false);
+          }}>
+
+
+         <Text
+          style={[
+            styles.confirmarTexto,
+            tiradaSeleccionada && { color: '#000', } // cambia color de texto si está editando
+          ]}
+        >
+          {tiradaSeleccionada ? '✏️ Editar Tirada' : '🎲 Guardar Tirada'}
+        </Text>
+      </Pressable>
+
+
+    {tiradaSeleccionada && (
+      <Pressable
+
+       style={({ pressed }) => [
+            styles.confirmarBoton,
+            pressed && { opacity: 0.7, transform: [{ scale: 0.97 }] } ,
+            , { backgroundColor: '#dd302abd', marginTop: 12, borderWidth:1, borderColor:"gray" }// efecto al presionar
+          ]} 
+   
+        onPress={() => {
+          eliminarTiradasPj(tiradaSeleccionada.idtirada);
+          setTiradaSeleccionada(null);
+          setModalVisibleTirada(false);
+        }}
+      >
+        <Text style={[styles.confirmarTexto, { color: '#fff' }]}>🗑️ Eliminar Tirada</Text>
+      </Pressable>
+    )}
+
+  </View>
+
+
+
+{/*
+ <Pressable onPress={() => setModalVisibleTirada(false)} style={{ marginTop: 10 }}>
+        <Text style={{ color: '#aaa' }}>Cancelar</Text>
+      </Pressable>*/}
+     
+    </View>
+  </View>
+
+  </TouchableWithoutFeedback>
+  
+</Modal>
+
+
+
+
+
+
+
+
+<View style={{ width: '100%', alignItems: 'center',padding:6 }}>
+  <View style={{ flexDirection: 'row', width: '90%',alignItems: 'center' ,justifyContent:"center" }}>
+
+    <LinearGradient
+      colors={['#cfd396ff', '#1f6f94ff', '#383f7c36']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 0 }}
+      style={[
+        styles.botonPrincipal,
+        { width: '30%', marginLeft: 10 },
+        tiradaSeleccionada && {
+          borderWidth: 1.5,
+          borderColor: '#00ff0dff',
+          shadowColor: '#00ff0dff',
+          shadowOffset: { width: 0, height: 3 },
+          shadowOpacity: 0.9,
+          shadowRadius: 20,
+          elevation: 8,
+        }
+      ]}
+    >
+      <TouchableOpacity onPress={() => setModalVisibleTirada(true)} style={styles.botonToque}> 
+        <Text style={styles.botonPrincipalTexto}>+🎲</Text>
+      </TouchableOpacity>
+    </LinearGradient>
+
+   <Animatable.View ref={botonAnimRef} style={[styles.botonPrincipal, { width: '50%', marginLeft: 10 }]}>
+  <LinearGradient
+    colors={['#EF6C00', '#E65100', '#BF360C']}
+    start={{ x: 0, y: 0 }}
+    end={{ x: 1, y: 0 }}
+    style={{ flex: 1, borderRadius: 10, overflow: 'hidden' }} // Para que la animación respete bordes
+  >
+    <TouchableOpacity
+      style={styles.botonToque}
+      onPress={() => {
+        tirarDados();
+        setTimeout(() => {
+            botonAnimRef.current?.rubberBand(400); 
+           Vibration.vibrate([80, 50, 80, 50, 150, 50, 300]);
+        
+        }, 1000);
+
+      }}
+    >
+      <Text style={styles.botonPrincipalTexto}>Tirar Dados</Text>
+    </TouchableOpacity>
+  </LinearGradient>
+</Animatable.View>
+
+   
+  </View>
+</View>
+
+
+
+{/* ACA ESTAN LOS BOTONES DE LAS TIRADAS*/}
+{tiradasGuardadasPj.length > 0 && (
+  <View style={{ 
+    paddingTop: 20, 
+    paddingLeft:10,
+    paddingRight:10,
+    flexDirection: 'row', 
+    flexWrap: 'wrap', 
+    justifyContent: 'space-between',
+  }}>
+    {tiradasGuardadasPj
+      .filter((t) => t.ippersonajes === p.idpersonaje)
+      .map((item, index) => {
+        const estaSeleccionada =
+          tiradaSeleccionada && item.idtirada === tiradaSeleccionada.idtirada;
+
+        return (
+          <Pressable
+            key={item.idtirada + index}
+            onPress={() => setearTiradas(item)}
+            style={({ pressed }) => [
+              {
+                backgroundColor: estaSeleccionada ? "aliceblue" : '#333',
+                paddingVertical: 8,
+                paddingHorizontal: 14,
+                borderRadius: 20,
+                marginBottom: 12,
+                shadowColor: estaSeleccionada ? '#FFD700' : '#000',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: pressed ? 0.3 : 0.6,
+                shadowRadius: 5,
+                elevation: estaSeleccionada ? 8 : 3,
+                borderWidth: estaSeleccionada ? 2 : 0.2,
+                borderColor: estaSeleccionada ? '#00ff0dff' : 'cyan',
+                opacity: pressed ? 0.7 : 1,
+                alignItems: 'center',
+                width: '48%',       // para que haya espacio y dos por fila
+              },
+            ]}
           >
-            <TouchableOpacity onPress={tirarDados} style={styles.botonToque}>
-              <Text style={styles.botonPrincipalTexto}>Tirar Dados</Text>
-            </TouchableOpacity>
-          </LinearGradient>
+            <Text
+              style={{
+                color: estaSeleccionada ? '#222' : '#eee',
+                fontWeight: estaSeleccionada ? '700' : '500',
+                fontSize: 14,
+              }}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {item.nombre}
+            </Text>
+          </Pressable>
+        );
+      })}
+  </View>
+)}
+
+
+
+
+
+
+
+
+
+
 
         <View style={styles.resultado}>
           <Text style={styles.resultadoTexto}>D10 esfuerzo: {valTirada}</Text>
@@ -690,6 +1062,17 @@ labelFases: {
 botonPrincipal: {
   borderRadius: 10,
   overflow: 'hidden',
+  width:"60%",
+  borderWidth:1,
+  borderColor:"gray",
+   // sombra para iOS
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.25,
+  shadowRadius: 3.84,
+
+  // sombra para Android
+  elevation: 5,
 },
 
 botonToque: {
@@ -702,6 +1085,7 @@ botonPrincipalTexto: {
   color: 'white',
   fontSize: 18,
   fontWeight: 'bold',
+
 },
 containerAvatares: {
     paddingVertical: 2,
@@ -746,4 +1130,162 @@ containerAvatares: {
     maxWidth: 72,
     textAlign: 'center',
   },
+    modalFondo: {
+    flex: 1,
+    backgroundColor: '#000000aa',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContenido: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    width: '80%',
+    alignItems: 'center',
+  },
+  modalTitulo: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color:"aliceblue"
+  },
+  dadoRowT: {
+    flexDirection: 'row',
+    marginTop: 10,
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+  dadoBoton: {
+    backgroundColor: '#EF6C00',
+    margin: 5,
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  dadoTexto: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  cerrarBoton: {
+    marginTop: 20,
+  },
+  cerrarTexto: {
+    color: '#555',
+  },
+  modalContenidoGrande: {
+  backgroundColor: '#1e1e1e',
+  borderRadius: 10,
+  padding: 10,
+  width: '100%',
+  maxHeight: '90%',
+},
+
+confirmarBoton: {
+  backgroundColor: '#00efbbff',
+  padding: 10,
+  borderRadius: 8,
+  marginTop: 20,
+  width:"60%",
+  borderWidth:1,
+  borderColor:"gray"
+},
+
+confirmarTexto: {
+  color: 'white',
+  fontWeight: 'bold',
+  textAlign: 'center',
+},
+dadoRow: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  marginBottom: 10,
+},
+
+dadoLabel: {
+  flex: 1.5, // deja espacio para el texto
+  fontSize: 14,
+  color: 'white',
+},
+
+botones: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  gap: 4, // si usás React Native 0.71+, si no usás marginRight
+  borderWidth:1,
+  backgroundColor:"white",
+  borderColor:"white",
+  borderRadius:18,
+   shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.3,
+  shadowRadius: 4,
+  elevation: 13,
+},
+boton: {
+  backgroundColor: 'black',
+  paddingHorizontal: 16,
+  paddingVertical: 10,
+  borderRadius: 18,
+  width:40,
+  borderWidth:1,
+  borderColor:"green",
+},
+
+botonTexto: {
+  color: 'white',
+  fontWeight: 'bold',
+},
+itemContainer: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginVertical: 5,
+  borderWidth: 0.2,
+  borderColor: "cyan",
+  borderRadius: 5,
+  padding: 4,
+},
+textContainer: {
+  flex: 1,
+  marginRight: 8,
+
+},
+
+
+
+deleteBtn: {
+  color: '#f87171',
+  fontSize: 18,
+  paddingHorizontal: 8,
+},
+botonGuardar: {
+backgroundColor: '#22d3ee',
+  paddingVertical: 10,
+  paddingHorizontal: 20,
+  borderRadius: 10,
+  alignItems: 'center',
+  marginTop: 10,
+  opacity:0.7
+},
+
+textoBoton: {
+  color: 'black',
+  fontSize: 16,
+  fontWeight: 'bold',
+},
+
+botonTirada: {
+  paddingVertical: 6,
+  paddingHorizontal: 10,
+  backgroundColor: 'gray', // azul típico botón iOS
+  borderRadius: 5,
+  width:150,
+  borderWidth:1,
+  borderColor:"red",
+},
+saved: {
+  color: 'white',
+  fontSize: 16,
+},
 });

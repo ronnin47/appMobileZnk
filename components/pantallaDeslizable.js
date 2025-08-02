@@ -10,6 +10,9 @@ import { showMessage } from 'react-native-flash-message';
 import axios from 'axios';
 import { API_BASE_URL } from './config';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 export const PantallaDeslizable = () => {
   const {
     personajes,
@@ -39,6 +42,105 @@ export const PantallaDeslizable = () => {
   const [consumision, setConsumision] = useState('');
 
   const isInitialMount = useRef(true);
+
+
+
+
+
+
+
+
+const [tiradasGuardadasPj, setTiradasGuardadasPj] = useState([]);
+
+  // 🔹 Cargar desde AsyncStorage al inicio
+  useEffect(() => {
+    const cargarTiradasPj = async () => {
+      try {
+        const datos = await AsyncStorage.getItem('tiradasGuardadasPj');
+        if (datos) {
+          setTiradasGuardadasPj(JSON.parse(datos));
+        }
+
+
+        
+      } catch (e) {
+        console.error('Error al cargar tiradas:', e);
+      }
+    };
+    cargarTiradasPj();
+  }, []);
+
+ const agregarTiradaPj = async (nueva) => {
+  const existe = tiradasGuardadasPj.find(t => t.idtirada === nueva.idtirada);
+
+  let actualizadas;
+  if (existe) {
+    // Reemplazar tirada existente (editar)
+    actualizadas = tiradasGuardadasPj.map(t =>
+      t.idtirada === nueva.idtirada ? nueva : t
+    );
+     showMessage({
+                  message: 'Tirada actualizada',
+                  description: 'Los cambios de tirada se actualizaron correctamente.',
+                  type: 'success',
+                  icon: 'success',
+                  duration: 3000,
+                });
+  } else {
+    // Agregar nueva tirada
+    actualizadas = [...tiradasGuardadasPj, nueva];
+     showMessage({
+                  message: 'Nueva irada agregada',
+                  description: 'Se guardo una nueva tirada.',
+                  type: 'success',
+                  icon: 'success',
+                  duration: 3000,
+                });
+  }
+ 
+
+  setTiradasGuardadasPj(actualizadas);
+
+  try {
+    await AsyncStorage.setItem('tiradasGuardadasPj', JSON.stringify(actualizadas));
+  } catch (e) {
+    console.error('Error guardando tiradas:', e);
+  }
+};
+
+  // 🔹 Eliminar una tirada
+  const eliminarTiradasPj = async (idtirada) => {
+    const filtradas = tiradasGuardadasPj.filter(t => t.idtirada !== idtirada);
+    setTiradasGuardadasPj(filtradas);
+    try {
+      await AsyncStorage.setItem('tiradasGuardadasPj', JSON.stringify(filtradas));
+       showMessage({
+                  message: 'Tirada eliminada',
+                  description: 'La tirada se borro de tu lista.',
+                  type: 'danger',
+                  icon: 'danger',
+                  duration: 3000,
+                });
+    } catch (e) {
+      console.error('Error eliminando tirada:', e);
+    }
+  };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   // ⚡ Sincroniza valores del personaje seleccionado
   useEffect(() => {
@@ -77,6 +179,9 @@ export const PantallaDeslizable = () => {
     };
     savePersonajes(nuevosPersonajes);
   };
+
+
+
 
   useEffect(() => {
     if (isInitialMount.current) {
@@ -175,6 +280,13 @@ export const PantallaDeslizable = () => {
           negativa={negativa} setNegativa={setNegativa}
           cicatriz={cicatriz} setCicatriz={setCicatriz}
           consumision={consumision} setConsumision={setConsumision}
+
+
+          tiradasGuardadasPj={tiradasGuardadasPj}
+          setTiradasGuardadasPj={setTiradasGuardadasPj}
+          agregarTiradaPj={agregarTiradaPj}
+          eliminarTiradasPj={eliminarTiradasPj}
+
         />
       </View>
 

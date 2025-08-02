@@ -39,10 +39,10 @@ export const PageDerechaChat = ({ agregarTirada,eliminarTiradas, tiradasGuardada
       />
 
    <Pressable style={styles.botonGuardar} onPress={guardarTirada}>
-  <Text style={styles.textoBoton}>Guardar tirada</Text>
-</Pressable>
+   <Text style={styles.textoBoton}>Guardar tirada</Text>
+   </Pressable>
 
-      <Text style={[styles.label, {marginTop:20, marginBottom:10}]}>Tiradas guardadas:</Text>
+    <Text style={[styles.label, {marginTop:20, marginBottom:10}]}>Tiradas guardadas:</Text>
      <FlatList
       data={tiradasGuardadas}
       keyExtractor={(item) => item.nombre}

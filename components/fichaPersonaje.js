@@ -654,11 +654,12 @@ const colorPlaceHolder="#888"
                 borderColor: 'gray',
                 marginBottom: 20,
                 borderRadius: 5,
-                paddingLeft:22
+                paddingLeft:22,
+               
               }]}
 >
                   <View style={styles.inputGroup}>
-                    <Text style={styles.labelTronco}>Fuerza</Text>
+                    <Text style={styles.labelTronco}>力 Fuerza</Text>
                     <TextInput
                       keyboardType="default"
                       style={styles.inputNumero}
@@ -670,7 +671,7 @@ const colorPlaceHolder="#888"
                   </View>
 
                   <View style={styles.inputGroup}>
-                    <Text style={styles.labelTronco}>Fortaleza</Text>
+                    <Text style={styles.labelTronco}>剛 Fortaleza</Text>
                     <TextInput
                       keyboardType="default"
                       style={styles.inputNumero}
@@ -682,7 +683,7 @@ const colorPlaceHolder="#888"
                   </View>
 
                   <View style={styles.inputGroup}>
-                    <Text style={styles.labelTronco}>Destreza</Text>
+                    <Text style={styles.labelTronco}>技 Destreza</Text>
                     <TextInput
                       keyboardType="default"
                       style={styles.inputNumero}
@@ -694,7 +695,7 @@ const colorPlaceHolder="#888"
                   </View>
 
                   <View style={styles.inputGroup}>
-                    <Text style={styles.labelTronco}>Agilidad</Text>
+                    <Text style={styles.labelTronco}>敏 Agilidad</Text>
                     <TextInput
                       keyboardType="default"
                       style={styles.inputNumero}
@@ -706,7 +707,7 @@ const colorPlaceHolder="#888"
                   </View>
 
                   <View style={styles.inputGroup}>
-                    <Text style={styles.labelTronco}>Sabiduria</Text>
+                    <Text style={styles.labelTronco}>知 Sabiduria</Text>
                     <TextInput
                       keyboardType="default"
                       style={styles.inputNumero}
@@ -718,7 +719,7 @@ const colorPlaceHolder="#888"
                   </View>
 
                   <View style={styles.inputGroup}>
-                    <Text style={styles.labelTronco}>Presencia</Text>
+                    <Text style={styles.labelTronco}>威 Presencia</Text>
                     <TextInput
                       keyboardType="default"
                       style={styles.inputNumero}
@@ -730,7 +731,7 @@ const colorPlaceHolder="#888"
                   </View>
 
                   <View style={styles.inputGroup}>
-                    <Text style={styles.labelTronco}>Principio</Text>
+                    <Text style={styles.labelTronco}> 原 Principio</Text>
                     <TextInput
                       keyboardType="default"
                       style={styles.inputNumero}
@@ -742,7 +743,7 @@ const colorPlaceHolder="#888"
                   </View>
 
                   <View style={styles.inputGroup}>
-                    <Text style={styles.labelTronco}>Sentidos</Text>
+                    <Text style={styles.labelTronco}>感 Sentidos </Text>
                     <TextInput
                       keyboardType="default"
                       style={styles.inputNumero}
@@ -761,7 +762,7 @@ const colorPlaceHolder="#888"
             style={{
               flexDirection: 'row',
               justifyContent: 'space-between',
-              paddingLeft: 15,
+              paddingLeft: 24,
               padding: 10,
               borderRadius: 6,
               borderWidth:0.3,
@@ -1112,7 +1113,7 @@ backgroundColor: 'black' , // negro más profundo
     paddingVertical: 4, // antes: 6
     paddingHorizontal: 6, // antes: 8
     borderRadius: 6,
-    marginBottom: 6, // antes: 10
+    marginBottom: 4, // antes: 10
     color: '#d1fae5',
     fontSize: 14, // antes: 15
     width:"90%",
@@ -1125,7 +1126,7 @@ backgroundColor: 'black' , // negro más profundo
   },
   inputGroup: {
     width: '48%',
-    marginBottom: 8, // antes: 12
+    marginBottom: 2, // antes: 12
   },
   label: {
     color: '#facc15',
@@ -1134,7 +1135,7 @@ backgroundColor: 'black' , // negro más profundo
     fontWeight: '600',
   },
   labelTronco: {
-  color: '#fff200', // amarillo dorado
+  color: "#facc15", // amarillo dorado
   marginBottom: 2,
   fontSize: 13,
   fontWeight: 'bold',
