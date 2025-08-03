@@ -127,8 +127,6 @@ const [tiradasGuardadasPj, setTiradasGuardadasPj] = useState([]);
   };
 
 
-
-  // ⚡ Sincroniza valores del personaje seleccionado
   useEffect(() => {
     if (pj) {
       setKi(String(pj.ki ?? ''));
