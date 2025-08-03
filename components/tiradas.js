@@ -10,10 +10,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { ActivityIndicator } from 'react-native';
 import { showMessage } from 'react-native-flash-message';
 import { Vibration } from 'react-native';
-
 import * as Animatable from 'react-native-animatable';
-
 import { TouchableWithoutFeedback, Keyboard } from 'react-native';
+
 
 const generarNumerosAzarSinRangoMin=(cantidad, rangoMax)=> {
   var numeros = [];
@@ -42,10 +41,10 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen,
 
 
 
-          tiradasGuardadasPj,
-          setTiradasGuardadasPj,
-          agregarTiradaPj,
-          eliminarTiradasPj,
+            tiradasGuardadasPj,
+            setTiradasGuardadasPj,
+            agregarTiradaPj,
+            eliminarTiradasPj,
            }) => {
 
 
@@ -67,7 +66,6 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen,
 
 
 
-
 const botonAnimRef = useRef(null);
 
   const [valTirada, setValTirada] = useState("");
@@ -80,6 +78,9 @@ const botonAnimRef = useRef(null);
   const [valTiradaD10Bono, setValTiradaD10Bono] = useState("");
   const [principal, setPrincipal] = useState("");
   const [secundaria, setSecundaria] = useState("");
+ 
+  const [modificador,setModificador]=useState("");
+
   const [dadosD12Bono, setDadosD12Bono] = useState(0);
   const [dadosD6Bono, setDadosD6Bono] = useState(0);
   const [dadosD4Bono, setDadosD4Bono] = useState(0);
@@ -110,7 +111,7 @@ const personajesFavoritos = useMemo(() => {
 }, [favoritos, personajes]);
   
 
-//no es necesario para poder emitir a chat-chat
+
  useEffect(() => {
   socket.emit('user-connected', { usuarioId: p.usuarioId, sesion: 'algo' });
 }, []);
@@ -132,87 +133,98 @@ const personajesFavoritos = useMemo(() => {
     cicatriz,
   ]);
 
+//**************aca seguro */
+ const tirarDados = () => {
+  const principalValue = principal === "" ? 0 : parseInt(principal);
+  const secundariaValue = secundaria === "" ? 0 : parseInt(secundaria);
+  const nombre = nombreTirada ? nombreTirada : "";
+  const modificadorValue = modificador === "" ? 0 : parseInt(modificador);
 
-  const tirarDados = () => {
-    const principalValue = principal === "" ? 0 : parseInt(principal);
-    const secundariaValue = secundaria === "" ? 0 : parseInt(secundaria);
-    const nombre = nombreTirada ? nombreTirada : "";
+  let base = 1;
+  if (principal == 0) {
+    base = 0;
+  }
 
-    let base = 1;
-    if (principal == 0) {
-      base = 0;
-    }
-    let cantD10 = Math.floor(principal / 10) + base;
-    let tirada = generarNumerosAzarSinRangoMin(cantD10, 10);
-    let d12 = generarNumerosAzarSinRangoMin(dadosD12Bono, 12);
-    let d6 = generarNumerosAzarSinRangoMin(dadosD6Bono, 6);
-    let d4 = generarNumerosAzarSinRangoMin(dadosD4Bono, 4);
-    let d10 = generarNumerosAzarSinRangoMin(dadosD10, 10);
-    let d20 = generarNumerosAzarSinRangoMin(dadosD20, 20);
-    let d10Bono = generarNumerosAzarSinRangoMin(dadosD10Bono, 10);
+  let cantD10 = Math.floor(principal / 10) + base;
+  let tirada = generarNumerosAzarSinRangoMin(cantD10, 10);
+  let d12 = generarNumerosAzarSinRangoMin(dadosD12Bono, 12);
+  let d6 = generarNumerosAzarSinRangoMin(dadosD6Bono, 6);
+  let d4 = generarNumerosAzarSinRangoMin(dadosD4Bono, 4);
+  let d10 = generarNumerosAzarSinRangoMin(dadosD10, 10);
+  let d20 = generarNumerosAzarSinRangoMin(dadosD20, 20);
+  let d10Bono = generarNumerosAzarSinRangoMin(dadosD10Bono, 10);
 
-    let sumaTirada = tirada.reduce((a, v) => a + v, 0);
-    let sumaD12 = d12.reduce((a, v) => a + v, 0);
-    let sumaD6 = d6.reduce((a, v) => a + v, 0);
-    let sumaD4 = d4.reduce((a, v) => a + v, 0);
-    let sumaD10 = d10.reduce((a, v) => a + v, 0);
-    let sumaD20 = d20.reduce((a, v) => a + v, 0);
-    let sumaD10Bono = d10Bono.reduce((a, v) => a + v, 0);
+  let sumaTirada = tirada.reduce((a, v) => a + v, 0);
+  let sumaD12 = d12.reduce((a, v) => a + v, 0);
+  let sumaD6 = d6.reduce((a, v) => a + v, 0);
+  let sumaD4 = d4.reduce((a, v) => a + v, 0);
+  let sumaD10 = d10.reduce((a, v) => a + v, 0);
+  let sumaD20 = d20.reduce((a, v) => a + v, 0);
+  let sumaD10Bono = d10Bono.reduce((a, v) => a + v, 0);
 
-    let total =
-      sumaTirada +
-      principalValue +
-      secundariaValue +
-      sumaD10 +
-      sumaD20 +
-      sumaD10Bono +
-      sumaD6 +
-      sumaD4 +
-      sumaD12;
+  let total =
+    sumaTirada +
+    principalValue +
+    secundariaValue +
+    sumaD10 +
+    sumaD20 +
+    sumaD10Bono +
+    sumaD6 +
+    sumaD4 +
+    sumaD12 +
+    modificadorValue; // ✅ Se suma el modificador
 
-    setValTirada(tirada.join(", "));
-    setValTiradaD12(d12.join(", "));
-    setValTiradaD6(d6.join(", "));
-    setValTiradaD4(d4.join(", "));
-    setValTiradaD10(d10.join(", "));
-    setValTiradaD20(d20.join(", "));
-    setValTiradaD10Bono(d10Bono.join(", "));
-    setSumaTirada(total);
-const baset = principalValue + secundariaValue;
+  setValTirada(tirada.join(", "));
+  setValTiradaD12(d12.join(", "));
+  setValTiradaD6(d6.join(", "));
+  setValTiradaD4(d4.join(", "));
+  setValTiradaD10(d10.join(", "));
+  setValTiradaD20(d20.join(", "));
+  setValTiradaD10Bono(d10Bono.join(", "));
+  setSumaTirada(total);
 
-let partes = [];
+  const baset = principalValue + secundariaValue;
+  let partes = [];
 
-if (baset > 0) partes.push(`Base: ${baset}`);
-if (tirada.length > 0) partes.push(`D10 esfuerzo: ${tirada.join(", ")}`);
-if (d10.length > 0) partes.push(`D10 Ken: ${d10.join(", ")}`);
-if (d10Bono.length > 0) partes.push(`D10 bono: ${d10Bono.join(", ")}`);
-if (d20.length > 0) partes.push(`D20: ${d20.join(", ")}`);
-if (d6.length > 0) partes.push(`D6: ${d6.join(", ")}`);
-if (d4.length > 0) partes.push(`D4: ${d4.join(", ")}`);
-if (d12.length > 0) partes.push(`D12: ${d12.join(", ")}`);
+  if (baset > 0) partes.push(`Base: ${baset}`);
+  if (modificadorValue !== 0) partes.push(`Modificador: ${modificadorValue}`); // ✅ Se muestra si existe
+  if (tirada.length > 0) partes.push(`D10 esfuerzo: ${tirada.join(", ")}`);
+  if (d10.length > 0) partes.push(`D10 Ken: ${d10.join(", ")}`);
+  if (d10Bono.length > 0) partes.push(`D10 bono: ${d10Bono.join(", ")}`);
+  if (d20.length > 0) partes.push(`D20: ${d20.join(", ")}`);
+  if (d6.length > 0) partes.push(`D6: ${d6.join(", ")}`);
+  if (d4.length > 0) partes.push(`D4: ${d4.join(", ")}`);
+  if (d12.length > 0) partes.push(`D12: ${d12.join(", ")}`);
 
-const mensajeChat = `🎲 Tirada  ${nombre?.trim() ? `"${nombre.toUpperCase()}"  ` : ""}  ${partes.join("   ")}                        Total: ${total}`;
+  const mensajeChat = `🎲 Tirada ${nombre?.trim() ? `"${nombre.toUpperCase()}"` : ""}  ${partes.join("   ")}                        Total: ${total}`;
 
-  
-    const mensaje={
-     // id: Date.now().toString() + Math.random().toString(36).substring(2),
-      usuarioId:p.usuarioId,
-      idpersonaje:p.idpersonaje,
-      nombre:p.nombre,
-      mensaje:mensajeChat,
-      estatus:estatus,
-      imagenPjUrl:p.imagenurl || "",
-      nick: nick || "",
-      tipo:"tirada",
-    }
-
-    //console.log("***TIRADAS emite**",mensaje)
-    socket.emit('chat-chat', mensaje);
-
-   setTiradaSeleccionada(null);
+  const mensaje = {
+    usuarioId: p.usuarioId,
+    idpersonaje: p.idpersonaje,
+    nombre: p.nombre,
+    mensaje: mensajeChat,
+    estatus: estatus,
+    imagenPjUrl: p.imagenurl || "",
+    nick: nick || "",
+    tipo: "tirada",
   };
 
+  socket.emit('chat-chat', mensaje);
+  setTiradaSeleccionada(null);
+};
 
+
+const limpiarCamposTirada = () => {
+  setPrincipal("");
+  setSecundaria("");
+  setModificador("");
+  setDadosD12Bono(0);
+  setDadosD6Bono(0);
+  setDadosD4Bono(0);
+  setDadosD10(0);
+  setDadosD20(0);
+  setDadosD10Bono(0);
+};
 //ESTO ES PARA LA LOGICA INTERNA DE GUARDAR sobre el array que esta en el context
     const guardarCambios = () => {
     const index = personajes.findIndex(per => per.idpersonaje === pj.idpersonaje);
@@ -289,18 +301,57 @@ const [modalVisibleTirada, setModalVisibleTirada] = useState(false);
 
 const [nombreTirada, setNombreTirada] = useState('');
 const [tiradaSeleccionada, setTiradaSeleccionada] = useState(null);
+const [mostrarSelectorPrincipal, setMostrarSelectorPrincipal] = useState(false);
+const [mostrarSelectorSecundaria, setMostrarSelectorSecundaria] = useState(false);
 
+const obtenerValorPersonalizado = (nombre, p) => {
+  if (!nombre || !p) return 0;
 
+  // Pares add / valAdd
+  const adds = ['add1', 'add2', 'add3', 'add4'];
+  const vals = ['valAdd1', 'valAdd2', 'valAdd3', 'valAdd4'];
 
+  for (let i = 0; i < adds.length; i++) {
+    if (p[adds[i]] && p[adds[i]].toLowerCase() === nombre.toLowerCase()) {
+      return p[vals[i]] != null ? p[vals[i]] : 0;
+    }
+  }
+
+  // Pares apCombate / valCombate
+  const apCombates = ['apCombate', 'apCombate2'];
+  const valCombates = ['valCombate', 'valCombate2'];
+
+  for (let i = 0; i < apCombates.length; i++) {
+    if (p[apCombates[i]] && p[apCombates[i]].toLowerCase() === nombre.toLowerCase()) {
+      return p[valCombates[i]] != null ? p[valCombates[i]] : 0;
+    }
+  }
+
+  // Propiedad directa
+  if (p.hasOwnProperty(nombre) && p[nombre] != null) {
+    return p[nombre];
+  }
+
+  // Si es un número, retornar número
+  const valorNum = Number(nombre);
+  if (!isNaN(valorNum)) return valorNum;
+
+  // Retornar el nombre si no encontró nada más
+  return nombre;
+};
 const setearTiradas = (item) => {
   if (tiradaSeleccionada && tiradaSeleccionada.idtirada === item.idtirada) {
     // Deselecciona y limpia todo
     setTiradaSeleccionada(null);
-    console.log("Tirada deseleccionada");
+    //console.log("Tirada deseleccionada");
 
     setNombreTirada("");
+    
     setPrincipal(0);
     setSecundaria(0);
+
+    setModificador(0);
+
     setDadosD12Bono(0);
     setDadosD6Bono(0);
     setDadosD4Bono(0);
@@ -313,11 +364,21 @@ const setearTiradas = (item) => {
 
   // Si no está seleccionada, seleccionarla y setear los valores
   setTiradaSeleccionada(item);
-  console.log("Tirada seleccionada: ", item);
+  //console.log("Tirada seleccionada: ", item);
 
   setNombreTirada(item.nombre || "");
-  setPrincipal(item.principal || 0);
-  setSecundaria(item.secundaria || 0);
+
+
+const valorPrincipal = typeof item.principal === 'string' && p && p[item.principal] != null
+      ? p[item.principal]
+      : item.principal || 0;
+    setPrincipal(String(valorPrincipal));
+
+   const valorSecundaria = obtenerValorPersonalizado(item.secundaria, p);
+setSecundaria(String(valorSecundaria));
+
+setModificador(item.modificador || 0);
+  
   setDadosD12Bono(item.dadosD12Bono || 0);
   setDadosD6Bono(item.dadosD6Bono || 0);
   setDadosD4Bono(item.dadosD4Bono || 0);
@@ -332,12 +393,89 @@ useEffect(() => {
   }
 }, [tiradaSeleccionada]);
 
-//console.log("TIRADAS EN ASYNC: ",tiradasGuardadasPj)
-  //console.log("paso por el componente")
+
+const caracteristicasPrinciaples = ['fuerza',"fortaleza", 'destreza', 'agilidad', 'sentidos', 'presencia',"principio","sabiduria" ];
+const caracteristicasSecundariasBase = [
+  'academisismo',
+  'alerta',
+  'atletismo',
+  'conBakemono',
+  'mentir',
+  'pilotear',
+  'artesMarciales',
+  'medicina',
+  'conObjMagicos',
+  'sigilo',
+  'conEsferas',
+  'conLeyendas',
+  'forja',
+  'conDemonio',
+  'conEspiritual',
+  'manejoBlaster',
+  'manejoSombras',
+  'tratoBakemono',
+  'conHechiceria',
+  'medVital',
+  'medEspiritual',
+  'rayo',
+  'fuego',
+  'frio',
+  'veneno',
+  'corte',
+  'energia'
+];
+// Objeto con los nombres personalizados que el jugador puso
+const extras = ['add1', 'add2', 'add3', 'add4', 'apCombate', 'apCombate2'];
+
+// Función que extrae nombres personalizados no vacíos de 'p' y los agrega al array base
+function obtenerCaracteristicasSecundariasConExtras(pj) {
+  const caracteristicasExtras = extras
+    .map((clave) => pj[clave])   // extraigo el valor en p.add1, p.add2...
+    .filter((nombre) => nombre && nombre.trim() !== ''); // filtro los que no están vacíos o nulos
+
+  // Combino las bases + extras sin duplicados (por si hay nombres repetidos)
+  const combinado = [...new Set([...caracteristicasSecundariasBase, ...caracteristicasExtras.map(n => n.toLowerCase())])];
+
+  return combinado;
+}
+
+const caracteristicasSecundarias = obtenerCaracteristicasSecundariasConExtras(pj);
+
+
+
+
+const etiquetasLegibles = {
+  academisismo: 'Academisismo',
+  alerta: 'Alerta',
+  atletismo: 'Atletismo',
+  conBakemono: 'Conocimiento de Bakemono',
+  mentir: 'Mentir',
+  pilotear: 'Pilotear',
+  artesMarciales: 'Artes Marciales',
+  medicina: 'Medicina',
+  conObjMagicos: 'Conocimiento de Objetos Mágicos',
+  sigilo: 'Sigilo',
+  conEsferas: 'Conocimiento de Esferas',
+  conLeyendas: 'Conocimiento de Leyendas',
+  forja: 'Forja',
+  conDemonio: 'Conocimiento de Demonio',
+  conEspiritual: 'Conocimiento Espiritual',
+  manejoBlaster: 'Manejo de Blaster',
+  manejoSombras: 'Manejo de Sombras',
+  tratoBakemono: 'Trato con Bakemono',
+  conHechiceria: 'Conocimiento de Hechicería',
+  medVital: 'Medición Vital',
+  medEspiritual: 'Medición Espiritual',
+  rayo: 'Rayo',
+  fuego: 'Fuego',
+  frio: 'Frío',
+  veneno: 'Veneno',
+  corte: 'Corte',
+  energia: 'Energía',
+};
+
   return (
     <>
-
-
    <View style={styles.containerAvatares}>
   {personajesOrdenados.length === 0 ? (
     <></>
@@ -417,6 +555,15 @@ useEffect(() => {
           onChangeText={setSecundaria}
         />
 
+        <TextInput
+          style={styles.input}
+          placeholder="Modificadores"
+          placeholderTextColor="#ccc"
+          keyboardType="default"
+          value={modificador}
+          onChangeText={setModificador}
+        />
+
         <View style={styles.dadosContainer}>
   {/* Primera columna con primeros 3 dados */}
   <View style={styles.columna}>
@@ -485,183 +632,299 @@ useEffect(() => {
 
 
 
-
 <Modal
   visible={modalVisibleTirada}
   animationType="slide"
   transparent={true}
-   onRequestClose={() => {
+  onRequestClose={() => {
     setTiradaSeleccionada(null);
     setModalVisibleTirada(false);
   }}
 >
-
-   <TouchableWithoutFeedback
+  {/* TouchableWithoutFeedback solo en el fondo para detectar toque fuera */}
+  <TouchableWithoutFeedback
     onPress={() => {
       Keyboard.dismiss(); // opcional, para cerrar teclado si está abierto
       setModalVisibleTirada(false);
-      setTiradaSeleccionada(null); // si querés limpiar selección al cerrar modal tocando fuera
+      setTiradaSeleccionada(null); // limpiar selección al cerrar tocando fuera
     }}
   >
-
     <View style={styles.modalFondo}>
-    <View style={styles.modalContenidoGrande}>
-      <Text style={styles.modalTitulo}>⚔️ Armar Tirada</Text>
-       <TextInput
-        style={styles.input}
-        placeholder="Nombre de la tirada"
-        placeholderTextColor="#ccc"
-        keyboardType="default"
-        value={nombreTirada}
-        onChangeText={setNombreTirada}
-      />
+      {/* Este TouchableWithoutFeedback absorbe los toques dentro del modal para que no propaguen */}
+      <TouchableWithoutFeedback onPress={() => { /* no hace nada para bloquear cierre */ }}>
+        <View style={styles.modalContenidoGrande}>
+          <Text style={styles.modalTitulo}>⚔️ Armar Tirada</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Nombre de la tirada"
+            placeholderTextColor="#ccc"
+            keyboardType="default"
+            value={nombreTirada}
+            onChangeText={setNombreTirada}
+          />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Atributo principal"
-        placeholderTextColor="#ccc"
-        keyboardType="default"
-        value={principal}
-        onChangeText={setPrincipal}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Atributo secundario"
-        placeholderTextColor="#ccc"
-        keyboardType="default"
-        value={secundaria}
-        onChangeText={setSecundaria}
-      />
-
-      <View style={styles.dadosContainer}>
-        {/* Columna izquierda */}
-        <View style={styles.columna}>
-          {[{ label: "D10 bono", valor: dadosD10Bono, add: () => setDadosD10Bono(d => d + 1), rest: () => setDadosD10Bono(d => Math.max(0, d - 1)) },
-            { label: "D12 bono", valor: dadosD12Bono, add: () => setDadosD12Bono(d => d + 1), rest: () => setDadosD12Bono(d => Math.max(0, d - 1)) },
-            { label: "D4 bono", valor: dadosD4Bono, add: () => setDadosD4Bono(d => d + 1), rest: () => setDadosD4Bono(d => Math.max(0, d - 1)) },
-          ].map((dado, idx) => (
-            <View key={idx} style={styles.dadoRow}>
-              <Text style={styles.dadoLabel}>
-                {dado.label}:{' '}
-                <Text style={{
-                  color: dado.valor > 0 ? 'yellow' : 'white',
-                  fontWeight: 'bold',
-                }}>{dado.valor}</Text>
-              </Text>
-              <View style={styles.botones}>
-                <TouchableOpacity style={styles.boton} onPress={dado.rest}>
-                  <Text style={styles.botonTexto}>-</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.boton} onPress={dado.add}>
-                  <Text style={styles.botonTexto}>+</Text>
-                </TouchableOpacity>
-              </View>
+          <View style={{ marginBottom: 16 }}>
+            <Text style={styles.label}>Caracteristica Principal</Text>
+            <View style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              borderWidth: 1,
+              borderColor: '#555',
+              borderRadius: 8,
+              paddingHorizontal: 10,
+              backgroundColor: '#1a1a1a'
+            }}>
+              <TextInput
+                style={{
+                  flex: 1,
+                  color: 'white',
+                  paddingVertical: 8,
+                  fontSize: 16,
+                }}
+                placeholder="Principal"
+                placeholderTextColor="#888"
+                value={principal}
+                onChangeText={setPrincipal}
+              />
+              <TouchableOpacity
+                onPress={() => setMostrarSelectorPrincipal(!mostrarSelectorPrincipal)}
+                style={{ paddingHorizontal: 8 }}
+              >
+                <Text style={{ fontSize: 18, color: 'white' }}>▼</Text>
+              </TouchableOpacity>
             </View>
-          ))}
-        </View>
-
-        {/* Columna derecha */}
-        <View style={styles.columna}>
-          {[{ label: "D10 Ken", valor: dadosD10, add: () => setDadosD10(d => d + 1), rest: () => setDadosD10(d => Math.max(0, d - 1)) },
-            { label: "D20", valor: dadosD20, add: () => setDadosD20(d => d + 1), rest: () => setDadosD20(d => Math.max(0, d - 1)) },
-            { label: "D6 bono", valor: dadosD6Bono, add: () => setDadosD6Bono(d => d + 1), rest: () => setDadosD6Bono(d => Math.max(0, d - 1)) },
-          ].map((dado, idx) => (
-            <View key={idx} style={styles.dadoRow}>
-              <Text style={styles.dadoLabel}>
-                {dado.label}:{' '}
-                <Text style={{
-                  color: dado.valor > 0 ? 'yellow' : 'white',
-                  fontWeight: 'bold'
-                }}>{dado.valor}</Text>
-              </Text>
-              <View style={styles.botones}>
-                <TouchableOpacity style={styles.boton} onPress={dado.rest}>
-                  <Text style={styles.botonTexto}>-</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.boton} onPress={dado.add}>
-                  <Text style={styles.botonTexto}>+</Text>
-                </TouchableOpacity>
+            {mostrarSelectorPrincipal && (
+              <View style={{
+                marginTop: 6,
+                backgroundColor: '#003b5c',
+                borderRadius: 6,
+                borderWidth: 1,
+                borderColor: '#00b4d8',
+                maxHeight: 140
+              }}>
+                <FlatList
+                  data={caracteristicasPrinciaples}
+                  keyExtractor={(item) => item}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      onPress={() => {
+                        setPrincipal(item);
+                        setMostrarSelectorPrincipal(false);
+                      }}
+                      style={{
+                        paddingVertical: 10,
+                        paddingHorizontal: 12,
+                        borderBottomWidth: 1,
+                        borderBottomColor: '#0077a6'
+                      }}
+                    >
+                      <Text style={{ color: 'white', fontSize: 15 }}>{item}</Text>
+                    </TouchableOpacity>
+                  )}
+                />
               </View>
+            )}
+          </View>
+
+          <View style={{ marginBottom: 16 }}>
+            <Text style={styles.label}>Característica secundaria</Text>
+            <View style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              borderWidth: 1,
+              borderColor: '#555',
+              borderRadius: 8,
+              paddingHorizontal: 10,
+              backgroundColor: '#1a1a1a'
+            }}>
+             <TextInput
+  style={{
+    flex: 1,
+    color: 'white',
+    paddingVertical: 8,
+    fontSize: 16,
+  }}
+  placeholder="Secundaria"
+  placeholderTextColor="#888"
+  value={secundaria}
+  onChangeText={setSecundaria}
+/>
+              <TouchableOpacity
+                onPress={() => setMostrarSelectorSecundaria(!mostrarSelectorSecundaria)}
+                style={{ paddingHorizontal: 8 }}
+              >
+                <Text style={{ fontSize: 18, color: 'white' }}>▼</Text>
+              </TouchableOpacity>
             </View>
-          ))}
+            {mostrarSelectorSecundaria && (
+              <View style={{
+                marginTop: 6,
+                backgroundColor: '#003b5c',
+                borderRadius: 6,
+                borderWidth: 1,
+                borderColor: '#00b4d8',
+                maxHeight: 140
+              }}>
+                <FlatList
+                  data={caracteristicasSecundarias}
+                  keyExtractor={(item) => item}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      onPress={() => {
+                        setSecundaria(item);
+                        setMostrarSelectorSecundaria(false);
+                      }}
+                      style={{
+                        paddingVertical: 10,
+                        paddingHorizontal: 12,
+                        borderBottomWidth: 1,
+                        borderBottomColor: '#0077a6'
+                      }}
+                    >
+                      <Text style={{ color: 'white', fontSize: 15 }}>
+                        {etiquetasLegibles[item] || item}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                />
+              </View>
+            )}
+          </View>
+
+          <TextInput
+            style={styles.input}
+            placeholder="Modificador"
+            placeholderTextColor="#ccc"
+            keyboardType="default"
+            value={modificador}
+            onChangeText={setModificador}
+          />
+
+          <View style={styles.dadosContainer}>
+            {/* Columna izquierda */}
+            <View style={styles.columna}>
+              {[{ label: "D10 bono", valor: dadosD10Bono, add: () => setDadosD10Bono(d => d + 1), rest: () => setDadosD10Bono(d => Math.max(0, d - 1)) },
+                { label: "D12 bono", valor: dadosD12Bono, add: () => setDadosD12Bono(d => d + 1), rest: () => setDadosD12Bono(d => Math.max(0, d - 1)) },
+                { label: "D4 bono", valor: dadosD4Bono, add: () => setDadosD4Bono(d => d + 1), rest: () => setDadosD4Bono(d => Math.max(0, d - 1)) },
+              ].map((dado, idx) => (
+                <View key={idx} style={styles.dadoRow}>
+                  <Text style={styles.dadoLabel}>
+                    {dado.label}:{' '}
+                    <Text style={{
+                      color: dado.valor > 0 ? 'yellow' : 'white',
+                      fontWeight: 'bold',
+                    }}>{dado.valor}</Text>
+                  </Text>
+                  <View style={styles.botones}>
+                    <TouchableOpacity style={styles.boton} onPress={dado.rest}>
+                      <Text style={styles.botonTexto}>-</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.boton} onPress={dado.add}>
+                      <Text style={styles.botonTexto}>+</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ))}
+            </View>
+
+            {/* Columna derecha */}
+            <View style={styles.columna}>
+              {[{ label: "D10 Ken", valor: dadosD10, add: () => setDadosD10(d => d + 1), rest: () => setDadosD10(d => Math.max(0, d - 1)) },
+                { label: "D20", valor: dadosD20, add: () => setDadosD20(d => d + 1), rest: () => setDadosD20(d => Math.max(0, d - 1)) },
+                { label: "D6 bono", valor: dadosD6Bono, add: () => setDadosD6Bono(d => d + 1), rest: () => setDadosD6Bono(d => Math.max(0, d - 1)) },
+              ].map((dado, idx) => (
+                <View key={idx} style={styles.dadoRow}>
+                  <Text style={styles.dadoLabel}>
+                    {dado.label}:{' '}
+                    <Text style={{
+                      color: dado.valor > 0 ? 'yellow' : 'white',
+                      fontWeight: 'bold'
+                    }}>{dado.valor}</Text>
+                  </Text>
+                  <View style={styles.botones}>
+                    <TouchableOpacity style={styles.boton} onPress={dado.rest}>
+                      <Text style={styles.botonTexto}>-</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.boton} onPress={dado.add}>
+                      <Text style={styles.botonTexto}>+</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginBottom: 20 }}>
+
+            <Pressable
+              style={({ pressed }) => [
+                styles.confirmarBoton,
+                pressed && { opacity: 0.7, transform: [{ scale: 0.97 }] } // efecto al presionar
+              ]}
+              onPress={() => {
+                // Aquí ejecutás la lógica de tirada
+                //console.log("Guardando tirada con:",nombreTirada, principal, secundaria, dadosD20, dadosD10Bono);
+                const idtirada = tiradaSeleccionada ? tiradaSeleccionada.idtirada : Date.now();
+                const tiradaPj = {
+                  idtirada,
+                  ippersonajes: p.idpersonaje,
+                  nombre: nombreTirada || "",
+                  principal: principal || 0,
+                  secundaria: secundaria || 0,
+                  modificador:modificador || 0,
+                  dadosD20: dadosD20 || 0,
+                  dadosD10Bono: dadosD10Bono || 0,
+                  dadosD10: dadosD10 || 0,
+                  dadosD4Bono: dadosD4Bono || 0,
+                  dadosD6Bono: dadosD6Bono || 0,
+                  dadosD12Bono: dadosD12Bono || 0,
+                 
+                }
+                agregarTiradaPj(tiradaPj)
+                setTiradaSeleccionada(null);
+                setNombreTirada("")
+                setModalVisibleTirada(false);
+              }}
+            >
+              <Text
+                style={[
+                  styles.confirmarTexto,
+                  tiradaSeleccionada && { color: '#000', } // cambia color de texto si está editando
+                ]}
+              >
+                {tiradaSeleccionada ? '✏️ Editar Tirada' : '🎲 Guardar Tirada'}
+              </Text>
+            </Pressable>
+
+            {tiradaSeleccionada && (
+              <Pressable
+                style={({ pressed }) => [
+                  styles.confirmarBoton,
+                  pressed && { opacity: 0.7, transform: [{ scale: 0.97 }] },
+                  , { backgroundColor: '#dd302abd', marginTop: 12, borderWidth: 1, borderColor: "gray" }
+                ]}
+                onPress={() => {
+                  eliminarTiradasPj(tiradaSeleccionada.idtirada);
+                  setTiradaSeleccionada(null);
+                  setModalVisibleTirada(false);
+                }}
+              >
+                <Text style={[styles.confirmarTexto, { color: '#fff' }]}>🗑️ Eliminar Tirada</Text>
+              </Pressable>
+            )}
+
+          </View>
+
+          {/* 
+          <Pressable onPress={() => setModalVisibleTirada(false)} style={{ marginTop: 10 }}>
+            <Text style={{ color: '#aaa' }}>Cancelar</Text>
+          </Pressable> 
+          */}
+
         </View>
-      </View>
-
- <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginBottom:20, }}>
-
-      <Pressable 
-           style={({ pressed }) => [
-            styles.confirmarBoton,
-            pressed && { opacity: 0.7, transform: [{ scale: 0.97 }] } // efecto al presionar
-          ]} 
-          onPress={() => {
-            // Aquí ejecutás la lógica de tirada
-            //console.log("Guardando tirada con:",nombreTirada, principal, secundaria, dadosD20, dadosD10Bono);
-            const idtirada = tiradaSeleccionada ? tiradaSeleccionada.idtirada : Date.now();
-            const tiradaPj={
-              idtirada, 
-              ippersonajes:p.idpersonaje,
-              nombre: nombreTirada || "",
-              principal:principal || 0,
-              secundaria:secundaria || 0,
-              dadosD20:dadosD20 || 0,
-              dadosD10Bono:dadosD10Bono|| 0,
-              dadosD10:dadosD10|| 0,
-              dadosD4Bono:dadosD4Bono || 0,
-              dadosD6Bono:dadosD6Bono || 0,
-              dadosD12Bono:dadosD12Bono|| 0,
-            }
-            agregarTiradaPj(tiradaPj)
-            setTiradaSeleccionada(null);
-            setNombreTirada("")
-            setModalVisibleTirada(false);
-          }}>
-
-
-         <Text
-          style={[
-            styles.confirmarTexto,
-            tiradaSeleccionada && { color: '#000', } // cambia color de texto si está editando
-          ]}
-        >
-          {tiradaSeleccionada ? '✏️ Editar Tirada' : '🎲 Guardar Tirada'}
-        </Text>
-      </Pressable>
-
-
-    {tiradaSeleccionada && (
-      <Pressable
-
-       style={({ pressed }) => [
-            styles.confirmarBoton,
-            pressed && { opacity: 0.7, transform: [{ scale: 0.97 }] } ,
-            , { backgroundColor: '#dd302abd', marginTop: 12, borderWidth:1, borderColor:"gray" }// efecto al presionar
-          ]} 
-   
-        onPress={() => {
-          eliminarTiradasPj(tiradaSeleccionada.idtirada);
-          setTiradaSeleccionada(null);
-          setModalVisibleTirada(false);
-        }}
-      >
-        <Text style={[styles.confirmarTexto, { color: '#fff' }]}>🗑️ Eliminar Tirada</Text>
-      </Pressable>
-    )}
-
-  </View>
-
-
-
-{/*
- <Pressable onPress={() => setModalVisibleTirada(false)} style={{ marginTop: 10 }}>
-        <Text style={{ color: '#aaa' }}>Cancelar</Text>
-      </Pressable>*/}
-     
+      </TouchableWithoutFeedback>
     </View>
-  </View>
-
   </TouchableWithoutFeedback>
-  
 </Modal>
 
 
@@ -692,7 +955,15 @@ useEffect(() => {
         }
       ]}
     >
-      <TouchableOpacity onPress={() => setModalVisibleTirada(true)} style={styles.botonToque}> 
+      <TouchableOpacity  
+      onPress={() => {
+        if (!tiradaSeleccionada) {
+          limpiarCamposTirada();
+        }
+        setModalVisibleTirada(true);
+      }}
+
+       style={styles.botonToque}> 
         <Text style={styles.botonPrincipalTexto}>+🎲</Text>
       </TouchableOpacity>
     </LinearGradient>
@@ -1224,7 +1495,7 @@ botones: {
 },
 boton: {
   backgroundColor: 'black',
-  paddingHorizontal: 16,
+  paddingHorizontal: 14,
   paddingVertical: 10,
   borderRadius: 18,
   width:40,
