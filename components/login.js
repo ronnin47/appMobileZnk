@@ -9,8 +9,6 @@ import { ImageBackground, StyleSheet, View, Text, TextInput, TouchableOpacity } 
 import { API_BASE_URL } from './config';
 
 
-
-//este componente inicial que renderiza la aplciaicon al ingresar
 export const LoginScreen = ({ navigation}) => {
 
  const { setUserToken, savePersonajes,setEstatus } = useContext(AuthContext);

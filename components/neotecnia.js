@@ -36,8 +36,6 @@ export const Neotecnia = () => {
       const { objetosNeo } = response.data;
 
 
-    
-
       if (Array.isArray(objetosNeo)) {
         const ordenadosPorNivel = [...objetosNeo].sort((a, b) => {
           const nivelA = parseInt(a.nivel) || 0;
