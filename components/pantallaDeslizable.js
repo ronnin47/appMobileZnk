@@ -72,7 +72,7 @@ const [tiradasGuardadasPj, setTiradasGuardadasPj] = useState([]);
 
  const agregarTiradaPj = async (nueva) => {
   const existe = tiradasGuardadasPj.find(t => t.idtirada === nueva.idtirada);
-
+ //console.log(nueva)
   let actualizadas;
   if (existe) {
     // Reemplazar tirada existente (editar)
@@ -125,20 +125,6 @@ const [tiradasGuardadasPj, setTiradasGuardadasPj] = useState([]);
       console.error('Error eliminando tirada:', e);
     }
   };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
