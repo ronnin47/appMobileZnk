@@ -72,7 +72,14 @@ export const BarraKen = ({ pj, ken,setKen,kenActual,setKenActual }) => {
   return (
    
 
-<View style={styles.container}>
+   <LinearGradient
+   colors={['#3ab222ff', '#141e30', '#000000']}
+           start={{ x: 0, y: 0 }}
+           end={{ x: 1, y: 0 }}
+           style={[
+             styles.container
+           ]}
+         >
 
   {/* Barra de Ken arriba */}
   <View style={styles.barraContenedor}>
@@ -118,17 +125,20 @@ export const BarraKen = ({ pj, ken,setKen,kenActual,setKenActual }) => {
     </LinearGradient>
   </View>
 
-</View>
+</LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#000',
-    padding: 16,
+    padding: 10,
     alignItems: 'center',
     borderRadius: 10,
     marginTop: 10,
+     borderWidth:0.3,
+    borderColor:"white",
+    borderRadius:10
   },
   kenTexto: {
     color: '#fff',
@@ -140,7 +150,7 @@ const styles = StyleSheet.create({
  
   barraContenedor: {
     width: '100%',
-    height: 16,
+   height: 19,
     backgroundColor: 'yellow',
     borderRadius: 8, // sin bordes redondeados
     marginVertical: 6,

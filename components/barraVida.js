@@ -320,7 +320,16 @@ const agregarDamage = async () => {
 
 
 return (
-  <View style={styles.container}>
+  
+      <LinearGradient
+  colors={['#b22222ff', '#141e30', '#000000']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={[
+          styles.container
+        ]}
+      >
+
     
 
     {/* Barra positiva */}
@@ -328,7 +337,7 @@ return (
       <View style={[styles.barraAmarilla, { width: '100%' }]} />
 
       <LinearGradient
-        colors={['#8B0000', '#B22222', '#FF4500']}
+      colors={['#aa8484', '#B22222', '#4B1C0B']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
         style={[
@@ -402,15 +411,20 @@ return (
       </Pressable>
   </LinearGradient>
     </View>
-  </View>
+
+      </LinearGradient>
+
 );
 };
 
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#000',
-    padding: 16,
+    padding: 10,
     alignItems: 'center',
+    borderWidth:0.3,
+    borderColor:"white",
+    borderRadius:10
   },
   estadoText: {
     color: 'black',
@@ -425,7 +439,7 @@ const styles = StyleSheet.create({
   },
   barraContenedor: {
     width: '100%',
-    height: 16,
+    height: 19,
     borderRadius: 8,
     overflow: 'hidden',
     marginVertical: 4,

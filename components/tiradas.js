@@ -1,6 +1,6 @@
 import React, { useContext, useState, useRef, useEffect,useMemo } from 'react';
 import { AuthContext } from './AuthContext';
-import { Dimensions,Animated, View,Text, TextInput, TouchableOpacity, StyleSheet, ScrollView,Image,Modal,Pressable,FlatList } from 'react-native';
+import { Dimensions,Animated, View,Text, TextInput, TouchableOpacity, StyleSheet, ScrollView,Image,Modal,Pressable,FlatList, Button } from 'react-native';
 import { ChatTiradas } from './chatTiradas';
 import { BarraVida } from './barraVida';
 import { BarraKi } from './barraKi';
@@ -78,8 +78,11 @@ const botonAnimRef = useRef(null);
   const [valTiradaD10Bono, setValTiradaD10Bono] = useState("");
   const [principal, setPrincipal] = useState("");
   const [secundaria, setSecundaria] = useState("");
- 
   const [modificador,setModificador]=useState("");
+
+  const [valPrincipal, setValPrincipal] = useState("");
+  const [valSecundaria, setValSecundaria] = useState("");
+  const [valModificador,setValModificador]=useState("");
 
   const [dadosD12Bono, setDadosD12Bono] = useState(0);
   const [dadosD6Bono, setDadosD6Bono] = useState(0);
@@ -88,8 +91,11 @@ const botonAnimRef = useRef(null);
   const [dadosD20, setDadosD20] = useState(0);
   const [dadosD10Bono, setDadosD10Bono] = useState(0);
   const [abierto, setAbierto] = useState(false);
-
-   const scrollRef = useRef(null);
+ 
+  const [mostrarResultadosTirada,setMostrarResultadosTirada]=useState(false)
+   
+ 
+ const scrollRef = useRef(null);
   const windowWidth = Dimensions.get('window').width;
  //MEJORA
     if (!pj || !pj.nombre) {
@@ -182,6 +188,11 @@ const personajesFavoritos = useMemo(() => {
   setValTiradaD20(d20.join(", "));
   setValTiradaD10Bono(d10Bono.join(", "));
   setSumaTirada(total);
+
+  setValPrincipal(principalValue);
+ setValSecundaria(secundariaValue);
+setValModificador(modificadorValue);
+
 
   const baset = principalValue + secundariaValue;
   let partes = [];
@@ -422,7 +433,8 @@ const caracteristicasSecundariasBase = [
   'frio',
   'veneno',
   'corte',
-  'energia'
+  'energia',
+  'fuerza',"fortaleza", 'destreza', 'agilidad', 'sentidos', 'presencia',"principio","sabiduria"
 ];
 // Objeto con los nombres personalizados que el jugador puso
 const extras = ['add1', 'add2', 'add3', 'add4', 'apCombate', 'apCombate2'];
@@ -448,7 +460,7 @@ const etiquetasLegibles = {
   academisismo: 'Academisismo',
   alerta: 'Alerta',
   atletismo: 'Atletismo',
-  conBakemono: 'Conocimiento de Bakemono',
+  conBakemono: 'Conocimiento Bakemono',
   mentir: 'Mentir',
   pilotear: 'Pilotear',
   artesMarciales: 'Artes Marciales',
@@ -458,11 +470,11 @@ const etiquetasLegibles = {
   conEsferas: 'Conocimiento de Esferas',
   conLeyendas: 'Conocimiento de Leyendas',
   forja: 'Forja',
-  conDemonio: 'Conocimiento de Demonio',
+  conDemonio: 'Conocimiento Demonio',
   conEspiritual: 'Conocimiento Espiritual',
   manejoBlaster: 'Manejo de Blaster',
   manejoSombras: 'Manejo de Sombras',
-  tratoBakemono: 'Trato con Bakemono',
+  tratoBakemono: 'Trato Bakemono',
   conHechiceria: 'Conocimiento de Hechicería',
   medVital: 'Medición Vital',
   medEspiritual: 'Medición Espiritual',
@@ -536,11 +548,39 @@ const etiquetasLegibles = {
      <ChatTiradas p={p}/>
 
       <ScrollView style={styles.container}>
+
+          <View style={styles.barras}>
+            <View >
+              <BarraVida            
+              setKenActual={setKenActual}
+              vidaActual={Number(vidaActual)||0}
+              setVidaActual={setVidaActual}
+              pj={p} ki={ki} setKi={setKi} fortaleza={fortaleza} setFortaleza={setFortaleza}  positiva={Number(positiva) || 0} negativa={Number(negativa) || 0} cicatriz={Number(cicatriz) || 0}>
+             </BarraVida>
+            </View>
+
+            <View>
+              <BarraKi 
+                kiActual={Number(kiActual)||0}
+                setKiActual={setKiActual}
+                consumision={consumision}
+                setConsumision={setConsumision}
+                pj={p} ki={ki} setKi={setKi}>
+              </BarraKi>
+            </View>
+
+            <View>
+              <BarraKen
+              kenActual={Number(kenActual)||0}
+              setKenActual={setKenActual}
+              pj={p} ken={ken} setKen={setKen}></BarraKen>
+            </View>       
+        </View>
       
         
         <TextInput
           style={styles.input}
-          placeholder="Atributo principal"
+          placeholder="Caracteristica principal"
           placeholderTextColor="#ccc"
           keyboardType="default"
           value={principal}
@@ -548,7 +588,7 @@ const etiquetasLegibles = {
         />
         <TextInput
           style={styles.input}
-          placeholder="Atributo secundario"
+          placeholder="Caracteristica secundaria"
           placeholderTextColor="#ccc"
           keyboardType="default"
           value={secundaria}
@@ -681,7 +721,7 @@ const etiquetasLegibles = {
                   paddingVertical: 8,
                   fontSize: 16,
                 }}
-                placeholder="Principal"
+                placeholder="Caracteristica principal"
                 placeholderTextColor="#888"
                 value={principal}
                 onChangeText={setPrincipal}
@@ -744,7 +784,7 @@ const etiquetasLegibles = {
     paddingVertical: 8,
     fontSize: 16,
   }}
-  placeholder="Secundaria"
+  placeholder="Caracteristica secundaria"
   placeholderTextColor="#888"
   value={secundaria}
   onChangeText={setSecundaria}
@@ -882,6 +922,7 @@ const etiquetasLegibles = {
                 }
                 agregarTiradaPj(tiradaPj)
                 setTiradaSeleccionada(null);
+                limpiarCamposTirada();
                 setNombreTirada("")
                 setModalVisibleTirada(false);
               }}
@@ -979,6 +1020,7 @@ const etiquetasLegibles = {
       style={styles.botonToque}
       onPress={() => {
         tirarDados();
+        limpiarCamposTirada();
         setTimeout(() => {
             botonAnimRef.current?.rubberBand(400); 
            Vibration.vibrate([80, 50, 80, 50, 150, 50, 300]);
@@ -1054,18 +1096,29 @@ const etiquetasLegibles = {
       })}
   </View>
 )}
+ 
 
+      
 
+      
+     <View>
+      <TouchableOpacity
+  onPress={() => setMostrarResultadosTirada(prev => !prev)}
+  activeOpacity={0.7}
+ style={[styles.acordeonHeader,{borderWidth:0.2, borderColor:"gray", borderRadius:8}]}
+>
+  <Text style={styles.acordeonTitulo}>
+    Resultado tirada {mostrarResultadosTirada ? '▲' : '▼'}
+  </Text>
+</TouchableOpacity>
 
-
-
-
-
-
-
-
-
-        <View style={styles.resultado}>
+      
+      </View>   
+       {mostrarResultadosTirada && (
+          <View style={styles.resultado}>
+          <Text style={styles.resultadoTexto}>Caracteristcia principal: {valPrincipal}</Text>
+          <Text style={styles.resultadoTexto}>Caracteristcia secundaria: {valSecundaria}</Text>
+          <Text style={styles.resultadoTexto}>Modificador: {valModificador}</Text>
           <Text style={styles.resultadoTexto}>D10 esfuerzo: {valTirada}</Text>
           <Text style={styles.resultadoTexto}>Bono D10 Ken: {valTiradaD10}</Text>
           <Text style={styles.resultadoTexto}>Bono D20 bono: {valTiradaD20}</Text>
@@ -1077,81 +1130,55 @@ const etiquetasLegibles = {
           
           <Text style={styles.resultadoTotal}>TOTAL: {sumaTirada}</Text>
         </View>
+       )}
 
-        <View style={styles.barras}>
-            <View >
-              <BarraVida            setKenActual={setKenActual}
-          
-            vidaActual={Number(vidaActual)||0}
-            setVidaActual={setVidaActual}
-             pj={p} ki={ki} setKi={setKi} fortaleza={fortaleza} setFortaleza={setFortaleza}  positiva={Number(positiva) || 0} negativa={Number(negativa) || 0} cicatriz={Number(cicatriz) || 0}></BarraVida>
-            </View>
-
-            <View>
-              <BarraKi 
-                kiActual={Number(kiActual)||0}
-                setKiActual={setKiActual}
-                consumision={consumision}
-                setConsumision={setConsumision}
-                pj={p} ki={ki} setKi={setKi}></BarraKi>
-            </View>
-
-            <View>
-              <BarraKen
-              kenActual={Number(kenActual)||0}
-              setKenActual={setKenActual}
-              pj={p} ken={ken} setKen={setKen}></BarraKen>
-            </View>       
-        </View>
-
-        
-        
          <View style={styles.acordeonContainer}>
-      <TouchableOpacity onPress={() => setAbierto(!abierto)} style={styles.acordeonHeader}>
-        <Text style={styles.acordeonTitulo}>Fases y cicatrices {abierto ? '▲' : '▼'}</Text>
-      </TouchableOpacity>
+              <TouchableOpacity onPress={() => setAbierto(!abierto)} style={styles.acordeonHeader}>
+                <Text style={styles.acordeonTitulo}>Fases y cicatrices {abierto ? '▲' : '▼'}</Text>
+              </TouchableOpacity>
 
-      {abierto && (
-  <View style={styles.inputsContainer}>
-    <View style={styles.inputGroup}>
-       <Text style={styles.labelFases}>Fases de Salud {faseSalud} pv</Text>
-      <Text style={styles.label}>Fases positivas</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Fases positivas"
-        placeholderTextColor="#aaa"
-        value={positiva}
-        onChangeText={setPositiva}
-        keyboardType="numbers-and-punctuation"
-      />
-    </View>
+              {abierto && (
+                <View style={styles.inputsContainer}>
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.labelFases}>Fases de Salud {faseSalud} pv</Text>
+                    <Text style={styles.label}>Fases positivas</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Fases positivas"
+                      placeholderTextColor="#aaa"
+                      value={positiva}
+                      onChangeText={setPositiva}
+                      keyboardType="numbers-and-punctuation"
+                    />
+                  </View>
 
-    <View style={styles.inputGroup}>
-      <Text style={styles.label}>Fases negativas</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Fases negativas"
-        placeholderTextColor="#aaa"
-        value={negativa}
-        onChangeText={setNegativa}
-        keyboardType="numbers-and-punctuation"
-      />
-    </View>
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.label}>Fases negativas</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Fases negativas"
+                      placeholderTextColor="#aaa"
+                      value={negativa}
+                      onChangeText={setNegativa}
+                      keyboardType="numbers-and-punctuation"
+                    />
+                  </View>
 
-    <View style={styles.inputGroup}>
-      <Text style={styles.label}>Puntos de cicatrices</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Puntos de cicatrices"
-        placeholderTextColor="#aaa"
-        value={cicatriz}
-        onChangeText={setCicatriz}
-        keyboardType="numbers-and-punctuation"
-      />
-    </View>
-  </View>
-)}
-    </View>
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.label}>Puntos de cicatrices</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Puntos de cicatrices"
+                      placeholderTextColor="#aaa"
+                      value={cicatriz}
+                      onChangeText={setCicatriz}
+                      keyboardType="numbers-and-punctuation"
+                    />
+                  </View>
+                </View>
+              )}
+         </View>
+
       </ScrollView>
     </>
   );
@@ -1247,9 +1274,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   resultado: {
-    marginTop: 20,
+    
     padding: 10,
-    backgroundColor: "#2a2a2a",
+    backgroundColor: "black",
     borderRadius: 6,  
   },
   resultadoTexto: {
@@ -1279,7 +1306,8 @@ dadoRow: {
   marginBottom: 8,
 },
 barras: {
-  marginBottom:50,
+  marginBottom:20,
+  marginTop:10,
 },
  acordeonContainer: {
     marginVertical: 10,
@@ -1558,5 +1586,23 @@ botonTirada: {
 saved: {
   color: 'white',
   fontSize: 16,
+},
+acordeonResults: {
+  backgroundColor: '#333',       // fondo oscuro elegante
+  color: '#fff',                 // texto blanco
+  paddingVertical: 10,
+  paddingHorizontal: 16,
+  borderRadius: 16,
+  fontSize: 14,
+  fontWeight: 'bold',
+  textAlign: 'center',
+  overflow: 'hidden',
+  elevation: 3,                  // sombra Android
+  shadowColor: '#000',          // sombra iOS
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.3,
+  shadowRadius: 4,
+  borderWidth:0.5,
+  borderColor:"white"
 },
 });
