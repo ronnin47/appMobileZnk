@@ -1556,7 +1556,29 @@ app.delete('/deleteObjetoH/:idobjeto', async (req, res) => {
   }
 });
 
+  
+app.get('/buscarHistorialPj', async (req, res) => {
+  const { nombre } = req.query; // o req.body si es POST
+  //console.log("lo que viene ", req.query)
 
+  try {
+    const result = await pool.query(
+      `SELECT * FROM (
+         SELECT * FROM mensajes
+         WHERE REPLACE(LOWER(nombre), ' ', '') = REPLACE(LOWER($1), ' ', '')
+         ORDER BY id DESC
+         LIMIT 100
+       ) sub
+       ORDER BY id ASC`,
+      [nombre]
+    );
+
+    res.status(200).json({ historialPj: result.rows });
+  } catch (error) {
+    console.error('Error al consumir historial de personaje:', error);
+    res.status(500).json({ error: 'Error interno al obtener historial de personaje' });
+  }
+});
 
 
 

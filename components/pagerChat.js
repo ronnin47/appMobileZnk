@@ -1,9 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState,useContext } from 'react';
 import { View, StyleSheet } from 'react-native';
 import PagerView from 'react-native-pager-view';
 import Chat from './chat';
 import { PageDerechaChat } from './pageDerechaChat';
+import { PageDerechaChat2 } from './pageDerechaChat2';
 
 export const PagerChat = () => {
   const [tiradasGuardadas, setTiradasGuardadas] = useState([]);
@@ -52,6 +53,11 @@ export const PagerChat = () => {
       </View>
       <View key="2" style={styles.page}>
         <PageDerechaChat
+        />
+       
+      </View>
+       <View key="3" style={styles.page}>
+        <PageDerechaChat2
           agregarTirada={agregarTirada}
           eliminarTiradas={eliminarTiradas}
           tiradasGuardadas={tiradasGuardadas}
