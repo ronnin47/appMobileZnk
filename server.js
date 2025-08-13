@@ -66,6 +66,7 @@ function normalizarMensaje(mensaje) {
 io.on('connection', (socket) => {
   console.log(`Socket conectado: ${socket.id}`);
 
+  // Eventos que ya tienes para la app móvil
   socket.on('user-connected', (userData) => {
     const { usuarioId, sesion } = userData;
     if (usuarioId && sesion) {
@@ -138,7 +139,6 @@ io.on('connection', (socket) => {
 
     } catch (error) {
       console.error('❌ Error al guardar mensaje en DB:', error);
-      // Opcional: asignar un id temporal para no romper la UI
       msgNormalizado.id = Date.now().toString() + Math.random().toString(36).substring(2);
     }
 
@@ -148,11 +148,74 @@ io.on('connection', (socket) => {
     io.emit('chat-chat', msgNormalizado);
   });
 
+  // Eventos que usa la web
+  socket.on('message', async (mensaje) => {
+    const msgNormalizado = normalizarMensaje(mensaje);
+
+    try {
+      const insertQuery = `
+        INSERT INTO mensajes (
+          "usuarioId", idpersonaje, nombre, mensaje, estatus,
+          imagenurl, "imagenPjUrl", nick,
+          "kenActual", ken, "kiActual", ki,
+          "vidaActual", "vidaTotal", timestamp, tipo
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+        RETURNING id
+      `;
+
+      const { rows } = await pool.query(insertQuery, [
+        msgNormalizado.usuarioId,
+        msgNormalizado.idpersonaje,
+        msgNormalizado.nombre,
+        msgNormalizado.mensaje,
+        msgNormalizado.estatus,
+        msgNormalizado.imagenurl,
+        msgNormalizado.imagenPjUrl,
+        msgNormalizado.nick,
+        msgNormalizado.kenActual,
+        msgNormalizado.ken,
+        msgNormalizado.kiActual,
+        msgNormalizado.ki,
+        msgNormalizado.vidaActual,
+        msgNormalizado.vidaTotal,
+        msgNormalizado.timestamp,
+        msgNormalizado.tipo,
+      ]);
+
+      msgNormalizado.id = rows[0].id;
+    } catch (error) {
+      console.error('Error al guardar mensaje en DB:', error);
+      msgNormalizado.id = Date.now().toString() + Math.random().toString(36).substring(2);
+    }
+
+    io.emit('message', msgNormalizado);
+  });
+
+  socket.on('image', (imageData) => {
+    io.emit('image', imageData);
+  });
+
+  socket.on('removeImage', (idpersonaje) => {
+    console.log(`Eliminando personaje con id: ${idpersonaje}`);
+    io.emit('removeImage', idpersonaje);
+  });
+
+  socket.on('user-disconnect', (data) => {
+    const { usuarioId } = data;
+    const socketId = [...connectedUsers.entries()].find(([key, value]) => value === usuarioId)?.[0];
+    if (socketId) {
+      connectedUsers.delete(socketId);
+      console.log(`Usuario ${usuarioId} se desconectó por cierre de sesión.`);
+      io.emit('connected-users', Array.from(connectedUsers.values()));
+    }
+  });
+
   socket.on('disconnect', () => {
-    const usuarioDesconectado = connectedUsers.get(socket.id);
-    if (usuarioDesconectado) {
-      console.log(`Usuario ${usuarioDesconectado} desconectado.`);
+    const usuarioId = connectedUsers.get(socket.id);
+    if (usuarioId) {
       connectedUsers.delete(socket.id);
+      console.log(`Usuario ${usuarioId} se desconectó.`);
+      io.emit('user-disconnect', { usuarioId });
       io.emit('connected-users', Array.from(connectedUsers.values()));
     }
   });
