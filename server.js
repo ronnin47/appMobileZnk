@@ -25,7 +25,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 
 
-//SOCKETIO
+//SOCKETIO esta es la prueba para construir
 const server = http.createServer(app);
 // Inicializa el servidor de Socket.IO
 const io = new Server(server, {
