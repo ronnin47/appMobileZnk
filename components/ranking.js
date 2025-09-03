@@ -5,6 +5,7 @@ import { Estrellitas } from './estrellitas'; // adaptado también
 import { FlatList } from 'react-native';
 import { BackHandler } from 'react-native'; // 👈 asegurate de importar esto
 
+
 const Cartita = ({
   idpersonaje,
   nombre,
@@ -20,7 +21,7 @@ const Cartita = ({
 }) => {
   const [showModal, setShowModal] = useState(false);
   const isLeyenda = ken >= 400;
-
+ const imagenBase = require('../assets/imagenBase.jpeg');
 
     // 👇 Efecto para manejar el botón "Atrás"
   useEffect(() => {
@@ -43,7 +44,7 @@ const Cartita = ({
     <>
       <TouchableOpacity onPress={() => setShowModal(true)} style={[styles.card, isLeyenda && styles.cardLeyenda]}>
         <Text style={styles.rankNumber}>{rank}</Text>
-        <Image source={{ uri: imagenurl }} style={styles.cardImage} />
+        <Image   source={imagenurl ? { uri: imagenurl } : imagenBase} style={styles.cardImage} />
         <Estrellitas ken={ken} />
         <Text style={styles.name}>{nombre}</Text>
         <Text style={styles.domain}>{dominio}</Text>
@@ -71,6 +72,8 @@ const Cartita = ({
 
 
 const CartaUnica = ({ nombre, dominio, ken, imagenurl, historia, naturaleza, conviccion }) => {
+
+  const imagenBase = require('../assets/imagenBase.jpeg');
   return (
     <ScrollView style={styles.modalContainer}>
       <View style={styles.modalHeader}>
@@ -78,7 +81,7 @@ const CartaUnica = ({ nombre, dominio, ken, imagenurl, historia, naturaleza, con
         <Estrellitas ken={parseInt(ken) || 0} />
       </View>
 
-      <Image source={{ uri: imagenurl }} style={styles.modalImage} />
+      <Image source={imagenurl ? { uri: imagenurl } : imagenBase} style={styles.modalImage} />
 
       <View style={styles.modalInfo}>
         <Text style={styles.modalText}>Dominio: {dominio}</Text>
@@ -104,11 +107,8 @@ export const Ranking = () => {
   // Ordenar toda la colección por ken descendente
   const coleccionOrdenada = [...coleccionPersonajes].sort((a, b) => b.ken - a.ken);
 
-  // Crear un diccionario para rankear cada personaje según su posición en el ranking global
-  const rankingMap = {};
-  coleccionOrdenada.forEach((pj, index) => {
-    rankingMap[pj.idpersonaje] = index + 1;
-  });
+ 
+
 
   // Filtrar la colección según la búsqueda y otros criterios
   const personajesFiltrados = coleccionOrdenada.filter((pj) => {
@@ -123,6 +123,13 @@ export const Ranking = () => {
       (pj.vidaActual <= vidaTotal || pj.ken >= 400)
     );
   });
+
+   // Crear un diccionario para rankear cada personaje según su posición en el ranking global
+ // Después de filtrar
+const rankingMap = {};
+personajesFiltrados.forEach((pj, index) => {
+  rankingMap[pj.idpersonaje] = index + 1;
+});
 
   return (
     <View style={styles.container}>
@@ -153,6 +160,9 @@ export const Ranking = () => {
   );
 };
 
+
+
+//estilos
 const styles = StyleSheet.create({
  container: {
     flex: 1,
