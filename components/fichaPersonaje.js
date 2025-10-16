@@ -60,6 +60,7 @@ const check = Array.isArray(favoritos) && pjSeleccionado
 
 
 
+
 //ACA LOS STATES
   const [nombre,setNombre]=useState(p.nombre != null ? String(p.nombre) : '');
   const [imagen,setImagen]=useState(p.imagen);
@@ -150,6 +151,10 @@ const check = Array.isArray(favoritos) && pjSeleccionado
 
 
 
+const manejarToggleMarca = () => {
+  setPjPnj(prev => !prev); // Cambia entre true y false
+  console.log("dispara marca del destino, nuevo valor:", !pjPnj);
+};
   //uno nuevo que va ser la url
   
 const [imagenurl, setImagenurl] = useState(p.imagenurl || '');
@@ -536,15 +541,13 @@ const colorPlaceHolder="#888"
         onChangeText={setNombre}
       />
 
-       <TouchableOpacity onPress={manejarToggle} style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 10 }}>
-      <Text style={{ fontSize: 22, color: 'white',marginRight:0  }}>{check ? '✅' : '⬜'}</Text>
-      <Text style={{ marginLeft: 4, color: 'white',marginRight:4 }}>Favorito</Text>
-       </TouchableOpacity>
+       
 
       <TouchableOpacity style={styles.botonGuardar} onPress={guardarCambiosBBDD}>
         <Icon name="save" size={24} color="#00FF00" />
       </TouchableOpacity>
           </View>
+         
 
           <View style={styles.rowContainer}>
           <View style={styles.imageContainer}>
@@ -573,6 +576,7 @@ const colorPlaceHolder="#888"
         </View>
 
           </View>
+
 
           
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10 }}>
@@ -631,6 +635,24 @@ const colorPlaceHolder="#888"
 
 
      
+       <View style={{ flexDirection: 'row', alignItems: 'center',  justifyContent: 'center',gap:20, marginVertical: 5 }}>
+            <TouchableOpacity
+              onPress={manejarToggleMarca}
+              style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 5 }}
+            >
+              <Text style={{ fontSize: 16, color: 'white', marginRight: 0 }}>
+                {p.pjPnj ? '☑️' : '⬜'}
+              </Text>
+              <Text style={{ marginLeft: 4, color: 'white', marginRight: 4 }}>
+                Marca del destino
+              </Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity onPress={manejarToggle} style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 5 }}>
+            <Text style={{ fontSize: 16, color: 'white',marginRight:0  }}>{check ? '✅' : '⬜'}</Text>
+            <Text style={{ marginLeft: 4, color: 'white',marginRight:4 }}>Favorito</Text>
+            </TouchableOpacity>
+      </View>
 
 
 
