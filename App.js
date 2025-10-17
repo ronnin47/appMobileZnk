@@ -21,6 +21,10 @@ import { AuthProvider } from './components/AuthProvider';
 import { Ranking } from './components/ranking';
 import { Sagas } from './components/sagas';
 import { PoderesUnicos } from './components/poderesUnicos';
+
+
+import { Logros } from './components/logros';
+
 import { ErrorBoundary } from './ErrorBoundary'; // o la ruta correcta
 import FlashMessage from 'react-native-flash-message';
 import { Platform } from 'react-native';
@@ -198,6 +202,23 @@ if (isLoading) {
       <Stack.Screen name="Poderes Unicos" component={PoderesUnicos}
        options={{
           headerTitle: 'Poderes Unicos', // o '' si no querés texto
+          headerBackTitleVisible: false,
+          headerStyle: {
+            backgroundColor: '#121212', // Fondo oscuro
+            height: 80,
+          },
+          headerTintColor: 'white', // Color de la flechita y backTitle
+          headerTitleStyle: {
+            color: 'white', // ✅ Color del texto del título
+            fontWeight: 'bold',
+            fontSize: 20,
+          },
+        }} />
+
+
+       <Stack.Screen name="Logros" component={Logros}
+       options={{
+          headerTitle: 'Logros', // o '' si no querés texto
           headerBackTitleVisible: false,
           headerStyle: {
             backgroundColor: '#121212', // Fondo oscuro

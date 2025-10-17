@@ -172,7 +172,7 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
   const universoCelesteItems = [
     { id: 'ranking', nombre: 'Ranking', imagen:"https://res.cloudinary.com/dzul1hatw/image/upload/v1753555471/puerta_mo6o6p.jpg"},
     { id: 'poderesUnicos', nombre: 'Poderes Unicos', imagen:"https://res.cloudinary.com/dzul1hatw/image/upload/v1753555606/tecnicaEspecial_e0glko.jpg" },
-    { id: 'reglas', nombre: 'Reglas', imagen: "https://res.cloudinary.com/dzul1hatw/image/upload/v1753280092/tesoros/tesoro_24.jpg" },
+    { id: 'logros', nombre: 'Logros', imagen: "https://res.cloudinary.com/dzul1hatw/image/upload/v1753280092/tesoros/tesoro_24.jpg" },
   ];
 
 
@@ -225,6 +225,8 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
               navigation.navigate('Ranking');
             } else if(item.id=="poderesUnicos") {
                navigation.navigate('Poderes Unicos');
+            }else if(item.id=="logros") {
+               navigation.navigate('Logros');
             }else {
               alert(`Seleccionaste ${item.nombre}`);
             }

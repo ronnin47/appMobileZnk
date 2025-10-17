@@ -410,6 +410,7 @@ app.get('/consumirPersonajesUsuario', async (req, res) => {
   }
 });
 
+
 //OK
 app.post('/insert-personaje', async (req, res) => {
   const {
@@ -1247,6 +1248,83 @@ app.delete('/deleteObjetoMagico/:idobjeto', async (req, res) => {
 });
 
 
+
+
+
+
+
+app.get('/consumirLogros', async (req, res) => {
+  try {
+    
+    //const { usuarioId } = req.query;
+   // console.log("el id del usuario es: ",usuarioId)
+    const userQuery = `
+      SELECT *
+      FROM logros;
+    `;
+
+
+
+
+    const userResult = await pool.query(userQuery);
+
+   
+   if (userResult.rows.length === 0) {
+  return res.status(200).json({
+    message: 'Usuario sin personajes aún',
+    logrosConsumidos: [],  // ← importante
+  });
+}
+
+    const logrosConsumidos = userResult.rows;
+
+
+  
+   
+
+    
+    res.json({
+      message: 'Peticion de logros exitosa!',
+      logrosConsumidos: logrosConsumidos,   
+    });
+
+  } catch (error) {
+    console.error('Error al obtener logros consumidos de la base de datos:', error);
+    res.status(500).json({ message: 'Error en el servidor' });
+  }
+});
+
+
+
+
+app.post('/insertarLogro', async (req, res) => {
+  try {
+    const { nombre, descripcion } = req.body;
+
+    if (!nombre || nombre.trim() === '') {
+      return res.status(400).json({ error: 'El campo nombre es obligatorio' });
+    }
+
+    const query = `
+      INSERT INTO logros (nombre, descripcion)
+      VALUES ($1, $2)
+      RETURNING *;
+    `;
+
+    const values = [nombre, descripcion || null]; // descripción opcional
+
+    const result = await pool.query(query, values);
+
+    return res.status(201).json({
+      message: 'Logro insertado correctamente',
+      logro: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error('Error en /insertarLogro:', error);
+    return res.status(500).json({ error: 'Error del servidor al insertar logro' });
+  }
+});
 
 
 
