@@ -1,8 +1,9 @@
 
+import 'react-native-gesture-handler';
 import { StyleSheet, Text, View, Dimensions, ScrollView,Image } from 'react-native';
 import React, { useContext } from 'react';
 import { useState } from 'react';
-import 'react-native-gesture-handler';
+
 import { Carrusel } from './carrusel';
 import { AuthContext } from './AuthContext';
 import { TouchableOpacity } from 'react-native';

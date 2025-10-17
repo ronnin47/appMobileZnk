@@ -1,3 +1,6 @@
+//import 'react-native-gesture-handler';
+//import 'react-native-reanimated';
+
 import { useNavigationState } from '@react-navigation/native';
 import React, { useContext,useEffect,useState,useRef } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
@@ -36,7 +39,7 @@ const Stack = createStackNavigator();
 
 //SplashScreen.preventAutoHideAsync();
 
-export const App = () => {
+const App = () => {
    const [appIsReady, setAppIsReady] = useState(false);
 
   useEffect(() => {
@@ -379,3 +382,5 @@ loadingText: {
 },
   
 });
+
+export default App;

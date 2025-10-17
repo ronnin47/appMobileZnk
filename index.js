@@ -1,9 +1,7 @@
+import 'react-native-gesture-handler';
+import 'react-native-reanimated';
+import React from 'react';
 import { registerRootComponent } from 'expo';
+import App from './App';
 
-//componente de inicio
-import { App } from './App';
-
-
-
-//le manda al o crea un root con App
 registerRootComponent(App);
