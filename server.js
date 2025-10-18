@@ -1299,25 +1299,61 @@ app.get('/consumirLogros', async (req, res) => {
 
 app.post('/insertarLogro', async (req, res) => {
   try {
-    const { nombre, descripcion } = req.body;
+    const { nombre, descripcion, categoria, nivel, imagen, personajesids } = req.body;
+
+    console.log("",personajesids)
 
     if (!nombre || nombre.trim() === '') {
       return res.status(400).json({ error: 'El campo nombre es obligatorio' });
     }
 
+    // 1. Insertar el logro sin la imagen aún
     const query = `
-      INSERT INTO logros (nombre, descripcion)
-      VALUES ($1, $2)
+      INSERT INTO logros (nombre, descripcion, categoria, nivel, personajesids)
+      VALUES ($1, $2, $3, $4, $5)
       RETURNING *;
     `;
-
-    const values = [nombre, descripcion || null]; // descripción opcional
-
+    const values = [nombre, descripcion, categoria, nivel, personajesids];
     const result = await pool.query(query, values);
+    const newId = result.rows[0].id;
 
+    let imageUrl = null;
+
+    // 2. Subir la imagen si existe
+    if (imagen) {
+      const matches = imagen.match(/^data:image\/(\w+);base64,(.+)$/);
+      if (!matches) return res.status(400).json({ error: 'Imagen base64 inválida.' });
+
+      const ext = matches[1];
+      const data = matches[2];
+
+      const uploadResult = await cloudinary.uploader.upload(
+        `data:image/${ext};base64,${data}`,
+        {
+          folder: 'logros',
+          public_id: `logros_${newId}`,
+          overwrite: true,
+        }
+      );
+
+      imageUrl = uploadResult.secure_url;
+      const imageCloudId = uploadResult.public_id;
+
+      // 3. Actualizar la fila con la URL y el Cloud ID
+      await pool.query(
+        'UPDATE logros SET imagenurl = $1, imagencloudid = $2 WHERE id = $3',
+        [imageUrl, imageCloudId, newId]
+      );
+    }
+
+    // 4. Recuperar el logro completo ya con la URL actualizada
+    const updatedResult = await pool.query('SELECT * FROM logros WHERE id = $1', [newId]);
+    const logroCompleto = updatedResult.rows[0];
+
+    // 5. Responder con el logro completo
     return res.status(201).json({
       message: 'Logro insertado correctamente',
-      logro: result.rows[0]
+      logro: logroCompleto,
     });
 
   } catch (error) {
@@ -1325,6 +1361,7 @@ app.post('/insertarLogro', async (req, res) => {
     return res.status(500).json({ error: 'Error del servidor al insertar logro' });
   }
 });
+
 
 
 
