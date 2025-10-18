@@ -26,7 +26,7 @@ const imagenBase = require('../assets/imagenBase.jpeg');
 
 export const Logros = () => {
   const [logros, setLogros] = useState([]);
-  const { userToken,coleccionPersonajes } = useContext(AuthContext);
+  const { userToken,coleccionPersonajes,estatus } = useContext(AuthContext);
 
   // nuevos estados para el insert
   const [nombreNuevo, setNombreNuevo] = useState('');
@@ -199,63 +199,115 @@ setResultadosPersonajes([]);
   return (
     <>
       <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 120 }}>
-        {/* Header / Título */}
-        <Text style={styles.titulo}>Logros</Text>
+      
 
-       {/* Listado de logros */}
-<ScrollView style={{ width: '100%' }} contentContainerStyle={{ padding: 16 }}>
+  {/* Listado de logros */}
+<ScrollView style={{ width: '100%' }} contentContainerStyle={{ padding: 12 }}>
   {logros.length > 0 ? (
     logros.map((logro, index) => (
-      <View key={logro.id || index} style={styles.logroItem}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Image
-            source={{ uri: logro.imagen || logro.imagenurl || Image.resolveAssetSource(imagenBase).uri }}
-            style={styles.objetoImagenMini}
-          />
-          <View style={{ marginLeft: 10, flex: 1 }}>
-            <Text style={styles.logroTitulo}>{logro.nombre}</Text>
-            {logro.descripcion ? <Text style={styles.logroDesc}>{logro.descripcion}</Text> : null}
-            {logro.categoria ? <Text style={[styles.label, { marginTop: 6 }]}>{logro.categoria}</Text> : null}
+      <TouchableOpacity
+        key={logro.id || index}
+        activeOpacity={0.8}
+        style={{
+          backgroundColor: '#1b1d23',
+          marginBottom: 16,
+          borderRadius: 10,
+          borderWidth: 1,
+          borderColor: 'gray',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Imagen estilo BANNER */}
+        <Image
+          source={{ uri: logro.imagenurl || Image.resolveAssetSource(imagenBase).uri }}
+          style={{
+            width: '100%',
+            height: 120,
+            resizeMode: 'cover',
+          }}
+        />
 
+        {/* Contenido */}
+        <View style={{ padding: 12 }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#f1f1f1' }}>
+            {logro.nombre}
+          </Text>
 
+          {logro.descripcion ? (
+            <Text style={{ fontSize: 13, color: '#c4c4c4', marginTop: 4 }}>
+              {logro.descripcion}
+            </Text>
+          ) : null}
 
+          {/* Categoría */}
+          {logro.categoria && (
+            <Text
+              style={{
+                marginTop: 6,
+                fontSize: 12,
+                color: '#fff',
+                backgroundColor: '#6c63ff',
+                alignSelf: 'flex-start',
+                paddingHorizontal: 8,
+                paddingVertical: 2,
+                borderRadius: 6,
+                overflow: 'hidden',
+              }}
+            >
+              {logro.categoria}
+            </Text>
+          )}
 
+          {/* Personajes vinculados */}
+          {Array.isArray(logro.personajesids) && logro.personajesids.length > 0 && (
+            <View style={{ marginTop: 10 }}>
+              <Text style={{ color: '#aaa', marginBottom: 6 }}>Personajes relacionados:</Text>
 
-            {/* Personajes asociados */}
-           {/* Personajes asociados */}
-{logro.personajesids && logro.personajesids.length > 0 && (
-  <ScrollView horizontal style={{ marginTop: 8 }}>
-    {logro.personajesids.map((idPers) => {
-      const personaje = coleccionPersonajes.find(p => p.idpersonaje === idPers);
-      if (!personaje) return null;
-      return (
-        <View key={personaje.idpersonaje} style={{ alignItems: 'center', marginRight: 8 }}>
-          <Image
-            source={{ uri: personaje.imagenurl || Image.resolveAssetSource(imagenBase).uri }}
-            style={{ width: 40, height: 40, borderRadius: 20 }}
-          />
-          <Text style={{ color: '#fff', fontSize: 12 }}>{personaje.nombre}</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {logro.personajesids.map((idPers) => {
+                  const personaje = coleccionPersonajes.find(p => p.idpersonaje === idPers);
+                  if (!personaje) return null;
+                  return (
+                    <View
+                      key={personaje.idpersonaje}
+                      style={{ alignItems: 'center', marginRight: 10 }}
+                    >
+                      <Image
+                        source={{ uri: personaje.imagenurl || Image.resolveAssetSource(imagenBase).uri }}
+                        style={{
+                          width: 45,
+                          height: 45,
+                          borderRadius: 25,
+                          borderWidth: 2,
+                          borderColor: '#6c63ff',
+                        }}
+                      />
+                      <Text style={{ color: '#fff', fontSize: 11, marginTop: 3 }}>
+                        {personaje.nombre}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          )}
         </View>
-      );
-    })}
-  </ScrollView>
-)}
-          </View>
-        </View>
-      </View>
+      </TouchableOpacity>
     ))
   ) : (
-    <View>
-      <Text style={styles.noResultados}>Este será el nuevo componente de logros</Text>
-    </View>
+    <Text style={{ color: '#ccc', textAlign: 'center', marginTop: 20 }}>
+      No hay logros cargados todavía...
+    </Text>
   )}
 </ScrollView>
+
       </ScrollView>
 
       {/* Floating Button moderno para "Nuevo Logro" */}
-      <TouchableOpacity style={styles.fab} onPress={openModal} activeOpacity={0.8}>
+      {estatus=="narrador"? (<TouchableOpacity style={styles.fab} onPress={openModal} activeOpacity={0.85}>
         <Text style={styles.fabText}>+</Text>
-      </TouchableOpacity>
+      </TouchableOpacity>):(<></>)}
+      
 
       {/* Modal para crear logro */}
       <Modal
@@ -568,92 +620,154 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 
-  // FAB (botón flotante)
-  fab: {
-    position: 'absolute',
-    right: 18,
-    bottom: 24,
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#1e90ff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-  },
-  fabText: {
-    color: '#fff',
-    fontSize: 34,
-    lineHeight: Platform.OS === 'ios' ? 36 : 34,
-    fontWeight: '700',
-  },
+ fab: {
+  position: 'absolute',
+  bottom: 85, // ← Subido para que no quede tan abajo
+  right: 22,
+  backgroundColor: '#6c63ff',
+  width: 65,
+  height: 65,
+  borderRadius: 35,
+  justifyContent: 'center',
+  alignItems: 'center',
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 6 },
+  shadowOpacity: 0.35,
+  shadowRadius: 6,
+  elevation: 10,
+  borderWidth: 2,
+  borderColor: '#a29bfe',
+},
+
+fabText: {
+  color: '#fff',
+  fontSize: 34,
+  fontWeight: 'bold',
+  marginTop: -2,
+},
 
   // Modal
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  modalContainer: {
-    backgroundColor: '#0b0b0b',
-    borderRadius: 12,
-    padding: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 10,
-    alignSelf: 'center',
-    width: '100%',
-  },
-  modalScroll: {
-    paddingBottom: 12,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  modalTitle: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  closeButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-  },
-  closeButtonText: {
-    color: '#ccc',
-    fontWeight: '600',
-  },
+ modalOverlay: {
+  flex: 1,
+  backgroundColor: 'rgba(0,0,0,0.85)',
+  justifyContent: 'center',
+  padding: 12,
+},
 
-  actionsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 12,
-  },
-  cancelButton: {
-    backgroundColor: '#444',
-    marginRight: 10,
-  },
-  saveButton: {
-    backgroundColor: '#28a745',
-    flex: 1,
-  },
+modalContainer: {
+  backgroundColor: '#1f232e',
+  borderRadius: 14,
+  padding: 16,
+  borderWidth: 1,
+  borderColor: '#32384a',
+  width: '100%',
+  alignSelf: 'center',
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 6 },
+  shadowOpacity: 0.5,
+  shadowRadius: 12,
+  elevation: 12,
+},
 
-  noResultados: {
-    color: '#888',
-    fontStyle: 'italic',
-    marginBottom: 10,
-    paddingLeft: 6,
-  },
+modalHeader: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: 12,
+  borderBottomWidth: 1,
+  borderBottomColor: '#333',
+  paddingBottom: 6,
+},
+
+modalTitle: {
+  fontSize: 20,
+  fontWeight: 'bold',
+  color: '#f8f8f8',
+},
+
+closeButton: {
+  backgroundColor: '#ff4747',
+  paddingHorizontal: 12,
+  paddingVertical: 6,
+  borderRadius: 6,
+},
+
+closeButtonText: {
+  color: '#fff',
+  fontWeight: 'bold',
+},
+
+input: {
+  backgroundColor: '#2a2f3a',
+  color: '#fff',
+  padding: 10,
+  borderRadius: 6,
+  borderWidth: 1,
+  borderColor: '#3b4252',
+  marginBottom: 10,
+},
+
+actionsRow: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  marginTop: 15,
+},
+
+button: {
+  flex: 1,
+  paddingVertical: 10,
+  marginHorizontal: 6,
+  borderRadius: 6,
+  alignItems: 'center',
+},
+
+cancelButton: {
+  backgroundColor: '#444',
+},
+
+saveButton: {
+  backgroundColor: '#6c63ff',
+},
+
+buttonText: {
+  color: '#fff',
+  fontWeight: 'bold',
+},
+
+modalScroll: {
+  paddingBottom: 20,
+},
+
+cargarImagen: {
+  marginTop: 15,
+  alignItems: 'center',
+  backgroundColor: '#2a2f3a',
+  padding: 12,
+  borderRadius: 8,
+  borderWidth: 1,
+  borderColor: '#3b4252',
+},
+
+imagenCargar: {
+  width: 120,
+  height: 120,
+  borderRadius: 12,
+  borderWidth: 2,
+  borderColor: '#040313ff',
+  marginTop: 10,
+},
+
+boton: {
+  backgroundColor: '#6c63ff',
+  paddingHorizontal: 16,
+  paddingVertical: 8,
+  borderRadius: 6,
+},
+
+botonTexto: {
+  color: '#fff',
+  fontWeight: '500',
+},
 });
 
 
