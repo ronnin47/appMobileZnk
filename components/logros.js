@@ -4,6 +4,7 @@ import { AuthContext } from './AuthContext';
 import axios from 'axios';
 import { showMessage } from 'react-native-flash-message';
 import { API_BASE_URL } from './config';
+import { TouchableWithoutFeedback, Keyboard } from 'react-native';
 
 import {
   View,
@@ -39,6 +40,11 @@ export const Logros = () => {
   const [imagenUrl, setImagenUrl] = useState(Image.resolveAssetSource(imagenBase).uri); // para previsualizar
 
   const [modalVisible, setModalVisible] = useState(false);
+
+
+
+  const [modalVerVisible, setModalVerVisible] = useState(false);
+const [logroSeleccionado, setLogroSeleccionado] = useState(null);
 
 
 const [busquedaPersonaje, setBusquedaPersonaje] = useState('');
@@ -196,103 +202,169 @@ setResultadosPersonajes([]);
     }
   };
 
+// Dentro de Logros.js, antes del return:
+const eliminarLogro = async (id) => {
+  // Confirmación
+  const confirm = window.confirm
+    ? window.confirm('¿Seguro que quieres eliminar este logro?')
+    : true; // para dispositivos móviles donde window.confirm no existe, podrías usar un Alert
+
+  if (!confirm) return;
+
+  try {
+    // Llamada al backend sin token
+    await axios.delete(`${API_BASE_URL}/eliminarLogro/${id}`);
+
+    // Actualizar estado local
+    setLogros((prev) => prev.filter((l) => l.id !== id));
+
+    // Cerrar modal
+    setModalVerVisible(false);
+
+    showMessage({ message: 'Logro eliminado', type: 'success' });
+  } catch (error) {
+    console.error('Error al eliminar logro:', error);
+    showMessage({ message: 'No se pudo eliminar el logro', type: 'danger' });
+  }
+};
+
+// Ordenar logros por categoría alfabéticamente sin cambiar el diseño
+const logrosOrdenados = Array.isArray(logros)
+  ? [...logros].sort((a, b) => {
+      if (!a.categoria) return 1;
+      if (!b.categoria) return -1;
+      return a.categoria.localeCompare(b.categoria);
+    })
+  : [];
+
+
   return (
     <>
       <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 120 }}>
       
 
-  {/* Listado de logros */}
+{/* Listado de logros */}
 <ScrollView style={{ width: '100%' }} contentContainerStyle={{ padding: 12 }}>
   {logros.length > 0 ? (
-    logros.map((logro, index) => (
-      <TouchableOpacity
-        key={logro.id || index}
-        activeOpacity={0.8}
-        style={{
-          backgroundColor: '#1b1d23',
-          marginBottom: 16,
-          borderRadius: 10,
-          borderWidth: 1,
-          borderColor: 'gray',
-          overflow: 'hidden',
-        }}
-      >
-        {/* Imagen estilo BANNER */}
-        <Image
-          source={{ uri: logro.imagenurl || Image.resolveAssetSource(imagenBase).uri }}
+    Object.entries(
+      logrosOrdenados.reduce((acc, logro) => {
+        const rawCat = logro.categoria || 'Sin categoría';
+        const catKey = rawCat.toLowerCase(); // normalizamos para agrupar
+        if (!acc[catKey]) {
+          acc[catKey] = {
+            displayName: rawCat.charAt(0).toUpperCase() + rawCat.slice(1).toLowerCase(),
+            items: []
+          };
+        }
+        acc[catKey].items.push(logro);
+        return acc;
+      }, {})
+    ).map(([catKey, data]) => (
+      <View key={catKey} style={{ marginBottom: 20 }}>
+        {/* Título de categoría */}
+        <Text
           style={{
-            width: '100%',
-            height: 120,
-            resizeMode: 'cover',
+            marginTop: 6,
+            marginBottom: 12,
+            fontSize: 16,
+            color: '#fff',
+            backgroundColor: '#6c63ff',
+            alignSelf: 'flex-start',
+            paddingHorizontal: 8,
+            paddingVertical: 2,
+            borderRadius: 6,
+            overflow: 'hidden',
           }}
-        />
+        >
+          {data.displayName}
+        </Text>
 
-        {/* Contenido */}
-        <View style={{ padding: 12 }}>
-          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#f1f1f1' }}>
-            {logro.nombre}
-          </Text>
-
-          {logro.descripcion ? (
-            <Text style={{ fontSize: 13, color: '#c4c4c4', marginTop: 4 }}>
-              {logro.descripcion}
-            </Text>
-          ) : null}
-
-          {/* Categoría */}
-          {logro.categoria && (
-            <Text
+        {/* Scroll horizontal de logros */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {data.items.map((logro, index) => (
+            <TouchableOpacity
+              key={logro.id || index}
+              activeOpacity={0.8}
+              onPress={() => {
+                setLogroSeleccionado(logro);
+                setModalVerVisible(true);
+              }}
               style={{
-                marginTop: 6,
-                fontSize: 12,
-                color: '#fff',
-                backgroundColor: '#6c63ff',
-                alignSelf: 'flex-start',
-                paddingHorizontal: 8,
-                paddingVertical: 2,
-                borderRadius: 6,
+                backgroundColor: '#1b1d23',
+                marginRight: 12,
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor: 'gray',
                 overflow: 'hidden',
+                width: 250, // ancho fijo para scroll horizontal
               }}
             >
-              {logro.categoria}
-            </Text>
-          )}
+              {/* Imagen estilo BANNER */}
+              <Image
+                source={{ uri: logro.imagenurl || Image.resolveAssetSource(imagenBase).uri }}
+                style={{
+                  width: '100%',
+                  height: 120,
+                  resizeMode: 'cover',
+                }}
+              />
 
-          {/* Personajes vinculados */}
-          {Array.isArray(logro.personajesids) && logro.personajesids.length > 0 && (
-            <View style={{ marginTop: 10 }}>
-              <Text style={{ color: '#aaa', marginBottom: 6 }}>Personajes relacionados:</Text>
+              {/* Contenido */}
+              <View style={{ padding: 12 }}>
+                <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#ffd343ff' }}>
+                  {logro.nombre}
+                </Text>
 
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {logro.personajesids.map((idPers) => {
-                  const personaje = coleccionPersonajes.find(p => p.idpersonaje === idPers);
-                  if (!personaje) return null;
-                  return (
-                    <View
-                      key={personaje.idpersonaje}
-                      style={{ alignItems: 'center', marginRight: 10 }}
-                    >
-                      <Image
-                        source={{ uri: personaje.imagenurl || Image.resolveAssetSource(imagenBase).uri }}
-                        style={{
-                          width: 45,
-                          height: 45,
-                          borderRadius: 25,
-                          borderWidth: 2,
-                          borderColor: '#6c63ff',
-                        }}
-                      />
-                      <Text style={{ color: '#fff', fontSize: 11, marginTop: 3 }}>
-                        {personaje.nombre}
-                      </Text>
-                    </View>
-                  );
-                })}
-              </ScrollView>
-            </View>
-          )}
-        </View>
-      </TouchableOpacity>
+                {logro.descripcion ? (
+                  <Text
+                    style={{ fontSize: 13, color: '#c4c4c4', marginTop: 4 }}
+                    numberOfLines={3}
+                    ellipsizeMode="tail"
+                  >
+                    {logro.descripcion}
+                  </Text>
+                ) : null}
+
+                {/* Personajes vinculados */}
+                {Array.isArray(logro.personajesids) && logro.personajesids.length > 0 && (
+                  <View style={{ marginTop: 10 }}>
+                    <Text style={{ color: '#889de0ff', marginBottom: 6 }}>Protagonistas:</Text>
+
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                      {logro.personajesids.map((idPers) => {
+                        const personaje = coleccionPersonajes.find(p => p.idpersonaje === idPers);
+                        if (!personaje) return null;
+                        return (
+                          <View
+                            key={personaje.idpersonaje}
+                            style={{ alignItems: 'center', marginRight: 10 }}
+                          >
+                            <Image
+                              source={{ uri: personaje.imagenurl || Image.resolveAssetSource(imagenBase).uri }}
+                              style={{
+                                width: 45,
+                                height: 45,
+                                borderRadius: 25,
+                                borderWidth: 2,
+                                borderColor: '#6c63ff',
+                              }}
+                            />
+                            <Text style={{ color: 'aliceblue', fontSize: 11, marginTop: 3 }}>
+                              {personaje.nombre.length > 10
+                                ? personaje.nombre.slice(0, 10) + '...'
+                                : personaje.nombre}
+                            </Text>
+                          </View>
+                        );
+                      })}
+                    </ScrollView>
+                  </View>
+                )}
+              </View>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
     ))
   ) : (
     <Text style={{ color: '#ccc', textAlign: 'center', marginTop: 20 }}>
@@ -300,7 +372,6 @@ setResultadosPersonajes([]);
     </Text>
   )}
 </ScrollView>
-
       </ScrollView>
 
       {/* Floating Button moderno para "Nuevo Logro" */}
@@ -343,29 +414,39 @@ setResultadosPersonajes([]);
                   style={[styles.input, { height: 80 }]}
                   multiline
                 />
-{/* Personajes seleccionados */}
 {personajesids.length > 0 && (
   <ScrollView horizontal style={{ marginVertical: 6 }}>
     {personajesids.map((id) => {
-      console.log("Id:",id)
       const p = coleccionPersonajes.find((x) => x.idpersonaje === id);
       if (!p) return null;
-      return (
-        <View key={p.idpersonaje} style={{ alignItems: 'center', marginRight: 8 }}>
-          <Image
-            source={{ uri: p.imagenurl || Image.resolveAssetSource(imagenBase).uri }}
-            style={{ width: 40, height: 40, borderRadius: 20 }}
-          />
-          <Text style={{ color: '#fff', fontSize: 12 }}>{p.nombre}</Text>
-          <TouchableOpacity
-            onPress={() =>
-              setPersonajesids(prev => prev.filter(pid => pid !== p.idpersonaje))
-            }
-          >
-            <Text style={{ color: 'red', fontSize: 10 }}>X</Text>
-          </TouchableOpacity>
-        </View>
-      );
+
+     return (
+  <View key={p.idpersonaje} style={{ alignItems: 'center', marginRight: 8, width: 60 }}>
+    <Image
+      source={{ uri: p.imagenurl || Image.resolveAssetSource(imagenBase).uri }}
+      style={{ width: 40, height: 40, borderRadius: 20 }}
+    />
+    <Text
+      style={{
+        color: '#fff',
+        fontSize: 10,
+        textAlign: 'center', // centra el texto
+        flexWrap: 'wrap',    // permite que salte línea
+      }}
+    >
+      {p.nombre}
+    </Text>
+
+    {/* X para eliminar */}
+    <TouchableOpacity
+      onPress={() =>
+        setPersonajesids(prev => prev.filter(pid => pid !== p.idpersonaje))
+      }
+    >
+      <Text style={{ color: 'red', fontSize: 14 }}>X</Text>
+    </TouchableOpacity>
+  </View>
+);
     })}
   </ScrollView>
 )}
@@ -379,8 +460,8 @@ setResultadosPersonajes([]);
   style={styles.input}
 />
 
-<ScrollView style={{ maxHeight: 200, marginTop: 6 }}>
-  {resultadosPersonajes.map((p) => (
+<ScrollView style={{ maxHeight: 285, marginTop: 6 }}>
+  {resultadosPersonajes.slice(0, 5).map((p) => (
     <TouchableOpacity
       key={p.idpersonaje}
       onPress={() => {
@@ -408,7 +489,9 @@ setResultadosPersonajes([]);
   ))}
 
   {busquedaPersonaje && resultadosPersonajes.length === 0 && (
-    <Text style={{ color: '#888', fontStyle: 'italic', marginTop: 6 }}>No se encontraron personajes</Text>
+    <Text style={{ color: '#888', fontStyle: 'italic', marginTop: 6 }}>
+      No se encontraron personajes
+    </Text>
   )}
 </ScrollView>
 
@@ -465,6 +548,130 @@ setResultadosPersonajes([]);
           </View>
         </Animated.View>
       </Modal>
+
+
+<Modal
+  visible={modalVerVisible}
+  transparent
+  animationType="fade"
+  onRequestClose={() => setModalVerVisible(false)}
+>
+  <View style={styles.modalOverlay}>
+
+    {/* Fondo que cierra el modal al tocar afuera */}
+    <TouchableWithoutFeedback onPress={() => setModalVerVisible(false)}>
+      <View style={styles.modalBackground} />
+    </TouchableWithoutFeedback>
+
+    {/* Contenido del modal */}
+    <View style={[styles.modalContainer, { maxHeight: windowHeight * 0.95 }]}>
+
+      {logroSeleccionado && (
+        <>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>{logroSeleccionado.nombre}</Text>
+            <TouchableOpacity
+              onPress={() => setModalVerVisible(false)}
+              style={styles.closeButton}
+            >
+              <Text style={styles.closeButtonText}>x</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Imagen del logro */}
+          <Image
+            source={{ uri: logroSeleccionado.imagenurl || Image.resolveAssetSource(imagenBase).uri }}
+            style={{ width: '100%', height: 260, borderRadius: 8, marginBottom: 12 }}
+          />
+
+          {/* Descripción */}
+          <Text style={{ color: '#ddd', fontSize: 15, marginBottom: 10 }}>
+            {logroSeleccionado.descripcion || 'Sin descripción'}
+          </Text>
+
+          {/* Categoría y nivel */}
+          <Text style={{ color: '#6c63ff', marginBottom: 8 }}>
+            Categoría: {logroSeleccionado.categoria || 'N/A'}
+          </Text>
+          <Text style={{ color: '#bbb', marginBottom: 15 }}>
+            Nivel: {logroSeleccionado.nivel || 'N/A'}
+          </Text>
+
+          {/* Personajes */}
+          {Array.isArray(logroSeleccionado.personajesids) &&
+            logroSeleccionado.personajesids.length > 0 && (
+              <>
+                <Text style={{ color: '#ffd343ff', marginBottom: 6 }}>Protagonistas:</Text>
+                <ScrollView
+                  horizontal
+                  nestedScrollEnabled={true}
+                  keyboardShouldPersistTaps="handled"
+                  showsHorizontalScrollIndicator={true}
+                  style={{ maxHeight: 110 }}
+                  contentContainerStyle={{ paddingHorizontal: 4 }}
+                >
+                  {logroSeleccionado.personajesids.map(idPers => {
+                    const personaje = coleccionPersonajes.find(p => p.idpersonaje === idPers);
+                    if (!personaje) return null;
+                    return (
+                      <View
+                        key={idPers}
+                        style={{
+                          alignItems: 'center',
+                          marginRight: 12,
+                          width: 100,
+                          marginBottom: 10,
+                        }}
+                      >
+                        <Image
+                          source={{
+                            uri:
+                              personaje.imagenurl ||
+                              Image.resolveAssetSource(imagenBase).uri,
+                          }}
+                          style={{
+                            width: 50,
+                            height: 50,
+                            borderRadius: 25,
+                            borderWidth: 2,
+                            borderColor: '#6c63ff',
+                          }}
+                        />
+                        <Text style={{ color: '#fff', fontSize: 10, textAlign: 'center' }}>
+                          {personaje.nombre}
+                        </Text>
+                      </View>
+                    );
+                  })}
+                </ScrollView>
+              </>
+            )}
+
+          {/* BOTONES SOLO PARA NARRADOR */}
+          {estatus === "narrador" && (
+            <View style={{ flexDirection: 'row', marginTop: 20 }}>
+              <TouchableOpacity
+                style={[styles.button, { backgroundColor: '#00ccffc2' }]}
+                onPress={() => {
+                  // función futura editar
+                }}
+              >
+                <Text style={styles.buttonText}>Editar</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.button, { backgroundColor: '#ff4444b2', marginLeft: 8 }]}
+                onPress={() => eliminarLogro(logroSeleccionado.id)}
+              >
+                <Text style={styles.buttonText}>Eliminar</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </>
+      )}
+    </View>
+  </View>
+</Modal>
     </>
   );
 };
@@ -695,6 +902,7 @@ closeButton: {
 closeButtonText: {
   color: '#fff',
   fontWeight: 'bold',
+  opacity:0.65,
 },
 
 input: {

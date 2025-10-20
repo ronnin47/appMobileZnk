@@ -1296,7 +1296,6 @@ app.get('/consumirLogros', async (req, res) => {
 
 
 
-
 app.post('/insertarLogro', async (req, res) => {
   try {
     const { nombre, descripcion, categoria, nivel, imagen, personajesids } = req.body;
@@ -1359,6 +1358,31 @@ app.post('/insertarLogro', async (req, res) => {
   } catch (error) {
     console.error('Error en /insertarLogro:', error);
     return res.status(500).json({ error: 'Error del servidor al insertar logro' });
+  }
+});
+
+
+app.delete('/eliminarLogro/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // Verifica que el logro exista
+    const { rowCount: existe } = await pool.query(
+      'SELECT 1 FROM logros WHERE id = $1',
+      [id]
+    );
+
+    if (!existe) {
+      return res.status(404).json({ message: 'Logro no encontrado' });
+    }
+
+    // Elimina el logro
+    await pool.query('DELETE FROM logros WHERE id = $1', [id]);
+
+    return res.json({ message: 'Logro eliminado exitosamente' });
+  } catch (error) {
+    console.error('Error al eliminar logro:', error);
+    return res.status(500).json({ message: 'Error interno del servidor' });
   }
 });
 
