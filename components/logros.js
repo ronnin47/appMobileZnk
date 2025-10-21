@@ -19,6 +19,8 @@ import {
   Animated,
   Platform,
   Dimensions,
+  SectionList,
+  FlatList,
 } from 'react-native';
 
 import * as ImagePicker from 'expo-image-picker';
@@ -70,27 +72,32 @@ useEffect(() => {
   const windowWidth = Dimensions.get('window').width;
   const windowHeight = Dimensions.get('window').height;
 
-  const consumirLogros = async () => {
-    if (!userToken) return;
-    try {
-      const response = await axios.get(`${API_BASE_URL}/consumirLogros`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+  const [loading, setLoading] = useState(false); // <-- nuevo estado
 
-      const { logrosConsumidos } = response.data;
+const consumirLogros = async () => {
+  if (!userToken) return;
+  setLoading(true); // <-- mostrar spinner
+  try {
+    const response = await axios.get(`${API_BASE_URL}/consumirLogros`, {
+      headers: { 'Content-Type': 'application/json' },
+    });
 
-      if (!Array.isArray(logrosConsumidos)) {
-        console.error('El formato de datos no es un array/ aca esta el error.');
-        return;
-      }
+    const { logrosConsumidos } = response.data;
 
-      setLogros(logrosConsumidos);
-    } catch (error) {
-      console.error('Cliente: Fallo al consumir logros', error.message);
+    if (!Array.isArray(logrosConsumidos)) {
+      console.error('El formato de datos no es un array/ aca esta el error.');
+      setLogros([]);
+      return;
     }
-  };
+
+    setLogros(logrosConsumidos);
+  } catch (error) {
+    console.error('Cliente: Fallo al consumir logros', error.message);
+    setLogros([]);
+  } finally {
+    setLoading(false); // <-- ocultar spinner
+  }
+};
 
   useEffect(() => {
     consumirLogros();
@@ -238,166 +245,198 @@ const logrosOrdenados = Array.isArray(logros)
   : [];
 
 
-  return (
-    <>
-      <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 120 }}>
-      
+  // reemplazar el bloque que renderiza la lista con ScrollViews anidados
+// por este SectionList + FlatList para mejor virtualización:
+const groupedObj = logrosOrdenados.reduce((acc, logro) => {
+  const rawCat = logro.categoria || 'Sin categoría';
+  const catKey = rawCat.toLowerCase();
+  if (!acc[catKey]) {
+    acc[catKey] = {
+      displayName:
+        rawCat.charAt(0).toUpperCase() + rawCat.slice(1).toLowerCase(),
+      items: [],
+    };
+  }
+  acc[catKey].items.push(logro);
+  return acc;
+}, {});
 
-{/* Listado de logros */}
-<ScrollView style={{ width: '100%' }} contentContainerStyle={{ padding: 12 }}>
-  {logros.length > 0 ? (
-    Object.entries(
-      logrosOrdenados.reduce((acc, logro) => {
-        const rawCat = logro.categoria || 'Sin categoría';
-        const catKey = rawCat.toLowerCase(); // normalizamos para agrupar
-        if (!acc[catKey]) {
-          acc[catKey] = {
-            displayName: rawCat.charAt(0).toUpperCase() + rawCat.slice(1).toLowerCase(),
-            items: []
-          };
-        }
-        acc[catKey].items.push(logro);
-        return acc;
-      }, {})
-    ).map(([catKey, data]) => (
-      <View key={catKey} style={{ marginBottom: 20 }}>
-        {/* Título de categoría */}
-        <Text
-          style={{
-            marginTop: 6,
-            marginBottom: 12,
-            fontSize: 16,
-            color: '#fff',
-            backgroundColor: '#6c63ff',
-            alignSelf: 'flex-start',
-            paddingHorizontal: 8,
-            paddingVertical: 2,
-            borderRadius: 6,
-            overflow: 'hidden',
-          }}
-        >
-          {data.displayName}
-        </Text>
+const sections = Object.keys(groupedObj).map(catKey => ({
+  title: groupedObj[catKey].displayName,
+  data: [ groupedObj[catKey].items.sort((a,b) => (b.nivel||0)-(a.nivel||0)) ] // cada section contiene 1 elemento: el array de items
+}));
 
-        {/* Scroll horizontal de logros */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {data.items.map((logro, index) => (
-            <TouchableOpacity
-              key={logro.id || index}
-              activeOpacity={0.8}
-              onPress={() => {
-                setLogroSeleccionado(logro);
-                setModalVerVisible(true);
-              }}
+
+ return (
+  <>
+    <View style={styles.container}>
+      <SectionList
+        sections={sections}
+        keyExtractor={(item, index) => (item.id || item.nombre || index).toString()}
+        renderSectionHeader={({ section: { title } }) => (
+          <View style={{ paddingHorizontal: 12, paddingTop: 6 }}>
+            <Text
               style={{
-                backgroundColor: '#1b1d23',
-                marginRight: 12,
-                borderRadius: 10,
-                borderWidth: 1,
-                borderColor: 'gray',
+                marginTop: 6,
+                marginBottom: 12,
+                fontSize: 16,
+                color: '#fff',
+                backgroundColor: '#6c63ff',
+                alignSelf: 'flex-start',
+                paddingHorizontal: 8,
+                paddingVertical: 2,
+                borderRadius: 6,
                 overflow: 'hidden',
-                width: 250, // ancho fijo para scroll horizontal
               }}
             >
-              {/* Imagen estilo BANNER */}
-              <Image
-                source={{ uri: logro.imagenurl || Image.resolveAssetSource(imagenBase).uri }}
-                style={{
-                  width: '100%',
-                  height: 120,
-                  resizeMode: 'cover',
+              {title}
+            </Text>
+          </View>
+        )}
+        renderItem={({ item }) => (
+          <FlatList
+            data={item}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(logro) => (logro.id || logro.nombre || Math.random()).toString()}
+            renderItem={({ item: logro }) => (
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => {
+                  setLogroSeleccionado(logro);
+                  setModalVerVisible(true);
                 }}
-              />
+                style={{
+                  backgroundColor: '#1b1d23',
+                  marginRight: 12,
+                  borderRadius: 10,
+                  borderWidth: 1,
+                  borderColor: 'gray',
+                  overflow: 'hidden',
+                  width: 250,
+                }}
+              >
+                <Image
+                  source={{ uri: logro.imagenurl || Image.resolveAssetSource(imagenBase).uri }}
+                  style={{ width: '100%', height: 120, resizeMode: 'cover' }}
+                />
 
-              {/* Contenido */}
-              <View style={{ padding: 12 }}>
-                <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#ffd343ff' }}>
-                  {logro.nombre}
-                </Text>
-
-                {logro.descripcion ? (
-                  <Text
-                    style={{ fontSize: 13, color: '#c4c4c4', marginTop: 4 }}
-                    numberOfLines={3}
-                    ellipsizeMode="tail"
-                  >
-                    {logro.descripcion}
+                <View style={{ padding: 12 }}>
+                  <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#ffd343ff' }}>
+                    {logro.nombre}
                   </Text>
-                ) : null}
+                  {logro.descripcion ? (
+                    <Text style={{ fontSize: 13, color: '#c4c4c4', marginTop: 4 }} numberOfLines={3}>
+                      {logro.descripcion}
+                    </Text>
+                  ) : null}
 
-                {/* Personajes vinculados */}
-                {Array.isArray(logro.personajesids) && logro.personajesids.length > 0 && (
-                  <View style={{ marginTop: 10 }}>
-                    <Text style={{ color: '#889de0ff', marginBottom: 6 }}>Protagonistas:</Text>
+                  {Array.isArray(logro.personajesids) && logro.personajesids.length > 0 && (
+                    <View style={{ marginTop: 10 }}>
+                      <Text style={{ color: '#889de0ff', marginBottom: 6 }}>Protagonistas:</Text>
 
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                      {logro.personajesids.map((idPers) => {
-                        const personaje = coleccionPersonajes.find(p => p.idpersonaje === idPers);
-                        if (!personaje) return null;
-                        return (
-                          <View
-                            key={personaje.idpersonaje}
-                            style={{ alignItems: 'center', marginRight: 10 }}
-                          >
-                            <Image
-                              source={{ uri: personaje.imagenurl || Image.resolveAssetSource(imagenBase).uri }}
+                      {/* Scroll horizontal con alineación consistente */}
+                      <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          paddingVertical: 4,
+                        }}
+                      >
+                        {logro.personajesids.map((idPers) => {
+                          const personaje = coleccionPersonajes.find((p) => p.idpersonaje === idPers);
+                          if (!personaje) return null;
+                          return (
+                            <View
+                              key={personaje.idpersonaje}
                               style={{
-                                width: 45,
-                                height: 45,
-                                borderRadius: 25,
-                                borderWidth: 2,
-                                borderColor: '#6c63ff',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                marginRight: 10,
+                                width: 70,
                               }}
-                            />
-                            <Text style={{ color: 'aliceblue', fontSize: 11, marginTop: 3 }}>
-                              {personaje.nombre.length > 10
-                                ? personaje.nombre.slice(0, 10) + '...'
-                                : personaje.nombre}
-                            </Text>
-                          </View>
-                        );
-                      })}
-                    </ScrollView>
-                  </View>
-                )}
-              </View>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-    ))
-  ) : (
-    <Text style={{ color: '#ccc', textAlign: 'center', marginTop: 20 }}>
-      No hay logros cargados todavía...
-    </Text>
-  )}
-</ScrollView>
-      </ScrollView>
+                            >
+                              <Image
+                                source={{
+                                  uri: personaje.imagenurl || Image.resolveAssetSource(imagenBase).uri,
+                                }}
+                                style={{
+                                  width: 45,
+                                  height: 45,
+                                  borderRadius: 25,
+                                  borderWidth: 2,
+                                  borderColor: '#6c63ff',
+                                }}
+                              />
+                              <Text
+                                numberOfLines={1}
+                                ellipsizeMode="tail"
+                                style={{
+                                  color: 'aliceblue',
+                                  fontSize: 11,
+                                  marginTop: 4,
+                                  textAlign: 'center',
+                                  width: 68,
+                                }}
+                              >
+                                {personaje.nombre.length > 12
+                                  ? personaje.nombre.slice(0, 12) + '...'
+                                  : personaje.nombre}
+                              </Text>
+                            </View>
+                          );
+                        })}
+                      </ScrollView>
+                    </View>
+                  )}
+                </View>
+              </TouchableOpacity>
+            )}
+          />
+        )}
+        contentContainerStyle={{ paddingBottom: 120, paddingTop: 6 }}
+       ListEmptyComponent={() => (
+  <View style={{ padding: 12, alignItems: 'center', justifyContent: 'center' }}>
+    {loading ? (
+      <ActivityIndicator size="large" color="#6c63ff" />
+    ) : (
+      <Text style={{ color: '#ccc', textAlign: 'center', marginTop: 20 }}>
+        No hay logros cargados todavía...
+      </Text>
+    )}
+  </View>
+)}
+        stickySectionHeadersEnabled={false}
+      />
 
-      {/* Floating Button moderno para "Nuevo Logro" */}
-      {estatus=="narrador"? (<TouchableOpacity style={styles.fab} onPress={openModal} activeOpacity={0.85}>
-        <Text style={styles.fabText}>+</Text>
-      </TouchableOpacity>):(<></>)}
-      
+      {estatus == 'narrador' ? (
+        <TouchableOpacity style={styles.fab} onPress={openModal} activeOpacity={0.85}>
+          <Text style={styles.fabText}>+</Text>
+        </TouchableOpacity>
+      ) : null}
 
       {/* Modal para crear logro */}
       <Modal
         visible={modalVisible}
         transparent
-        animationType="none" // usamos Animated para el fade
+        animationType="none"
         onRequestClose={closeModal}
       >
-        <Animated.View style={[styles.modalOverlay, { opacity: fadeAnim }]}>
+        <TouchableWithoutFeedback onPress={closeModal}>
+             <Animated.View style={[styles.modalOverlay, { opacity: fadeAnim }]}>
           <View style={[styles.modalContainer, { maxHeight: windowHeight * 0.92 }]}>
             <ScrollView contentContainerStyle={styles.modalScroll}>
               <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>{nombreNuevo ? nombreNuevo : 'Nuevo logro'}</Text>
+                <Text style={styles.modalTitle}>
+                  {nombreNuevo ? nombreNuevo : 'Nuevo logro'}
+                </Text>
                 <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
                   <Text style={styles.closeButtonText}>Cerrar</Text>
                 </TouchableOpacity>
               </View>
 
-              {/* Formulario (igual que antes) */}
               <View style={styles.form}>
                 <TextInput
                   placeholder="Nombre del logro"
@@ -414,86 +453,115 @@ const logrosOrdenados = Array.isArray(logros)
                   style={[styles.input, { height: 80 }]}
                   multiline
                 />
-{personajesids.length > 0 && (
-  <ScrollView horizontal style={{ marginVertical: 6 }}>
-    {personajesids.map((id) => {
-      const p = coleccionPersonajes.find((x) => x.idpersonaje === id);
-      if (!p) return null;
 
-     return (
-  <View key={p.idpersonaje} style={{ alignItems: 'center', marginRight: 8, width: 60 }}>
-    <Image
-      source={{ uri: p.imagenurl || Image.resolveAssetSource(imagenBase).uri }}
-      style={{ width: 40, height: 40, borderRadius: 20 }}
-    />
-    <Text
-      style={{
-        color: '#fff',
-        fontSize: 10,
-        textAlign: 'center', // centra el texto
-        flexWrap: 'wrap',    // permite que salte línea
-      }}
-    >
-      {p.nombre}
-    </Text>
+                {personajesids.length > 0 && (
+                  <ScrollView horizontal style={{ marginVertical: 6 }}>
+                    {personajesids.map((id) => {
+                      const p = coleccionPersonajes.find(
+                        (x) => x.idpersonaje === id
+                      );
+                      if (!p) return null;
 
-    {/* X para eliminar */}
-    <TouchableOpacity
-      onPress={() =>
-        setPersonajesids(prev => prev.filter(pid => pid !== p.idpersonaje))
-      }
-    >
-      <Text style={{ color: 'red', fontSize: 14 }}>X</Text>
-    </TouchableOpacity>
-  </View>
-);
-    })}
-  </ScrollView>
-)}
+                      return (
+                        <View
+                          key={p.idpersonaje}
+                          style={{ alignItems: 'center', marginRight: 8, width: 60 }}
+                        >
+                          <Image
+                            source={{
+                              uri:
+                                p.imagenurl ||
+                                Image.resolveAssetSource(imagenBase).uri,
+                            }}
+                            style={{ width: 40, height: 40, borderRadius: 20 }}
+                          />
+                          <Text
+                            style={{
+                              color: '#fff',
+                              fontSize: 10,
+                              textAlign: 'center',
+                              flexWrap: 'wrap',
+                            }}
+                          >
+                            {p.nombre}
+                          </Text>
 
-{/* Buscador */}
-<TextInput
-  placeholder="Buscar personaje..."
-  placeholderTextColor="#888"
-  value={busquedaPersonaje}
-  onChangeText={setBusquedaPersonaje}
-  style={styles.input}
-/>
+                          <TouchableOpacity
+                            onPress={() =>
+                              setPersonajesids((prev) =>
+                                prev.filter((pid) => pid !== p.idpersonaje)
+                              )
+                            }
+                          >
+                            <Text style={{ color: 'red', fontSize: 14 }}>X</Text>
+                          </TouchableOpacity>
+                        </View>
+                      );
+                    })}
+                  </ScrollView>
+                )}
 
-<ScrollView style={{ maxHeight: 285, marginTop: 6 }}>
-  {resultadosPersonajes.slice(0, 5).map((p) => (
-    <TouchableOpacity
-      key={p.idpersonaje}
-      onPress={() => {
-        if (!personajesids.includes(p.idpersonaje)) {
-          setPersonajesids(prev => [...prev, p.idpersonaje]);
-        }
-        setBusquedaPersonaje('');       // limpia input
-        setResultadosPersonajes([]);    // limpia resultados
-      }}
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 6,
-        marginVertical: 2,
-        borderRadius: 6,
-        backgroundColor: personajesids.includes(p.idpersonaje) ? '#28a745' : '#222',
-      }}
-    >
-      <Image
-        source={{ uri: p.imagenurl || Image.resolveAssetSource(imagenBase).uri }}
-        style={{ width: 40, height: 40, borderRadius: 20, marginRight: 8 }}
-      />
-      <Text style={{ color: '#fff', fontWeight: '600' }}>{p.nombre}</Text>
-    </TouchableOpacity>
-  ))}
+                <TextInput
+                  placeholder="Buscar personaje..."
+                  placeholderTextColor="#888"
+                  value={busquedaPersonaje}
+                  onChangeText={setBusquedaPersonaje}
+                  style={styles.input}
+                />
 
-  {busquedaPersonaje && resultadosPersonajes.length === 0 && (
-    <Text style={{ color: '#888', fontStyle: 'italic', marginTop: 6 }}>
-      No se encontraron personajes
-    </Text>
-  )}
-</ScrollView>
+                <ScrollView style={{ maxHeight: 285, marginTop: 6 }}>
+                  {resultadosPersonajes.slice(0, 5).map((p) => (
+                    <TouchableOpacity
+                      key={p.idpersonaje}
+                      onPress={() => {
+                        if (!personajesids.includes(p.idpersonaje)) {
+                          setPersonajesids((prev) => [...prev, p.idpersonaje]);
+                        }
+                        setBusquedaPersonaje('');
+                        setResultadosPersonajes([]);
+                      }}
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        padding: 6,
+                        marginVertical: 2,
+                        borderRadius: 6,
+                        backgroundColor: personajesids.includes(p.idpersonaje)
+                          ? '#28a745'
+                          : '#222',
+                      }}
+                    >
+                      <Image
+                        source={{
+                          uri:
+                            p.imagenurl ||
+                            Image.resolveAssetSource(imagenBase).uri,
+                        }}
+                        style={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: 20,
+                          marginRight: 8,
+                        }}
+                      />
+                      <Text style={{ color: '#fff', fontWeight: '600' }}>
+                        {p.nombre}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+
+                  {busquedaPersonaje && resultadosPersonajes.length === 0 && (
+                    <Text
+                      style={{
+                        color: '#888',
+                        fontStyle: 'italic',
+                        marginTop: 6,
+                      }}
+                    >
+                      No se encontraron personajes
+                    </Text>
+                  )}
+                </ScrollView>
 
                 <TextInput
                   placeholder="Categoría"
@@ -513,14 +581,23 @@ const logrosOrdenados = Array.isArray(logros)
                 />
 
                 <View style={styles.cargarImagen}>
-                  <Text style={styles.subtitulo}>{nombreNuevo || 'Nuevo logro'}</Text>
+                  <Text style={styles.subtitulo}>
+                    {nombreNuevo || 'Nuevo logro'}
+                  </Text>
                   <Image
-                    source={{ uri: imagenUrl || Image.resolveAssetSource(imagenBase).uri }}
+                    source={{
+                      uri:
+                        imagenUrl ||
+                        Image.resolveAssetSource(imagenBase).uri,
+                    }}
                     style={styles.imagenCargar}
                   />
 
                   <View style={{ alignItems: 'center', marginTop: 8 }}>
-                    <TouchableOpacity style={styles.boton} onPress={abrirGaleria}>
+                    <TouchableOpacity
+                      style={styles.boton}
+                      onPress={abrirGaleria}
+                    >
                       <Text style={styles.botonTexto}>Seleccionar imagen</Text>
                     </TouchableOpacity>
                   </View>
@@ -532,7 +609,9 @@ const logrosOrdenados = Array.isArray(logros)
                     style={[styles.button, styles.cancelButton]}
                     disabled={loadingInsert}
                   >
-                    <Text style={[styles.buttonText, { color: '#fff' }]}>Cancelar</Text>
+                    <Text style={[styles.buttonText, { color: '#fff' }]}>
+                      Cancelar
+                    </Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -540,140 +619,194 @@ const logrosOrdenados = Array.isArray(logros)
                     style={[styles.button, styles.saveButton]}
                     disabled={loadingInsert}
                   >
-                    {loadingInsert ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Guardar</Text>}
+                    {loadingInsert ? (
+                      <ActivityIndicator color="#fff" />
+                    ) : (
+                      <Text style={styles.buttonText}>Guardar</Text>
+                    )}
                   </TouchableOpacity>
                 </View>
               </View>
             </ScrollView>
           </View>
         </Animated.View>
+        </TouchableWithoutFeedback>
+        
       </Modal>
 
-
-<Modal
+   <Modal
   visible={modalVerVisible}
   transparent
   animationType="fade"
   onRequestClose={() => setModalVerVisible(false)}
 >
-  <View style={styles.modalOverlay}>
-
-    {/* Fondo que cierra el modal al tocar afuera */}
-    <TouchableWithoutFeedback onPress={() => setModalVerVisible(false)}>
-      <View style={styles.modalBackground} />
-    </TouchableWithoutFeedback>
-
-    {/* Contenido del modal */}
-    <View style={[styles.modalContainer, { maxHeight: windowHeight * 0.95 }]}>
-
-      {logroSeleccionado && (
-        <>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>{logroSeleccionado.nombre}</Text>
-            <TouchableOpacity
-              onPress={() => setModalVerVisible(false)}
-              style={styles.closeButton}
+  <TouchableWithoutFeedback onPress={() => setModalVerVisible(false)}>
+    <View style={styles.modalOverlay}>
+      <TouchableWithoutFeedback>
+        <View
+          style={[
+            styles.modalContainer,
+            {
+              maxHeight: windowHeight * 0.95,
+              paddingBottom: 12,
+            },
+          ]}
+        >
+          {logroSeleccionado && (
+            <ScrollView
+              showsVerticalScrollIndicator={true}
+              contentContainerStyle={{
+                paddingBottom: 40,
+              }}
             >
-              <Text style={styles.closeButtonText}>x</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Imagen del logro */}
-          <Image
-            source={{ uri: logroSeleccionado.imagenurl || Image.resolveAssetSource(imagenBase).uri }}
-            style={{ width: '100%', height: 260, borderRadius: 8, marginBottom: 12 }}
-          />
-
-          {/* Descripción */}
-          <Text style={{ color: '#ddd', fontSize: 15, marginBottom: 10 }}>
-            {logroSeleccionado.descripcion || 'Sin descripción'}
-          </Text>
-
-          {/* Categoría y nivel */}
-          <Text style={{ color: '#6c63ff', marginBottom: 8 }}>
-            Categoría: {logroSeleccionado.categoria || 'N/A'}
-          </Text>
-          <Text style={{ color: '#bbb', marginBottom: 15 }}>
-            Nivel: {logroSeleccionado.nivel || 'N/A'}
-          </Text>
-
-          {/* Personajes */}
-          {Array.isArray(logroSeleccionado.personajesids) &&
-            logroSeleccionado.personajesids.length > 0 && (
-              <>
-                <Text style={{ color: '#ffd343ff', marginBottom: 6 }}>Protagonistas:</Text>
-                <ScrollView
-                  horizontal
-                  nestedScrollEnabled={true}
-                  keyboardShouldPersistTaps="handled"
-                  showsHorizontalScrollIndicator={true}
-                  style={{ maxHeight: 110 }}
-                  contentContainerStyle={{ paddingHorizontal: 4 }}
+              {/* ENCABEZADO */}
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>{logroSeleccionado.nombre}</Text>
+                <TouchableOpacity
+                  onPress={() => setModalVerVisible(false)}
+                  style={styles.closeButton}
                 >
-                  {logroSeleccionado.personajesids.map(idPers => {
-                    const personaje = coleccionPersonajes.find(p => p.idpersonaje === idPers);
-                    if (!personaje) return null;
-                    return (
-                      <View
-                        key={idPers}
-                        style={{
-                          alignItems: 'center',
-                          marginRight: 12,
-                          width: 100,
-                          marginBottom: 10,
-                        }}
-                      >
-                        <Image
-                          source={{
-                            uri:
-                              personaje.imagenurl ||
-                              Image.resolveAssetSource(imagenBase).uri,
-                          }}
-                          style={{
-                            width: 50,
-                            height: 50,
-                            borderRadius: 25,
-                            borderWidth: 2,
-                            borderColor: '#6c63ff',
-                          }}
-                        />
-                        <Text style={{ color: '#fff', fontSize: 10, textAlign: 'center' }}>
-                          {personaje.nombre}
-                        </Text>
-                      </View>
-                    );
-                  })}
-                </ScrollView>
-              </>
-            )}
+                  <Text style={styles.closeButtonText}>x</Text>
+                </TouchableOpacity>
+              </View>
 
-          {/* BOTONES SOLO PARA NARRADOR */}
-          {estatus === "narrador" && (
-            <View style={{ flexDirection: 'row', marginTop: 20 }}>
-              <TouchableOpacity
-                style={[styles.button, { backgroundColor: '#00ccffc2' }]}
-                onPress={() => {
-                  // función futura editar
+              {/* IMAGEN PRINCIPAL */}
+              <Image
+                source={{
+                  uri:
+                    logroSeleccionado.imagenurl ||
+                    Image.resolveAssetSource(imagenBase).uri,
                 }}
-              >
-                <Text style={styles.buttonText}>Editar</Text>
-              </TouchableOpacity>
+                style={{
+                  width: '100%',
+                  height: 260,
+                  borderRadius: 8,
+                  marginBottom: 12,
+                }}
+              />
 
-              <TouchableOpacity
-                style={[styles.button, { backgroundColor: '#ff4444b2', marginLeft: 8 }]}
-                onPress={() => eliminarLogro(logroSeleccionado.id)}
-              >
-                <Text style={styles.buttonText}>Eliminar</Text>
-              </TouchableOpacity>
-            </View>
+              {/* DESCRIPCIÓN */}
+              <Text style={{ color: '#ddd', fontSize: 15, marginBottom: 10 }}>
+                {logroSeleccionado.descripcion || 'Sin descripción'}
+              </Text>
+
+              <Text style={{ color: '#6c63ff', marginBottom: 8 }}>
+                Categoría: {logroSeleccionado.categoria || 'N/A'}
+              </Text>
+              <Text style={{ color: '#bbb', marginBottom: 15 }}>
+                Nivel: {logroSeleccionado.nivel || 'N/A'}
+              </Text>
+
+              {/* PERSONAJES EN FILA */}
+              {Array.isArray(logroSeleccionado.personajesids) &&
+                logroSeleccionado.personajesids.length > 0 && (
+                  <>
+                    <Text
+                      style={{
+                        color: '#ffd343ff',
+                        marginBottom: 6,
+                      }}
+                    >
+                      Protagonistas:
+                    </Text>
+
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        paddingVertical: 4,
+                      }}
+                    >
+                      {logroSeleccionado.personajesids.map((idPers) => {
+                        const personaje = coleccionPersonajes.find(
+                          (p) => p.idpersonaje === idPers
+                        );
+                        if (!personaje) return null;
+
+                        return (
+                          <View
+                            key={idPers}
+                            style={{
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              marginRight: 12,
+                              width: 70,
+                            }}
+                          >
+                            <Image
+                              source={{
+                                uri:
+                                  personaje.imagenurl ||
+                                  Image.resolveAssetSource(imagenBase).uri,
+                              }}
+                              style={{
+                                width: 50,
+                                height: 50,
+                                borderRadius: 25,
+                                borderWidth: 2,
+                                borderColor: '#6c63ff',
+                              }}
+                            />
+                            <Text
+                              style={{
+                                color: '#fff',
+                                fontSize: 10,
+                                textAlign: 'center',
+                                marginTop: 3,
+                                lineHeight: 12,
+                              }}
+                              numberOfLines={2}
+                            >
+                              {personaje.nombre}
+                            </Text>
+                          </View>
+                        );
+                      })}
+                    </ScrollView>
+                  </>
+                )}
+
+              {/* BOTONES PARA NARRADOR */}
+              {estatus === 'narrador' && (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    marginTop: 20,
+                    justifyContent: 'center',
+                  }}
+                >
+                  <TouchableOpacity
+                    style={[styles.button, { backgroundColor: '#00ccffc2' }]}
+                    onPress={() => {
+                      // función futura editar
+                    }}
+                  >
+                    <Text style={styles.buttonText}>Editar</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.button,
+                      { backgroundColor: '#ff4444b2', marginLeft: 8 },
+                    ]}
+                    onPress={() => eliminarLogro(logroSeleccionado.id)}
+                  >
+                    <Text style={styles.buttonText}>Eliminar</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </ScrollView>
           )}
-        </>
-      )}
+        </View>
+      </TouchableWithoutFeedback>
     </View>
-  </View>
+  </TouchableWithoutFeedback>
 </Modal>
-    </>
-  );
+    </View>
+  </>
+);
 };
 
 const styles = StyleSheet.create({
