@@ -1,141 +1,144 @@
-import React, { useState, useEffect, useContext} from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { View, Text, TextInput, Image, TouchableOpacity, Modal, StyleSheet, FlatList, BackHandler, ScrollView } from 'react-native';
 import { AuthContext } from './AuthContext';
-import { View, Text, TextInput, ScrollView, Image, TouchableOpacity, Modal, StyleSheet } from 'react-native';
-import { Estrellitas } from './estrellitas'; // adaptado también
-import { FlatList } from 'react-native';
-import { BackHandler } from 'react-native'; // 👈 asegurate de importar esto
+import { Estrellitas } from './estrellitas';
 
-
-const Cartita = ({
-  idpersonaje,
-  nombre,
-  dominio,
-  ken,
-  imagenurl,
-  historia,
-  naturaleza,
-  conviccion,
-  rank,
-  vidaActual,
-  vidaTotal
-}) => {
+const Cartita = ({ item, rank }) => {
   const [showModal, setShowModal] = useState(false);
-  const isLeyenda = ken >= 400;
- const imagenBase = require('../assets/imagenBase.jpeg');
+  const isLeyenda = parseInt(item.ken) >= 400;
+  const imagenBase = require('../assets/imagenBase.jpeg');
 
-    // 👇 Efecto para manejar el botón "Atrás"
   useEffect(() => {
     if (showModal) {
       const backAction = () => {
-        setShowModal(false); // cierra el modal
-        return true; // evita que el sistema cierre la app
+        setShowModal(false);
+        return true;
       };
-
-      const backHandler = BackHandler.addEventListener(
-        'hardwareBackPress',
-        backAction
-      );
-
-      return () => backHandler.remove(); // limpia el listener
+      const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+      return () => backHandler.remove();
     }
-  }, [showModal]); // solo se activa cuando showModal cambia
+  }, [showModal]);
 
   return (
     <>
-      <TouchableOpacity onPress={() => setShowModal(true)} style={[styles.card, isLeyenda && styles.cardLeyenda]}>
-        <Text style={styles.rankNumber}>{rank}</Text>
-        <Image   source={imagenurl ? { uri: imagenurl } : imagenBase} style={styles.cardImage} />
-        <Estrellitas ken={ken} />
-        <Text style={styles.name}>{nombre}</Text>
-        <Text style={styles.domain}>{dominio}</Text>
-      </TouchableOpacity>
-        <Modal
-          visible={showModal}
-          transparent={false}
-          animationType="fade"
-          onRequestClose={() => setShowModal(false)} // 👈 ¡agregá esto!
-        >
-        <CartaUnica
-          onClose={() => setShowModal(false)}
-          nombre={nombre}
-          dominio={dominio}
-          ken={ken}
-          imagenurl={imagenurl}
-          historia={historia}
-          naturaleza={naturaleza}
-          conviccion={conviccion}
+      <TouchableOpacity onPress={() => setShowModal(true)} style={styles.cardContainer}>
+  {isLeyenda ? (
+    <View style={styles.glowBorder}>
+      <View style={styles.card}>
+        <Image
+          source={item.imagenurl ? { uri: item.imagenurl } : imagenBase}
+          style={styles.cardImage}
         />
+
+        {/* Número de ranking grande arriba a la izquierda */}
+        <View style={styles.rankContainer}>
+          <Text style={styles.rankNumber}>{rank}</Text>
+        </View>
+
+        <View style={styles.overlay}>
+          <Text style={styles.name}>{item.nombre}</Text>
+          <Text style={styles.domain}>{item.dominio}</Text>
+          <Estrellitas ken={parseInt(item.ken) || 0} />
+        </View>
+      </View>
+    </View>
+  ) : (
+    <View style={styles.card}>
+      <Image
+        source={item.imagenurl ? { uri: item.imagenurl } : imagenBase}
+        style={styles.cardImage}
+      />
+      <View style={styles.rankContainer}>
+        <Text style={styles.rankNumber}>{rank}</Text>
+      </View>
+      <View style={styles.overlay}>
+        <Text style={styles.name}>{item.nombre}</Text>
+        <Text style={styles.domain}>{item.dominio}</Text>
+        <Estrellitas ken={parseInt(item.ken) || 0} />
+      </View>
+    </View>
+  )}
+</TouchableOpacity>
+
+      <Modal
+        visible={showModal}
+        animationType="fade"
+        onRequestClose={() => setShowModal(false)}
+      >
+        <CartaUnica item={item} onClose={() => setShowModal(false)} />
       </Modal>
     </>
   );
 };
 
-
-const CartaUnica = ({ nombre, dominio, ken, imagenurl, historia, naturaleza, conviccion }) => {
-
+const CartaUnica = ({ item, onClose }) => {
   const imagenBase = require('../assets/imagenBase.jpeg');
+
   return (
-    <ScrollView style={styles.modalContainer}>
-      <View style={styles.modalHeader}>
-        <Text style={styles.modalTitle}>{nombre}</Text>
-        <Estrellitas ken={parseInt(ken) || 0} />
+    <ScrollView style={styles.modalContainer} contentContainerStyle={{ paddingBottom: 20 }}>
+     <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+  <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+    <Text style={styles.closeButtonText}>✕</Text>
+  </TouchableOpacity>
+</View>
+
+      <View style={{ position: 'relative' }}>
+        <Image
+          source={item.imagenurl ? { uri: item.imagenurl } : imagenBase}
+          style={styles.modalImage}
+        />
+        {/* Estrellitas sobre la imagen */}
+        <View style={styles.modalEstrellitas}>
+          <Estrellitas ken={parseInt(item.ken) || 0} />
+        </View>
       </View>
 
-      <Image source={imagenurl ? { uri: imagenurl } : imagenBase} style={styles.modalImage} />
-
-      <View style={styles.modalInfo}>
-        <Text style={styles.modalText}>Dominio: {dominio}</Text>
-        <Text style={styles.modalText}>Ken: {ken}</Text>
-        <Text style={styles.modalText}>Naturaleza: {naturaleza}</Text>
-        <Text style={styles.modalText}>
-          Convicción: <Text style={styles.modalConviccion}>{conviccion}</Text>
-        </Text>
-      </View>
-      <View style={styles.modalHistoria}>
-        <Text style={styles.modalText}>
-          {historia && historia.trim().length > 0 ? historia : 'Historia desconocida'}
-        </Text>
-      </View>
+      <Text style={styles.modalTitle}>{item.nombre}</Text>
+      <Text style={styles.modalText}>Dominio: {item.dominio}</Text>
+      <Text style={styles.modalText}>Ken: {item.ken}</Text>
+      <Text style={styles.modalText}>Naturaleza: {item.naturaleza}</Text>
+      <Text style={styles.modalText}>Convicción: {item.conviccion}</Text>
+      <Text style={styles.modalHistoria}>
+        {item.historia && item.historia.trim().length > 0 ? item.historia : 'Historia desconocida'}
+      </Text>
     </ScrollView>
   );
 };
 
 export const Ranking = () => {
   const { coleccionPersonajes } = useContext(AuthContext);
-  const [pjBuscado, setPjBuscado] = useState("");
+  const [pjBuscado, setPjBuscado] = useState('');
 
-  // Ordenar toda la colección por ken descendente
-  const coleccionOrdenada = [...coleccionPersonajes].sort((a, b) => b.ken - a.ken);
+  const coleccionOrdenada = [...coleccionPersonajes].sort((a, b) => (parseInt(b.ken) || 0) - (parseInt(a.ken) || 0));
 
- 
+  const rankingMap = {};
+  coleccionOrdenada.forEach((pj, index) => {
+    rankingMap[pj.idpersonaje] = index + 1;
+  });
 
+  const personajesFiltrados = coleccionOrdenada.filter(pj => {
+    const ki = parseInt(pj.ki) || 0;
+    const fortaleza = parseInt(pj.fortaleza) || 0;
+    const positiva = parseInt(pj.positiva) || 0;
+    const negativa = parseInt(pj.negativa) || 0;
+    const vidaActual = parseInt(pj.vidaActual) || 0;
+    const ken = parseInt(pj.ken) || 0;
 
-  // Filtrar la colección según la búsqueda y otros criterios
-  const personajesFiltrados = coleccionOrdenada.filter((pj) => {
-    const vidaTotal =
-      ((parseInt(pj.ki) || 0) + (parseInt(pj.fortaleza) || 0)) *
-      ((parseInt(pj.positiva) || 0) + (parseInt(pj.negativa) || 0));
+    const vidaTotal = (ki + fortaleza) * (positiva + negativa);
 
     return (
       pj.pjPnj === true &&
       pj.nombre.toLowerCase().includes(pjBuscado.toLowerCase()) &&
-      pj.ken >= 40 &&
-      (pj.vidaActual <= vidaTotal || pj.ken >= 400)
+      ken >= 40 &&
+      (vidaActual <= vidaTotal || ken >= 400)
     );
   });
-
-   // Crear un diccionario para rankear cada personaje según su posición en el ranking global
- // Después de filtrar
-const rankingMap = {};
-personajesFiltrados.forEach((pj, index) => {
-  rankingMap[pj.idpersonaje] = index + 1;
-});
 
   return (
     <View style={styles.container}>
       <TextInput
         style={styles.searchInput}
-        placeholder="Ingrese nombre del PJ"
+        placeholder="Buscar personaje"
         value={pjBuscado}
         onChangeText={setPjBuscado}
         placeholderTextColor="#ccc"
@@ -144,15 +147,7 @@ personajesFiltrados.forEach((pj, index) => {
       <FlatList
         data={personajesFiltrados}
         keyExtractor={(item) => item.idpersonaje.toString()}
-        numColumns={2}
-        renderItem={({ item }) => (
-          <Cartita
-            rank={rankingMap[item.idpersonaje]} // ranking real aquí
-            {...item}
-            vidaTotal={(item.ki + item.fortaleza) * (item.positiva + item.negativa)}
-          />
-        )}
-        columnWrapperStyle={{ justifyContent: "space-between" }}
+        renderItem={({ item }) => <Cartita item={item} rank={rankingMap[item.idpersonaje]} />}
         contentContainerStyle={styles.cardsContainer}
         showsVerticalScrollIndicator={false}
       />
@@ -160,153 +155,147 @@ personajesFiltrados.forEach((pj, index) => {
   );
 };
 
-
-
-//estilos
 const styles = StyleSheet.create({
- container: {
-    flex: 1,
-    backgroundColor: '#000',
-    padding: 10,
-  
-  },
-  searchInput: {
-    backgroundColor: '#222',
-    color: 'white',
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 20,
-  },
-  scrollContainer: {
-    // alignItems removed para evitar interferencia con flexWrap
-  },
- cardsContainer: {
-   paddingHorizontal: 10,
-  paddingBottom: 20,
-  paddingHorizontal: 10,
-  paddingTop: 10, // <--- nuevo
-},
-  card: {
-  backgroundColor: '#111',
-  borderRadius: 10,
-  padding: 6, // menos padding para que la imagen esté más cerca
-  marginBottom: 12,
-  marginHorizontal: 5, // simula gap horizontal
-  width: '47%', // permite dos por fila con espacio para rankNumber
-  alignItems: 'center',
-  position: 'relative', // necesario para que rankNumber se posicione bien
-     borderColor:  '#7baedc',
-    borderWidth: 0.3,
+  container: { flex: 1, backgroundColor: '#000', padding: 10 },
+  searchInput: { backgroundColor: '#222', color: '#fff', padding: 10, borderRadius: 8, marginBottom: 20 },
+  cardsContainer: { paddingBottom: 20 },
+  cardContainer: { marginBottom: 14, width: '100%' },
 
-},
+  // --- Tarjetas normales ---
+  card: {
+    borderRadius: 10,
+    overflow: 'hidden',
+    backgroundColor: '#111',
+    position: 'relative',
+    borderWidth:1,
+    borderColor:"gray"
+    
+  },
+
+  // --- Tarjeta legendaria (borde dorado visible) ---
   cardLeyenda: {
-    borderColor: 'gold',
-    borderWidth: 3,
-   
+    borderWidth: 4,
+    borderColor: 'white',
+    shadowColor: '#ffd90059',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 10,
+    shadowRadius: 10,
+    elevation: 10, // efecto brillante en Android
   },
+
+  // --- Contenedor de brillo (si querés que rodee la tarjeta) ---
+  glowBorder: {
+    padding: 3,
+    borderRadius: 14,
+    backgroundColor: '#222', // fondo oscuro para contrastar
+    borderWidth: 2,
+    borderColor: '#ffd900a4',
+    shadowColor: '#00ffffff',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 15,
+    elevation: 15,
+  },
+
   cardImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 10,
-  },
-name: {
-  color: 'yellow',
-  fontSize: 18,
-  marginTop: 5,
-  textAlign: 'center',
+  width: '100%',
+  height: 160,
+  borderRadius: 10,
+  borderWidth: 3,
+  borderColor: 'black',
+  shadowColor: '#FFD700',
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.8,
+  shadowRadius: 8,
+  elevation: 8,
+  resizeMode: 'cover',   // cubrir todo el contenedor
+  overflow: 'hidden',
+  alignSelf: 'flex-start', // asegura que tome desde arriba
 },
-  domain: {
-    color: 'white',
-    fontSize: 14,
-  },
-rankNumber: {
-  position: 'absolute',
-  top: -8,
-  left: -8,
-  backgroundColor: '#f1c40f',
-  color: 'black',
-  borderRadius: 20,
-  paddingVertical: 4,
-  fontWeight: 'bold',
-  fontSize: 12,
-  width: 30,           // ancho fijo igual para todos
-  textAlign: 'center', // para centrar el número
-  zIndex: 10,
-},
- modalContainer: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: '#000', // Fondo negro
-  },
-  modalHeader: {
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  modalTitle: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: '#fff', // Texto blanco
-    marginBottom: 6,
-  },
-  modalImage: {
+
+  // --- Overlay inferior con nombre y dominio ---
+  overlay: {
+    position: 'absolute',
+    bottom: 0,
     width: '100%',
-    height: 300, // Imagen más alta
-    resizeMode: 'cover',
-    borderRadius: 12,
-    marginBottom: 20,
-  },
-  modalInfo: {
-    backgroundColor: '#111', // Fondo gris oscuro
-    padding: 14,
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  modalText: {
-    fontSize: 16,
-    marginBottom: 6,
-    color: '#eee', // Texto claro para buen contraste
-  },
-  modalHistoria: {
-    padding: 14,
-    backgroundColor: '#1a1a1a', // Gris más claro para distinguir la historia
-    borderRadius: 8,
-    marginBottom: 32,
-  },
-  tabButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginVertical: 20,
-  },
-  tabButton: {
-    fontSize: 16,
-    color: 'white',
-  },
-  activeTab: {
-    color: 'yellow',
-    textDecorationLine: 'underline',
-  },
-  closeButton: {
-    backgroundColor: 'red',
-    padding: 10,
-    borderRadius: 10,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    paddingVertical: 6,
     alignItems: 'center',
   },
-  closeText: {
-    color: 'white',
+  name: { color: 'yellow', fontWeight: 'bold', fontSize: 16 },
+  domain: { color: '#ccc', fontSize: 13 },
+
+// --- Ranking global ---
+rankContainer: {
+  position: 'absolute',
+  top: 8,
+  left: 8,
+  backgroundColor: 'rgba(10, 10, 10, 0.85)',
+  borderWidth: 1.5,
+  borderColor: '#b8860b', // dorado viejo, más serio
+  borderRadius: 6,
+  paddingHorizontal: 12,
+  paddingVertical: 4,
+  zIndex: 10,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.8,
+  shadowRadius: 6,
+  elevation: 8,
+},
+
+rankNumber: {
+  fontSize: 26,
+  fontWeight: '900',
+  color: '#d4af37', // dorado opaco realista
+  letterSpacing: 1.2,
+  textShadowColor: '#1a1a1a', // sombra profunda, no roja
+  textShadowOffset: { width: 2, height: 2 },
+  textShadowRadius: 3,
+  fontStyle: 'normal',
+  textTransform: 'uppercase',
+  includeFontPadding: false,
+},
+
+  // --- Modal ---
+  modalContainer: { flex: 1, padding: 16, backgroundColor: '#000' },
+  modalImage: { width: '100%', height: 300, marginBottom: 12, borderRadius:4,},
+
+  // --- Fondo oscuro con estrellas ---
+  modalEstrellitas: {
+    position: 'absolute',
+    bottom: 20,
+    left: 8,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.54)',
+    borderRadius: 10,
+    padding: 10,
+  },
+
+  modalTitle: { fontSize: 24, fontWeight: 'bold', color: '#fff', marginBottom: 6 },
+  modalText: { fontSize: 16, color: '#eee', marginBottom: 4 },
+  modalHistoria: { marginTop: 12, color: '#ccc' },
+
+  // --- Botón cerrar (X roja) ---
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    borderRadius: 20,
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 100,
+  },
+  closeButtonText: {
+    color: 'red',
+    fontSize: 20,
     fontWeight: 'bold',
   },
-  noResults: {
-    color: 'yellow',
-    marginTop: 20,
-    fontSize: 18,
-    textAlign: 'center',
-    fontFamily: 'cursive',
-  },
-  modalConviccion: {
-  fontSize: 16,
-  marginBottom: 6,
-  color: '#00FFFF', // Cian brillante
-  fontWeight: 'bold', // Opcional, para destacarlo más
-},
 });
+
 
