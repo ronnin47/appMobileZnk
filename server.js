@@ -1388,6 +1388,74 @@ app.delete('/eliminarLogro/:id', async (req, res) => {
 
 
 
+app.put('/editarLogro/:id', async (req, res) => {
+  const logroId = req.params.id;
+  const { nombre, descripcion, categoria, nivel, imagen, personajesids } = req.body;
+
+
+  //console.log("Imagen del logro: ",imagen);
+
+  if (!nombre || !descripcion) {
+    return res.status(400).json({ error: 'Nombre y descripción son requeridos' });
+  }
+
+  try {
+    // 1️⃣ Actualizar datos básicos
+    const queryUpdate = `
+      UPDATE logros
+      SET nombre = $1,
+          descripcion = $2,
+          categoria = $3,
+          nivel = $4,
+          personajesids = $5
+      WHERE id = $6
+      RETURNING *;
+    `;
+    const values = [nombre, descripcion, categoria, nivel, personajesids, logroId];
+    let result = await pool.query(queryUpdate, values);
+    let logroActualizado = result.rows[0];
+
+    // 2️⃣ Si viene una imagen en base64, actualizarla en Cloudinary
+    if (imagen && imagen.startsWith('data:image')) {
+      const matches = imagen.match(/^data:image\/(\w+);base64,(.+)$/);
+      if (!matches) return res.status(400).json({ error: 'Imagen base64 inválida.' });
+
+      const ext = matches[1];
+      const data = matches[2];
+
+      const uploadResult = await cloudinary.uploader.upload(
+        `data:image/${ext};base64,${data}`,
+        {
+          folder: 'logros',
+          public_id: `logros_${logroId}`,
+          overwrite: true,
+        }
+      );
+
+      const imageUrl = uploadResult.secure_url;
+      const imageCloudId = uploadResult.public_id;
+
+      // Actualizar solo los campos de imagen
+      const updateImageQuery = `
+        UPDATE logros
+        SET imagenurl = $1,
+            imagencloudid = $2
+        WHERE id = $3
+        RETURNING *;
+      `;
+      result = await pool.query(updateImageQuery, [imageUrl, imageCloudId, logroId]);
+      logroActualizado = result.rows[0];
+    }
+
+    // 3️⃣ Devolver el logro actualizado (con imagen vieja o nueva)
+    res.json({ message: 'Logro actualizado correctamente', logro: logroActualizado });
+
+  } catch (err) {
+    console.error('Error al editar logro:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 
 
 
