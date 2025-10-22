@@ -11,6 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from './AuthContext';
 import * as Animatable from 'react-native-animatable';
 
+
 export const Carrusel = ({ personajes }) => {
   const { setPjSeleccionado } = useContext(AuthContext);
   const navigation = useNavigation();
@@ -94,8 +95,10 @@ const ImageWrapper = ({ uri, fallback }) => {
 
 const styles = StyleSheet.create({
   carruselContainer: {
-    height: 200,
+    height: 190,
     justifyContent: 'center',
+    marginBottom: 12,
+    marginTop: 0,
   },
   row: {
     flexDirection: 'row',
@@ -105,45 +108,48 @@ const styles = StyleSheet.create({
   card: {
     marginHorizontal: 8,
     alignItems: 'center',
-    borderRadius: 16,
+    borderRadius: 14, // bordes suaves y elegantes
     overflow: 'hidden',
-    backgroundColor: '#121212',
-    shadowColor: '#00ffff',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 6,
+    backgroundColor: '#1a1a1a',
+    shadowColor: '#f0a400c7',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.7,
+    shadowRadius: 20,
+    elevation: 10,
+    borderWidth: 2,
+    borderColor: '#f0a50055', // borde glow suave
   },
   cardPressed: {
     transform: [{ scale: 0.96 }],
-    shadowOpacity: 0.5,
-    shadowRadius: 15,
+    shadowOpacity: 0.9,
+    shadowRadius: 25,
   },
   imagen: {
-    width: 140,
+    width: 130,
     height: 180,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#00ffff',
-    backgroundColor: '#000',
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: '#161316fd',
+    backgroundColor: 'aliceblue',
   },
   overlay: {
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    paddingVertical: 5,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    alignItems: 'center',
-    borderBottomLeftRadius: 16,
-    borderBottomRightRadius: 16,
-  },
+  position: 'absolute',
+  bottom: 0,
+  width: '100%',
+  paddingVertical: 6,
+  // Gradiente tipo DaisyUI
+  backgroundColor: 'linear-gradient(90deg, rgba(43, 177, 154, 0.39) 0%, rgba(255, 220, 100,0.85) 100%)',
+  alignItems: 'center',
+  borderBottomLeftRadius: 14,
+  borderBottomRightRadius: 14,
+},
   text: {
-    color: '#ffd900bd',
-    fontSize: 16,
-    fontWeight: '700',
-    textShadowColor: '#000',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    color: '#fffde7', // blanco cremoso
+    fontSize: 14,
+    fontWeight: '900',
+    textShadowColor: '#110910f6',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 8,
     textAlign: 'center',
   },
 });

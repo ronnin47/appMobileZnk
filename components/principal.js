@@ -170,9 +170,12 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
 };
 
   const universoCelesteItems = [
-    { id: 'ranking', nombre: 'Ranking', imagen:"https://res.cloudinary.com/dzul1hatw/image/upload/v1753555471/puerta_mo6o6p.jpg"},
-    { id: 'poderesUnicos', nombre: 'Poderes Unicos', imagen:"https://res.cloudinary.com/dzul1hatw/image/upload/v1753555606/tecnicaEspecial_e0glko.jpg" },
+        { id: 'ranking', nombre: 'Ranking', imagen:"https://res.cloudinary.com/dzul1hatw/image/upload/v1753555471/puerta_mo6o6p.jpg"},
+
     { id: 'logros', nombre: 'Logros', imagen: "https://res.cloudinary.com/dzul1hatw/image/upload/v1753280092/tesoros/tesoro_24.jpg" },
+
+    { id: 'poderesUnicos', nombre: 'Poderes Unicos', imagen:"https://res.cloudinary.com/dzul1hatw/image/upload/v1753555606/tecnicaEspecial_e0glko.jpg" },
+    
   ];
 
 
@@ -192,7 +195,23 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
       
       <View style={styles.contenedorPrincipal}>
         <View style={styles.tituloYBotonContainer}>
-          <Text style={styles.tituloSeccion}>Mis Personajes</Text>
+          <Text style={[styles.tituloSeccion,
+             {
+              flexDirection: 'row',
+              alignItems: 'center',
+              alignSelf: 'flex-start',
+              backgroundColor: '#6c63ff',
+              paddingHorizontal: 8,
+              paddingVertical: 2,
+              borderRadius: 6,
+              marginTop: 6,
+              marginBottom: 12,
+              color:"aliceblue"
+            }
+          ]}>Mis Personajes</Text>
+
+
+          
            <TouchableOpacity onPress={crearFichaPersonaje} activeOpacity={0.8} style={styles.botonWrapper}>
               <LinearGradient
                 colors={['#f6f7f8', '#d9d9d9', '#a3a3a3', '#eaeaea']}
@@ -212,7 +231,20 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
       </View>
 
      <View style={[styles.contenedorPrincipal, { marginTop: 0 }]}>
-  <Text style={styles.tituloSeccion}>Universo Celeste</Text>
+  <Text style={[styles.tituloSeccion,
+             {
+              flexDirection: 'row',
+              alignItems: 'center',
+              alignSelf: 'flex-start',
+              backgroundColor: '#6c63ff',
+              paddingHorizontal: 8,
+              paddingVertical: 2,
+              borderRadius: 6,
+              marginTop: 6,
+              marginBottom: 12,
+              color:"aliceblue"
+            }
+          ]}>Universo Celeste</Text>
   <ScrollView horizontal showsHorizontalScrollIndicator={false}>
     <View style={styles.row}>
       {universoCelesteItems.map((item) => (
@@ -252,7 +284,20 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
         {/* Contenedor de Sagas con botón Crear Saga */}
       <View style={[styles.contenedorPrincipal, { marginTop: 20}]}>
         <View style={styles.tituloYBotonContainer}>
-          <Text style={styles.tituloSeccion}>Sagas</Text>
+          <Text style={[styles.tituloSeccion,
+             {
+              flexDirection: 'row',
+              alignItems: 'center',
+              alignSelf: 'flex-start',
+              backgroundColor: '#6c63ff',
+              paddingHorizontal: 8,
+              paddingVertical: 2,
+              borderRadius: 6,
+              marginTop: 6,
+              marginBottom: 12,
+              color:"aliceblue"
+            }
+          ]}>Sagas</Text>
 
           {/* Mostrar botón sólo si estatus es narrador */}
          {estatus === 'narrador' && (
@@ -300,7 +345,20 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
          {/* Contenedor de nuevos componentes orientado hacia Herbolaria, Neotecnia y Objetos Magicos*/}
        <View style={[styles.contenedorPrincipal, { marginTop: 20, marginBottom: 80 }]}>
        
-          <Text style={styles.tituloSeccion}>Manual ZNK</Text>
+          <Text style={[styles.tituloSeccion,
+             {
+              flexDirection: 'row',
+              alignItems: 'center',
+              alignSelf: 'flex-start',
+              backgroundColor: '#6c63ff',
+              paddingHorizontal: 8,
+              paddingVertical: 2,
+              borderRadius: 6,
+              marginTop: 6,
+              marginBottom: 12,
+              color:"aliceblue"
+            }
+          ]}>Manual ZNK</Text>
            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
     <View style={styles.row}>
       {componentesManual.map((item) => (
@@ -399,7 +457,7 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   tituloSeccion: {
-    fontSize: 22,
+    fontSize: 14,
     fontWeight: 'bold',
     marginRight: 10,
     color: '#fff',
@@ -407,9 +465,10 @@ const styles = StyleSheet.create({
   },
 botonCrear: {
   backgroundColor: '#FFC107', // golden orange
-  paddingVertical: 8,
-  paddingHorizontal: 16,
-  borderRadius: 6,
+  paddingVertical: 4,
+  paddingHorizontal: 4,
+  marginRight:4,
+  borderRadius: 9,
   borderWidth: 1,
   borderColor: '#FFF8E1', // borde dorado claro
 
@@ -437,7 +496,7 @@ textoBoton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    marginBottom: 0,
   },
   row: {
   flexDirection: 'row',
@@ -449,32 +508,35 @@ textoBoton: {
 
 card: {
   marginHorizontal: 8,
-  alignItems: 'center',
+  borderRadius: 10,
+  overflow: 'hidden',
+  width: 120,
+  height: 160,
+  backgroundColor: '#1a1a1a',
+  shadowColor: '#fff',
+  shadowOffset: { width: 2, height: 4 },
+  shadowOpacity: 0.3,
+  shadowRadius: 6,
+  elevation: 6,
+  borderWidth: 1,
+  borderColor: 'gray',
+  justifyContent: 'flex-end', // para que el banner de texto quede abajo
 },
 
- imagen: {
-    width: 120,
-    height: 160,
-    borderWidth: 0.35,
-    borderColor: "white",
-    borderRadius: 8,
-    marginBottom: 15,
-    shadowColor: '#fff',
-    shadowOffset: {
-      width: 4,
-      height: 8,
-    },
-    shadowOpacity: 0.9,
-    shadowRadius: 20,
-    elevation: 15,
-    backgroundColor: '#000',
-    overflow: 'hidden',
-  },
+imagen: {
+  ...StyleSheet.absoluteFillObject, // la imagen ocupa todo el card
+  width: null,
+  height: null,
+  resizeMode: 'cover',
+},
 
 text: {
-  fontSize: 16,
+  width: '100%',
   textAlign: 'center',
-  color: '#fff',
-  width: 120,
+  color: '#FFD700', // dorado
+  fontWeight: 'bold',
+  fontSize: 14,
+  paddingVertical: 4,
+  backgroundColor: 'rgba(0,0,0,0.5)', // overlay semi-transparente
 },
 });
