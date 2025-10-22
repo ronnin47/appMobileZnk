@@ -21,11 +21,14 @@ import {
   Dimensions,
   SectionList,
   FlatList,
+  Alert,
 } from 'react-native';
 
 import * as ImagePicker from 'expo-image-picker';
 
 const imagenBase = require('../assets/imagenBase.jpeg');
+const itemNivelPre = require('../assets/mitamaDorada.png');
+
 
 export const Logros = () => {
   const [logros, setLogros] = useState([]);
@@ -312,30 +315,50 @@ setResultadosPersonajes([]);
 
   
 
-// Dentro de Logros.js, antes del return:
 const eliminarLogro = async (id) => {
-  // Confirmación
-  const confirm = window.confirm
-    ? window.confirm('¿Seguro que quieres eliminar este logro?')
-    : true; // para dispositivos móviles donde window.confirm no existe, podrías usar un Alert
+  // Mostrar alerta de confirmación
+  Alert.alert(
+    'Confirmar eliminación',
+    '¿Seguro que quieres eliminar este logro?',
+    [
+      {
+        text: 'Cancelar',
+        style: 'cancel',
+      },
+      {
+        text: 'Eliminar',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            // Llamada al backend
+            await axios.delete(`${API_BASE_URL}/eliminarLogro/${id}`);
 
-  if (!confirm) return;
+            // Actualizar estado local
+            setLogros((prev) => prev.filter((l) => l.id !== id));
 
-  try {
-    // Llamada al backend sin token
-    await axios.delete(`${API_BASE_URL}/eliminarLogro/${id}`);
+            // Cerrar modal
+            setModalVerVisible(false);
 
-    // Actualizar estado local
-    setLogros((prev) => prev.filter((l) => l.id !== id));
-
-    // Cerrar modal
-    setModalVerVisible(false);
-
-    showMessage({ message: 'Logro eliminado', type: 'success' });
-  } catch (error) {
-    console.error('Error al eliminar logro:', error);
-    showMessage({ message: 'No se pudo eliminar el logro', type: 'danger' });
-  }
+            // Mostrar mensaje de éxito
+            showMessage({
+              message: '✅ Logro eliminado correctamente',
+              type: 'success',
+              duration: 2000,
+            });
+          } catch (error) {
+            console.error('Error al eliminar logro:', error);
+            showMessage({
+              message: '❌ No se pudo eliminar el logro',
+              description: 'Revisa tu conexión o inténtalo de nuevo',
+              type: 'danger',
+              duration: 2500,
+            });
+          }
+        },
+      },
+    ],
+    { cancelable: true }
+  );
 };
 
 // Ordenar logros por categoría alfabéticamente sin cambiar el diseño
@@ -397,107 +420,145 @@ const sections = Object.keys(groupedObj).map(catKey => ({
           </View>
         )}
         renderItem={({ item }) => (
-          <FlatList
-            data={item}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={(logro) => (logro.id || logro.nombre || Math.random()).toString()}
-            renderItem={({ item: logro }) => (
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => {
-                  setLogroSeleccionado(logro);
-                  setModalVerVisible(true);
-                }}
-                style={{
-                  backgroundColor: '#1b1d23',
-                  marginRight: 12,
-                  borderRadius: 10,
-                  borderWidth: 1,
-                  borderColor: 'gray',
-                  overflow: 'hidden',
-                  width: 250,
+           <FlatList
+    data={item}
+    horizontal
+    showsHorizontalScrollIndicator={false}
+    keyExtractor={(logro) => (logro.id || logro.nombre || Math.random()).toString()}
+    renderItem={({ item: logro }) => (
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onPress={() => {
+          setLogroSeleccionado(logro);
+          setModalVerVisible(true);
+        }}
+        style={{
+          backgroundColor: '#1b1d23',
+          marginRight: 12,
+          borderRadius: 10,
+          borderWidth: 1,
+          borderColor: 'gray',
+          overflow: 'hidden',
+          width: 250,
+        }}
+      >
+        {/* Contenedor con imagen y mitamas superpuestas */}
+        <View style={{ position: 'relative' }}>
+          <Image
+            source={{ uri: logro.imagenurl || Image.resolveAssetSource(imagenBase).uri }}
+            style={{ width: '100%', height: 140, resizeMode: 'cover' }}
+          />
+
+          {/* Mitamas doradas sobre la imagen */}
+          <View
+            style={{
+              position: 'absolute',
+              bottom: 6,
+              left: 6,
+              flexDirection: 'row',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+            }}
+          >
+            {Array.from({ length: Math.floor((logro.nivel || 0) / 10) }).map((_, index) => (
+              <Image
+                key={index}
+                source={require('../assets/mitamaDorada.png')}
+               style={{
+          width: 20,
+          height: 20,
+          marginLeft: 2,
+          shadowColor: '#fff',
+          shadowOffset: { width: 0, height: 0 },
+          shadowOpacity: 0.9,
+          shadowRadius: 6,
+          elevation: 5,
+          opacity: 0.75,
+          borderRadius: 50,
+          borderWidth: 1,      // borde rojo o del color que quieras
+          borderColor: '#f1ab41ff',
+        }}
+                resizeMode="contain"
+              />
+            ))}
+          </View>
+        </View>
+
+        {/* Resto del contenido del logro */}
+        <View style={{ padding: 12 }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#ffd343ff' }}>
+            {logro.nombre}
+          </Text>
+
+          {logro.descripcion ? (
+            <Text style={{ fontSize: 13, color: '#c4c4c4', marginTop: 4 }} numberOfLines={3}>
+              {logro.descripcion}
+            </Text>
+          ) : null}
+
+          {Array.isArray(logro.personajesids) && logro.personajesids.length > 0 && (
+            <View style={{ marginTop: 10 }}>
+              <Text style={{ color: '#889de0ff', marginBottom: 6 }}>Protagonistas:</Text>
+
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  paddingVertical: 4,
                 }}
               >
-                <Image
-                  source={{ uri: logro.imagenurl || Image.resolveAssetSource(imagenBase).uri }}
-                  style={{ width: '100%', height: 120, resizeMode: 'cover' }}
-                />
-
-                <View style={{ padding: 12 }}>
-                  <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#ffd343ff' }}>
-                    {logro.nombre}
-                  </Text>
-                  {logro.descripcion ? (
-                    <Text style={{ fontSize: 13, color: '#c4c4c4', marginTop: 4 }} numberOfLines={3}>
-                      {logro.descripcion}
-                    </Text>
-                  ) : null}
-
-                  {Array.isArray(logro.personajesids) && logro.personajesids.length > 0 && (
-                    <View style={{ marginTop: 10 }}>
-                      <Text style={{ color: '#889de0ff', marginBottom: 6 }}>Protagonistas:</Text>
-
-                      {/* Scroll horizontal con alineación consistente */}
-                      <ScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          paddingVertical: 4,
+                {logro.personajesids.map((idPers) => {
+                  const personaje = coleccionPersonajes.find((p) => p.idpersonaje === idPers);
+                  if (!personaje) return null;
+                  return (
+                    <View
+                      key={personaje.idpersonaje}
+                      style={{
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginRight: 10,
+                        width: 70,
+                      }}
+                    >
+                      <Image
+                        source={{
+                          uri: personaje.imagenurl || Image.resolveAssetSource(imagenBase).uri,
+                        }}
+                        style={{
+                          width: 45,
+                          height: 45,
+                          borderRadius: 25,
+                          borderWidth: 2,
+                          borderColor: '#6c63ff',
+                        }}
+                      />
+                      <Text
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                        style={{
+                          color: 'aliceblue',
+                          fontSize: 11,
+                          marginTop: 4,
+                          textAlign: 'center',
+                          width: 68,
                         }}
                       >
-                        {logro.personajesids.map((idPers) => {
-                          const personaje = coleccionPersonajes.find((p) => p.idpersonaje === idPers);
-                          if (!personaje) return null;
-                          return (
-                            <View
-                              key={personaje.idpersonaje}
-                              style={{
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                marginRight: 10,
-                                width: 70,
-                              }}
-                            >
-                              <Image
-                                source={{
-                                  uri: personaje.imagenurl || Image.resolveAssetSource(imagenBase).uri,
-                                }}
-                                style={{
-                                  width: 45,
-                                  height: 45,
-                                  borderRadius: 25,
-                                  borderWidth: 2,
-                                  borderColor: '#6c63ff',
-                                }}
-                              />
-                              <Text
-                                numberOfLines={1}
-                                ellipsizeMode="tail"
-                                style={{
-                                  color: 'aliceblue',
-                                  fontSize: 11,
-                                  marginTop: 4,
-                                  textAlign: 'center',
-                                  width: 68,
-                                }}
-                              >
-                                {personaje.nombre.length > 12
-                                  ? personaje.nombre.slice(0, 12) + '...'
-                                  : personaje.nombre}
-                              </Text>
-                            </View>
-                          );
-                        })}
-                      </ScrollView>
+                        {personaje.nombre.length > 12
+                          ? personaje.nombre.slice(0, 12) + '...'
+                          : personaje.nombre}
+                      </Text>
                     </View>
-                  )}
-                </View>
-              </TouchableOpacity>
-            )}
-          />
+                  );
+                })}
+              </ScrollView>
+            </View>
+          )}
+        </View>
+      </TouchableOpacity>
+    )}
+  />
         )}
         contentContainerStyle={{ paddingBottom: 120, paddingTop: 6 }}
        // En la SectionList, reemplazar ListEmptyComponent por:
@@ -676,7 +737,7 @@ ListEmptyComponent={() => (
                 />
 
                 <TextInput
-                  placeholder="Nivel"
+                  placeholder="Nivel de Presencia"
                   placeholderTextColor="#888"
                   value={nivel}
                   onChangeText={setNivel}
@@ -776,20 +837,57 @@ ListEmptyComponent={() => (
             </TouchableOpacity>
           </View>
 
-          {/* IMAGEN PRINCIPAL */}
-          <Image
-            source={{
-              uri:
-                logroSeleccionado.imagenurl ||
-                Image.resolveAssetSource(imagenBase).uri,
-            }}
-            style={{
-              width: '100%',
-              height: 260,
-              borderRadius: 8,
-              marginBottom: 12,
-            }}
-          />
+       {/* Contenedor relativo para la imagen y las mitamas */}
+<View style={{ position: 'relative', marginBottom: 12, borderRadius: 8, overflow: 'hidden' }}>
+  {/* IMAGEN PRINCIPAL */}
+  <Image
+    source={{
+      uri:
+        logroSeleccionado.imagenurl ||
+        Image.resolveAssetSource(imagenBase).uri,
+    }}
+    style={{
+      width: '100%',
+      height: 260,
+      borderRadius: 8,
+    }}
+    resizeMode="cover"
+  />
+
+  {/* Mitamas doradas sobre la imagen */}
+  <View
+    style={{
+      position: 'absolute',
+      bottom: 8,       // distancia desde el borde inferior
+      left: 8,         // distancia desde el borde izquierdo
+      flexDirection: 'row',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+    }}
+  >
+    {Array.from({ length: Math.floor((logroSeleccionado.nivel || 0) / 10) }).map((_, index) => (
+      <Image
+        key={index}
+        source={require('../assets/mitamaDorada.png')}
+        style={{
+          width: 22,
+          height: 22,
+          marginLeft: 2,
+          shadowColor: '#fff',
+          shadowOffset: { width: 0, height: 0 },
+          shadowOpacity: 0.9,
+          shadowRadius: 6,
+          elevation: 5,
+          opacity: 0.95,
+          borderRadius: 50,
+          borderWidth: 1,      // borde rojo o del color que quieras
+          borderColor: '#f1ab41ff',
+        }}
+        resizeMode="contain"
+      />
+    ))}
+  </View>
+</View>
 
           {/* DESCRIPCIÓN */}
           <Text style={{ color: '#ddd', fontSize: 15, marginBottom: 10 }}>
@@ -799,9 +897,28 @@ ListEmptyComponent={() => (
           <Text style={{ color: '#6c63ff', marginBottom: 8 }}>
             Categoría: {logroSeleccionado.categoria || 'N/A'}
           </Text>
-          <Text style={{ color: '#bbb', marginBottom: 15 }}>
-            Nivel: {logroSeleccionado.nivel || 'N/A'}
-          </Text>
+
+
+          <View style={{ marginBottom: 15 }}>
+  <Text  
+  style={{
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: '#6c63ff',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+    marginTop: 6,
+    marginBottom: 12,
+    color:"aliceblue"
+  }}>
+    Nivel de Presencia:{' '}
+    {logroSeleccionado.nivel ? logroSeleccionado.nivel : 'N/A'}{' '}
+  </Text>
+
+
+</View>
 
           {/* PERSONAJES EN FILA */}
           {Array.isArray(logroSeleccionado.personajesids) &&
@@ -969,11 +1086,11 @@ ListEmptyComponent={() => (
             style={styles.input}
           />
           <TextInput
-            placeholder="Nivel"
+            placeholder="Nivel de Presencia"
             placeholderTextColor="#888"
             value={nivel.toString()}
             onChangeText={text => setNivel(Number(text) || 0)}
-            keyboardType="numeric"
+            keyboardType="default"
             style={styles.input}
           />
         </View>
