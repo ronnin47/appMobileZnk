@@ -5,7 +5,6 @@ import {
   View,
   Image,
   StyleSheet,
-  TouchableOpacity,
   Pressable
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -14,8 +13,8 @@ import * as Animatable from 'react-native-animatable';
 
 export const Carrusel = ({ personajes }) => {
   const { setPjSeleccionado } = useContext(AuthContext);
-  const imagenBase = require('../assets/imagenBase.jpeg');
   const navigation = useNavigation();
+  const imagenBase = require('../assets/imagenBase.jpeg');
   const [animados, setAnimados] = useState({});
 
   const handlePress = (pj) => {
@@ -28,61 +27,34 @@ export const Carrusel = ({ personajes }) => {
     const animar = animados[id];
 
     const onPress = () => {
-      setAnimados((prev) => ({ ...prev, [id]: true }));
+      setAnimados(prev => ({ ...prev, [id]: true }));
       setTimeout(() => {
-        setAnimados((prev) => ({ ...prev, [id]: false }));
+        setAnimados(prev => ({ ...prev, [id]: false }));
         handlePress(item);
-      }, 300); // espera un poco antes de navegar
+      }, 400);
     };
 
     return (
       <Animatable.View
         animation={animar ? 'swing' : undefined}
-        duration={1600}
+        duration={800}
         useNativeDriver
       >
-       
-
         <Pressable
           style={({ pressed }) => [
-              styles.card,
-              pressed && {
-              transform: [{ scale: 0.97 }],
-              opacity: 0.8,
-              borderWidth: 3,
-              padding:0.9,
-              borderColor: "white", // cyan
-              borderRadius: 6,
-              backgroundColor: '#0a0a0a', // un fondo oscuro elegante
-              shadowColor: '#00ffff',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.3,
-              shadowRadius: 6,
-              elevation: 6,
-            } 
-            ]}
-            onPress={onPress}
-          >
+            styles.card,
+            pressed && styles.cardPressed
+          ]}
+          onPress={onPress}
+        >
           <ImageWrapper
-            uri={
-              item.imagen?.startsWith?.('data:image')
-                ? item.imagen
-                : item.imagenurl
-            }
+            uri={item.imagen?.startsWith('data:image') ? item.imagen : item.imagenurl}
             fallback={imagenBase}
           />
-          
-          <Text
-            style={styles.text}
-            numberOfLines={1}
-            adjustsFontSizeToFit={true}
-            minimumFontScale={0.5}
-            ellipsizeMode="tail"
-          >
-            {item.nombre}
-          </Text>
-          </Pressable>
-        
+          <View style={styles.overlay}>
+            <Text style={styles.text}>{item.nombre}</Text>
+          </View>
+        </Pressable>
       </Animatable.View>
     );
   };
@@ -92,22 +64,12 @@ export const Carrusel = ({ personajes }) => {
       <FlatList
         horizontal
         data={[...personajes].reverse()}
-        keyExtractor={(item) =>
-          item.idpersonaje?.toString() || Math.random().toString()
-        }
+        keyExtractor={(item) => item.idpersonaje?.toString() || Math.random().toString()}
         renderItem={renderItem}
         showsHorizontalScrollIndicator={false}
-        snapToInterval={136}
+        snapToInterval={150}
         decelerationRate="fast"
         contentContainerStyle={styles.row}
-        getItemLayout={(data, index) => ({
-          length: 136,
-          offset: 136 * index,
-          index,
-        })}
-        initialNumToRender={5}
-        maxToRenderPerBatch={10}
-        windowSize={5}
       />
     </View>
   );
@@ -117,11 +79,8 @@ const ImageWrapper = ({ uri, fallback }) => {
   const [source, setSource] = useState(fallback);
 
   useEffect(() => {
-    if (uri && typeof uri === 'string' && uri.trim() !== '') {
-      setSource({ uri });
-    } else {
-      setSource(fallback);
-    }
+    if (uri && typeof uri === 'string' && uri.trim() !== '') setSource({ uri });
+    else setSource(fallback);
   }, [uri]);
 
   return (
@@ -135,41 +94,56 @@ const ImageWrapper = ({ uri, fallback }) => {
 
 const styles = StyleSheet.create({
   carruselContainer: {
-    height: 220,
+    height: 200,
     justifyContent: 'center',
-  },
-  text: {
-    fontSize: 16,
-    textAlign: 'center',
-    color: '#fff',
-    marginTop: -5,
-    width: 120,
-  },
-  imagen: {
-    width: 120,
-    height: 160,
-    borderWidth: 0.35,
-    borderColor: 'white',
-    borderRadius: 8,
-    marginBottom: 15,
-    shadowColor: '#fff',
-    shadowOffset: {
-      width: 4,
-      height: 8,
-    },
-    shadowOpacity: 0.9,
-    shadowRadius: 20,
-    elevation: 15,
-    backgroundColor: '#000',
-    overflow: 'hidden',
   },
   row: {
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
+    alignItems: 'flex-end',
+    paddingHorizontal: 12,
   },
   card: {
     marginHorizontal: 8,
     alignItems: 'center',
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: '#121212',
+    shadowColor: '#00ffff',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  cardPressed: {
+    transform: [{ scale: 0.96 }],
+    shadowOpacity: 0.5,
+    shadowRadius: 15,
+  },
+  imagen: {
+    width: 140,
+    height: 180,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#00ffff',
+    backgroundColor: '#000',
+  },
+  overlay: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    paddingVertical: 5,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    alignItems: 'center',
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
+  },
+  text: {
+    color: '#ffd900bd',
+    fontSize: 16,
+    fontWeight: '700',
+    textShadowColor: '#000',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
+    textAlign: 'center',
   },
 });
