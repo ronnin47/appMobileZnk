@@ -6,20 +6,14 @@ import {
 import socket from './socket';
 import { AuthContext } from './AuthContext';
 import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-import { PinchGestureHandler } from 'react-native-gesture-handler';
-import Animated, {
-  useAnimatedGestureHandler,
-  useAnimatedStyle,
-  useSharedValue,
-} from 'react-native-reanimated';
-
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, { useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
 import * as Animatable from 'react-native-animatable';
 
-
-export default function Chat({tiradasGuardadas}) {
+export default function Chat({ tiradasGuardadas }) {
   const scrollViewRef = useRef();
   const [input, setInput] = useState('');
   const [imagenPreview, setImagenPreview] = useState(null);
@@ -27,22 +21,38 @@ export default function Chat({tiradasGuardadas}) {
   const { historialChat, setHistorialChat, userToken, personajeActual, estatus, imagenurl, nick } = useContext(AuthContext);
   const imagenBase = require('../assets/imagenBase.jpeg');
   const usuarioId = userToken ? userToken.split("-")[1] : null;
+
   const animacionPorTipo = {
-  'tirada': 'bounce',
-  'vida': 'rubberBand',
-  'ki': 'zoomIn',
-  'ken': 'zoomIn',
-  'imagen': 'zoomIn',
-  'chat': 'fadeIn',
-  
-};
+    'tirada': 'bounce',
+    'vida': 'rubberBand',
+    'ki': 'zoomIn',
+    'ken': 'zoomIn',
+    'imagen': 'zoomIn',
+    'chat': 'fadeIn',
+  };
+
   useEffect(() => {
     if (scrollViewRef.current) {
       scrollViewRef.current.scrollToEnd({ animated: true });
     }
   }, [historialChat]);
 
-  // Función para optimizar URL de avatar (solo si es Cloudinary)
+  // 🧠 Escala animada
+  const scale = useSharedValue(1);
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  // ⚡ Gesto pinch compatible con Expo Go
+  const pinchGesture = Gesture.Pinch()
+    .onUpdate((e) => {
+      scale.value = e.scale;
+    })
+    .onEnd(() => {
+      scale.value = 1;
+    });
+
+  // 🔧 Avatar optimizado
   const optimizarAvatarUrl = (url) => {
     if (!url) return null;
     if (url.includes('/upload/')) {
@@ -51,96 +61,67 @@ export default function Chat({tiradasGuardadas}) {
     return url;
   };
 
-  // Variables para mantener escala acumulada y punto inicial
-  const scale = useSharedValue(1);
-  const savedScale = useSharedValue(1);
+  const activarTirada = (mensaje) => {
+    if (!mensaje.includes('#')) return mensaje;
+    const partes = mensaje.split('#');
+    const textoAntes = partes[0].trim();
+    const resto = partes[1].trim();
 
-  const pinchHandler = useAnimatedGestureHandler({
-    onStart: (event, context) => {
-      context.startScale = savedScale.value;
-    },
-    onActive: (event, context) => {
-      scale.value = context.startScale * event.scale;
-    },
-    onEnd: () => {
-      savedScale.value = scale.value;
-    },
-  });
+    const matchClaveYExtras = /^([^\s+]+(?:\s+[^\s+]+)*)(.*)$/i.exec(resto);
+    if (!matchClaveYExtras) return mensaje;
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
+    const claveTirada = matchClaveYExtras[1].trim().toLowerCase();
+    const extraFormula = (matchClaveYExtras[2] || '').replace(/\s+/g, '');
+    const tiradaBase = tiradasGuardadas.find(t => t.nombre === claveTirada);
+    const formulaBase = tiradaBase?.tirada?.replace(/\s+/g, '') || claveTirada;
+    const formulaFinal = `${formulaBase}${extraFormula}`;
+    const regex = /([+-]?)(\d+)(d(\d+))?/gi;
 
+    let totalFinal = 0;
+    let resultadoTexto = '';
+    let match;
+    let esPrimero = true;
 
+    while ((match = regex.exec(formulaFinal)) !== null) {
+      const signoStr = match[1] || '+';
+      const signo = signoStr === '-' ? -1 : 1;
+      const cantidad = parseInt(match[2], 10);
+      const esDado = !!match[3];
+      const caras = parseInt(match[4], 10);
+      const prefix = esPrimero ? '' : signo === 1 ? '+ ' : '- ';
 
-const activarTirada = (mensaje) => {
-  if (!mensaje.includes('#')) return mensaje;
-
-  const partes = mensaje.split('#');
-  const textoAntes = partes[0].trim();
-  const resto = partes[1].trim();
-
-  // Separar la clave de tirada del posible añadido (ej. "+20+3d20")
-  const matchClaveYExtras = /^([^\s+]+(?:\s+[^\s+]+)*)(.*)$/i.exec(resto);
-  if (!matchClaveYExtras) return mensaje;
-
-  const claveTirada = matchClaveYExtras[1].trim().toLowerCase();
-  const extraFormula = (matchClaveYExtras[2] || '').replace(/\s+/g, '');
-
-  const tiradaBase = tiradasGuardadas.find(t => t.nombre === claveTirada);
-  const formulaBase = tiradaBase?.tirada?.replace(/\s+/g, '') || claveTirada;
-
-  const formulaFinal = `${formulaBase}${extraFormula}`;
-
-  const regex = /([+-]?)(\d+)(d(\d+))?/gi;
-
-  let totalFinal = 0;
-  let resultadoTexto = '';
-  let match;
-  let esPrimero = true;
-
-  while ((match = regex.exec(formulaFinal)) !== null) {
-    const signoStr = match[1] || '+';
-    const signo = signoStr === '-' ? -1 : 1;
-    const cantidad = parseInt(match[2], 10);
-    const esDado = !!match[3];
-    const caras = parseInt(match[4], 10);
-
-    const prefix = esPrimero ? '' : signo === 1 ? '+ ' : '- ';
-
-    if (esDado) {
-      const tiradas = [];
-      for (let i = 0; i < cantidad; i++) {
-        const resultado = Math.floor(Math.random() * caras) + 1;
-        tiradas.push(resultado);
+      if (esDado) {
+        const tiradas = [];
+        for (let i = 0; i < cantidad; i++) {
+          const resultado = Math.floor(Math.random() * caras) + 1;
+          tiradas.push(resultado);
+        }
+        const suma = tiradas.reduce((a, b) => a + b, 0) * signo;
+        totalFinal += suma;
+        resultadoTexto += `${prefix}${cantidad}d${caras} → [${tiradas.join(', ')}] `;
+      } else {
+        const modificador = cantidad * signo;
+        totalFinal += modificador;
+        resultadoTexto += `${prefix}${Math.abs(modificador)} `;
       }
-      const suma = tiradas.reduce((a, b) => a + b, 0) * signo;
-      totalFinal += suma;
-      resultadoTexto += `${prefix}${cantidad}d${caras} → [${tiradas.join(', ')}] `;
-    } else {
-      const modificador = cantidad * signo;
-      totalFinal += modificador;
-      resultadoTexto += `${prefix}${Math.abs(modificador)} `;
+      esPrimero = false;
     }
 
-    esPrimero = false;
-  }
-
-  return `🎲 ${textoAntes} "${claveTirada}" ${resultadoTexto.trim()}\nTotal final: ${totalFinal}`;
-};
+    return `🎲 ${textoAntes} "${claveTirada}" ${resultadoTexto.trim()}\nTotal final: ${totalFinal}`;
+  };
 
   const enviar = async () => {
     if (imagenPreview) {
       try {
-        const imagenBase64 = await FileSystem.readAsStringAsync(imagenPreview, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
+       const imagenBase64 = await FileSystem.readAsStringAsync(imagenPreview, {
+        encoding: 'base64',
+      });
 
         const mensajeImagen = {
           usuarioId: Number(usuarioId),
           idpersonaje: personajeActual?.idpersonaje || 0,
           nombre: nick || estatus,
-          estatus: estatus,
+          estatus,
           imagenBase64: `data:image/jpeg;base64,${imagenBase64}`,
           imagenurl: imagenurl || "",
           nick: nick || "",
@@ -158,20 +139,17 @@ const activarTirada = (mensaje) => {
 
     if (input.trim()) {
       const mensaje = activarTirada(input);
-
-      //si el string del mensaje incluye # es de tipo tirada sino chat
-      //console.log("",mensaje)
-      const esTirada=mensaje.includes("🎲")
+      const esTirada = mensaje.includes("🎲");
 
       const msgEnviar = {
         usuarioId: Number(usuarioId),
         idpersonaje: personajeActual?.idpersonaje || 0,
         nombre: nick || estatus,
-        mensaje: mensaje,
-        estatus: estatus,
+        mensaje,
+        estatus,
         imagenurl: imagenurl || '',
         nick: nick || "",
-       tipo: esTirada ? "tirada" : "chat",
+        tipo: esTirada ? "tirada" : "chat",
       };
 
       socket.emit('chat-chat', msgEnviar);
@@ -192,53 +170,77 @@ const activarTirada = (mensaje) => {
       setImagenPreview(imagenUri);
     }
   };
-/*
-  // Aquí uso useMemo para memoizar la lista renderizada de mensajes
+
   const renderMensajesMemo = useMemo(() => {
     return historialChat.map((item, index) => {
       const esPropio = item.usuarioId == usuarioId;
       const esNarrador = item.estatus === 'narrador';
-
+      const anterior = historialChat[index - 1];
+      const mismoRemitenteAnterior =
+        anterior &&
+        anterior.usuarioId === item.usuarioId &&
+        anterior.nombre === item.nombre;
+      const mostrarAvatar = !mismoRemitenteAnterior;
       const estilos = [styles.mensaje];
-      if (esNarrador) {
-        estilos.push(styles.mensajeNarrador);
-      } else if (esPropio) {
-        estilos.push(styles.mensajePropio);
-      }
-      if (esPropio) {
-        estilos.push(styles.alinearDerecha);
-      } else {
-        estilos.push(styles.alinearIzquierda);
-      }
 
-      const esImagen = typeof item.mensaje === 'string' && item.mensaje.startsWith('http') &&
-        (item.mensaje.endsWith('.jpg') || item.mensaje.endsWith('.jpeg') || item.mensaje.endsWith('.png') || item.mensaje.endsWith('.webp'));
+      if (esNarrador) estilos.push(styles.mensajeNarrador);
+      else if (esPropio) estilos.push(styles.mensajePropio);
+      estilos.push(esPropio ? styles.alinearDerecha : styles.alinearIzquierda);
+
+      const esImagen = typeof item.mensaje === 'string' &&
+        item.mensaje.startsWith('http') &&
+        (item.mensaje.endsWith('.jpg') ||
+          item.mensaje.endsWith('.jpeg') ||
+          item.mensaje.endsWith('.png') ||
+          item.mensaje.endsWith('.webp'));
 
       const avatarUrlOptimizada = optimizarAvatarUrl(
         item.imagenPjUrl ? item.imagenPjUrl : item.imagenurl
       );
 
+      const esUltimo = index === historialChat.length - 1;
+      const animacion = esUltimo ? animacionPorTipo[item.tipo] || 'fadeIn' : undefined;
+
       return (
-        <View key={`comp1-${Number(item.id) || index.toString()}`} style={[estilos, { paddingRight: 6 }]}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, minWidth: 200 }}>
-            <Image
-              source={
-                avatarUrlOptimizada
-                  ? { uri: avatarUrlOptimizada }
-                  : imagenBase
-              }
-              style={{ width: 32, height: 32, borderRadius: 15 }}
-            />
-            <Text style={{ color: 'aliceblue', fontSize: 12 }}>{item.nombre || item.nick}</Text>
-            <Text style={{ color: '#888', fontSize: 10, flex: 1, textAlign: 'right' }}>
-              {item.timestamp
-                ? new Date(Number(item.timestamp)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                : ''}
-            </Text>
-          </View>
+        <Animatable.View
+          animation={animacion}
+          duration={1000}
+          easing="ease-out"
+          key={`comp1-${Number(item.id) || index.toString()}`}
+          style={[estilos, { paddingRight: 6, marginBottom: mostrarAvatar ? 6 : 2 }]}
+        >
+          {mostrarAvatar && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', minWidth: 200 }}>
+              <Image
+                source={avatarUrlOptimizada ? { uri: avatarUrlOptimizada } : imagenBase}
+                style={{ width: 32, height: 32, borderRadius: 15, marginRight: 4 }}
+              />
+              <Text style={{ color: 'aliceblue', fontSize: 12 }}>
+                {item.nombre || item.nick}
+              </Text>
+              <Text style={{ color: '#888', fontSize: 10, flex: 1, textAlign: 'right' }}>
+                {item.timestamp
+                  ? new Date(Number(item.timestamp)).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })
+                  : ''}
+              </Text>
+            </View>
+          )}
+
           {esImagen ? (
             <TouchableOpacity onPress={() => setImagenAmpliada(item.mensaje)}>
-              <Image source={{ uri: item.mensaje }} style={{ width: 200, height: 200, borderRadius: 8, marginTop: 4, marginRight: 2 }} />
+              <Image
+                source={{ uri: item.mensaje }}
+                style={{
+                  width: 200,
+                  height: 200,
+                  borderRadius: 8,
+                  marginTop: 4,
+                  marginRight: 2,
+                }}
+              />
             </TouchableOpacity>
           ) : (
             <Text
@@ -248,139 +250,16 @@ const activarTirada = (mensaje) => {
                   : estilos.includes(styles.mensajePropio)
                     ? { color: 'greenyellow' }
                     : { color: '#f2f2f2c4' },
-                { marginLeft: 30, minWidth: 180 },
+                { marginLeft: mostrarAvatar ? 30 : 6, minWidth: 180, marginTop: 2 },
               ]}
             >
               {item.mensaje}
             </Text>
           )}
-        </View>
+        </Animatable.View>
       );
     });
   }, [historialChat, usuarioId, imagenBase]);
-*/
-
-
-  
-  const renderMensajesMemo = useMemo(() => {
-  return historialChat.map((item, index) => {
-    const esPropio = item.usuarioId == usuarioId;
-    const esNarrador = item.estatus === 'narrador';
-    const anterior = historialChat[index - 1];
-
-    const mismoRemitenteAnterior =
-      anterior &&
-      anterior.usuarioId === item.usuarioId &&
-      anterior.nombre === item.nombre;
-
-    const mostrarAvatar = !mismoRemitenteAnterior;
-
-    const estilos = [styles.mensaje];
-    if (esNarrador) {
-      estilos.push(styles.mensajeNarrador);
-    } else if (esPropio) {
-      estilos.push(styles.mensajePropio);
-    }
-
-    estilos.push(esPropio ? styles.alinearDerecha : styles.alinearIzquierda);
-
-    const esImagen = typeof item.mensaje === 'string' &&
-      item.mensaje.startsWith('http') &&
-      (item.mensaje.endsWith('.jpg') ||
-        item.mensaje.endsWith('.jpeg') ||
-        item.mensaje.endsWith('.png') ||
-        item.mensaje.endsWith('.webp'));
-
-    const avatarUrlOptimizada = optimizarAvatarUrl(
-      item.imagenPjUrl ? item.imagenPjUrl : item.imagenurl
-    );
-    const esUltimo = index === historialChat.length - 1;
-    const animacion = esUltimo ? animacionPorTipo[item.tipo] || 'fadeIn' : undefined;
-
-    return (
-        <Animatable.View
-          animation={animacion}
-          duration={1000}
-          easing="ease-out"
-        key={`comp1-${Number(item.id) || index.toString()}`}
-        style={[estilos, { paddingRight: 6, marginBottom: mostrarAvatar ? 6 : 2 }]}
-      >
-     
-        {mostrarAvatar ? (
-          <View style={{ flexDirection: 'row', alignItems: 'center', minWidth: 200 }}>
-            <Image
-              source={
-                avatarUrlOptimizada
-                  ? { uri: avatarUrlOptimizada }
-                  : imagenBase
-              }
-              style={{ width: 32, height: 32, borderRadius: 15, marginRight: 4 }}
-            />
-            <Text style={{ color: 'aliceblue', fontSize: 12 }}>
-              {item.nombre || item.nick}
-            </Text>
-            <Text style={{ color: '#888', fontSize: 10, flex: 1, textAlign: 'right' }}>
-              {item.timestamp
-                ? new Date(Number(item.timestamp)).toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })
-                : ''}
-            </Text>
-          </View>
-        ) : (
-         
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 6 }}>
-            <Text style={{ color: 'aliceblue', fontSize: 12 }}>
-              {item.nombre || item.nick}
-            </Text>
-            <Text style={{ color: '#888', fontSize: 10 }}>
-              {item.timestamp
-                ? new Date(Number(item.timestamp)).toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })
-                : ''}
-            </Text>
-          </View>
-        )}
-
-       
-        {esImagen ? (
-          <TouchableOpacity onPress={() => setImagenAmpliada(item.mensaje)}>
-            <Image
-              source={{ uri: item.mensaje }}
-              style={{
-                width: 200,
-                height: 200,
-                borderRadius: 8,
-                marginTop: 4,
-                marginRight: 2,
-              }}
-            />
-          </TouchableOpacity>
-        ) : (
-          <Text
-            style={[
-              estilos.includes(styles.mensajeNarrador)
-                ? { color: 'yellow' }
-                : estilos.includes(styles.mensajePropio)
-                  ? { color: 'greenyellow' }
-                  : { color: '#f2f2f2c4' },
-              { marginLeft: mostrarAvatar ? 30 : 6, minWidth: 180, marginTop: 2 },
-            ]}
-          >
-            {item.mensaje}
-          </Text>
-        )}
-      </Animatable.View>
-    );
-  });
-}, [historialChat, usuarioId, imagenBase]);
- 
-  
- 
-
 
   return (
     <KeyboardAvoidingView
@@ -407,10 +286,7 @@ const activarTirada = (mensaje) => {
           </TouchableOpacity>
         )}
         <TextInput
-          style={[
-            styles.input,
-            imagenPreview && { marginLeft: 0 }
-          ]}
+          style={[styles.input, imagenPreview && { marginLeft: 0 }]}
           value={input}
           onChangeText={setInput}
           placeholder="Escribe un mensaje"
@@ -426,7 +302,7 @@ const activarTirada = (mensaje) => {
         </TouchableOpacity>
       </View>
 
-      {/* Modal para imagen ampliada con zoom */}
+      {/* 🩵 Modal para imagen ampliada con zoom compatible con Expo Go */}
       {imagenAmpliada && (
         <ScrollView
           style={{
@@ -446,7 +322,6 @@ const activarTirada = (mensaje) => {
             onPress={() => {
               setImagenAmpliada(null);
               scale.value = 1;
-              savedScale.value = 1;
             }}
             style={{
               position: 'absolute',
@@ -461,45 +336,39 @@ const activarTirada = (mensaje) => {
             <MaterialCommunityIcons name="close-circle" size={36} color="white" />
           </TouchableOpacity>
 
-          <PinchGestureHandler onGestureEvent={pinchHandler}>
+          <GestureDetector gesture={pinchGesture}>
             <Animated.Image
               source={{ uri: imagenAmpliada }}
-              style={[{
-                width: '90%',
-                height: 500, // Altura fija o relativa si preferís
-                resizeMode: 'contain',
-              }, animatedStyle]}
+              style={[
+                {
+                  width: '90%',
+                  height: 500,
+                  resizeMode: 'contain',
+                },
+                animatedStyle,
+              ]}
             />
-          </PinchGestureHandler>
+          </GestureDetector>
         </ScrollView>
       )}
-
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0d0d0d',
-    padding: 13,
-  },
-  chatBox: {
-    paddingBottom: 40,
-  },
+  container: { flex: 1, backgroundColor: '#0d0d0d', padding: 13 },
+  chatBox: { paddingBottom: 40 },
   mensaje: {
     color: "#f2f2f2c4",
     backgroundColor: 'black',
     padding: 8,
     marginVertical: 4,
-    borderRadius: 6,
+    borderRadius: 8,
     alignSelf: 'flex-start',
     maxWidth: '95%',
-    borderRadius: 8,
     borderWidth: 0.2,
     borderColor: "white"
   },
-
   mensajePropio: {
     backgroundColor: '#222',
     color: 'greenyellow',
@@ -508,7 +377,6 @@ const styles = StyleSheet.create({
     borderColor: "cyan",
     borderRadius: 8,
   },
-
   mensajeNarrador: {
     backgroundColor: '#333',
     color: 'yellow',
@@ -516,7 +384,7 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: "cyan",
     borderRadius: 8,
-    paddingRight: 2
+    paddingRight: 2,
   },
   inputBox: {
     flexDirection: 'row',
@@ -526,22 +394,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 5,
   },
-  input: {
-    flex: 1,
-    color: 'white',
-    fontSize: 16,
-    paddingHorizontal: 10,
-  },
-  enviar: {
-    fontSize: 22,
-    color: '#00e0ff',
-    marginLeft: 10,
-  },
-  alinearDerecha: {
-    alignSelf: 'flex-end',
-  },
-
-  alinearIzquierda: {
-    alignSelf: 'flex-start',
-  },
+  input: { flex: 1, color: 'white', fontSize: 16, paddingHorizontal: 10 },
+  enviar: { fontSize: 22, color: '#00e0ff', marginLeft: 10 },
+  alinearDerecha: { alignSelf: 'flex-end' },
+  alinearIzquierda: { alignSelf: 'flex-start' },
 });
