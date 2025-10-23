@@ -17,10 +17,10 @@
       }
     },
     "production": {
-      "distribution": "internal",
+      "distribution": "store",
       "android": {
-        "buildType": "apk",
-        "credentialsSource": "local"
+        "buildType": "app-bundle",
+        "credentialsSource": "remote"
       }
     }
   }
