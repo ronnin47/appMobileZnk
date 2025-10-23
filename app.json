@@ -32,6 +32,9 @@
         "projectId": "4ffbb6bb-b7a9-4d47-9be6-4c6163a69e54"
       }
     },
-    "owner": "gorda47"
+    "owner": "gorda47",
+    "plugins": [
+      "expo-font"
+    ]
   }
 }
