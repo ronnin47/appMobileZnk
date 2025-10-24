@@ -589,7 +589,7 @@ ListEmptyComponent={() => (
         animationType="none"
         onRequestClose={closeModal}
       >
-        <TouchableWithoutFeedback onPress={closeModal}>
+       
              <Animated.View style={[styles.modalOverlay, { opacity: fadeAnim }]}>
           <View style={[styles.modalContainer, { maxHeight: windowHeight * 0.92 }]}>
             <ScrollView contentContainerStyle={styles.modalScroll}>
@@ -795,7 +795,7 @@ ListEmptyComponent={() => (
             </ScrollView>
           </View>
         </Animated.View>
-        </TouchableWithoutFeedback>
+       
         
       </Modal>
 

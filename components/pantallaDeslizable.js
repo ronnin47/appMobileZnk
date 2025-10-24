@@ -204,12 +204,24 @@ const [tiradasGuardadasPj, setTiradasGuardadasPj] = useState([]);
                   duration: 3000,
                 });
 
+                /*
                 setTimeout(() => {
                   navigation.navigate('Home', { screen: 'Principal' });
                 }, 100);
+*/
+
+ // Reset completo de la navegación para evitar stacking de pantallas
+               navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'Home', params: { screen: 'Principal' } }],
+                });
+
               } else {
                 console.warn('No se pudo eliminar el personaje');
               }
+
+
+            
             } catch (error) {
               console.error('Error al eliminar el personaje:', error);
             }
