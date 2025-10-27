@@ -1,6 +1,6 @@
 
 import 'react-native-gesture-handler';
-import { StyleSheet, Text, View, Dimensions, ScrollView,Image } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, ScrollView,Image,ImageBackground  } from 'react-native';
 import React, { useContext } from 'react';
 import { useState } from 'react';
 
@@ -16,17 +16,19 @@ import { LinearGradient } from 'expo-linear-gradient';
 const windowWidth = Dimensions.get('window').width;
 import { API_BASE_URL } from './config';
 
-
+const imagenBase = require('../assets/imagenBase.jpeg');
 
 export default function Principal() {
   
   const { personajes, savePersonajes,consumir,sagas, setSagas, estatus,coleccionPersonajes,saveColeccionPersonajes,fetchSagas} = useContext(AuthContext);
+ 
 
   const navigation = useNavigation();
 //crear la nueva ficha
 const crearFichaPersonaje = async () => {
 
   const usuarioId = await AsyncStorage.getItem('userId');
+ 
 
   const pjNew = {
     nombre: "Ficha Nueva",
@@ -185,13 +187,42 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
     { id: 'herbolaria', nombre: 'Herbolaria', imagen: "https://res.cloudinary.com/dzul1hatw/image/upload/v1753555998/herbolaria_tnhxjw.jpg" },
   ];
 
-  return (
-    <ScrollView 
-      style={styles.container}
-      horizontal={false}
-      pagingEnabled={false}
-      showsHorizontalScrollIndicator={false}
-      >
+
+//Marmolado violeta
+//const fondoUrl = "https://i.pinimg.com/736x/9e/22/12/9e2212d6518fd97e391dc48b98957da9.jpg"; // 🔹 URL del fondo
+
+//const fondoUrl = "https://i.pinimg.com/1200x/ac/b4/9b/acb49b0646778e43ce2f54b17943c8fa.jpg"; 
+  
+//PETALOS
+//const fondoUrl = "https://res.cloudinary.com/dzul1hatw/image/upload/v1761596480/300b0a177654b700a1719b9f8ee53331_lp1nb2.jpg"; 
+
+//const fondoUrl = "https://res.cloudinary.com/dzul1hatw/image/upload/v1761596480/66335927e6d593b71f4ececcb5d6a503_xp8zim.jpg"; 
+  
+
+//const fondoUrl = "https://res.cloudinary.com/dzul1hatw/image/upload/v1761596480/3c5776803bd188a000c4a709bfa5cc73_f93fra.jpg"; 
+
+//este va
+const fondoUrl = "https://res.cloudinary.com/dzul1hatw/image/upload/v1761594578/f9f44f13d3e40198f916d1f7db44559e_jrkvux.jpg"; 
+
+return (
+
+     <ImageBackground
+      source={{ uri: fondoUrl  }}
+      style={{ flex: 1, opacity:1, backgroundColor:"rgba(3, 3, 3, 0.59)" }}
+      resizeMode='cover'
+    >
+       <ScrollView
+  style={[
+    styles.container,
+    {
+      ...StyleSheet.absoluteFillObject, // cubre todo el ScrollView
+      backgroundColor: 'rgba(3, 3, 3, 0.34)', // negro semi-transparente
+    },
+  ]}
+  horizontal={false}
+  pagingEnabled={false}
+  showsHorizontalScrollIndicator={false}
+>
       
       <View style={styles.contenedorPrincipal}>
         <View style={styles.tituloYBotonContainer}>
@@ -400,6 +431,8 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
       
     
     </ScrollView>
+    </ImageBackground>
+    
   );
 }
 
@@ -435,7 +468,7 @@ const ImageWrapper = ({ uri, fallback }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    //backgroundColor: '#000',
     paddingLeft: 6,
     paddingTop: 20,
   },
@@ -519,7 +552,7 @@ card: {
   shadowRadius: 6,
   elevation: 6,
   borderWidth: 1,
-  borderColor: 'gray',
+  borderColor: '#ffffffb7',
   justifyContent: 'flex-end', // para que el banner de texto quede abajo
 },
 

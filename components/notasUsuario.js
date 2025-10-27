@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { View, Text, TextInput, StyleSheet, Image } from 'react-native';
+import { View, Text, TextInput, StyleSheet,Image, ImageBackground } from 'react-native';
 import { AuthContext } from './AuthContext';
 
 export const NotasUsuario = () => {
@@ -7,8 +7,17 @@ export const NotasUsuario = () => {
 
   const personaje = personajes?.find(p => p.idpersonaje === pjSeleccionado);
     const imagenBase = require('../assets/imagenBase.jpeg');
-  return (
-    <View style={styles.container}>
+ 
+ const fondoUrl="https://res.cloudinary.com/dzul1hatw/image/upload/v1761596815/1536017df259933671623c69beaae925_pwz9t7.jpg";
+ 
+    return (
+
+          <ImageBackground
+                  source={{ uri: fondoUrl  }}
+                  style={{ flex: 1, opacity:1, backgroundColor:"rgba(3, 3, 3, 0.59)" }}
+                  resizeMode='cover'
+                >
+                  <View style={styles.container}>
       {personaje && (
         <View style={styles.card}>
              
@@ -31,18 +40,21 @@ export const NotasUsuario = () => {
         />
       </View>
     </View>
+
+                </ImageBackground>
+    
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0d0d0d',
+    //backgroundColor: '#0d0d0d',
     padding: 10,
     paddingTop:20,
   },
   card: {
-    backgroundColor: '#1a1a1a',
+    //backgroundColor: '#1a1a1a',
     borderRadius: 12,
     padding: 16,
     flexDirection: 'row',  // Aquí el layout horizontal
@@ -59,7 +71,7 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 50,
     borderWidth: 2,
-    borderColor: '#FFD700',
+    borderColor: '#000000ff',
   },
   info: {
     flex: 1,
@@ -78,7 +90,7 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   textareaWrapper: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#1a1a1a86',
     borderRadius: 10,
     padding: 12,
     flex: 1,

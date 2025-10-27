@@ -116,8 +116,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.7,
     shadowRadius: 20,
     elevation: 10,
-    borderWidth: 2,
-    borderColor: '#f0a50055', // borde glow suave
+    borderWidth: 2.3,
+    borderColor: '#1d1c19d7', // borde glow suave
   },
   cardPressed: {
     transform: [{ scale: 0.96 }],

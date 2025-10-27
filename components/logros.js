@@ -4,7 +4,7 @@ import { AuthContext } from './AuthContext';
 import axios from 'axios';
 import { showMessage } from 'react-native-flash-message';
 import { API_BASE_URL } from './config';
-import { TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { TouchableWithoutFeedback, Keyboard,ImageBackground } from 'react-native';
 
 import {
   View,
@@ -61,7 +61,7 @@ const [modalEditarVisible, setModalEditarVisible] = useState(false);
 const fadeAnimEditar = useRef(new Animated.Value(0)).current;
 const [imagenLogroEditar, setImagenLogroEditar] = useState(logroSeleccionado?.imagenurl || null);
 
-
+const fondoUrl = "https://res.cloudinary.com/dzul1hatw/image/upload/v1761596480/3c5776803bd188a000c4a709bfa5cc73_f93fra.jpg"; 
 
 const seleccionarImagenEditar = async () => {
   const result = await ImagePicker.launchImageLibraryAsync({
@@ -393,9 +393,18 @@ const sections = Object.keys(groupedObj).map(catKey => ({
 }));
 
 
+
+
+
+
  return (
   <>
-    <View style={styles.container}>
+       <ImageBackground
+            source={{ uri: fondoUrl  }}
+            style={{ flex: 1, opacity:1, backgroundColor:"rgba(3, 3, 3, 0.59)" }}
+            resizeMode='cover'
+          >
+<View style={styles.container}>
       <SectionList
         sections={sections}
         keyExtractor={(item, index) => (item.id || item.nombre || index).toString()}
@@ -1182,13 +1191,15 @@ ListEmptyComponent={() => (
 </Modal>
 
     </View>
+      </ImageBackground>
+    
   </>
 );
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#000',
+   // backgroundColor: '#000',
     padding: 10,
     flex: 1,
   },

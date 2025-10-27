@@ -526,137 +526,108 @@ const colorPlaceHolder="#888"
 
   return (
   
-  <ScrollView
+
+     <View style={{ flex: 1 }}>
+    {/* BOTÓN FIJO */}
+    <TouchableOpacity style={styles.botonGuardarFijo} onPress={guardarCambiosBBDD}>
+      <Icon name="save" size={32} color="#00FF00" />
+    </TouchableOpacity>
+
+ <ScrollView
       keyboardShouldPersistTaps="handled"
       contentContainerStyle={[styles.container, { flexGrow: 1}]}
     >
-         <View style={{ marginTop:20 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 10 }}>
-      <TextInput
-        placeholder="Nombre"
-        placeholderTextColor={colorPlaceHolder}
-        keyboardType="default"
-        style={[styles.inputTextoNombre, { flex: 1, marginRight: 10 }]}
-        value={nombre}
-        onChangeText={setNombre}
-      />
+      <View style={{ marginTop:20 }}>
 
-       
+     <View style={styles.card}>
 
-      <TouchableOpacity style={styles.botonGuardar} onPress={guardarCambiosBBDD}>
-        <Icon name="save" size={24} color="#00FF00" />
-      </TouchableOpacity>
-          </View>
-         
+  {/* BANNER DE IMAGEN CON NOMBRE (Text decorativo) */}
+  <View style={styles.imageBanner}>
+    <Image source={getImageSource()} style={styles.imagenBanner} resizeMode="cover" />
 
-          <View style={styles.rowContainer}>
-          <View style={styles.imageContainer}>
-            <Image source={getImageSource()} style={styles.imagen} resizeMode="cover" />
-            <TouchableOpacity onPress={seleccionarImagen} style={{ marginTop: 10 }}>
-              <Text style={{ color: 'cyan' }}>Cambiar imagen</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.inputsContainer}>
-          <Text style={styles.label}>Raza</Text>
-          <TextInput placeholder="Raza" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputTexto} value={raza} onChangeText={setRaza} />
-          
-          <Text style={styles.label}>Dominio</Text>
-          <TextInput placeholder="Dominio" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputTexto} value={dominio} onChangeText={setDominio} />
-          
-          <Text style={styles.label}>Edad</Text>
-          <TextInput placeholder="Edad" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputTexto} value={edad} onChangeText={setEdad} />
-          
-          <Text style={styles.label}>Naturaleza</Text>
-          <TextInput placeholder="Naturaleza" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputTexto} value={naturaleza} onChangeText={setNaturaleza} />
-          
-        
-          
-          
-        </View>
-
-          </View>
-
-
-          
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10 }}>
-          {/* Columna 1 */}
-          <View style={{ flex: 1, marginRight: 10 }}>
-            <Text style={styles.label}>Ki</Text>
-            <TextInput
-              placeholder="Ki"
-              placeholderTextColor={colorPlaceHolder}
-              keyboardType="default"
-              value={ki}
-              onChangeText={setKi}
-            style={styles.inputNumero}
-            />
-
-            <Text style={styles.label}>
-              Nivel de Destino
-            </Text>
-            <TextInput
-              placeholder="Nivel de Destino"
-              placeholderTextColor={colorPlaceHolder}
-              keyboardType="default"
-              value={destino}
-              onChangeText={setDestino}
-            style={styles.inputNumero}
-            />
-          </View>
-
-          {/* Columna 2 */}
-          <View style={{ flex: 1, marginLeft: 10 }}>
-            <Text style={styles.label}>Ken</Text>
-            <TextInput
-              placeholder="Ken"
-              placeholderTextColor={colorPlaceHolder}
-              keyboardType="default"
-              value={ken}
-              onChangeText={setKen}
-            style={styles.inputNumero}
-            />
-
-            <Text style={styles.label}>
-              P. de Destino
-            </Text>
-            <TextInput
-              placeholder="P. de destino"
-              placeholderTextColor={colorPlaceHolder}
-              keyboardType="default"
-              value={pDestino}
-              onChangeText={setPdestino}
-              style={styles.inputNumero}
-            />
-          </View>
-      </View>
-      <Text style={[styles.label,{textAlign:"center"}]}>Convicción</Text>
-      <TextInput  placeholder="Convicción" placeholderTextColor={colorPlaceHolder} keyboardType="default" multiline={true} style={styles.inputTextoConv} value={conviccion} onChangeText={setConviccion} />
-
-
-     
-       <View style={{ flexDirection: 'row', alignItems: 'center',  justifyContent: 'center',gap:20, marginVertical: 5 }}>
-            <TouchableOpacity
-              onPress={manejarToggleMarca}
-              style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 5 }}
-            >
-              <Text style={{ fontSize: 16, color: 'white', marginRight: 0 }}>
-                {p.pjPnj ? '☑️' : '⬜'}
-              </Text>
-              <Text style={{ marginLeft: 4, color: 'white', marginRight: 4 }}>
-                Marca del destino
-              </Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity onPress={manejarToggle} style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 5 }}>
-            <Text style={{ fontSize: 16, color: 'white',marginRight:0  }}>{check ? '✅' : '⬜'}</Text>
-            <Text style={{ marginLeft: 4, color: 'white',marginRight:4 }}>Favorito</Text>
-            </TouchableOpacity>
-      </View>
+    {/* NOMBRE SOBRE LA BASE DE LA IMAGEN */}
+    <View style={styles.nombreOverlay}>
+      <Text style={styles.nombreSobreImagen}>{nombre}</Text>
+    </View>
 
 
 
-    
+    {/* BOTÓN CAMBIAR IMAGEN */}
+    <TouchableOpacity onPress={seleccionarImagen} style={styles.cambiarImagenBtn}>
+      <Text style={{ color: 'cyan' }}>Cambiar imagen</Text>
+    </TouchableOpacity>
+  </View>
+
+  {/* INPUT DE NOMBRE Y OTROS CAMPOS */}
+  <View style={styles.inputsContainer}>
+    <Text style={styles.label}>Nombre</Text>
+    <TextInput
+      placeholder="Nombre"
+      placeholderTextColor={colorPlaceHolder}
+      style={styles.inputTexto}
+      value={nombre}
+      onChangeText={setNombre}
+    />
+
+    <Text style={styles.label}>Raza</Text>
+    <TextInput placeholder="Raza" placeholderTextColor={colorPlaceHolder} style={styles.inputTexto} value={raza} onChangeText={setRaza} />
+
+    <Text style={styles.label}>Dominio</Text>
+    <TextInput placeholder="Dominio" placeholderTextColor={colorPlaceHolder} style={styles.inputTexto} value={dominio} onChangeText={setDominio} />
+
+    <Text style={styles.label}>Edad</Text>
+    <TextInput placeholder="Edad" placeholderTextColor={colorPlaceHolder} style={styles.inputTexto} value={edad} onChangeText={setEdad} />
+
+    <Text style={styles.label}>Naturaleza</Text>
+    <TextInput placeholder="Naturaleza" placeholderTextColor={colorPlaceHolder} style={styles.inputTexto} value={naturaleza} onChangeText={setNaturaleza} />
+  </View>
+
+  {/* KI, KEN, DESTINOS */}
+  <View style={styles.statsRow}>
+    <View style={styles.statColumn}>
+      <Text style={styles.label}>Ki</Text>
+      <TextInput style={styles.inputNumero} value={ki} onChangeText={setKi} placeholder="Ki" placeholderTextColor={colorPlaceHolder} />
+
+      <Text style={styles.label}>Nivel de Destino</Text>
+      <TextInput style={styles.inputNumero} value={destino} onChangeText={setDestino} placeholder="Nivel de Destino" placeholderTextColor={colorPlaceHolder} />
+    </View>
+    <View style={styles.statColumn}>
+      <Text style={styles.label}>Ken</Text>
+      <TextInput style={styles.inputNumero} value={ken} onChangeText={setKen} placeholder="Ken" placeholderTextColor={colorPlaceHolder} />
+
+      <Text style={styles.label}>P. de Destino</Text>
+      <TextInput style={styles.inputNumero} value={pDestino} onChangeText={setPdestino} placeholder="P. de Destino" placeholderTextColor={colorPlaceHolder} />
+    </View>
+  </View>
+
+  {/* CONVICCIÓN */}
+  <Text style={[styles.label, { textAlign: 'center' }]}>Convicción</Text>
+  <TextInput
+    placeholder="Convicción"
+    placeholderTextColor={colorPlaceHolder}
+    multiline
+    style={styles.inputTextoConv}
+    value={conviccion}
+    onChangeText={setConviccion}
+  />
+
+  {/* CHECKBOXES */}
+  <View style={styles.checkboxRow}>
+    <TouchableOpacity onPress={manejarToggleMarca} style={styles.checkboxContainer}>
+      <Text style={styles.checkbox}>{p.pjPnj ? '☑️' : '⬜'}</Text>
+      <Text style={styles.checkboxLabel}>Marca del destino</Text>
+    </TouchableOpacity>
+    <TouchableOpacity onPress={manejarToggle} style={styles.checkboxContainer}>
+      <Text style={styles.checkbox}>{check ? '✅' : '⬜'}</Text>
+      <Text style={styles.checkboxLabel}>Favorito</Text>
+    </TouchableOpacity>
+  </View>
+
+</View>
+
+
+
+    {/* CARACTERITICAS PRINCIPALES- CARACTERISTICAS SECUNDARIAS Y TODAS LAS SECCIONES RESTANTES*/} 
       <List.Section>
 
          <List.Accordion
@@ -1021,18 +992,12 @@ const colorPlaceHolder="#888"
 
 
           
-         </View>
-    
+      </View>
           
-        
   </ScrollView>
 
-
-        
-    
-
-
-
+    </View>
+ 
 
   );
 };
@@ -1184,25 +1149,166 @@ textoBoton: {
   fontWeight: 'bold',
   fontSize: 16,
 },
+
+
+
 inputTextoNombre: {
-  borderWidth: 1,
+ 
   backgroundColor: 'black',
   paddingVertical: 4,
   paddingHorizontal: 6,
-  borderRadius: 6,
+
   marginTop: 5,
   color: '#FFFF00',
   fontSize: 19,
   fontFamily: 'AnimeAce2.0',
   
-  // sombra iOS
-  shadowColor: '#FFFF00',
-  shadowOffset: { width: 0, height: 0 },
-  shadowOpacity: 0.8,
-  shadowRadius: 8,
-
-  // sombra Android
-  elevation: 10,
+  
 }, 
+
+
+
+
+
+
+
+
+
+
+imageBanner: {
+  position: 'relative',
+  width: '100%',
+  height: 240,
+  borderRadius: 12,
+  overflow: 'hidden',
+  marginBottom: 12,
+},
+
+imagenBanner: {
+  width: '100%',
+  height: '100%',
+},
+
+nombreOverlay: {
+  position: 'absolute',
+  bottom: 0,
+  width: '100%',
+  backgroundColor: 'rgba(0,0,0,0.6)',
+  paddingVertical: 6,
+  alignItems: 'center',
+},
+
+nombreSobreImagen: {
+  color: '#facc15',
+  fontSize: 20,
+  fontWeight: '700',
+  textShadowColor: '#000',
+  textShadowOffset: { width: 1, height: 1 },
+  textShadowRadius: 2,
+},
+
+botonGuardarBanner: {
+  position: 'absolute',
+  top: 8,
+  right: 8,
+  backgroundColor: '#28a745',
+  padding: 6,
+  borderRadius: 6,
+  borderWidth: 1,
+  borderColor: 'white',
+},
+
+
+botonGuardarFijo: {
+  position: 'absolute',  // siempre sobre la pantalla
+  top: 40,               // distancia desde el borde superior
+  right: 20,             // distancia desde el borde derecho
+  backgroundColor: '#28a745',
+  padding: 10,
+  borderRadius: 8,
+  borderWidth: 1,
+  borderColor: 'white',
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.6,
+  shadowRadius: 5,
+  elevation: 12,
+  zIndex: 999,           // asegura que quede por encima de todo
+},
+
+cambiarImagenBtn: {
+  position: 'absolute',
+  top: 8,
+  left: 8,
+},
+
+inputsContainer: {
+  marginBottom: 10,
+},
+
+inputTexto: {
+  borderWidth: 1,
+  borderColor: '#a16207',
+  backgroundColor: '#1a1a1a',
+  paddingVertical: 4,
+  paddingHorizontal: 6,
+  borderRadius: 6,
+  marginBottom: 6,
+  color: '#e0e0e0',
+  fontSize: 14,
+},
+
+inputNumero: {
+  borderWidth: 1,
+  borderColor: '#a16207',
+  backgroundColor: '#1a1a1a',
+  paddingVertical: 4,
+  paddingHorizontal: 6,
+  borderRadius: 6,
+  marginBottom: 4,
+  color: '#d1fae5',
+  fontSize: 14,
+  textAlign: 'center',
+},
+
+inputTextoConv: {
+  borderWidth: 0.5,
+  borderColor: 'white',
+  backgroundColor: '#000',
+  padding: 8,
+  borderRadius: 6,
+  color: '#fff',
+  fontSize: 14,
+  minHeight: 50,
+  textAlignVertical: 'top',
+  marginVertical: 6,
+},
+
+statsRow: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  marginVertical: 6,
+},
+
+statColumn: {
+  flex: 1,
+  marginHorizontal: 4,
+},
+
+checkboxRow: {
+  flexDirection: 'row',
+  justifyContent: 'center',
+  alignItems: 'center',
+  gap: 20,
+  marginVertical: 6,
+},
+
+checkboxContainer: {
+  flexDirection: 'row',
+  alignItems: 'center',
+},
+
+checkbox: { fontSize: 16, color: '#fff', marginRight: 4 },
+checkboxLabel: { color: '#fff', fontSize: 13 },
 
 });
