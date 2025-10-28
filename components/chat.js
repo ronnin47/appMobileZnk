@@ -1,7 +1,7 @@
 import React, { useState, useContext, useRef, useEffect, useMemo } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
-  ScrollView, StyleSheet, KeyboardAvoidingView, Platform, Image
+  ScrollView, StyleSheet, KeyboardAvoidingView, Platform, Image, ImageBackground
 } from 'react-native';
 import socket from './socket';
 import { AuthContext } from './AuthContext';
@@ -14,6 +14,7 @@ import Animated, { useSharedValue, useAnimatedStyle } from 'react-native-reanima
 import * as Animatable from 'react-native-animatable';
 
 export default function Chat({ tiradasGuardadas }) {
+  
   const scrollViewRef = useRef();
   const [input, setInput] = useState('');
   const [imagenPreview, setImagenPreview] = useState(null);
@@ -22,6 +23,8 @@ export default function Chat({ tiradasGuardadas }) {
   const imagenBase = require('../assets/imagenBase.jpeg');
   const usuarioId = userToken ? userToken.split("-")[1] : null;
 
+  const fondoUrl = "https://res.cloudinary.com/dzul1hatw/image/upload/v1761596480/300b0a177654b700a1719b9f8ee53331_lp1nb2.jpg";
+  
   const animacionPorTipo = {
     'tirada': 'bounce',
     'vida': 'rubberBand',
@@ -262,7 +265,13 @@ export default function Chat({ tiradasGuardadas }) {
   }, [historialChat, usuarioId, imagenBase]);
 
   return (
-    <KeyboardAvoidingView
+
+ <ImageBackground
+            source={{ uri: fondoUrl  }}
+            style={{ flex: 1, opacity:1, backgroundColor:"rgba(3, 3, 3, 0.59)" }}
+            resizeMode='cover'
+          >
+              <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 80}
@@ -352,11 +361,15 @@ export default function Chat({ tiradasGuardadas }) {
         </ScrollView>
       )}
     </KeyboardAvoidingView>
+    </ImageBackground>
+  
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0d0d0d', padding: 13 },
+  container: { flex: 1,
+     //backgroundColor: '#0d0d0d',
+     padding: 13 },
   chatBox: { paddingBottom: 40 },
   mensaje: {
     color: "#f2f2f2c4",

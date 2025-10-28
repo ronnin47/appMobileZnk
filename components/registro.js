@@ -16,7 +16,7 @@ const RegisterScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
-
+const fondoUrl = "https://res.cloudinary.com/dzul1hatw/image/upload/v1761596480/3c5776803bd188a000c4a709bfa5cc73_f93fra.jpg";
   const handleRegister = async () => {
   if (!email || !username || !password || !confirmPassword) {
     setError('Por favor complete todos los campos.');

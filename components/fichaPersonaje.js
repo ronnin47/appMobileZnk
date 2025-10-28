@@ -1,6 +1,6 @@
 import React, { useContext,useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
-import { View, Text, StyleSheet, Image,ScrollView,TextInput,TouchableOpacity,ActivityIndicator  } from 'react-native';
+import { View, Text, StyleSheet, Image,ScrollView,TextInput,TouchableOpacity,ActivityIndicator,ImageBackground  } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { KeyboardAvoidingView, Platform } from 'react-native';
 
@@ -18,7 +18,7 @@ import { Historia } from './historia';
 import { TecnicaEspecial } from './tecEpecial';
 import { API_BASE_URL } from './config'; 
 import { LinearGradient } from 'expo-linear-gradient';
-
+import { Tronco } from './tronco';
 
 export const FichaPersonaje = ({ pj, ki, setKi, fortaleza, setFortaleza, ken,setKen,eliminarPersonaje,vidaActual,kiActual,kenActual,setVidaActual,setKiActual,setKenActual,positiva,setPositiva,negativa,setNegativa,cicatriz,setCicatriz,consumision,setConsumision }) => {
   
@@ -541,33 +541,44 @@ const colorPlaceHolder="#888"
 
      <View style={styles.card}>
 
-  {/* BANNER DE IMAGEN CON NOMBRE (Text decorativo) */}
-  <View style={styles.imageBanner}>
-    <Image source={getImageSource()} style={styles.imagenBanner} resizeMode="cover" />
+<View style={styles.imagenBanner}>
+  <ImageBackground
+    source={getImageSource()}
+    style={styles.bannerFondo}
+    resizeMode="cover"
+  >
+    {/* TRONCO superpuesto */}
+    <View style={styles.troncoOverlay}>
+      <Tronco
+        fza={fuerza}
+        fort={fortaleza}
+        des={destreza}
+        agi={agilidad}
+        sab={sabiduria}
+        sen={sentidos}
+        pre={presencia}
+        pri={principio}
+      />
+    </View>
 
-    {/* NOMBRE SOBRE LA BASE DE LA IMAGEN */}
+    {/* Nombre */}
     <View style={styles.nombreOverlay}>
       <Text style={styles.nombreSobreImagen}>{nombre}</Text>
     </View>
 
-
-
-    {/* BOTÓN CAMBIAR IMAGEN */}
+    {/* Botón cambiar imagen */}
     <TouchableOpacity onPress={seleccionarImagen} style={styles.cambiarImagenBtn}>
       <Text style={{ color: 'cyan' }}>Cambiar imagen</Text>
     </TouchableOpacity>
-  </View>
+  </ImageBackground>
+</View>
 
   {/* INPUT DE NOMBRE Y OTROS CAMPOS */}
   <View style={styles.inputsContainer}>
-    <Text style={styles.label}>Nombre</Text>
-    <TextInput
-      placeholder="Nombre"
-      placeholderTextColor={colorPlaceHolder}
-      style={styles.inputTexto}
-      value={nombre}
-      onChangeText={setNombre}
-    />
+
+    <Text style={styles.label}>Nombre</Text> 
+    <TextInput placeholder="Nombre" placeholderTextColor={colorPlaceHolder} style={styles.inputTexto} value={nombre} onChangeText={setNombre} />
+
 
     <Text style={styles.label}>Raza</Text>
     <TextInput placeholder="Raza" placeholderTextColor={colorPlaceHolder} style={styles.inputTexto} value={raza} onChangeText={setRaza} />
@@ -575,11 +586,14 @@ const colorPlaceHolder="#888"
     <Text style={styles.label}>Dominio</Text>
     <TextInput placeholder="Dominio" placeholderTextColor={colorPlaceHolder} style={styles.inputTexto} value={dominio} onChangeText={setDominio} />
 
-    <Text style={styles.label}>Edad</Text>
-    <TextInput placeholder="Edad" placeholderTextColor={colorPlaceHolder} style={styles.inputTexto} value={edad} onChangeText={setEdad} />
 
     <Text style={styles.label}>Naturaleza</Text>
     <TextInput placeholder="Naturaleza" placeholderTextColor={colorPlaceHolder} style={styles.inputTexto} value={naturaleza} onChangeText={setNaturaleza} />
+
+    <Text style={styles.label}>Edad</Text>
+    <TextInput placeholder="Edad" placeholderTextColor={colorPlaceHolder} style={styles.inputTexto} value={edad} onChangeText={setEdad} />
+
+    
   </View>
 
   {/* KI, KEN, DESTINOS */}
@@ -1163,7 +1177,6 @@ inputTextoNombre: {
   fontSize: 19,
   fontFamily: 'AnimeAce2.0',
   
-  
 }, 
 
 
@@ -1175,32 +1188,48 @@ inputTextoNombre: {
 
 
 
-imageBanner: {
-  position: 'relative',
-  width: '100%',
-  height: 240,
-  borderRadius: 12,
-  overflow: 'hidden',
-  marginBottom: 12,
-},
+
+
+
+
+
 
 imagenBanner: {
   width: '100%',
+  height: 300,
+  position: 'relative', // referencia para el absolute
+  overflow: 'visible',  // <-- permite que el Tronco sobresalga si querés
+  borderRadius: 0,      // <-- quita curvas que pueden alejarlo del borde
+  marginBottom:6,
+},
+
+bannerFondo: {
+  width: '100%',
   height: '100%',
+  position: 'relative',
+},
+
+troncoOverlay: {
+  position: 'absolute',
+  bottom: 0,   // pegado al borde inferior
+  left: 0,     // pegado al borde izquierdo
+  zIndex: 3,
 },
 
 nombreOverlay: {
   position: 'absolute',
-  bottom: 0,
-  width: '100%',
-  backgroundColor: 'rgba(0,0,0,0.6)',
-  paddingVertical: 6,
-  alignItems: 'center',
+  bottom: 10,
+  left: 0,
+  right: 10,
+  alignItems: 'flex-end', // centra horizontalmente
+  zIndex: 2,
 },
+
+
 
 nombreSobreImagen: {
   color: '#facc15',
-  fontSize: 20,
+  fontSize: 24,
   fontWeight: '700',
   textShadowColor: '#000',
   textShadowOffset: { width: 1, height: 1 },

@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
+  ImageBackground
 } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import axios from 'axios';
@@ -25,7 +26,7 @@ export const PageDerechaChat = () => {
 
   const imagenBase = require('../assets/imagenBase.jpeg');
   const flatListRef = useRef(null);
-
+const fondoUrl = "https://res.cloudinary.com/dzul1hatw/image/upload/v1761596480/300b0a177654b700a1719b9f8ee53331_lp1nb2.jpg";
 
 const [busquedaRealizada, setBusquedaRealizada] = useState(false);
   useEffect(() => {
@@ -76,7 +77,13 @@ const [busquedaRealizada, setBusquedaRealizada] = useState(false);
   };
 
   return (
-    <View style={styles.container}>
+
+     <ImageBackground
+                source={{ uri: fondoUrl  }}
+                style={{ flex: 1, opacity:1, backgroundColor:"rgba(3, 3, 3, 0.59)" }}
+                resizeMode='cover'
+              >
+<View style={styles.container}>
       {/* Búsqueda historial */}
       <View style={styles.wrapper}>
         <Text style={styles.titulo}>Buscar historial de personaje</Text>
@@ -92,7 +99,7 @@ const [busquedaRealizada, setBusquedaRealizada] = useState(false);
         onPress={buscarHistorial}
         style={({ pressed }) => [
           styles.botonBuscar,
-          pressed && { backgroundColor: '#088', transform: [{ scale: 0.96 }] },
+          pressed && { backgroundColor: 'rgba(136, 61, 0, 1)', transform: [{ scale: 0.96 }] },
         ]}
       >
         <Text style={styles.iconoBuscar}>🔍</Text>
@@ -240,18 +247,21 @@ const [busquedaRealizada, setBusquedaRealizada] = useState(false);
 
       
     </View>
+            
+              </ImageBackground>
+    
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'black',
+   backgroundColor: '#111111af',
     padding: 10,
   },
   wrapper: {
     padding: 16,
-    backgroundColor: '#111',
+    //backgroundColor: '#111',
   },
   titulo: {
     color: '#ccc',
@@ -300,10 +310,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#1a1a1a',
   },
   mensajePropio: {
-    backgroundColor: '#003300',
+    backgroundColor: '#182f42be',
   },
   mensajeNarrador: {
-    backgroundColor: '#0e5055a4',
+    backgroundColor: '#152a3bbe',
   },
   alinearDerecha: {
     alignSelf: 'flex-end',
