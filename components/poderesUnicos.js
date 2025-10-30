@@ -1,16 +1,15 @@
-import React, { useContext, useState, useEffect, useMemo } from 'react';
-import { View, Text, TextInput, FlatList, StyleSheet, Image } from 'react-native';
+import React, { useContext, useState, useMemo } from 'react';
+import { View, Text, TextInput, FlatList, Image, ImageBackground } from 'react-native';
 import { AuthContext } from './AuthContext';
 import { Estrellitas } from './estrellitas';
+import tw from './tailwind';
 
 export const PoderesUnicos = () => {
   const { coleccionPersonajes } = useContext(AuthContext);
   const [tecBuscar, setTecBuscar] = useState('');
 
-  // Memoizamos el filtrado para que solo se recalculen los datos cuando cambie el filtro o la colección
   const poderesFiltrados = useMemo(() => {
     const filtro = tecBuscar.toLowerCase();
-
     return coleccionPersonajes.reduce((acc, personaje) => {
       const tecnicasActivas = (personaje.tecEspecial || []).filter(t => t.check === true);
       if (tecnicasActivas.length === 0) return acc;
@@ -31,141 +30,76 @@ export const PoderesUnicos = () => {
     }, []);
   }, [tecBuscar, coleccionPersonajes]);
 
-  // Renderizado individual para FlatList
   const renderPersonaje = ({ item }) => (
-    <View style={styles.card}>
-      <View style={styles.header}>
-        <View style={styles.nombreContenedor}>
-          {item.imagenurl && (
-            <Image source={{ uri: item.imagenurl }} style={styles.avatar} />
-          )}
-          <View style={styles.par}>
-            <Text style={styles.nombre}>{item.nombre || 'Desconocido'}</Text>
-            <View style={styles.estrellasAbajo}>
-              <Estrellitas ken={item.ken} />
-            </View>
-          </View>
-        </View>
+    <View style={tw`mb-6 rounded-3xl overflow-hidden shadow-lg shadow-black/60`}>
+      {/* Banner principal con imagen */}
+      <View style={tw`relative w-full h-44`}>
+        {item.imagenurl && (
+          <Image
+            source={{ uri: item.imagenurl }}
+            style={tw`w-full h-full`}
+          />
+        )}
+        {/* Overlay degradado y estrellas */}
+       <View style={tw`absolute bottom-0 left-0 w-full px-4 py-2 bg-black/50 rounded-t-lg flex-row justify-between items-end`}>
+  <Text style={tw`text-white text-xl font-bold`}>
+    {item.nombre || 'Desconocido'}
+  </Text>
+  <View style={tw` p-1 rounded-lg`}>
+    <Estrellitas ken={item.ken} />
+  </View>
+</View>
       </View>
 
-      {item.tecEspecial.map((tecnica, idx) => (
-        <View key={idx} style={styles.tecnica}>
-          <Text style={styles.tecnicaNombre}>{tecnica.nombre || 'Sin nombre'}</Text>
-          <Text style={styles.tecnicaDesc}>
-            <Text style={styles.label}>Descripción: </Text>
-            {tecnica.presentacion || 'No disponible'}
-          </Text>
-        </View>
-      ))}
+      {/* Técnicas debajo del banner */}
+      <View style={tw`bg-[#111]/90 p-4 rounded-b-3xl`}>
+        {item.tecEspecial.map((tecnica, idx) => (
+          <View key={idx} style={tw`bg-[#222]/70 p-3 rounded-2xl mb-2 shadow-md shadow-cyan-500/20`}>
+            <Text style={tw`text-yellow-300 text-lg font-bold mb-1 text-center`}>
+              {tecnica.nombre || 'Sin nombre'}
+            </Text>
+            <Text style={tw`text-[aliceblue] text-center`}>
+              <Text style={tw`text-orange-400 font-semibold`}>Descripción: </Text>
+              {tecnica.presentacion || 'No disponible'}
+            </Text>
+          </View>
+        ))}
+      </View>
     </View>
   );
+
+  const fondoUrl = "https://res.cloudinary.com/dzul1hatw/image/upload/v1761596480/3c5776803bd188a000c4a709bfa5cc73_f93fra.jpg";
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#111' }}>
-      <TextInput
-        style={styles.input}
-        value={tecBuscar}
-        onChangeText={setTecBuscar}
-        placeholder="Ingresa el nombre de personaje o del poder único"
-        placeholderTextColor="#aaa"
-      />
-
-      {poderesFiltrados.length > 0 ? (
-        <FlatList
-          data={poderesFiltrados}
-          keyExtractor={(_, index) => index.toString()}
-          renderItem={renderPersonaje}
-          contentContainerStyle={styles.container}
-          keyboardShouldPersistTaps="handled"
+    <ImageBackground
+      source={{ uri: fondoUrl }}
+      style={tw`flex-1`}
+      resizeMode="cover"
+    >
+      {/* Overlay semitransparente para todo el fondo */}
+      <View style={tw`flex-1 bg-black/40`}>
+        <TextInput
+          style={tw`bg-[#222]/80 text-white p-4 rounded-3xl m-4 shadow-md shadow-cyan-500/30`}
+          value={tecBuscar}
+          onChangeText={setTecBuscar}
+          placeholder="Busca un personaje o poder único"
+          placeholderTextColor="#ccc"
         />
-      ) : (
-        <Text style={styles.noEncontrado}>No se encontró la técnica especial buscada.</Text>
-      )}
-    </View>
+
+        {poderesFiltrados.length > 0 ? (
+          <FlatList
+            data={poderesFiltrados}
+            keyExtractor={(_, index) => index.toString()}
+            renderItem={renderPersonaje}
+            contentContainerStyle={tw`px-4 pb-10`}
+            keyboardShouldPersistTaps="handled"
+          />
+        ) : (
+          <Text style={tw`text-yellow-400 text-lg text-center mt-8`}>
+            No se encontró la técnica especial buscada.
+          </Text>
+        )}
+      </View>
+    </ImageBackground>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-    paddingBottom: 40,
-  },
-  input: {
-    backgroundColor: '#222',
-    color: '#fff',
-    padding: 10,
-    borderRadius: 8,
-    margin: 16,
-    borderWidth: 1,
-    borderColor: '#555',
-  },
-  card: {
-    backgroundColor: '#1a1a1a',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 20,
-    borderWidth: 0.5,
-    borderColor: 'cyan',
-    shadowColor: 'cyan',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.4,
-    shadowRadius: 6,
-    elevation: 16,
-  },
-  header: {
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-    marginBottom: 8,
-  },
-  nombreContenedor: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 4,
-  },
-  avatar: {
-    width: 120,
-    height: 120,
-    borderRadius: 10,
-    marginRight: 8,
-    borderWidth: 4,
-    borderColor: 'black',
-  },
-  nombre: {
-    color: '#00FFB3',
-    fontSize: 18,
-    fontFamily: 'sans-serif',
-  },
-  tecnica: {
-    marginTop: 8,
-  },
-  tecnicaNombre: {
-    color: 'yellow',
-    fontSize: 16,
-    fontFamily: 'sans-serif',
-  },
-  tecnicaDesc: {
-    color: 'aliceblue',
-    marginTop: 4,
-  },
-  label: {
-    color: 'orange',
-  },
-  noEncontrado: {
-    color: 'yellow',
-    fontSize: 16,
-    textAlign: 'center',
-    marginTop: 20,
-    fontFamily: 'sans-serif',
-  },
-  estrellasAbajo: {
-    flexDirection: 'row',
-    maxWidth: 150,
-    overflow: 'hidden',
-  },
-  par: {
-    flexDirection: 'column',
-    marginTop: 6,
-    marginLeft: 6,
-    alignItems: 'center',
-  },
-});
