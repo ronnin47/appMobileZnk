@@ -1218,8 +1218,8 @@ troncoOverlay: {
 
 nombreOverlay: {
   position: 'absolute',
-  bottom: 10,
-  left: 0,
+  bottom: 20,
+  left: 155,
   right: 10,
   alignItems: 'flex-end', // centra horizontalmente
   zIndex: 2,
@@ -1229,11 +1229,14 @@ nombreOverlay: {
 
 nombreSobreImagen: {
   color: '#facc15',
-  fontSize: 24,
+  fontSize: 22,
   fontWeight: '700',
   textShadowColor: '#000',
   textShadowOffset: { width: 1, height: 1 },
   textShadowRadius: 2,
+  flexWrap: 'wrap',
+  maxWidth: '100%',  // asegura que no se salga del View
+  lineHeight: 26,    // mejora legibilidad en nombres de 2 líneas
 },
 
 botonGuardarBanner: {
