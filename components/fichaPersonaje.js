@@ -785,7 +785,7 @@ const colorPlaceHolder="#888"
 
         <ImageBackground
       source={{ uri: fondoUrl }}
-      style={{ flex: 1, opacity: 1 }}
+      style={{ flex: 1, opacity: 1, marginBottom:20 }}
       resizeMode="cover"
     >
     {/* 🔹 Capa oscura semitransparente para mejorar el contraste */}
@@ -804,7 +804,6 @@ const colorPlaceHolder="#888"
             padding: 10,
             borderWidth: 1,
             borderColor: 'gray',
-            marginBottom: 20,
             borderRadius: 5,
             paddingLeft: 10,
           },
