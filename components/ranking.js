@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, TextInput, Image, TouchableOpacity, Modal, StyleSheet, FlatList, BackHandler, ScrollView } from 'react-native';
+import { View, Text, TextInput, Image, TouchableOpacity, Modal, StyleSheet, FlatList, BackHandler, ScrollView,ImageBackground } from 'react-native';
 import { AuthContext } from './AuthContext';
 import { Estrellitas } from './estrellitas';
+//import { ImageBackground } from 'react-native-web';
 
 const Cartita = ({ item, rank }) => {
   const [showModal, setShowModal] = useState(false);
@@ -71,8 +72,13 @@ const Cartita = ({ item, rank }) => {
   );
 };
 
+
+
+
 const CartaUnica = ({ item, onClose }) => {
   const imagenBase = require('../assets/imagenBase.jpeg');
+
+  const fondoUrl = "https://res.cloudinary.com/dzul1hatw/image/upload/v1761596815/1536017df259933671623c69beaae925_pwz9t7.jpg";
 
   return (
     <ScrollView style={styles.modalContainer} contentContainerStyle={{ paddingBottom: 20 }}>
@@ -82,28 +88,61 @@ const CartaUnica = ({ item, onClose }) => {
   </TouchableOpacity>
 </View>
 
-      <View style={{ position: 'relative' }}>
-        <Image
-          source={item.imagenurl ? { uri: item.imagenurl } : imagenBase}
-          style={styles.modalImage}
-        />
-        {/* Estrellitas sobre la imagen */}
-        <View style={styles.modalEstrellitas}>
-          <Estrellitas ken={parseInt(item.ken) || 0} />
-        </View>
-      </View>
 
-      <Text style={styles.modalTitle}>{item.nombre}</Text>
-      <Text style={styles.modalText}>Dominio: {item.dominio}</Text>
-      <Text style={styles.modalText}>Ken: {item.ken}</Text>
-      <Text style={styles.modalText}>Naturaleza: {item.naturaleza}</Text>
-      <Text style={styles.modalText}>Convicción: {item.conviccion}</Text>
-      <Text style={styles.modalHistoria}>
-        {item.historia && item.historia.trim().length > 0 ? item.historia : 'Historia desconocida'}
-      </Text>
+
+        
+     <View style={{ position: 'relative', alignItems: 'center', marginBottom: 10 }}>
+  <Image
+    source={item.imagenurl ? { uri: item.imagenurl } : imagenBase}
+    style={styles.modalImage}
+    resizeMode="cover" // <- esto es clave para que la imagen no se deforme
+  />
+
+  {/* 🔹 Estrellitas sobre la imagen */}
+  <View style={styles.modalEstrellitas}>
+    <Estrellitas ken={parseInt(item.ken) || 0} />
+  </View>
+</View>
+
+<Text style={styles.modalTitle}>{item.nombre}</Text>
+<Text style={styles.modalText}>Dominio: {item.dominio}</Text>
+<Text style={styles.modalText}>Ken: {item.ken}</Text>
+<Text style={styles.modalText}>Naturaleza: {item.naturaleza}</Text>
+<Text style={styles.modalText}>Convicción: {item.conviccion}</Text>
+
+<ImageBackground
+  source={{ uri: fondoUrl }}
+  style={{
+    flex: 1,
+    backgroundColor: 'rgba(3, 3, 3, 0.88)',
+    borderRadius: 8,
+    overflow: 'hidden',
+    marginTop: 10,
+  }}
+  resizeMode="cover"
+>
+  <View
+    style={{
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'rgba(0, 0, 0, 0.45)', // overlay para contraste
+    }}
+  />
+  <View style={{ padding: 10 }}>
+    <Text style={styles.modalHistoria}>
+      {item.historia && item.historia.trim().length > 0
+        ? item.historia
+        : 'Historia desconocida'}
+    </Text>
+  </View>
+</ImageBackground>
+    
     </ScrollView>
   );
 };
+
+
+
+
 
 export const Ranking = () => {
   const { coleccionPersonajes } = useContext(AuthContext);

@@ -936,6 +936,40 @@ app.put('/agregarPersonajeSaga/:idsaga', async (req, res) => {
   }
 });
 
+// ✅ Eliminar personaje de saga
+app.put("/eliminarPersonajeSaga/:idsaga", async (req, res) => {
+  const { idsaga } = req.params;
+  const { personajes } = req.body; // array actualizado desde el frontend
+
+  if (!Array.isArray(personajes)) {
+    return res.status(400).json({ message: "El campo 'personajes' debe ser un array" });
+  }
+
+  try {
+    // Convertir el array en JSON para guardarlo
+    const personajesJSON = JSON.stringify(personajes);
+
+    const [result] = await connection.query(
+      "UPDATE sagas SET personajes = ? WHERE idsaga = ?",
+      [personajesJSON, idsaga]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Saga no encontrada" });
+    }
+
+    res.status(200).json({
+      message: "Personaje eliminado de la saga correctamente",
+      personajesActualizados: personajes,
+    });
+  } catch (error) {
+    console.error("Error al eliminar personaje de saga:", error);
+    res.status(500).json({ message: "Error en el servidor", error: error.message });
+  }
+});
+
+
+
 //PARA LA SECCION DE LA SAGA  ok!!
 app.get('/consumirSecciones', async (req, res) => {
   const { idsaga } = req.query;

@@ -11,13 +11,18 @@ import {
   TouchableOpacity,
   Modal,
   ScrollView,
+  ImageBackground,
 } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { AuthContext } from './AuthContext';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
-
 import { API_BASE_URL } from './config';
+
+
+
+
+
 
 
 
@@ -56,6 +61,9 @@ const puedeEditarNotas = (personaje) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [notasSeleccionadas, setNotasSeleccionadas] = useState([]);
   const [personajeSeleccionadoModal, setPersonajeSeleccionadoModal] = useState(null);
+
+
+  const [busqueda, setBusqueda] = useState('');
 
 /*
   useEffect(() => {
@@ -288,61 +296,102 @@ const abrirNotasPersonaje = (personaje) => {
     }
   };
 
-  const renderSeccion = ({ item, index }) => (
-    <View style={styles.card}>
-      {item.imagenurl ? (
+const renderSeccion = ({ item, index }) => (
+  <View style={styles.card}>
+    <View style={styles.imageContainer}>
+      {item.imagenurl && (
         <Image source={{ uri: item.imagenurl }} style={styles.sectionImage} />
-      ) : null}
+      )}
 
       {esNarrador && (
         <TouchableOpacity
-          style={[styles.button, { marginBottom: 10, alignSelf: 'flex-start' }]}
+          style={styles.overlayButton}
           onPress={() => seleccionarImagenSeccion(index)}
         >
-          <Text style={styles.buttonText}>
+          <Text style={styles.imageButtonText}>
             {item.imagenurl ? 'Cambiar Imagen' : 'Agregar Imagen'}
           </Text>
         </TouchableOpacity>
       )}
+    </View>
 
-      {esNarrador ? (
-        <>
-          <TextInput
-            style={styles.inputTitle}
-            value={item.titulo}
-            onChangeText={(text) => {
-              const updated = [...secciones];
-              updated[index].titulo = text;
-              setSecciones(updated);
-            }}
-          />
-          <TextInput
-            style={styles.inputDesc}
-            value={item.presentacion}
-            multiline
-            onChangeText={(text) => {
-              const updated = [...secciones];
-              updated[index].presentacion = text;
-              setSecciones(updated);
-            }}
-          />
-        </>
-      ) : (
-        <>
-          <Text style={styles.cardTitle}>{item.titulo}</Text>
-          <Text style={styles.cardDescription}>{item.presentacion}</Text>
-        </>
-      )}
+    {esNarrador ? (
+      <>
+        <TextInput
+          style={styles.inputTitle}
+          value={item.titulo}
+          onChangeText={(text) => {
+            const updated = [...secciones];
+            updated[index].titulo = text;
+            setSecciones(updated);
+          }}
+        />
+        <TextInput
+          style={styles.inputDesc}
+          value={item.presentacion}
+          multiline
+          onChangeText={(text) => {
+            const updated = [...secciones];
+            updated[index].presentacion = text;
+            setSecciones(updated);
+          }}
+        />
+      </>
+    ) : (
+      <>
+        <Text style={styles.cardTitle}>{item.titulo}</Text>
+        <Text style={styles.cardDescription}>{item.presentacion}</Text>
+      </>
+    )}
+  </View>
+);
+
+
+const eliminarPersonajeDeSaga = async (idpersonaje) => {
+  if (!sagaSeleccionada) return;
+
+  try {
+    // Filtrar los personajes dejando fuera el que querés eliminar
+    const nuevosPersonajes = sagaSeleccionada.personajes.filter(
+      (id) => id !== idpersonaje
+    );
+
+    // Enviar actualización al backend
+    await axios.put(`${API_BASE_URL}/eliminarPersonajeSaga/${sagaSeleccionada.idsaga}`, {
+      personajes: nuevosPersonajes,
+    });
+
+    // Actualizar localmente
+    setSagaSeleccionada((prev) => ({
+      ...prev,
+      personajes: nuevosPersonajes,
+    }));
+
+    showMessage({
+      message: 'Personaje eliminado de la saga',
+      type: 'success',
+    });
+
+    fetchSagas();
+  } catch (error) {
+    console.error('Error al eliminar personaje de saga:', error.message);
+    showMessage({
+      message: 'Error al eliminar personaje',
+      description: error.message,
+      type: 'danger',
+    });
+  }
+};
+
+
+
+if (!sagaSeleccionada) {
+  return (
+    <View style={styles.center}>
+      <Text style={styles.text}>Cargando saga...</Text>
     </View>
   );
-
-  if (!sagaSeleccionada) {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.text}>Cargando saga...</Text>
-      </View>
-    );
-  }
+}
 
 
   const personajesSaga = coleccionPersonajes
@@ -354,76 +403,76 @@ const abrirNotasPersonaje = (personaje) => {
 const guardarNotaSaga = async (notasEditables, personaje, savePersonajes,savePersonajeUno) => {
 
 
-  //console.log("entra en guardar nota")
-  //console.log("guardarNotaSaga llamada", { notasEditables, personaje });
-  
-if (!personaje || !notasEditables || notasEditables.length === 0) {
-  console.log("NO ENTRA: personaje o notasEditables inválidos", { personaje, notasEditables });
-  return;
-}
-
-  const notaEditada = notasEditables[0];
-  //const nuevasNotas = personaje.notasaga ? [...personaje.notasaga] : [];
-  const nuevasNotas = Array.isArray(personaje.notasaga) ? [...personaje.notasaga] : [];
-  
-
-  const indexExistente = nuevasNotas.findIndex(
-    (n) => n.idsaga === notaEditada.idsaga
-  );
-
-  if (indexExistente !== -1) {
-    nuevasNotas[indexExistente].nota = notaEditada.nota;
-  } else {
-    nuevasNotas.push({
-      nota: notaEditada.nota,
-      idsaga: notaEditada.idsaga,
+      //console.log("entra en guardar nota")
+      //console.log("guardarNotaSaga llamada", { notasEditables, personaje });
       
-    });
-  }
-
-  // Actualizar SOLO el campo notasaga localmente para el personaje correcto
-  savePersonajeUno({
-    idpersonaje: personaje.idpersonaje,
-    notasaga: nuevasNotas,
-  });
-
-
-
-  // Actualizar la colección global de personajes con las nuevas notas
-  const indexColeccion = coleccionPersonajes.findIndex(pj => pj.idpersonaje === personaje.idpersonaje);
-
-  if (indexColeccion !== -1) {
-    const nuevaColeccion = [...coleccionPersonajes];
-    nuevaColeccion[indexColeccion] = {
-      ...nuevaColeccion[indexColeccion],
-      notasaga: nuevasNotas,
-    };
-    saveColeccionPersonajes(nuevaColeccion);
-  }
-
-  //CON saveColeccionPersonajes() guardo en el contexto, y tengoq eu guardar las notas dentro 
-  //console.log("Enviando notasaga al backend:", nuevasNotas);
-  // Enviar SOLO notasaga al backend
-  try {
-    const response = await fetch(`${API_BASE_URL}/personajes/${personaje.idpersonaje}/notasaga`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ notasaga: nuevasNotas }),
-    });
-
-    if (response.ok) {
-      //console.log("Notasaga actualizada con éxito");
-
-      
-    } else {
-      const err = await response.text();
-      console.error("Error al actualizar notasaga:", err);
+    if (!personaje || !notasEditables || notasEditables.length === 0) {
+      console.log("NO ENTRA: personaje o notasEditables inválidos", { personaje, notasEditables });
+      return;
     }
-  } catch (error) {
-    console.error("Error de red:", error);
-  }
+
+      const notaEditada = notasEditables[0];
+      //const nuevasNotas = personaje.notasaga ? [...personaje.notasaga] : [];
+      const nuevasNotas = Array.isArray(personaje.notasaga) ? [...personaje.notasaga] : [];
+      
+
+      const indexExistente = nuevasNotas.findIndex(
+        (n) => n.idsaga === notaEditada.idsaga
+      );
+
+      if (indexExistente !== -1) {
+        nuevasNotas[indexExistente].nota = notaEditada.nota;
+      } else {
+        nuevasNotas.push({
+          nota: notaEditada.nota,
+          idsaga: notaEditada.idsaga,
+          
+        });
+      }
+
+      // Actualizar SOLO el campo notasaga localmente para el personaje correcto
+      savePersonajeUno({
+        idpersonaje: personaje.idpersonaje,
+        notasaga: nuevasNotas,
+      });
+
+
+
+      // Actualizar la colección global de personajes con las nuevas notas
+      const indexColeccion = coleccionPersonajes.findIndex(pj => pj.idpersonaje === personaje.idpersonaje);
+
+      if (indexColeccion !== -1) {
+        const nuevaColeccion = [...coleccionPersonajes];
+        nuevaColeccion[indexColeccion] = {
+          ...nuevaColeccion[indexColeccion],
+          notasaga: nuevasNotas,
+        };
+        saveColeccionPersonajes(nuevaColeccion);
+      }
+
+      //CON saveColeccionPersonajes() guardo en el contexto, y tengoq eu guardar las notas dentro 
+      //console.log("Enviando notasaga al backend:", nuevasNotas);
+      // Enviar SOLO notasaga al backend
+      try {
+        const response = await fetch(`${API_BASE_URL}/personajes/${personaje.idpersonaje}/notasaga`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ notasaga: nuevasNotas }),
+        });
+
+        if (response.ok) {
+          //console.log("Notasaga actualizada con éxito");
+
+          
+        } else {
+          const err = await response.text();
+          console.error("Error al actualizar notasaga:", err);
+        }
+      } catch (error) {
+        console.error("Error de red:", error);
+      }
 };
 
 
@@ -440,41 +489,72 @@ if (!personaje || !notasEditables || notasEditables.length === 0) {
                   value={sagaSeleccionada.titulo}
                   onChangeText={(text) => handleInputChange('titulo', text)}
                 />
-
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap',    justifyContent: 'center', marginBottom: 15 }}>
+                
+                {/*ACA LAS CARITAS DE LOS PERSONAJES */}
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap',    justifyContent: 'center', marginBottom: 5 }}>
                  {personajesSaga.map((pj) => {
   
                       return (
-                        <TouchableOpacity
-                          key={pj.idpersonaje}
-                          onPress={() => abrirNotasPersonaje(pj)}
-                        >
-                          <Image
-                            source={pj.imagenurl ? { uri: pj.imagenurl } : imagenBase}
-                            style={{
-                              width: 50,
-                              height: 50,
-                              borderRadius: 25,
-                              marginRight: 8,
-                              marginBottom: 8,
-                              borderWidth: 0.75,
-                              borderColor: '#fff',
-                            }}
-                          />
-                        </TouchableOpacity>
-                      );
+                         <View key={pj.idpersonaje} style={{ position: 'relative', marginRight: 8, marginBottom: 8 }}>
+                          <TouchableOpacity onPress={() => abrirNotasPersonaje(pj)}>
+                            <Image
+                              source={pj.imagenurl ? { uri: pj.imagenurl } : imagenBase}
+                              style={{
+                                width: 50,
+                                height: 50,
+                                borderRadius: 25,
+                                borderWidth: 0.75,
+                                borderColor: '#fff',
+                              }}
+                            />
+                          </TouchableOpacity>
+
+                          {esNarrador && (
+                            <TouchableOpacity
+                              onPress={() =>
+                                Alert.alert(
+                                  'Confirmar eliminación',
+                                  `¿Eliminar a ${pj.nombre} de esta saga?`,
+                                  [
+                                    { text: 'Cancelar', style: 'cancel' },
+                                    {
+                                      text: 'Eliminar',
+                                      style: 'destructive',
+                                      onPress: () => eliminarPersonajeDeSaga(pj.idpersonaje),
+                                    },
+                                  ]
+                                )
+                              }
+                              style={{
+                                position: 'absolute',
+                                top: -5,
+                                right: -5,
+                                backgroundColor: 'rgba(255, 0, 0, 0.8)',
+                                borderRadius: 10,
+                                paddingHorizontal: 5,
+                                paddingVertical: 1,
+                              }}
+                            >
+                              <Text style={{ color: '#fff', fontSize: 10, fontWeight: 'bold' }}>X</Text>
+                            </TouchableOpacity>
+                          )}
+                        </View>
+                    
+                    );
                     })}
                 </View>
+                
 
-                {sagaSeleccionada.imagenurl && (
-                  <Image source={{ uri: sagaSeleccionada.imagenurl }} style={styles.image} />
-                )}
-                <TouchableOpacity
-                  onPress={seleccionarImagen}
-                  style={[styles.button, { marginBottom: 15 }]}
-                >
-                  <Text style={styles.buttonText}>Cambiar Imagen</Text>
-                </TouchableOpacity>
+                 {/*ACA LA IMAGEN DE LA SAGA + EL BOTON DE CAMBIAR IMAGEN */}
+
+                <View style={styles.imageContainer}>
+                  {sagaSeleccionada.imagenurl && (
+                    <Image source={{ uri: sagaSeleccionada.imagenurl }} style={styles.image} />
+                  )}
+                  <TouchableOpacity onPress={seleccionarImagen} style={styles.overlayButtonSaga}>
+                    <Text style={styles.imageButtonTextSaga}>Cambiar Imagen</Text>
+                  </TouchableOpacity>
+                </View>
 
                 <TextInput
                   style={styles.description}
@@ -484,60 +564,123 @@ if (!personaje || !notasEditables || notasEditables.length === 0) {
                 />
 
                 <>
-                  <TouchableOpacity
-                    onPress={() => setMostrarSelector(!mostrarSelector)}
-                    style={[styles.button, { marginVertical: 10 }]}
+               <TouchableOpacity
+                  onPress={() => setMostrarSelector(!mostrarSelector)}
+                  style={[styles.button, { marginVertical: 10 }]}
+                >
+                  <Text style={styles.buttonText}>Sumar PJ a saga</Text>
+                </TouchableOpacity>
+
+                {mostrarSelector && (
+                  <View
+                    style={{
+                      marginBottom: 15,
+                      backgroundColor: '#1a1a1a',
+                      borderRadius: 8,
+                      padding: 10,
+                    }}
                   >
-                    <Text style={styles.buttonText}>Sumarse a saga</Text>
-                  </TouchableOpacity>
+                    {/* 🔍 Buscador */}
+                    <TextInput
+                      placeholder="Buscar personaje..."
+                      placeholderTextColor="#777"
+                      style={{
+                        backgroundColor: '#2a2a2a',
+                        color: '#fff',
+                        borderRadius: 8,
+                        paddingHorizontal: 10,
+                        paddingVertical: 8,
+                        marginBottom: 10,
+                      }}
+                      value={busqueda}
+                      onChangeText={(text) => setBusqueda(text)}
+                    />
 
-                  {mostrarSelector && (
-                    <View style={{ marginBottom: 15 }}>
-                      {coleccionPersonajes?.map((pj) => {
-                        const yaEstaEnSaga = sagaSeleccionada.personajes?.includes(
-                          pj.idpersonaje
-                        );
-                        return (
-                          <TouchableOpacity
-                            key={pj.idpersonaje}
-                            onPress={() => {
-                              if (!yaEstaEnSaga) {
-                                setPersonajeSeleccionado(pj.idpersonaje);
-                              }
-                            }}
-                            style={{
-                              backgroundColor:
-                                personajeSeleccionado === pj.idpersonaje
-                                  ? '#444'
-                                  : yaEstaEnSaga
-                                  ? '#666'
-                                  : '#222',
-                              padding: 10,
-                              borderRadius: 5,
-                              marginBottom: 5,
-                            }}
-                          >
-                            <Text
-                              style={{
-                                color: yaEstaEnSaga ? '#aaa' : '#fff',
-                              }}
-                            >
-                              {pj.nombre}
-                            </Text>
-                          </TouchableOpacity>
-                        );
-                      })}
+                    {/* 🔁 Lista filtrada (solo si hay algo escrito) */}
+                    {busqueda.length > 0 && (
+                      <>
+                        {coleccionPersonajes
+                          ?.filter((pj) =>
+                            pj.nombre.toLowerCase().includes(busqueda.toLowerCase())
+                          )
+                          .slice(0, 5) // 👈 solo los primeros 5 resultados
+                          .map((pj) => {
+                            const yaEstaEnSaga = sagaSeleccionada.personajes?.includes(pj.idpersonaje);
+                            const seleccionado = personajeSeleccionado === pj.idpersonaje;
 
-                      {personajeSeleccionado && (
-                        <TouchableOpacity
-                          onPress={agregarPersonajeASaga}
-                          style={[styles.button, { backgroundColor: '#28a745', marginTop: 10 }]}
-                        >
-                          <Text style={styles.buttonText}>Confirmar</Text>
-                        </TouchableOpacity>
-                      )}
-                    </View>
-                  )}
+                            return (
+                              <TouchableOpacity
+                                key={pj.idpersonaje}
+                                disabled={yaEstaEnSaga}
+                                onPress={() => {
+                                  if (!yaEstaEnSaga) setPersonajeSeleccionado(pj.idpersonaje);
+                                }}
+                                style={{
+                                  flexDirection: 'row',
+                                  alignItems: 'center',
+                                  backgroundColor: yaEstaEnSaga
+                                    ? '#333'
+                                    : seleccionado
+                                    ? '#3b82f6'
+                                    : '#222',
+                                  padding: 8,
+                                  borderRadius: 6,
+                                  marginBottom: 6,
+                                }}
+                              >
+                                {/* 🧑 Imagen del personaje */}
+                                {pj.imagenurl ? (
+                                  <Image
+                                    source={{ uri: pj.imagenurl }}
+                                    style={{
+                                      width: 40,
+                                      height: 40,
+                                      borderRadius: 20,
+                                      marginRight: 10,
+                                    }}
+                                  />
+                                ) : (
+                                  <View
+                                    style={{
+                                      width: 40,
+                                      height: 40,
+                                      borderRadius: 20,
+                                      backgroundColor: '#555',
+                                      marginRight: 10,
+                                    }}
+                                  />
+                                )}
+
+                                <Text
+                                  style={{
+                                    color: yaEstaEnSaga ? '#aaa' : '#fff',
+                                    fontWeight: seleccionado ? 'bold' : 'normal',
+                                  }}
+                                >
+                                  {pj.nombre}
+                                  {yaEstaEnSaga ? ' (ya en saga)' : ''}
+                                </Text>
+                              </TouchableOpacity>
+                            );
+                          })}
+                      </>
+                    )}
+
+                    {/* ✅ Botón de confirmación */}
+                    {personajeSeleccionado && (
+                      <TouchableOpacity
+                        onPress={agregarPersonajeASaga}
+                        style={[
+                          styles.button,
+                          { backgroundColor: '#28a745', marginTop: 10, borderRadius: 8 },
+                        ]}
+                      >
+                        <Text style={styles.buttonText}>Confirmar</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                )}
+
                 </>
               </>
             ) : (
@@ -583,104 +726,104 @@ if (!personaje || !notasEditables || notasEditables.length === 0) {
         contentContainerStyle={styles.container}
       />
 
-<Modal
-  visible={modalVisible}
-  animationType="slide"
-  transparent={true}
-  onRequestClose={() => setModalVisible(false)}
->
-  <View style={styles.modalBackgroundFull}>
-    <ScrollView contentContainerStyle={styles.modalContainerFull}>
-      <Text style={styles.modalTitle}>
-        Notas de {personajeSeleccionadoModal?.nombre || 'personaje'}
-      </Text>
-
-          <Image
-                source={
-                  personajeSeleccionadoModal?.imagenurl
-                    ? { uri: personajeSeleccionadoModal.imagenurl }
-                    : imagenBase
-                }
-                style={styles.personajeImagenFull}
-                resizeMode="cover"
-              />
-
-      <View style={styles.datosContainer}>
-        <Text style={styles.datoText}>
-          <Text style={{ fontWeight: 'bold' }}>Dominio: </Text>
-          {personajeSeleccionadoModal?.dominio || 'No definido'}
-        </Text>
-        <Text style={styles.datoText}>
-          <Text style={{ fontWeight: 'bold' }}>Naturaleza: </Text>
-          {personajeSeleccionadoModal?.naturaleza || 'No definida'}
-        </Text>
-      </View>
-
-   
-
-      {puedeEditarNotas(personajeSeleccionadoModal) ? (
-        <>
-          {notasEditables.map((nota, index) => (
-            <TextInput
-              key={index}
-              style={{
-                backgroundColor: '#222',
-                color: '#fff',
-                padding: 10,
-                borderRadius: 6,
-                marginBottom: 10,
-                minHeight: 200,
-                borderWidth: 1,
-                borderColor: '#555',
-                 textAlignVertical: 'top',
-              }}
-              multiline
-              value={nota.nota}
-              onChangeText={(text) => {
-                const nuevasNotas = [...notasEditables];
-                nuevasNotas[index].nota = text;
-                setNotasEditables(nuevasNotas);
-              }}
-            />
-          ))}
-
-         <TouchableOpacity
-              style={{
-                backgroundColor: '#4caf50',
-                padding: 12,
-                borderRadius: 8,
-                alignItems: 'center',
-                marginTop: 10,
-              }}
-             onPress={() => {
-                if (!notasEditables || notasEditables.length === 0) {
-                  console.log("No hay notas editables para guardar");
-                  return; // salir sin llamar a guardarNotaSaga
-                }
-                setNotasSeleccionadas(notasEditables);
-                setModalVisible(false); // mejor cerrar modal al guardar
-                guardarNotaSaga(notasEditables, personajeSeleccionadoModal, savePersonajes, savePersonajeUno);
-              }}
-            >
-              <Text style={{ color: '#fff', fontWeight: 'bold' }}>Guardar cambios</Text>
-            </TouchableOpacity>
-        </>
-      ) : (
-        <>
-          {notasSeleccionadas.length > 0 ? (
-            notasSeleccionadas.map((nota, index) => (
-              <Text key={index} style={styles.modalText}>
-                {nota.nota}
+        <Modal
+          visible={modalVisible}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.modalBackgroundFull}>
+            <ScrollView contentContainerStyle={styles.modalContainerFull}>
+              <Text style={styles.modalTitle}>
+                Notas de {personajeSeleccionadoModal?.nombre || 'personaje'}
               </Text>
-            ))
-          ) : (
-            <Text style={styles.modalText}>No hay notas para esta saga.</Text>
-          )}
-        </>
-      )}
-    </ScrollView>
-  </View>
-</Modal>
+
+                  <Image
+                        source={
+                          personajeSeleccionadoModal?.imagenurl
+                            ? { uri: personajeSeleccionadoModal.imagenurl }
+                            : imagenBase
+                        }
+                        style={styles.personajeImagenFull}
+                        resizeMode="cover"
+                      />
+
+              <View style={styles.datosContainer}>
+                <Text style={styles.datoText}>
+                  <Text style={{ fontWeight: 'bold' }}>Dominio: </Text>
+                  {personajeSeleccionadoModal?.dominio || 'No definido'}
+                </Text>
+                <Text style={styles.datoText}>
+                  <Text style={{ fontWeight: 'bold' }}>Naturaleza: </Text>
+                  {personajeSeleccionadoModal?.naturaleza || 'No definida'}
+                </Text>
+              </View>
+
+          
+
+              {puedeEditarNotas(personajeSeleccionadoModal) ? (
+                <>
+                  {notasEditables.map((nota, index) => (
+                    <TextInput
+                      key={index}
+                      style={{
+                        backgroundColor: '#222',
+                        color: '#fff',
+                        padding: 10,
+                        borderRadius: 6,
+                        marginBottom: 10,
+                        minHeight: 200,
+                        borderWidth: 1,
+                        borderColor: '#555',
+                        textAlignVertical: 'top',
+                      }}
+                      multiline
+                      value={nota.nota}
+                      onChangeText={(text) => {
+                        const nuevasNotas = [...notasEditables];
+                        nuevasNotas[index].nota = text;
+                        setNotasEditables(nuevasNotas);
+                      }}
+                    />
+                  ))}
+
+                <TouchableOpacity
+                      style={{
+                        backgroundColor: '#4caf50',
+                        padding: 12,
+                        borderRadius: 8,
+                        alignItems: 'center',
+                        marginTop: 10,
+                      }}
+                    onPress={() => {
+                        if (!notasEditables || notasEditables.length === 0) {
+                          console.log("No hay notas editables para guardar");
+                          return; // salir sin llamar a guardarNotaSaga
+                        }
+                        setNotasSeleccionadas(notasEditables);
+                        setModalVisible(false); // mejor cerrar modal al guardar
+                        guardarNotaSaga(notasEditables, personajeSeleccionadoModal, savePersonajes, savePersonajeUno);
+                      }}
+                    >
+                      <Text style={{ color: '#fff', fontWeight: 'bold' }}>Guardar cambios</Text>
+                    </TouchableOpacity>
+                </>
+              ) : (
+                <>
+                  {notasSeleccionadas.length > 0 ? (
+                    notasSeleccionadas.map((nota, index) => (
+                      <Text key={index} style={styles.modalText}>
+                        {nota.nota}
+                      </Text>
+                    ))
+                  ) : (
+                    <Text style={styles.modalText}>No hay notas para esta saga.</Text>
+                  )}
+                </>
+              )}
+            </ScrollView>
+          </View>
+        </Modal>
 
       {esNarrador && (
         <View style={styles.buttonsContainer}>
@@ -708,6 +851,11 @@ if (!personaje || !notasEditables || notasEditables.length === 0) {
   );
 };
 
+
+
+
+
+
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
@@ -715,7 +863,7 @@ const styles = StyleSheet.create({
   },
   container: {
     backgroundColor: '#000',
-    padding: 20,
+    padding: 10,
   },
   center: {
     flex: 1,
@@ -724,14 +872,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-  fontSize: 26,
- color: '#FFD700',
+  fontSize: 24,
+  color: '#FFD700',
   fontWeight: 'bold',
   fontFamily: 'serif', // o 'sans-serif-light' si lo preferís más moderno
-  marginBottom: 15,
-  marginTop: 15,
-  backgroundColor: '#1a1a1a',
-  paddingVertical: 6,
+  marginBottom: 12,
+  marginTop: 12,
+
+  paddingVertical: 4,
   paddingHorizontal: 18,
   borderRadius: 10,
   textAlign: 'center',
@@ -746,12 +894,12 @@ const styles = StyleSheet.create({
   height: 260,
   borderRadius: 7,
   marginBottom: 12,
-  marginTop: 15,
+  marginTop: 10,
   borderWidth: 1,           // grosor del borde
   borderColor: '#ffffff',   // color blanco puro
 },
   description: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#ddd',
     marginBottom: 20,
     backgroundColor: '#111',
@@ -760,10 +908,10 @@ const styles = StyleSheet.create({
   },
   text: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 14,
   },
   sectionTitle: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#FFD700',
     marginTop: 20,
@@ -777,9 +925,9 @@ const styles = StyleSheet.create({
   },
   sectionImage: {
     width: '100%',
-    height: 180,
+    height: 280,
     borderRadius: 10,
-    marginBottom: 8,
+    marginBottom: 4,
   },
   cardTitle: {
     fontSize: 18,
@@ -868,5 +1016,168 @@ const styles = StyleSheet.create({
     color: '#ddd',
     fontSize: 16,
     marginBottom: 12,
+  },
+
+  
+
+
+
+
+
+ overlayButtonSaga: {
+  position: 'absolute',
+  bottom: 10,   // pegado abajo
+ // left: 4,     
+  paddingVertical: 8,
+  paddingHorizontal: 6,
+ 
+},
+imageButtonTextSaga: {
+  color: '#FFD700',
+  fontSize: 12,
+  fontWeight: 'bold',
+  backgroundColor: 'rgba(0,0,0,0.6)',
+  paddingVertical: 8,
+  paddingHorizontal: 16,
+  borderRadius: 4,
+  borderWidth: 1,
+  borderColor: '#FFD700',
+},
+
+
+
+ card: {
+    backgroundColor: '#1a1a1a',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+  },
+  imageContainer: {
+    position: 'relative',
+    marginBottom: 10,
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  sectionImage: {
+    width: '100%',
+    height: 180,
+    borderRadius: 10,
+  },
+  overlayButton: {
+    position: 'absolute',
+    bottom: 8,
+    left: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.55)',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+  },
+  overlayButtonText: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  inputTitle: {
+    backgroundColor: '#2a2a2a',
+    color: '#fff',
+    fontSize: 16,
+    borderRadius: 8,
+    padding: 8,
+    marginBottom: 6,
+  },
+  inputDesc: {
+    backgroundColor: '#2a2a2a',
+    color: '#ddd',
+    fontSize: 14,
+    borderRadius: 8,
+    padding: 8,
+    minHeight: 60,
+    textAlignVertical: 'top',
+  },
+  cardTitle: {
+    fontSize: 18,
+    color: '#fff',
+    fontWeight: 'bold',
+    marginBottom: 6,
+  },
+  cardDescription: {
+    fontSize: 14,
+    color: '#ccc',
+  },
+
+    card: {
+    backgroundColor: '#1a1a1a',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+  },
+
+  imageContainer: {
+    position: 'relative',
+    marginBottom: 10,
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+
+  sectionImage: {
+    width: '100%',
+    height: 280,
+    borderRadius: 10,
+  },
+
+  overlayButton: {
+    position: 'absolute',
+    bottom: 10,
+    left: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.55)',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#FFD700',
+  },
+
+  imageButtonText: {
+    color: '#FFD700',
+    fontSize: 12,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+  },
+
+  inputTitle: {
+    backgroundColor: '#2a2a2a',
+    color: '#fff',
+    fontSize: 16,
+    borderRadius: 8,
+    padding: 8,
+    marginBottom: 6,
+  },
+
+  inputDesc: {
+    backgroundColor: '#2a2a2a',
+    color: '#ddd',
+    fontSize: 14,
+    borderRadius: 8,
+    padding: 8,
+    minHeight: 60,
+    textAlignVertical: 'top',
+  },
+
+  cardTitle: {
+    fontSize: 18,
+    color: '#fff',
+    fontWeight: 'bold',
+    marginBottom: 6,
+  },
+
+  cardDescription: {
+    fontSize: 14,
+    color: '#ccc',
   },
 });
