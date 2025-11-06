@@ -128,6 +128,7 @@ const abrirNotasPersonaje = (personaje) => {
         message: 'Personaje agregado a la saga',
         type: 'success',
       });
+      
       fetchSagas();
     } catch (error) {
       console.error('Error al agregar personaje a saga:', error.message);
@@ -367,10 +368,17 @@ const eliminarPersonajeDeSaga = async (idpersonaje) => {
       personajes: nuevosPersonajes,
     }));
 
-    showMessage({
-      message: 'Personaje eliminado de la saga',
-      type: 'success',
-    });
+   
+
+     setTimeout(() => {
+        showMessage({
+          message: 'Personaje eliminado de la Saga',
+          description: 'Tus datos de Saga se han actualizado correctamente.',
+          type: 'success',
+          icon: 'success',
+          duration: 3000,
+        });
+      }, 500);
 
     fetchSagas();
   } catch (error) {
@@ -380,6 +388,8 @@ const eliminarPersonajeDeSaga = async (idpersonaje) => {
       description: error.message,
       type: 'danger',
     });
+
+
   }
 };
 
@@ -503,7 +513,7 @@ const guardarNotaSaga = async (notasEditables, personaje, savePersonajes,savePer
                                 width: 50,
                                 height: 50,
                                 borderRadius: 25,
-                                borderWidth: 0.75,
+                                borderWidth: 1,
                                 borderColor: '#fff',
                               }}
                             />
@@ -564,122 +574,147 @@ const guardarNotaSaga = async (notasEditables, personaje, savePersonajes,savePer
                 />
 
                 <>
-               <TouchableOpacity
-                  onPress={() => setMostrarSelector(!mostrarSelector)}
-                  style={[styles.button, { marginVertical: 10 }]}
-                >
-                  <Text style={styles.buttonText}>Sumar PJ a saga</Text>
-                </TouchableOpacity>
+  <TouchableOpacity
+  onPress={() => setMostrarSelector(!mostrarSelector)}
+  activeOpacity={0.8}
+  style={{
+    alignSelf: 'flex-end', // o 'center' si lo querés centrado
+    paddingVertical: 1,
+    paddingHorizontal: 1,
+    marginVertical: 1,
+    borderRadius: 6,
+    backgroundColor: 'transparent', // 🔥 sin fondo
+  }}
+>
+  <Text style={styles.imageButtonTextSaga}>Sumar PJ a saga</Text>
+</TouchableOpacity>
 
                 {mostrarSelector && (
+  <View
+    style={{
+      marginBottom: 15,
+      backgroundColor: '#1a1a1a',
+      borderRadius: 8,
+      padding: 10,
+      position: 'relative',
+    }}
+  >
+    {/* ❌ Botón de cierre */}
+    <TouchableOpacity
+      onPress={() => setMostrarSelector(false)}
+      style={{
+        position: 'absolute',
+        top: 8,
+        right: 8,
+        zIndex: 10,
+        padding: 4,
+        
+      }}
+    >
+      
+      <Text style={{ color: 'red', fontSize: 18, fontWeight: 'bold', marginRight:4, }}>✕</Text>
+    </TouchableOpacity>
+
+    {/* 🔍 Buscador */}
+    <TextInput
+      placeholder="Buscar personaje..."
+      placeholderTextColor="#777"
+      style={{
+        backgroundColor: '#2a2a2a',
+        color: '#fff',
+        borderRadius: 8,
+        paddingHorizontal: 10,
+        paddingVertical: 8,
+        marginBottom: 10,
+      }}
+      value={busqueda}
+      onChangeText={(text) => setBusqueda(text)}
+    />
+
+    {/* 🔁 Lista filtrada (solo si hay algo escrito) */}
+    {busqueda.length > 0 && (
+      <>
+        {coleccionPersonajes
+          ?.filter((pj) =>
+            pj.nombre.toLowerCase().includes(busqueda.toLowerCase())
+          )
+          .slice(0, 5) // 👈 solo los primeros 5 resultados
+          .map((pj) => {
+            const yaEstaEnSaga = sagaSeleccionada.personajes?.includes(pj.idpersonaje);
+            const seleccionado = personajeSeleccionado === pj.idpersonaje;
+
+            return (
+              <TouchableOpacity
+                key={pj.idpersonaje}
+                disabled={yaEstaEnSaga}
+                onPress={() => {
+                  if (!yaEstaEnSaga) setPersonajeSeleccionado(pj.idpersonaje);
+                }}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  backgroundColor: yaEstaEnSaga
+                    ? '#333'
+                    : seleccionado
+                    ? '#3b82f6'
+                    : '#222',
+                  padding: 8,
+                  borderRadius: 6,
+                  marginBottom: 6,
+                }}
+              >
+                {/* 🧑 Imagen del personaje */}
+                {pj.imagenurl ? (
+                  <Image
+                    source={{ uri: pj.imagenurl }}
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 20,
+                      marginRight: 10,
+                    }}
+                  />
+                ) : (
                   <View
                     style={{
-                      marginBottom: 15,
-                      backgroundColor: '#1a1a1a',
-                      borderRadius: 8,
-                      padding: 10,
+                      width: 40,
+                      height: 40,
+                      borderRadius: 20,
+                      backgroundColor: '#555',
+                      marginRight: 10,
                     }}
-                  >
-                    {/* 🔍 Buscador */}
-                    <TextInput
-                      placeholder="Buscar personaje..."
-                      placeholderTextColor="#777"
-                      style={{
-                        backgroundColor: '#2a2a2a',
-                        color: '#fff',
-                        borderRadius: 8,
-                        paddingHorizontal: 10,
-                        paddingVertical: 8,
-                        marginBottom: 10,
-                      }}
-                      value={busqueda}
-                      onChangeText={(text) => setBusqueda(text)}
-                    />
-
-                    {/* 🔁 Lista filtrada (solo si hay algo escrito) */}
-                    {busqueda.length > 0 && (
-                      <>
-                        {coleccionPersonajes
-                          ?.filter((pj) =>
-                            pj.nombre.toLowerCase().includes(busqueda.toLowerCase())
-                          )
-                          .slice(0, 5) // 👈 solo los primeros 5 resultados
-                          .map((pj) => {
-                            const yaEstaEnSaga = sagaSeleccionada.personajes?.includes(pj.idpersonaje);
-                            const seleccionado = personajeSeleccionado === pj.idpersonaje;
-
-                            return (
-                              <TouchableOpacity
-                                key={pj.idpersonaje}
-                                disabled={yaEstaEnSaga}
-                                onPress={() => {
-                                  if (!yaEstaEnSaga) setPersonajeSeleccionado(pj.idpersonaje);
-                                }}
-                                style={{
-                                  flexDirection: 'row',
-                                  alignItems: 'center',
-                                  backgroundColor: yaEstaEnSaga
-                                    ? '#333'
-                                    : seleccionado
-                                    ? '#3b82f6'
-                                    : '#222',
-                                  padding: 8,
-                                  borderRadius: 6,
-                                  marginBottom: 6,
-                                }}
-                              >
-                                {/* 🧑 Imagen del personaje */}
-                                {pj.imagenurl ? (
-                                  <Image
-                                    source={{ uri: pj.imagenurl }}
-                                    style={{
-                                      width: 40,
-                                      height: 40,
-                                      borderRadius: 20,
-                                      marginRight: 10,
-                                    }}
-                                  />
-                                ) : (
-                                  <View
-                                    style={{
-                                      width: 40,
-                                      height: 40,
-                                      borderRadius: 20,
-                                      backgroundColor: '#555',
-                                      marginRight: 10,
-                                    }}
-                                  />
-                                )}
-
-                                <Text
-                                  style={{
-                                    color: yaEstaEnSaga ? '#aaa' : '#fff',
-                                    fontWeight: seleccionado ? 'bold' : 'normal',
-                                  }}
-                                >
-                                  {pj.nombre}
-                                  {yaEstaEnSaga ? ' (ya en saga)' : ''}
-                                </Text>
-                              </TouchableOpacity>
-                            );
-                          })}
-                      </>
-                    )}
-
-                    {/* ✅ Botón de confirmación */}
-                    {personajeSeleccionado && (
-                      <TouchableOpacity
-                        onPress={agregarPersonajeASaga}
-                        style={[
-                          styles.button,
-                          { backgroundColor: '#28a745', marginTop: 10, borderRadius: 8 },
-                        ]}
-                      >
-                        <Text style={styles.buttonText}>Confirmar</Text>
-                      </TouchableOpacity>
-                    )}
-                  </View>
+                  />
                 )}
+
+                <Text
+                  style={{
+                    color: yaEstaEnSaga ? '#aaa' : '#fff',
+                    fontWeight: seleccionado ? 'bold' : 'normal',
+                  }}
+                >
+                  {pj.nombre}
+                  {yaEstaEnSaga ? ' (ya en saga)' : ''}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+      </>
+    )}
+
+    {/* ✅ Botón de confirmación */}
+    {personajeSeleccionado && (
+      <TouchableOpacity
+        onPress={agregarPersonajeASaga}
+        style={[
+          styles.button,
+          { backgroundColor: '#28a745', marginTop: 10, borderRadius: 8 },
+        ]}
+      >
+        <Text style={styles.buttonText}>Confirmar</Text>
+      </TouchableOpacity>
+    )}
+  </View>
+)}
 
                 </>
               </>
@@ -889,19 +924,24 @@ const styles = StyleSheet.create({
   shadowRadius: 4,
   elevation: 4,
 },
- image: {
+image: {
   width: '100%',
-  height: 260,
-  borderRadius: 7,
+  height: 300,
+  borderRadius: 12,              // 🔹 Bordes más suaves
   marginBottom: 12,
-  marginTop: 10,
-  borderWidth: 1,           // grosor del borde
-  borderColor: '#ffffff',   // color blanco puro
+  marginTop: 4,
+  borderWidth: 1.2,              // 🔹 Un poco más definido
+  borderColor: 'rgba(255, 255, 255, 0.8)', // 🔹 Blanco sutil con transparencia
+  shadowColor: '#000',           // 🔹 Sombra para resaltar sobre fondos claros
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.3,
+  shadowRadius: 6,
+  elevation: 5,                  // 🔹 Sombra en Android
 },
   description: {
     fontSize: 14,
     color: '#ddd',
-    marginBottom: 20,
+    marginBottom: 10,
     backgroundColor: '#111',
     padding: 10,
     borderRadius: 8,
@@ -1171,7 +1211,7 @@ imageButtonTextSaga: {
 
   cardTitle: {
     fontSize: 18,
-    color: '#fff',
+    color: '#f3eb77ff',
     fontWeight: 'bold',
     marginBottom: 6,
   },
