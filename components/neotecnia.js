@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, ScrollView, Alert, FlatList, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, ScrollView, Alert, FlatList,ImageBackground, KeyboardAvoidingView, Platform } from 'react-native';
 import axios from 'axios';
 import { useState, useEffect, useContext } from 'react';
 import * as ImagePicker from 'expo-image-picker';
@@ -330,22 +330,17 @@ export const Neotecnia = () => {
 const renderItem = ({ item }) => {
   if (item.tipo === 'header') {
     return (
-      <TouchableOpacity
-        activeOpacity={0.5}
+          <TouchableOpacity
+        activeOpacity={0.7}
         onPress={() => {
-          setExpandidoKeys((prev) => {
-            if (prev.includes(item.key)) {
-              // Si el grupo ya está abierto, lo cerramos
-              return [];
-            } else {
-              // Si no, cerramos otros y abrimos sólo este
-              return [item.key];
-            }
-          });
+          setExpandidoKeys((prev) => (prev.includes(item.key) ? [] : [item.key]));
         }}
-        style={{ marginVertical: 10 }}
+        style={[
+          styles.headerContainer,
+          { backgroundColor: '#111', borderColor: item.color },
+        ]}
       >
-        <Text style={{ color: item.color, fontSize: 18, fontWeight: 'bold' }}>
+        <Text style={[styles.headerText, { color: item.color }]}>
           {expandidoKeys.includes(item.key) ? '▼ ' : '▶ '}
           {item.titulo}
         </Text>
@@ -360,9 +355,16 @@ const renderItem = ({ item }) => {
   }
   return null;
 };
-
+const fondoUrl = "https://res.cloudinary.com/dzul1hatw/image/upload/v1763048799/c24705ca9662f07250a63d634ea87b79_euv1o3.jpg"; 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 200 }}>
+
+    <ImageBackground
+          source={{ uri: fondoUrl  }}
+          style={{ flex: 1, opacity:1, backgroundColor:"rgba(3, 3, 3, 0.07)" }}
+          resizeMode='cover'
+        >
+
+           <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 200 }}>
       <TextInput
         placeholder="Buscar por nombre, nivel, rareza o coste..."
         placeholderTextColor="#aaa"
@@ -499,13 +501,16 @@ const renderItem = ({ item }) => {
         </>
       )}
     </ScrollView>
+
+        </ImageBackground>
+   
   );
 };
 
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#000',
+    //backgroundColor: '#00000011',
     padding: 10,
   },
   tituloGrupo: {
@@ -639,4 +644,30 @@ objetoDetalle: {
     color: '#D4AF37', // Dorado, o el color que prefieras
     fontWeight: 'bold',
   },
+
+    headerContainer: {
+  paddingVertical: 8,
+  paddingHorizontal: 12,
+  borderRadius: 10,
+  marginVertical: 10,
+  borderWidth: 1,
+  borderColor: 'rgba(255, 255, 255, 0.23)',
+  backgroundColor: 'rgba(20, 20, 20, 0.66)', // fondo oscuro semitransparente
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.5,
+  shadowRadius: 6,
+  elevation: 6, // Android shadow
+  flexDirection: 'row',
+  alignItems: 'center',
+},
+headerText: {
+  fontSize: 15,
+  fontWeight: 'bold',
+  letterSpacing: 0.5,
+  textShadowColor: 'rgba(0, 0, 0, 0.57)',
+  textShadowOffset: { width: 1, height: 1 },
+  textShadowRadius: 3,
+  color: '#fff',
+},
 });
