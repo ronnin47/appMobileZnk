@@ -6,11 +6,12 @@ import { KeyboardAvoidingView, Platform } from 'react-native';
 
 import axios from 'axios';
 import { showMessage } from 'react-native-flash-message';
-import { List, Button } from 'react-native-paper';
+import { Button } from 'react-native-paper';
 import * as FileSystem from 'expo-file-system';
 import { Ventajas } from './ventajas';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Inventario } from './inventario';
 import { Dominios } from './dominios';
 import { Hechizos } from './hechizos';
@@ -19,6 +20,50 @@ import { TecnicaEspecial } from './tecEpecial';
 import { API_BASE_URL } from './config'; 
 import { LinearGradient } from 'expo-linear-gradient';
 import { Tronco } from './tronco';
+
+// Componente Accordion personalizado
+const CustomAccordion = ({ title, expanded, onPress, children, icon }) => (
+  <View style={{ marginBottom: 6 }}>
+    <TouchableOpacity 
+      onPress={onPress}
+      style={{
+        backgroundColor: '#000000ff',
+        borderWidth: 1.5,
+        borderColor: 'aliceblue',
+        borderRadius: 16,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+      }}
+    >
+      <Text style={{ fontSize: 17, fontWeight: '700', color: '#FFA500', letterSpacing: 0.5 }}>
+        {title}
+      </Text>
+      <MaterialCommunityIcons 
+        name={expanded ? 'chevron-up' : 'chevron-down'} 
+        size={24} 
+        color="#FFA500"
+      />
+    </TouchableOpacity>
+    
+    {expanded && (
+      <View style={{
+        backgroundColor: '#0f0f0f',
+        borderWidth: 1,
+        borderTopWidth: 0,
+        borderColor: 'gray',
+        borderBottomLeftRadius: 8,
+        borderBottomRightRadius: 8,
+        paddingVertical: 3,
+        paddingHorizontal: 3,
+      }}>
+        {children}
+      </View>
+    )}
+  </View>
+);
 
 export const FichaPersonaje = ({ pj, ki, setKi, fortaleza, setFortaleza, ken,setKen,eliminarPersonaje,vidaActual,kiActual,kenActual,setVidaActual,setKiActual,setKenActual,positiva,setPositiva,negativa,setNegativa,cicatriz,setCicatriz,consumision,setConsumision }) => {
   
@@ -642,14 +687,13 @@ const colorPlaceHolder="#888"
 
 
     {/* CARACTERITICAS PRINCIPALES- CARACTERISTICAS SECUNDARIAS Y TODAS LAS SECCIONES RESTANTES*/} 
-      <List.Section>
+      <View style={{ marginTop: 12 }}>
 
-         <List.Accordion
+         <CustomAccordion
           title="Caracteristicas"
           expanded={expanded === 'caracteristicas'}
           onPress={() => handlePress('caracteristicas')}
-           titleStyle={{ fontSize: 18, fontWeight: 'bold', color: '#FFA500' }}
-          style={{ backgroundColor: '#1c1c1c', borderBottomWidth: 2, borderBottomColor: '#e0b878', paddingVertical: 4 }}
+          icon="dumbbell"
         >
 
 
@@ -958,74 +1002,67 @@ const colorPlaceHolder="#888"
           </View>
            
          
-        </List.Accordion>
+        </CustomAccordion>
 
-        <List.Accordion
+        <CustomAccordion
           title="Ventajas y Desventajas"
           expanded={expanded === 'ventajas'}
           onPress={() => handlePress('ventajas')}
-          titleStyle={{ fontSize: 18, fontWeight: 'bold', color: '#FFA500' }}
-          style={{ backgroundColor: '#1c1c1c', borderBottomWidth: 2, borderBottomColor: '#e0b878', paddingVertical: 4 }}
-                  >
+          icon="star"
+        >
             <Ventajas ventajas={ventajas} setVentajas={setVentajas} />
-        </List.Accordion>
+        </CustomAccordion>
 
-         <List.Accordion
+        <CustomAccordion
           title="Inventario"
-          expanded={expanded === 'inventario'}
+          expanded={expanded === 'inventario'}                     
           onPress={() => handlePress('inventario')}
-          titleStyle={{ fontSize: 18, fontWeight: 'bold', color: '#FFA500' }}
-          style={{ backgroundColor: '#1c1c1c', borderBottomWidth: 2, borderBottomColor: '#e0b878', paddingVertical: 4 }}
+          icon="backpack"
         >
           <Inventario inventario={inventario} setInventario={setInventario} />
-        </List.Accordion>
+        </CustomAccordion>
 
-        <List.Accordion
+        <CustomAccordion
           title="Dominios y Tecnicas"
           expanded={expanded === 'dominios'}
           onPress={() => handlePress('dominios')}
-          titleStyle={{ fontSize: 18, fontWeight: 'bold', color: '#FFA500' }}
-          style={{ backgroundColor: '#1c1c1c', borderBottomWidth: 2, borderBottomColor: '#e0b878', paddingVertical: 4 }}
+          icon="lightning-bolt"
         >
           <Dominios dominios={dominios} setDominios={setDominios} />
-        </List.Accordion>
+        </CustomAccordion>
 
-        <List.Accordion
+        <CustomAccordion
           title="Hechicería"
           expanded={expanded === 'hechiceria'}
           onPress={() => handlePress('hechiceria')}
-          titleStyle={{ fontSize: 18, fontWeight: 'bold', color: '#FFA500' }}
-          style={{ backgroundColor: '#1c1c1c', borderBottomWidth: 2, borderBottomColor: '#e0b878', paddingVertical: 4 }}
+          icon="wand-magic"
         >
           <Hechizos hechizos={hechizos} setHechizos={setHechizos}></Hechizos>
-        </List.Accordion>
+        </CustomAccordion>
 
-        <List.Accordion
+        <CustomAccordion
           title="Historia"
           expanded={expanded === 'historia'}
           onPress={() => handlePress('historia')}
-          titleStyle={{ fontSize: 18, fontWeight: 'bold', color: '#FFA500' }}
-          style={{ backgroundColor: '#1c1c1c', borderBottomWidth: 2, borderBottomColor: '#e0b878', paddingVertical: 4 }}
+          icon="book-open"
         >
           <Historia historia={historia} setHistoria={setHistoria}></Historia>
-        </List.Accordion>
+        </CustomAccordion>
 
-         <List.Accordion
+        <CustomAccordion
           title="Tecnicas, poderes y objetos unicos"
           expanded={expanded === 'tecEspecial'}
           onPress={() => handlePress('tecEspecial')}
-          titleStyle={{ fontSize: 18, fontWeight: 'bold', color: '#FFA500' }}
-          style={{ backgroundColor: '#1c1c1c', borderBottomWidth: 2, borderBottomColor: '#e0b878', paddingVertical: 4 }}
+          icon="crown"
         >
           <TecnicaEspecial tecEspecial={tecEspecial} setTecEspecial={setTecEspecial}></TecnicaEspecial>
-        </List.Accordion>
+        </CustomAccordion>
 
-        <List.Accordion
+        <CustomAccordion
           title="Eliminar Personaje"
           expanded={expanded === 'eliminarPj'}
           onPress={() => handlePress('eliminarPj')}
-          titleStyle={{ fontSize: 18, fontWeight: 'bold', color: '#FFA500' }}
-          style={{ backgroundColor: '#1c1c1c', borderBottomWidth: 2, borderBottomColor: '#e0b878', paddingVertical: 4 }}
+          icon="trash-can"
         >
           <Button
                 mode="contained"
@@ -1035,10 +1072,10 @@ const colorPlaceHolder="#888"
               >
                 Confirmar eliminación de {nombre}
               </Button>
-        </List.Accordion>
+        </CustomAccordion>
 
        
-      </List.Section>
+      </View>
 
 
           
