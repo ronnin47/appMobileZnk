@@ -5,6 +5,7 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  ImageBackground
 } from "react-native";
 
 const areArraysEqual = (a, b) => {
@@ -25,6 +26,7 @@ const areArraysEqual = (a, b) => {
 };
 
 export const Item = ({ id, itemValues, handleItemChange }) => {
+  const [isOpen, setIsOpen] = useState(false);
   const [heightPresentacion, setHeightPresentacion] = useState(40);
   const [heightSistema, setHeightSistema] = useState(40);
 
@@ -35,50 +37,82 @@ export const Item = ({ id, itemValues, handleItemChange }) => {
 
   return (
     <View style={styles.itemContainer}>
-      <View style={styles.nombreCheckContainer}>
-        <TextInput
-          style={styles.inputNombreFlex}
-          value={itemValues.nombre}
-          onChangeText={(text) => handleChange("nombre", text)}
-          placeholder="Nombre"
-          placeholderTextColor="#aaa"
-          multiline
-          numberOfLines={2}
-          textAlignVertical="top"
-        />
-        <TouchableOpacity
-          onPress={() => handleChange("check", !itemValues.check)}
-          style={styles.checkContainer}
-        >
-          <Text style={{ color: itemValues.check ? 'lime' : '#ccc', fontSize: 16 }}>
-            {itemValues.check ? '✅' : '⬜'}
+      {/* HEADER / FLECHA */}
+      <TouchableOpacity
+        style={styles.headerRow}
+        onPress={() => setIsOpen(!isOpen)}
+        activeOpacity={0.7}
+      >
+        {/* Nombre solo visible si está cerrado */}
+        {!isOpen ? (
+          <Text style={styles.headerNombre}>
+            {itemValues.nombre || "Sin nombre"}
           </Text>
-        </TouchableOpacity>
-      </View>
+        ) : (
+          <View style={{ flex: 1 }} /> // placeholder para mantener la flecha a la derecha
+        )}
 
-      <TextInput
-        style={[styles.textarea, { height: Math.max(40, heightPresentacion) }]}
-        value={itemValues.presentacion}
-        onChangeText={(text) => handleChange("presentacion", text)}
-        placeholder="Presentación:"
-        placeholderTextColor="#aaa"
-        multiline
-        onContentSizeChange={(e) =>
-          setHeightPresentacion(e.nativeEvent.contentSize.height)
-        }
-      />
+        {/* Flecha siempre visible */}
+        <Text style={styles.headerFlecha}>{isOpen ? "▲" : "▼"}</Text>
+      </TouchableOpacity>
 
-      <TextInput
-        style={[styles.textarea, { height: Math.max(40, heightSistema) }]}
-        value={itemValues.sistema}
-        onChangeText={(text) => handleChange("sistema", text)}
-        placeholder="Sistema:"
-        placeholderTextColor="#aaa"
-        multiline
-        onContentSizeChange={(e) =>
-          setHeightSistema(e.nativeEvent.contentSize.height)
-        }
-      />
+      {/* CUERPO SOLO SI ESTA ABIERTO */}
+      {isOpen && (
+        <View style={{ marginTop: 10 }}>
+          {/* Nombre editable */}
+          <TextInput
+            style={styles.inputNombreFlex}
+            value={itemValues.nombre}
+            onChangeText={(text) => handleChange("nombre", text)}
+            placeholder="Nombre"
+            placeholderTextColor="#aaa"
+            multiline
+            numberOfLines={15}
+            textAlignVertical="top"
+          />
+
+        
+
+          {/* Presentación */}
+          <TextInput
+            style={[styles.textarea, { height: Math.max(40, heightPresentacion) }]}
+            value={itemValues.presentacion}
+            onChangeText={(text) => handleChange("presentacion", text)}
+            placeholder="Presentación:"
+            placeholderTextColor="#aaa"
+            multiline
+            onContentSizeChange={(e) =>
+              setHeightPresentacion(e.nativeEvent.contentSize.height)
+            }
+          />
+
+          {/* Sistema */}
+          <TextInput
+            style={[styles.textarea, { height: Math.max(40, heightSistema) }]}
+            value={itemValues.sistema}
+            onChangeText={(text) => handleChange("sistema", text)}
+            placeholder="Sistema:"
+            placeholderTextColor="#aaa"
+            multiline
+            onContentSizeChange={(e) =>
+              setHeightSistema(e.nativeEvent.contentSize.height)
+            }
+          />
+
+
+            {/* Check */}
+          <TouchableOpacity
+            onPress={() => handleChange("check", !itemValues.check)}
+            style={styles.checkContainer}
+          >
+            <Text
+              style={{ color: itemValues.check ? "lime" : "#ccc", fontSize: 16 }}
+            >
+              {itemValues.check ? "✅" : "⬜"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 };
@@ -163,7 +197,22 @@ export const TecnicaEspecial = ({ tecEspecial, setTecEspecial }) => {
     return () => clearTimeout(timeout);
   }, [items]);
 
+    const fondoUrl = "https://res.cloudinary.com/dzul1hatw/image/upload/v1763045782/e035634455ab0076414882815f661711_fczp0b.jpg";
+
   return (
+
+
+
+  
+     
+    
+    
+        
+             <ImageBackground
+              source={{ uri: fondoUrl  }}
+              style={{ flex: 1, opacity:1, backgroundColor:"rgba(3, 3, 3, 0.66)" }}
+              resizeMode='cover'
+            >
     <View style={styles.container}>
       {items.length === 0 && (
         <Text style={{ color: "#ccc", textAlign: "center", marginBottom: 10 }}>
@@ -202,13 +251,14 @@ export const TecnicaEspecial = ({ tecEspecial, setTecEspecial }) => {
         </View>
       )}
     </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 10,
-    backgroundColor: "#000",
+    padding: 4,
+  // backgroundColor: "#00000048",
     flex: 1,
   },
   title: {
@@ -219,7 +269,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   itemContainer: {
-    backgroundColor: "#111",
+    backgroundColor: "#11111128",
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "#444",
@@ -233,20 +283,20 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   inputNombreFlex: {
-    backgroundColor: "#222",
+    backgroundColor: "#0000008c",
     color: "yellow",
     fontFamily: "Comic Sans MS",
     fontSize: 18,
     padding: 8,
     borderRadius: 6,
     flex: 1,
-    marginRight: 10,
+   marginBottom:4,
     minHeight: 40,
     textAlignVertical: "top",
   },
   textarea: {
-    backgroundColor: "#222",
-    color: "#fff",
+    backgroundColor: "#000000a8",
+    color: "#e0dcd1ff",
     borderRadius: 6,
     padding: 10,
     marginBottom: 10,
@@ -271,9 +321,30 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   checkContainer: {
-    backgroundColor: "#1a1a1a",
+    backgroundColor: "#000000ff",
     paddingHorizontal: 10,
     paddingVertical: 8,
     borderRadius: 6,
+    alignItems:"center"
+  },
+   headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    backgroundColor: "#0606073d", // un tono oscuro para el header
+    borderRadius: 6,
+  },
+  headerNombre: {
+    flex: 1,
+    color: "#f7dc44ff", // amarillo dorado
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  headerFlecha: {
+    fontSize: 18,
+    color: "#ffffff",
+    paddingHorizontal: 6,
   },
 });

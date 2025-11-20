@@ -1,4 +1,4 @@
-import { View, Text, TextInput, Button, StyleSheet, ScrollView,TouchableOpacity} from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, ScrollView,TouchableOpacity,ImageBackground} from 'react-native';
 
 
 export const ItemVentaja = ({ itemVentaja, handleVentaja }) => {
@@ -10,6 +10,7 @@ export const ItemVentaja = ({ itemVentaja, handleVentaja }) => {
         onChangeText={handleVentaja}
         placeholder="Escribe una ventaja..."
         placeholderTextColor="#999"
+        multiline={true}
       />
     </View>
   );
@@ -21,12 +22,15 @@ const stylesItem = StyleSheet.create({
     paddingHorizontal: 10,
   },
   input: {
-    borderColor: '#0ff',
+    borderColor: 'rgba(78, 85, 85, 0.48)',
     borderWidth: 1,
-    padding: 10,
-    color: '#fff',
-    backgroundColor: '#111',
+    padding: 6,
+    color: '#fac414ff',
+    backgroundColor: '#00000085',
     borderRadius: 6,
+    minHeight: 40,           // altura base
+    textAlignVertical: 'top', // para que el texto empiece arriba
+    textAlign:"center"
   },
 });
 
@@ -44,9 +48,16 @@ export const Ventajas = ({ ventajas, setVentajas }) => {
     }
     setVentajas(nuevas);
   };
-
+ const fondoUrl = "https://res.cloudinary.com/dzul1hatw/image/upload/v1762217941/fdba42d97ab74544c3c4a7456954c0f8_utm7a2.jpg";
   return (
-    <View style={styles.container}>
+
+     <ImageBackground
+                  source={{ uri: fondoUrl  }}
+                  style={{ flex: 1, opacity:1, backgroundColor:"rgba(3, 3, 3, 0.58)" }}
+                  resizeMode='cover'
+                >
+
+                  <View style={styles.container}>
       <ScrollView>
         {ventajas.map((item, index) => (
           <ItemVentaja
@@ -77,21 +88,16 @@ export const Ventajas = ({ ventajas, setVentajas }) => {
             </View>
         
     </View>
+
+                </ImageBackground>
+    
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#000',
+    backgroundColor: '#0000004d',
     padding: 6,
     borderRadius: 8,
-  },
-  title: {
-    fontSize: 22,
-    color: 'aliceblue',
-    fontWeight: 'bold',
-    marginBottom: 10,
-    fontFamily: 'sans-serif-condensed',
-    textAlign: 'center',
-  },
+  }
 });

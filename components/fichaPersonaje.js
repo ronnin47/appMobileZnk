@@ -566,7 +566,7 @@ const colorPlaceHolder="#888"
 
 
 
-
+const bgConvicion="https://res.cloudinary.com/dzul1hatw/image/upload/v1763045699/b5054f6badb66a02e2cac6154cb9840d_s1owbe.jpg";
 
 
   return (
@@ -661,14 +661,22 @@ const colorPlaceHolder="#888"
 
   {/* CONVICCIÓN */}
   <Text style={[styles.label, { textAlign: 'center' }]}>Convicción</Text>
-  <TextInput
+     <ImageBackground
+      source={{ uri: bgConvicion }}
+      style={styles.background}
+      imageStyle={{ borderRadius: 6 }}
+    >
+     <TextInput
     placeholder="Convicción"
     placeholderTextColor={colorPlaceHolder}
     multiline
     style={styles.inputTextoConv}
     value={conviccion}
     onChangeText={setConviccion}
+    
   />
+    </ImageBackground>
+ 
 
   {/* CHECKBOXES */}
   <View style={styles.checkboxRow}>
@@ -1377,16 +1385,21 @@ inputNumero: {
 },
 
 inputTextoConv: {
-  borderWidth: 0.5,
-  borderColor: 'white',
-  backgroundColor: '#000',
-  padding: 8,
-  borderRadius: 6,
-  color: '#fff',
-  fontSize: 14,
+  borderWidth: 3,
+  borderColor: '#ffa90a81',        // borde naranja translúcido
+  backgroundColor: '#00000002',    // fondo casi transparente
+  paddingVertical: 10,
+  paddingHorizontal: 12,
+  borderRadius: 6,                  // bordes más redondeados
+  color: '#000000ff',               // color del texto
+  fontSize: 18,
   minHeight: 50,
   textAlignVertical: 'top',
-  marginVertical: 6,
+  textAlign: 'center',
+  //textShadowColor: '#e6e2d4ff',    // sombra clara para efecto relleno
+  textShadowOffset: { width: 1, height: 1 }, 
+  textShadowRadius: 1,
+  fontWeight: 'bold',               // hace que el texto se vea más sólido
 },
 
 statsRow: {
