@@ -199,16 +199,8 @@ export const TecnicaEspecial = ({ tecEspecial, setTecEspecial }) => {
 
     const fondoUrl = "https://res.cloudinary.com/dzul1hatw/image/upload/v1763045782/e035634455ab0076414882815f661711_fczp0b.jpg";
 
-  return (
-
-
-
-  
-     
-    
-    
-        
-             <ImageBackground
+  return (     
+    <ImageBackground
               source={{ uri: fondoUrl  }}
               style={{ flex: 1, opacity:1, backgroundColor:"rgba(3, 3, 3, 0.66)" }}
               resizeMode='cover'
@@ -321,7 +313,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   checkContainer: {
-    backgroundColor: "#000000ff",
+    backgroundColor: "#00000075",
     paddingHorizontal: 10,
     paddingVertical: 8,
     borderRadius: 6,

@@ -13,6 +13,9 @@ import { Vibration } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import { TouchableWithoutFeedback, Keyboard } from 'react-native';
 
+import { Audio } from 'expo-av' 
+
+
 
 const generarNumerosAzarSinRangoMin=(cantidad, rangoMax)=> {
   var numeros = [];
@@ -484,6 +487,30 @@ const etiquetasLegibles = {
   veneno: 'Veneno',
   corte: 'Corte',
   energia: 'Energía',
+};
+
+
+
+
+ const sonidoDados = async () => {
+  setTimeout(async () => {
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        require('../assets/tirarDados2.mp3') // tu archivo local
+      );
+
+      await sound.playAsync(); // reproducir sonido
+
+      // Liberar memoria después de reproducir
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.didJustFinish) {
+          sound.unloadAsync();
+        }
+      });
+    } catch (error) {
+      console.log('Error al reproducir sonido:', error);
+    }
+  }, 1000); // 1000 ms = 1 segundo de retraso
 };
 
   return (
@@ -1020,12 +1047,14 @@ const etiquetasLegibles = {
       style={styles.botonToque}
       onPress={() => {
         tirarDados();
+       
         limpiarCamposTirada();
         setTimeout(() => {
             botonAnimRef.current?.rubberBand(400); 
            Vibration.vibrate([80, 50, 80, 50, 150, 50, 300]);
         
         }, 1000);
+         sonidoDados();
 
       }}
     >

@@ -4,6 +4,7 @@ import { AuthContext } from './AuthContext';
 import * as Animatable from 'react-native-animatable';
 
 
+
 export const ChatTiradas = ({ p }) => {
   const scrollViewRef = useRef();
   const { historialChat, setHistorialChat } = useContext(AuthContext);

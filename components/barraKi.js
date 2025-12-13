@@ -4,6 +4,12 @@ import { AuthContext } from './AuthContext';
 import socket from './socket';
 import { LinearGradient } from 'expo-linear-gradient';
 
+import { Audio } from 'expo-av';
+
+
+
+
+
 export const BarraKi = ({ pj,ki,setKi, kiActual,setKiActual,consumision,setConsumision }) => {
   const { personajes, savePersonajes,estatus,nick } = useContext(AuthContext);
   const p = personajes.find(p => p.idpersonaje === pj.idpersonaje);
@@ -28,9 +34,29 @@ export const BarraKi = ({ pj,ki,setKi, kiActual,setKiActual,consumision,setConsu
   const consumirKi = () => {
     const newValue = parseInt(kiActual) - parseInt(consumir);
     
+        const reproducirSonido = async () => {
+      let sonidoArchivo;
+    
+      if (consumir > 0) {
+        sonidoArchivo = require('../assets/gastarKi.mp3');
+      } else if (consumir < 0) {
+        sonidoArchivo = require('../assets/gastarKi.mp3');
+      } else {
+        sonidoArchivo = require('../assets/cero.mp3');
+      }
+    
+      const { sound } = await Audio.Sound.createAsync(sonidoArchivo);
+      await sound.playAsync();
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.didJustFinish) sound.unloadAsync();
+      });
+    };
+    reproducirSonido();
+
+
     if (!isNaN(newValue) && newValue >= 0) {
       setKiActual(String(newValue));
-
+    
       let message;
       if (parseInt(consumir) > 0) {
         message = `🔷 Consumió ${consumir} p de KI             KI: ${newValue} / ${ki}`;

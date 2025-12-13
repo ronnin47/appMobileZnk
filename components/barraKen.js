@@ -3,6 +3,7 @@ import { View,Text, TextInput, TouchableOpacity, StyleSheet,Pressable} from 'rea
 import { AuthContext } from './AuthContext';
 import socket from './socket';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Audio } from 'expo-av';
 
 
 export const BarraKen = ({ pj, ken,setKen,kenActual,setKenActual }) => {
@@ -19,6 +20,27 @@ export const BarraKen = ({ pj, ken,setKen,kenActual,setKenActual }) => {
   const consumirKen = () => {
     const newValue = parseInt(kenActual) - parseInt(consumir);
     
+       const reproducirSonido = async () => {
+          let sonidoArchivo;
+        
+          if (consumir > 0) {
+            sonidoArchivo = require('../assets/gastarKen.mp3');
+          } else if (consumir < 0) {
+            sonidoArchivo = require('../assets/recuperarKen.mp3');
+          } else {
+            sonidoArchivo = require('../assets/cero.mp3');
+          }
+        
+          const { sound } = await Audio.Sound.createAsync(sonidoArchivo);
+          await sound.playAsync();
+          sound.setOnPlaybackStatusUpdate((status) => {
+            if (status.didJustFinish) sound.unloadAsync();
+          });
+        };
+        reproducirSonido();
+
+
+
     if (!isNaN(newValue) && newValue >= 0) {
       setKenActual(String(newValue));
 

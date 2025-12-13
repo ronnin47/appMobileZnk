@@ -34,7 +34,8 @@
     },
     "owner": "gorda47",
     "plugins": [
-      "expo-font"
+      "expo-font",
+      "expo-audio"
     ]
   }
 }

@@ -4,6 +4,8 @@ import { AuthContext } from './AuthContext';
 import socket from './socket';
 import { LinearGradient } from 'expo-linear-gradient';
 
+import { Audio } from 'expo-av';
+
 export const BarraVida = ({pj, ki, setKi, fortaleza, setFortaleza, positiva, negativa, cicatriz, vidaActual, setVidaActual}) => {
 
 
@@ -264,6 +266,27 @@ const agregarDamage = async () => {
     }
 
 
+     const reproducirSonido = async () => {
+  let sonidoArchivo;
+
+  if (newValue > 0) {
+    sonidoArchivo = require('../assets/sonidoHerida.mp3');
+  } else if (newValue < 0) {
+    sonidoArchivo = require('../assets/sonidoCuracion.mp3');
+  } else {
+    sonidoArchivo = require('../assets/cero.mp3');
+  }
+
+  const { sound } = await Audio.Sound.createAsync(sonidoArchivo);
+  await sound.playAsync();
+  sound.setOnPlaybackStatusUpdate((status) => {
+    if (status.didJustFinish) sound.unloadAsync();
+  });
+};
+reproducirSonido();
+
+
+    
     let message
 
     if(newValue>0){
@@ -275,6 +298,10 @@ const agregarDamage = async () => {
         message = `✅ VITALIDAD: ${newDamage} / ${vidaTotal}     ${estadoDeFaseActual}  ${estadoSalud}`;
     }
   
+
+
+
+
      
    
      // Emitiendo el objeto con idpersonaje, kenActual y ken
