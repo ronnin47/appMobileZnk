@@ -19,11 +19,16 @@ export const BarraVida = ({pj, ki, setKi, fortaleza, setFortaleza, positiva, neg
 
   const [resistencia, setResistencia] = useState(p.resistencia != null ? String(p.resistencia) : '');
   
-
+/*
   //se refiere a la cantidad de vida por fase 
   const faseSalud = parseInt(ki) + parseInt(fortaleza);
    // console.log(typeof faseSalud)
-
+*/
+const faseSalud = React.useMemo(() => {
+  const kiSuma = Number(ki) || 0;
+  const fortalezaSuma = Number(fortaleza) || 0;
+  return ki >= 10 ? kiSuma + fortalezaSuma : fortalezaSuma;
+}, [ki, fortaleza]);
 
 //aca la vida total en barra positiva y en barra negativa y el total de la suma de ambas
   const vidaTotalPositiva = faseSalud * parseInt(positiva);
