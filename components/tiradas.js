@@ -42,8 +42,6 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen,
             consumision,
             setConsumision,
 
-
-
             tiradasGuardadasPj,
             setTiradasGuardadasPj,
             agregarTiradaPj,
@@ -98,6 +96,16 @@ const botonAnimRef = useRef(null);
   const [mostrarResultadosTirada,setMostrarResultadosTirada]=useState(false)
    
  
+// aca declaramos el state
+
+ const [nombreTroncoTirada,setNombreTroncoTirada]=useState("");
+ const [nombrePrincipal, setNombrePrincipal] = useState("");
+
+ const [nombreAptitudTirada,setNombreAptitudTirada]=useState("");
+ const [nombreAptitud, setNombreAptitud] = useState("");
+
+
+  
  const scrollRef = useRef(null);
   const windowWidth = Dimensions.get('window').width;
  //MEJORA
@@ -148,6 +156,11 @@ const personajesFavoritos = useMemo(() => {
   const secundariaValue = secundaria === "" ? 0 : parseInt(secundaria);
   const nombre = nombreTirada ? nombreTirada : "";
   const modificadorValue = modificador === "" ? 0 : parseInt(modificador);
+  const nombreTronco= nombrePrincipal
+  const nombreApt= nombreAptitud
+
+  console.log("llego el nombre tronco: ",nombreTronco)
+   console.log("llego el nombre aptitud: ",nombreApt)
 
   let base = 1;
   if (principal == 0) {
@@ -156,10 +169,15 @@ const personajesFavoritos = useMemo(() => {
 
   let cantD10 = Math.floor(principal / 10) + base;
   let tirada = generarNumerosAzarSinRangoMin(cantD10, 10);
+
+
   let d12 = generarNumerosAzarSinRangoMin(dadosD12Bono, 12);
   let d6 = generarNumerosAzarSinRangoMin(dadosD6Bono, 6);
   let d4 = generarNumerosAzarSinRangoMin(dadosD4Bono, 4);
+
+  //estos son los dados de esfuerzo del ken
   let d10 = generarNumerosAzarSinRangoMin(dadosD10, 10);
+  
   let d20 = generarNumerosAzarSinRangoMin(dadosD20, 20);
   let d10Bono = generarNumerosAzarSinRangoMin(dadosD10Bono, 10);
 
@@ -197,6 +215,64 @@ const personajesFavoritos = useMemo(() => {
 setValModificador(modificadorValue);
 
 
+
+
+//*************************************************************** */
+  // aca tendremos que segun la cantidad de dados o el valor de la caracteristica principal
+  // dar una cantidad de exitos 10 para notificar de la situacion de incrmeentos y cuanto incrementa
+  
+
+   //0) determinar cuantos 10 se necesitan segun la caracteristica
+  let exitosRequeridosPrincipal = 1;
+  
+ 
+
+  //Tronco
+
+    if (principalValue >= 20 && principalValue <= 59) {
+    exitosRequeridosPrincipal = 2;
+  } else if (principalValue >= 60 && principalValue <= 99) {
+    exitosRequeridosPrincipal = 3;
+  } else if (principalValue >= 100 && principalValue <= 160) {
+    exitosRequeridosPrincipal = 4;
+  } else if (principalValue >= 161 && principalValue <= 199) {
+    exitosRequeridosPrincipal = 5;
+  }
+
+
+   let exitosRequeridosAptitud = 1;
+  //Aptitudes
+
+
+if (secundariaValue >= 40 && secundariaValue <= 99) {
+  exitosRequeridosAptitud = 2;
+} else if (secundariaValue >= 100 && secundariaValue <= 159) {
+  exitosRequeridosAptitud = 3;
+} else if (secundariaValue >= 160 && secundariaValue <= 199) {
+  exitosRequeridosAptitud = 4;
+} else if (secundariaValue >= 200 && secundariaValue <= 259) {
+  exitosRequeridosAptitud = 5;
+} else if (secundariaValue >= 260 && secundariaValue <= 299) {
+  exitosRequeridosAptitud = 6;
+} else if (secundariaValue >= 300 && secundariaValue <= 359) {
+  exitosRequeridosAptitud = 7;
+} else if (secundariaValue >= 360 && secundariaValue <= 399) {
+  exitosRequeridosAptitud = 8;
+} else if (secundariaValue >= 400 && secundariaValue <= 459) {
+  exitosRequeridosAptitud = 9;
+}
+
+   //1) contamos los 10 de la tirada
+  const diecesTiradaPrincipal = (tirada.filter(dado => dado === 10).length)+(d10.filter(dado => dado === 10).length);
+
+  const puntosIncrementadosPrincipal= Math.floor(diecesTiradaPrincipal/exitosRequeridosPrincipal)
+
+  const puntosIncrementadosAptitud= Math.floor( diecesTiradaPrincipal/exitosRequeridosAptitud)
+
+
+//********************************************* */
+
+
   const baset = principalValue + secundariaValue;
   let partes = [];
 
@@ -212,6 +288,18 @@ setValModificador(modificadorValue);
 
   const mensajeChat = `🎲 Tirada ${nombre?.trim() ? `"${nombre.toUpperCase()}"` : ""}  ${partes.join("   ")}                        Total: ${total}`;
 
+ let partesIncremento = [];
+
+if (puntosIncrementadosPrincipal > 0) {
+  partesIncremento.push(`              💫💫✨ ${nombreTronco || "Tronco"}: + ${puntosIncrementadosPrincipal} ✨💫💫`);
+}
+
+if (puntosIncrementadosAptitud > 0) {
+  partesIncremento.push(`              💫💫✨ ${nombreApt || "Aptitud"}: + ${puntosIncrementadosAptitud} ✨💫💫`);
+}
+
+const mensajeChatIncrementos = partesIncremento.join("\n");
+
   const mensaje = {
     usuarioId: p.usuarioId,
     idpersonaje: p.idpersonaje,
@@ -224,8 +312,34 @@ setValModificador(modificadorValue);
   };
 
   socket.emit('chat-chat', mensaje);
+
+  if((puntosIncrementadosPrincipal > 0 || puntosIncrementadosAptitud > 0) && (principalValue > 0 || secundariaValue > 0)){
+    setTimeout(()=>{
+    
+    const mensaje = {
+    usuarioId: p.usuarioId,
+    idpersonaje: p.idpersonaje,
+    nombre: p.nombre,
+    mensaje: mensajeChatIncrementos,
+    estatus: estatus,
+    imagenPjUrl: p.imagenurl || "",
+    nick: nick || "",
+    tipo: "incrementos",
+  };
+
+  socket.emit('chat-chat', mensaje);},2500)
+  }
+
+
   setTiradaSeleccionada(null);
 };
+
+
+
+
+
+
+
 
 
 const limpiarCamposTirada = () => {
@@ -360,6 +474,9 @@ const setearTiradas = (item) => {
     //console.log("Tirada deseleccionada");
 
     setNombreTirada("");
+
+    setNombrePrincipal("");
+    setNombreAptitud("");
     
     setPrincipal(0);
     setSecundaria(0);
@@ -372,6 +489,7 @@ const setearTiradas = (item) => {
     setDadosD10(0);
     setDadosD20(0);
     setDadosD10Bono(0);
+
     
     return;
   }
@@ -382,6 +500,11 @@ const setearTiradas = (item) => {
 
   setNombreTirada(item.nombre || "");
 
+
+
+  // guardar el nombre principal para usarlo después
+  setNombrePrincipal(item.nombrePrincipal || "");
+   setNombreAptitud(item.nombreAptitud || "");
 
 const valorPrincipal = typeof item.principal === 'string' && p && p[item.principal] != null
       ? p[item.principal]
@@ -730,6 +853,8 @@ const etiquetasLegibles = {
             onChangeText={setNombreTirada}
           />
 
+
+
           <View style={{ marginBottom: 16 }}>
             <Text style={styles.label}>Caracteristica Principal</Text>
             <View style={{
@@ -776,6 +901,8 @@ const etiquetasLegibles = {
                     <TouchableOpacity
                       onPress={() => {
                         setPrincipal(item);
+                         setNombreTroncoTirada(item);  
+                         console.log(item)
                         setMostrarSelectorPrincipal(false);
                       }}
                       style={{
@@ -792,6 +919,9 @@ const etiquetasLegibles = {
               </View>
             )}
           </View>
+
+
+
 
           <View style={{ marginBottom: 16 }}>
             <Text style={styles.label}>Característica secundaria</Text>
@@ -839,6 +969,7 @@ const etiquetasLegibles = {
                     <TouchableOpacity
                       onPress={() => {
                         setSecundaria(item);
+                        setNombreAptitudTirada(item);  
                         setMostrarSelectorSecundaria(false);
                       }}
                       style={{
@@ -945,6 +1076,8 @@ const etiquetasLegibles = {
                   dadosD4Bono: dadosD4Bono || 0,
                   dadosD6Bono: dadosD6Bono || 0,
                   dadosD12Bono: dadosD12Bono || 0,
+                  nombrePrincipal: nombreTroncoTirada || "",
+                  nombreAptitud: nombreAptitudTirada || "",
                  
                 }
                 agregarTiradaPj(tiradaPj)
@@ -1119,6 +1252,8 @@ const etiquetasLegibles = {
               ellipsizeMode="tail"
             >
               {item.nombre}
+
+               
             </Text>
           </Pressable>
         );

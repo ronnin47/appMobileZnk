@@ -1,14 +1,49 @@
 import React, { useEffect, useRef, useContext } from 'react';
-import { View, ScrollView, Text, StyleSheet, Image } from 'react-native';
+import { View, ScrollView, Text, StyleSheet, Image,ImageBackground } from 'react-native';
 import { AuthContext } from './AuthContext';
 import * as Animatable from 'react-native-animatable';
 
-
+//sonido al llegar
+import { Audio } from 'expo-av';
+import { Vibration } from 'react-native';
+const fondoUrl="https://res.cloudinary.com/dzul1hatw/image/upload/v1763045771/955fcaca7b9e79d2146af67dd0498136_grsvyx.jpg";
+ 
 
 export const ChatTiradas = ({ p }) => {
   const scrollViewRef = useRef();
   const { historialChat, setHistorialChat } = useContext(AuthContext);
   const imagenBase = require('../assets/imagenBase.jpeg');
+  const ultimoMensajeProcesado = useRef(null);
+
+  
+
+
+  useEffect(() => {
+  if (historialChat.length > 0) {
+    const ultimo = historialChat[historialChat.length - 1];
+    ultimoMensajeProcesado.current = ultimo.id;
+  }
+}, []);
+
+const reproducirSonidoIncremento = async () => {
+  try {
+    const { sound } = await Audio.Sound.createAsync(
+      require("../assets/incremento.mp3")
+    );
+
+    await sound.playAsync();
+
+    sound.setOnPlaybackStatusUpdate((status) => {
+      if (status.didJustFinish) {
+        sound.unloadAsync();
+      }
+    });
+
+  } catch (error) {
+    console.log("Error reproduciendo sonido:", error);
+  }
+};
+
 const timestampEntradaChat = useRef(Date.now());
   const optimizarAvatarUrl = (url) => {
     if (!url) return null;
@@ -17,6 +52,28 @@ const timestampEntradaChat = useRef(Date.now());
     }
     return url;
   };
+
+
+    useEffect(() => {
+  if (!historialChat.length) return;
+
+  const ultimo = historialChat[historialChat.length - 1];
+
+  // evitar repetir sonido
+  if (ultimoMensajeProcesado.current === ultimo.id) return;
+
+  ultimoMensajeProcesado.current = ultimo.id;
+
+  
+  if (ultimo.tipo === "incrementos" && ultimo.idpersonaje == p.idpersonaje) {
+  reproducirSonidoIncremento();
+
+    setTimeout(() => {
+    Vibration.vibrate([80, 50, 80, 50, 150, 50, 300]);
+  }, 300);
+}
+
+}, [historialChat]);
 
   useEffect(() => {
     if (scrollViewRef.current) {
@@ -35,12 +92,12 @@ const timestampEntradaChat = useRef(Date.now());
 
   const animacionPorTipo = {
   'tirada': 'bounce',
+  'incrementos': 'zoomIn',
   'vida': 'rubberBand',
   'ki': 'zoomIn',
   'ken': 'zoomIn',
   'imagen': 'zoomIn',
   'chat': 'fadeIn',
-  
 };
 
 
@@ -52,6 +109,9 @@ const timestampEntradaChat = useRef(Date.now());
         ) : (
           historialChat.map((msg, idx) => {
             const esPropio = msg.idpersonaje == p.idpersonaje;
+            const esIncremento = msg.tipo === "incrementos";
+            const esIncrementoPropio = esIncremento && esPropio;
+
             const esImagen =
               typeof msg.mensaje === 'string' &&
               (msg.mensaje.startsWith('http://') || msg.mensaje.startsWith('https://')) &&
@@ -72,25 +132,43 @@ const timestampEntradaChat = useRef(Date.now());
           const animacion = esReciente ? animacionPorTipo[msg.tipo] || 'fadeIn' : undefined;
 
 return (
-  <Animatable.View
-     animation={animacion}
-    duration={1200}
-    easing="ease-out"
-    key={`comp2-${Number(msg.id) || idx.toString()}`}
+ <Animatable.View
+  animation={animacion}
+  duration={1200}
+  easing="ease-out"
+  key={`comp2-${Number(msg.id) || idx.toString()}`}
+  style={{
+    marginBottom: esIncrementoPropio ? 12 : 6,
+    backgroundColor: esIncrementoPropio ? "transparent" : (esPropio ? "#222" : "black"),
+    padding: esIncrementoPropio ? 10 : 4,
+    borderRadius: esIncrementoPropio ? 14 : 10,
+    borderWidth: esIncrementoPropio ? 2.5 : (esPropio ? 0.5 : 0.1),
+    borderColor: esIncrementoPropio ? "#fdfdfc" : "cyan",
+    shadowColor: esIncrementoPropio ? "#f5f4f2" : (esPropio ? "white" : "#000"),
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: esIncrementoPropio ? 1 : (esPropio ? 0.9 : 0.2),
+    shadowRadius: esIncrementoPropio ? 40 : (esPropio ? 18 : 4),
+    elevation: esIncrementoPropio ? 40 : (esPropio ? 18 : 4),
+    overflow: "hidden"
+  }}
+>
+  {esIncrementoPropio && (
+  <ImageBackground
+    source={{ uri: fondoUrl }}
     style={{
-      marginBottom: 6,
-      backgroundColor: esPropio ? "#222" : 'black',
-      padding: 4,
-      borderRadius: 10,
-      borderWidth: esPropio ? 0.5 : 0.1,
-      borderColor: esPropio ? "cyan" : 'cyan',
-      shadowColor: esPropio ? 'white' : '#000',
-      shadowOffset: { width: 0, height: 0 },
-      shadowOpacity: esPropio ? 0.9 : 0.2,
-      shadowRadius: esPropio ? 18 : 4,
-      elevation: esPropio ? 18 : 4,
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0
     }}
-  >
+    imageStyle={{
+      opacity: 0.7,
+      resizeMode: "cover",
+      borderRadius: 14
+    }}
+  />
+)}
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
       {mostrarAvatar ? (
         <Image
@@ -132,15 +210,17 @@ return (
         resizeMode="cover"
       />
     ) : (
-      <Text
-        style={[
-          styles.textoHistorial,
-          esPropio && styles.mensajePropio,
-          { marginLeft: mostrarAvatar ? 15 : 15 },
-        ]}
-      >
-        {msg.mensaje}
-      </Text>
+     <Text
+  style={[
+    styles.textoHistorial,
+    esIncrementoPropio
+      ? styles.mensajePropioIncremento
+      : esPropio && styles.mensajePropio,
+    { marginLeft: mostrarAvatar ? 15 : 15 },
+  ]}
+>
+  {msg.mensaje}
+</Text>
     )}
   </Animatable.View>
 );
@@ -181,6 +261,10 @@ const styles = StyleSheet.create({
   },
   mensajePropio: {
     color: "yellow",
+  },
+   mensajePropioIncremento: {
+    color: "aliceblue",
+    fontSize:16
   },
   imagenChat: {
     width: 180,
