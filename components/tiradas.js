@@ -270,6 +270,31 @@ if (secundariaValue >= 40 && secundariaValue <= 99) {
   const puntosIncrementadosAptitud= Math.floor( diecesTiradaPrincipal/exitosRequeridosAptitud)
 
 
+
+
+
+
+  // FRACASO ROUNDO
+/*
+  //FORZAR QUE SEAN 1
+  // >>> Forzar todos a 1 para prueba
+    tirada = tirada.map(() => 1);
+    d10 = d10.map(() => 1);
+*/
+  const dadosParaIncrementos = [...tirada, ...d10];
+  // Verificar si todos son 1
+const todosUno = dadosParaIncrementos.length > 0 && dadosParaIncrementos.every(dado => dado === 1);
+
+
+if (todosUno) {
+  console.log("⚠️ Todos los dados que cuentan para incrementos salieron 1: situación especial ⚠️");
+  // Aquí podrías definir un mensaje especial, o aplicar penalización, etc.
+
+}
+
+
+
+
 //********************************************* */
 
 
@@ -313,7 +338,35 @@ const mensajeChatIncrementos = partesIncremento.join("\n");
 
   socket.emit('chat-chat', mensaje);
 
-  if((puntosIncrementadosPrincipal > 0 || puntosIncrementadosAptitud > 0) && (principalValue > 0 || secundariaValue > 0)){
+
+
+  if((todosUno) && (principalValue > 0) ){
+   
+
+    const mensajeChatFracasoRotundo=` 
+        💥⚠️💀 FRACASO ROTUNDO 💀⚠️💥
+            🎲 Todos los dados salieron 1 🎲`
+
+
+    setTimeout( ()=>{
+      
+       const mensaje = {
+      usuarioId: p.usuarioId,
+      idpersonaje: p.idpersonaje,
+      nombre: p.nombre,
+      mensaje: mensajeChatFracasoRotundo,
+      estatus: estatus,
+      imagenPjUrl: p.imagenurl || "",
+      nick: nick || "",
+      tipo: "fracasoRotundo",
+      };
+
+      socket.emit('chat-chat', mensaje);
+    }
+
+    ,2000 )
+
+  }else if((puntosIncrementadosPrincipal > 0 || puntosIncrementadosAptitud > 0) && (principalValue > 0 || secundariaValue > 0)){
     setTimeout(()=>{
     
     const mensaje = {
@@ -328,8 +381,9 @@ const mensajeChatIncrementos = partesIncremento.join("\n");
   };
 
   socket.emit('chat-chat', mensaje);},2500)
-  }
+  }else 
 
+  
 
   setTiradaSeleccionada(null);
 };

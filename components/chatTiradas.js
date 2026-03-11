@@ -6,7 +6,10 @@ import * as Animatable from 'react-native-animatable';
 //sonido al llegar
 import { Audio } from 'expo-av';
 import { Vibration } from 'react-native';
+
 const fondoUrl="https://res.cloudinary.com/dzul1hatw/image/upload/v1763045771/955fcaca7b9e79d2146af67dd0498136_grsvyx.jpg";
+const fondoUrlFracaso="https://res.cloudinary.com/dzul1hatw/image/upload/v1773253072/55db976499bafdacb83f813c8c435f21_fi9vzq.jpg";
+ 
  
 
 export const ChatTiradas = ({ p }) => {
@@ -40,7 +43,26 @@ const reproducirSonidoIncremento = async () => {
     });
 
   } catch (error) {
-    console.log("Error reproduciendo sonido:", error);
+    console.log("Error reproduciendo sonido de incremento:", error);
+  }
+};
+
+const reproducirSonidoFracaso = async () => {
+  try {
+    const { sound } = await Audio.Sound.createAsync(
+      require("../assets/fracaso.mp3")
+    );
+
+    await sound.playAsync();
+
+    sound.setOnPlaybackStatusUpdate((status) => {
+      if (status.didJustFinish) {
+        sound.unloadAsync();
+      }
+    });
+
+  } catch (error) {
+    console.log("Error reproduciendo sonido de fracaso:", error);
   }
 };
 
@@ -72,6 +94,13 @@ const timestampEntradaChat = useRef(Date.now());
     Vibration.vibrate([80, 50, 80, 50, 150, 50, 300]);
   }, 300);
 }
+    
+if (ultimo.tipo === "fracasoRotundo" && ultimo.idpersonaje == p.idpersonaje) {
+  reproducirSonidoFracaso();  // igual que incrementos
+  setTimeout(() => {
+    Vibration.vibrate([80, 50, 80, 50, 150, 50, 300]);  // igual
+  }, 300);
+}
 
 }, [historialChat]);
 
@@ -93,6 +122,7 @@ const timestampEntradaChat = useRef(Date.now());
   const animacionPorTipo = {
   'tirada': 'bounce',
   'incrementos': 'zoomIn',
+  'fracasoRotundo': 'zoomIn',
   'vida': 'rubberBand',
   'ki': 'zoomIn',
   'ken': 'zoomIn',
@@ -101,135 +131,165 @@ const timestampEntradaChat = useRef(Date.now());
 };
 
 
-  return (
-    <View style={styles.panelHistorial}>
-      <ScrollView ref={scrollViewRef} style={styles.scrollHistorial}>
-        {historialChat.length === 0 ? (
-          <></>
-        ) : (
-          historialChat.map((msg, idx) => {
-            const esPropio = msg.idpersonaje == p.idpersonaje;
-            const esIncremento = msg.tipo === "incrementos";
-            const esIncrementoPropio = esIncremento && esPropio;
+ return (
+  <View style={styles.panelHistorial}>
+    <ScrollView ref={scrollViewRef} style={styles.scrollHistorial}>
+      {historialChat.length === 0 ? (
+        <></>
+      ) : (
+        historialChat.map((msg, idx) => {
 
-            const esImagen =
-              typeof msg.mensaje === 'string' &&
-              (msg.mensaje.startsWith('http://') || msg.mensaje.startsWith('https://')) &&
-              (msg.mensaje.endsWith('.jpg') ||
-                msg.mensaje.endsWith('.jpeg') ||
-                msg.mensaje.endsWith('.png') ||
-                msg.mensaje.includes('cloudinary'));
+          const esPropio = msg.idpersonaje == p.idpersonaje;
 
-            const avatarUrlOptimizada = optimizarAvatarUrl(
-              msg.imagenPjUrl ? msg.imagenPjUrl : msg.imagenurl
-            );
+          const esIncremento = msg.tipo === "incrementos";
+          const esIncrementoPropio = esIncremento && esPropio;
 
-            // Si el anterior es diferente o no existe, mostrar avatar
-            const anterior = historialChat[idx - 1];
-            const mostrarAvatar = !anterior || anterior.idpersonaje !== msg.idpersonaje;
+          const esFracaso = msg.tipo === "fracasoRotundo";
+          const esFracasoPropio = esFracaso && esPropio;
+
+          const esEspecialPropio = esIncrementoPropio || esFracasoPropio;
+
+          const esImagen =
+            typeof msg.mensaje === 'string' &&
+            (msg.mensaje.startsWith('http://') || msg.mensaje.startsWith('https://')) &&
+            (msg.mensaje.endsWith('.jpg') ||
+              msg.mensaje.endsWith('.jpeg') ||
+              msg.mensaje.endsWith('.png') ||
+              msg.mensaje.includes('cloudinary'));
+
+          const avatarUrlOptimizada = optimizarAvatarUrl(
+            msg.imagenPjUrl ? msg.imagenPjUrl : msg.imagenurl
+          );
+
+          const anterior = historialChat[idx - 1];
+          const mostrarAvatar = !anterior || anterior.idpersonaje !== msg.idpersonaje;
 
           const esReciente = Number(msg.timestamp) > timestampEntradaChat.current;
           const animacion = esReciente ? animacionPorTipo[msg.tipo] || 'fadeIn' : undefined;
 
-return (
- <Animatable.View
-  animation={animacion}
-  duration={1200}
-  easing="ease-out"
-  key={`comp2-${Number(msg.id) || idx.toString()}`}
-  style={{
-    marginBottom: esIncrementoPropio ? 12 : 6,
-    backgroundColor: esIncrementoPropio ? "transparent" : (esPropio ? "#222" : "black"),
-    padding: esIncrementoPropio ? 10 : 4,
-    borderRadius: esIncrementoPropio ? 14 : 10,
-    borderWidth: esIncrementoPropio ? 2.5 : (esPropio ? 0.5 : 0.1),
-    borderColor: esIncrementoPropio ? "#fdfdfc" : "cyan",
-    shadowColor: esIncrementoPropio ? "#f5f4f2" : (esPropio ? "white" : "#000"),
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: esIncrementoPropio ? 1 : (esPropio ? 0.9 : 0.2),
-    shadowRadius: esIncrementoPropio ? 40 : (esPropio ? 18 : 4),
-    elevation: esIncrementoPropio ? 40 : (esPropio ? 18 : 4),
-    overflow: "hidden"
-  }}
->
-  {esIncrementoPropio && (
-  <ImageBackground
-    source={{ uri: fondoUrl }}
-    style={{
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0
-    }}
-    imageStyle={{
-      opacity: 0.7,
-      resizeMode: "cover",
-      borderRadius: 14
-    }}
-  />
-)}
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-      {mostrarAvatar ? (
-        <Image
-          source={
-            avatarUrlOptimizada
-              ? { uri: avatarUrlOptimizada }
-              : imagenBase
-          }
-          style={{ width: 32, height: 32, borderRadius: 15 }}
-        />
-      ) : (
-        <View style={{ width: 0, height: 0 }} />
+          return (
+            <Animatable.View
+              animation={animacion}
+              duration={1200}
+              easing="ease-out"
+              key={`comp2-${Number(msg.id) || idx.toString()}`}
+              style={{
+                marginBottom: esEspecialPropio ? 12 : 6,
+                backgroundColor: esEspecialPropio ? "transparent" : (esPropio ? "#222" : "black"),
+                padding: esEspecialPropio ? 10 : 4,
+                borderRadius: esEspecialPropio ? 14 : 10,
+                borderWidth: esEspecialPropio ? 2.5 : (esPropio ? 0.5 : 0.1),
+                borderColor: esIncrementoPropio ? "#fdfdfc" : esFracasoPropio ? "#ff2b2b" : "cyan",
+                shadowColor: esIncrementoPropio ? "#f5f4f2" : esFracasoPropio ? "#ff0000" : (esPropio ? "white" : "#000"),
+                shadowOffset: { width: 0, height: 0 },
+                shadowOpacity: esEspecialPropio ? 1 : (esPropio ? 0.9 : 0.2),
+                shadowRadius: esEspecialPropio ? 40 : (esPropio ? 18 : 4),
+                elevation: esEspecialPropio ? 40 : (esPropio ? 18 : 4),
+                overflow: "hidden"
+              }}
+            >
+
+              {esIncrementoPropio && (
+                <ImageBackground
+                  source={{ uri: fondoUrl }}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0
+                  }}
+                  imageStyle={{
+                    opacity: 0.7,
+                    resizeMode: "cover",
+                    borderRadius: 14
+                  }}
+                />
+              )}
+
+              {esFracasoPropio && (
+                <ImageBackground
+                  source={{ uri: fondoUrlFracaso }}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0
+                  }}
+                  imageStyle={{
+                    opacity: 0.7,
+                    resizeMode: "cover",
+                    borderRadius: 14
+                  }}
+                />
+              )}
+
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                {mostrarAvatar ? (
+                  <Image
+                    source={
+                      avatarUrlOptimizada
+                        ? { uri: avatarUrlOptimizada }
+                        : imagenBase
+                    }
+                    style={{ width: 32, height: 32, borderRadius: 15 }}
+                  />
+                ) : (
+                  <View style={{ width: 0, height: 0 }} />
+                )}
+
+                <Text
+                  style={[
+                    styles.textoHistorial,
+                    esPropio && styles.mensajePropio,
+                  ]}
+                >
+                  {msg.nombre}:
+                </Text>
+
+                <Text style={{ color: '#888', fontSize: 10, flex: 1, textAlign: 'right' }}>
+                  {msg.timestamp
+                    ? new Date(Number(msg.timestamp)).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })
+                    : ''}
+                </Text>
+              </View>
+
+              {esImagen ? (
+                <Image
+                  source={{ uri: msg.mensaje }}
+                  style={[
+                    styles.imagenChat,
+                    esPropio && { alignSelf: 'flex-end' },
+                  ]}
+                  resizeMode="cover"
+                />
+              ) : (
+                <Text
+                  style={[
+                    styles.textoHistorial,
+                    esIncrementoPropio
+                      ? styles.mensajePropioIncremento
+                      : esFracasoPropio
+                      ? styles.mensajePropioFracaso
+                      : esPropio && styles.mensajePropio,
+                    { marginLeft: mostrarAvatar ? 15 : 15 },
+                  ]}
+                >
+                  {msg.mensaje}
+                </Text>
+              )}
+
+            </Animatable.View>
+          );
+        })
       )}
-      <Text
-        style={[
-          styles.textoHistorial,
-          esPropio && styles.mensajePropio,
-        ]}
-      >
-        {msg.nombre}:
-      </Text>
-      <Text style={{ color: '#888', fontSize: 10, flex: 1, textAlign: 'right' }}>
-        {msg.timestamp
-          ? new Date(Number(msg.timestamp)).toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit',
-            })
-          : ''}
-      </Text>
-    </View>
-
-    {esImagen ? (
-      <Image
-        source={{ uri: msg.mensaje }}
-        style={[
-          styles.imagenChat,
-          esPropio && { alignSelf: 'flex-end' },
-        ]}
-        resizeMode="cover"
-      />
-    ) : (
-     <Text
-  style={[
-    styles.textoHistorial,
-    esIncrementoPropio
-      ? styles.mensajePropioIncremento
-      : esPropio && styles.mensajePropio,
-    { marginLeft: mostrarAvatar ? 15 : 15 },
-  ]}
->
-  {msg.mensaje}
-</Text>
-    )}
-  </Animatable.View>
+    </ScrollView>
+  </View>
 );
-
-          })
-        )}
-      </ScrollView>
-    </View>
-  );
 };
 
 const styles = StyleSheet.create({
@@ -266,6 +326,12 @@ const styles = StyleSheet.create({
     color: "aliceblue",
     fontSize:16
   },
+  mensajePropioFracaso: {
+  color: "#fdfdfde7",
+  fontWeight: "bold",
+  
+  fontSize: 15,
+},
   imagenChat: {
     width: 180,
     height: 120,
