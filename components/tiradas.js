@@ -150,6 +150,35 @@ const personajesFavoritos = useMemo(() => {
     cicatriz,
   ]);
 
+
+  const sonidoSeleccionRef = useRef(null);
+
+useEffect(() => {
+  const cargarSonido = async () => {
+    const { sound } = await Audio.Sound.createAsync(
+      require('../assets/seleccionB.mp3')
+    );
+    sonidoSeleccionRef.current = sound;
+  };
+
+  cargarSonido();
+
+  return () => {
+    sonidoSeleccionRef.current?.unloadAsync();
+  };
+}, []);
+
+
+ const reproducirSonidoSeleccion = async () => {
+  try {
+    await sonidoSeleccionRef.current?.replayAsync();
+  } catch (error) {
+    console.log("Error reproduciendo sonido:", error);
+  }
+};
+
+
+
 //**************aca seguro */
  const tirarDados = () => {
   const principalValue = principal === "" ? 0 : parseInt(principal);
@@ -318,8 +347,28 @@ if (todosUno) {
 if (puntosIncrementadosPrincipal > 0) {
   partesIncremento.push(`              💫💫✨ ${nombreTronco || "Tronco"}: + ${puntosIncrementadosPrincipal} ✨💫💫`);
 }
-
+/*
 if (puntosIncrementadosAptitud > 0) {
+  partesIncremento.push(`              💫💫✨ ${nombreApt || "Aptitud"}: + ${puntosIncrementadosAptitud} ✨💫💫`);
+}
+*/
+
+const caracteristicasPrincipales = [
+  "fuerza",
+  "destreza",
+  "agilidad",
+  "fortaleza",
+  "principio",
+  "presencia",
+  "sabiduria",
+  "sentidos"
+];
+
+const esCaracteristicaPrincipal = caracteristicasPrincipales.includes(
+  (secundaria || "").toLowerCase()
+);
+
+if (puntosIncrementadosAptitud > 0 && !esCaracteristicaPrincipal && (secundariaValue > 0 || (nombreApt && nombreApt.trim() !== ""))){
   partesIncremento.push(`              💫💫✨ ${nombreApt || "Aptitud"}: + ${puntosIncrementadosAptitud} ✨💫💫`);
 }
 
@@ -508,11 +557,15 @@ const obtenerValorPersonalizado = (nombre, p) => {
       return p[valCombates[i]] != null ? p[valCombates[i]] : 0;
     }
   }
-
+/*
   // Propiedad directa
   if (p.hasOwnProperty(nombre) && p[nombre] != null) {
     return p[nombre];
   }
+*/
+  // Propiedad directa mejorada
+const key = Object.keys(p).find(k => k.toLowerCase() === nombre.toLowerCase());
+if (key) return p[key];
 
   // Si es un número, retornar número
   const valorNum = Number(nombre);
@@ -1256,64 +1309,71 @@ const etiquetasLegibles = {
 
 
 
-{/* ACA ESTAN LOS BOTONES DE LAS TIRADAS*/}
+{/* BOTONES DE TIRADAS */}
 {tiradasGuardadasPj.length > 0 && (
-  <View style={{ 
-    paddingTop: 20, 
-    paddingLeft:10,
-    paddingRight:10,
-    flexDirection: 'row', 
-    flexWrap: 'wrap', 
-    justifyContent: 'space-between',
-  }}>
+  <View
+    style={{
+      paddingTop: 20,
+      paddingHorizontal: 10,
+      flexDirection: "row",
+      flexWrap: "wrap",
+      justifyContent: "space-between",
+    }}
+  >
     {tiradasGuardadasPj
       .filter((t) => t.ippersonajes === p.idpersonaje)
+      .sort((a, b) => a.nombre.localeCompare(b.nombre))
       .map((item, index) => {
         const estaSeleccionada =
-          tiradaSeleccionada && item.idtirada === tiradaSeleccionada.idtirada;
+          tiradaSeleccionada &&
+          item.idtirada === tiradaSeleccionada.idtirada;
 
         return (
-          
-          
-
-
-          
           <Pressable
             key={item.idtirada + index}
-            onPress={() => setearTiradas(item)}
+            onPress={async () => {
+              await reproducirSonidoSeleccion();
+              setearTiradas(item)}
+            }
             style={({ pressed }) => [
               {
-                backgroundColor: estaSeleccionada ? "aliceblue" : '#333',
-                paddingVertical: 8,
-                paddingHorizontal: 14,
-                borderRadius: 20,
+                backgroundColor: estaSeleccionada ? "#fafafaec" : "#b39ddb9f",
+                
+                //backgroundColor: estaSeleccionada ? "#f7f7f7ec" : "#b39ddb9f",
+                width: "48%",
+                minHeight: 44,
+
+                paddingVertical: 12,
+                paddingHorizontal: 12,
+
+                borderRadius: 10,
                 marginBottom: 12,
-                shadowColor: estaSeleccionada ? '#FFD700' : '#000',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: pressed ? 0.3 : 0.6,
-                shadowRadius: 5,
-                elevation: estaSeleccionada ? 8 : 3,
-                borderWidth: estaSeleccionada ? 2 : 0.2,
-                borderColor: estaSeleccionada ? '#00ff0dff' : 'cyan',
-                opacity: pressed ? 0.7 : 1,
-                alignItems: 'center',
-                width: '48%',       // para que haya espacio y dos por fila
+
+                justifyContent: "center",
+                alignItems: "center",
+
+                borderWidth: estaSeleccionada ? 1.5 : 1,
+                borderColor: estaSeleccionada ? "#00ff0dff" : "#af8f8f",
+
+
+
+            
+
+                elevation: estaSeleccionada ? 6 : 2,
+
+                opacity: pressed ? 0.6 : 1,
               },
             ]}
           >
-
             <Text
-              style={{
-                color: estaSeleccionada ? '#222' : '#eee',
-                fontWeight: estaSeleccionada ? '700' : '500',
-                fontSize: 14,
-              }}
               numberOfLines={1}
-              ellipsizeMode="tail"
+              style={{
+                color: estaSeleccionada ? "#111" : "#fffdfd",
+                fontWeight: estaSeleccionada ? "700" : "500",
+                fontSize: 13,
+              }}
             >
               {item.nombre}
-
-               
             </Text>
           </Pressable>
         );

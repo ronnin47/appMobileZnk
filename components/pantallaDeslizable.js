@@ -12,8 +12,8 @@ import { API_BASE_URL } from './config';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Audio } from 'expo-av';
-
-
+import 'react-native-get-random-values';
+import { v4 as uuidv4 } from 'uuid';
 
 
 export const PantallaDeslizable = () => {
@@ -66,7 +66,7 @@ const reproducirSonidoPantallaDeslizable = async () => {
 
 
 const [tiradasGuardadasPj, setTiradasGuardadasPj] = useState([]);
-
+/*
   // 🔹 Cargar desde AsyncStorage al inicio
   useEffect(() => {
     const cargarTiradasPj = async () => {
@@ -84,82 +84,352 @@ const [tiradasGuardadasPj, setTiradasGuardadasPj] = useState([]);
     };
     cargarTiradasPj();
   }, []);
+*/
+
+  useEffect(() => {
+  const cargarTiradasBase = async () => {
+    try {
+      const datos = await AsyncStorage.getItem('tiradasGuardadasPj');
+      let tiradas = datos ? JSON.parse(datos) : [];
+
+      // Tiradas del personaje actual
+      let tiradasDelPj = tiradas.filter(t => t.ippersonajes === pjSeleccionado);
+
+      // Revisar si el bloque base ya existe
+      const tieneBloqueBase = tiradasDelPj.some(t => t.esBase);
+
+      console.log("alerta ",pj.alerta)
+      if (!tieneBloqueBase && pjSeleccionado) {
+     /*
+     const caracteristicasSecundariasBase = [
+  'academisismo',
+  'alerta',
+  'atletismo',
+  'conBakemono',
+  'mentir',
+  'pilotear',
+  'artesMarciales',
+  'medicina',
+  'conObjMagicos',
+  'sigilo',
+  'conEsferas',
+  'conLeyendas',
+  'forja',
+  'conDemonio',
+  'conEspiritual',
+  'manejoBlaster',
+  'manejoSombras',
+  'tratoBakemono',
+  'conHechiceria',
+  'medVital',
+  'medEspiritual',
+  'rayo',
+  'fuego',
+  'frio',
+  'veneno',
+  'corte',
+  'energia',
+  'fuerza',"fortaleza", 'destreza', 'agilidad', 'sentidos', 'presencia',"principio","sabiduria"
+];
+     */
+        const tiradasBase = [
+          { 
+            idtirada: uuidv4(), 
+            ippersonajes: pjSeleccionado, 
+            nombre: "Alerta", 
+            principal: "sentidos", 
+            secundaria: "alerta", 
+            modificador: 0, 
+            esBase: true, 
+            dadosD20: 0,
+            dadosD10Bono: 0,
+            dadosD10: 0,
+            dadosD4Bono: 0,
+            dadosD6Bono: 0,
+            dadosD12Bono: 0,
+            nombrePrincipal: "sentidos",
+            nombreAptitud: "alerta",
+          },
+          { 
+            idtirada: uuidv4(), 
+            ippersonajes: pjSeleccionado, 
+            nombre: "Bloqueo Art. Marciales", 
+            principal: "fortaleza", 
+            secundaria: "artesMarciales", 
+            modificador: 0, 
+            esBase: true, 
+            dadosD20:  0,
+            dadosD10Bono:  0,
+            dadosD10: 0,
+            dadosD4Bono: 0,
+            dadosD6Bono: 0,
+            dadosD12Bono: 0,
+            nombrePrincipal: "fortaleza",
+            nombreAptitud: "Art. Marciales",
+          },
+          { 
+            idtirada: uuidv4(), 
+            ippersonajes: pjSeleccionado, 
+            nombre: "Bloqueo Art. Marciales", 
+            principal: "fortaleza", 
+            secundaria: "artesMarciales", 
+            modificador: 0, 
+            esBase: true, 
+            dadosD20:  0,
+            dadosD10Bono:  0,
+            dadosD10: 0,
+            dadosD4Bono: 0,
+            dadosD6Bono: 0,
+            dadosD12Bono: 0,
+            nombrePrincipal: "fortaleza",
+            nombreAptitud: "Art. Marciales",
+          },
+          { 
+            idtirada: uuidv4(), 
+            ippersonajes: pjSeleccionado, 
+            nombre: "Leer mapas", 
+            principal: "sabiduria", 
+            secundaria: "academisismo", 
+            modificador: 0, 
+            esBase: true, 
+            dadosD20:  0,
+            dadosD10Bono:  0,
+            dadosD10: 0,
+            dadosD4Bono: 0,
+            dadosD6Bono: 0,
+            dadosD12Bono: 0,
+            nombrePrincipal: "sabiduria",
+            nombreAptitud: "academisismo",
+          },
+          { 
+            idtirada: uuidv4(), 
+            ippersonajes: pjSeleccionado, 
+            nombre: "Medicina", 
+            principal: "sabiduria", 
+            secundaria: "medicina", 
+            modificador: 0, 
+            esBase: true, 
+            dadosD20:  0,
+            dadosD10Bono:  0,
+            dadosD10: 0,
+            dadosD4Bono: 0,
+            dadosD6Bono: 0,
+            dadosD12Bono: 0,
+            nombrePrincipal: "sabiduria",
+            nombreAptitud: "medicina",
+          },
+           { 
+            idtirada: uuidv4(), 
+            ippersonajes: pjSeleccionado, 
+            nombre: "Cazar", 
+            principal: "destreza", 
+            secundaria: "alerta", 
+            modificador: 0, 
+            esBase: true, 
+            dadosD20:  0,
+            dadosD10Bono:  0,
+            dadosD10: 0,
+            dadosD4Bono: 0,
+            dadosD6Bono: 0,
+            dadosD12Bono: 0,
+            nombrePrincipal: "destreza",
+            nombreAptitud: "alerta",
+          },
+           { 
+            idtirada: uuidv4(), 
+            ippersonajes: pjSeleccionado, 
+            nombre: "Saltos y caidas", 
+            principal: "agilidad", 
+            secundaria: "atletismo", 
+            modificador: 0, 
+            esBase: true, 
+            dadosD20:  0,
+            dadosD10Bono:  0,
+            dadosD10: 0,
+            dadosD4Bono: 0,
+            dadosD6Bono: 0,
+            dadosD12Bono: 0,
+            nombrePrincipal: "agilidad",
+            nombreAptitud: "atletismo",
+          },
+           { 
+            idtirada: uuidv4(), 
+            ippersonajes: pjSeleccionado, 
+            nombre: "Trepar", 
+            principal: "destreza", 
+            secundaria: "atletismo", 
+            modificador: 0, 
+            esBase: true, 
+            dadosD20:  0,
+            dadosD10Bono:  0,
+            dadosD10: 0,
+            dadosD4Bono: 0,
+            dadosD6Bono: 0,
+            dadosD12Bono: 0,
+            nombrePrincipal: "destreza",
+            nombreAptitud: "atletismo",
+          },
+           { 
+            idtirada: uuidv4(), 
+            ippersonajes: pjSeleccionado, 
+            nombre: "Robar", 
+            principal: "agilidad", 
+            secundaria: "sigilo", 
+            modificador: 0, 
+            esBase: true, 
+            dadosD20:  0,
+            dadosD10Bono:  0,
+            dadosD10: 0,
+            dadosD4Bono: 0,
+            dadosD6Bono: 0,
+            dadosD12Bono: 0,
+            nombrePrincipal: "agilidad",
+            nombreAptitud: "sigilo",
+          },
+           { 
+            idtirada: uuidv4(), 
+            ippersonajes: pjSeleccionado, 
+            nombre: "Esquiva atletismo", 
+            principal: "agilidad", 
+            secundaria: "atletismo", 
+            modificador: 0, 
+            esBase: true, 
+            dadosD20:  0,
+            dadosD10Bono:  0,
+            dadosD10: 0,
+            dadosD4Bono: 0,
+            dadosD6Bono: 0,
+            dadosD12Bono: 0,
+            nombrePrincipal: "agilidad",
+            nombreAptitud: "atletismo",
+          },
+           { 
+            idtirada: uuidv4(), 
+            ippersonajes: pjSeleccionado, 
+            nombre: "Esquiva Art. Marciales", 
+            principal: "agilidad", 
+            secundaria: "artesMarciales", 
+            modificador: 0, 
+            esBase: true, 
+            dadosD20:  0,
+            dadosD10Bono:  0,
+            dadosD10: 0,
+            dadosD4Bono: 0,
+            dadosD6Bono: 0,
+            dadosD12Bono: 0,
+            nombrePrincipal: "agilidad",
+            nombreAptitud: "artesMarciales",
+          },
+           { 
+            idtirada: uuidv4(), 
+            ippersonajes: pjSeleccionado, 
+            nombre: "Fuerza", 
+            principal: "fuerza", 
+            secundaria: 0, 
+            modificador: 0, 
+            esBase: true, 
+            dadosD20:  0,
+            dadosD10Bono:  0,
+            dadosD10: 0,
+            dadosD4Bono: 0,
+            dadosD6Bono: 0,
+            dadosD12Bono: 0,
+            nombrePrincipal: "fuerza",
+            nombreAptitud: "",
+          },
+           { 
+            idtirada: uuidv4(), 
+            ippersonajes: pjSeleccionado, 
+            nombre: "Carrera", 
+            principal: "agilidad", 
+            secundaria: 0, 
+            modificador: 0, 
+            esBase: true, 
+            dadosD20:  0,
+            dadosD10Bono:  0,
+            dadosD10: 0,
+            dadosD4Bono: 0,
+            dadosD6Bono: 0,
+            dadosD12Bono: 0,
+            nombrePrincipal: "agilidad",
+            nombreAptitud: "",
+          },
+           { 
+            idtirada: uuidv4(), 
+            ippersonajes: pjSeleccionado, 
+            nombre: "Forja", 
+            principal: "fuerza", 
+            secundaria: "forja", 
+            modificador: 0, 
+            esBase: true, 
+            dadosD20:  0,
+            dadosD10Bono:  0,
+            dadosD10: 0,
+            dadosD4Bono: 0,
+            dadosD6Bono: 0,
+            dadosD12Bono: 0,
+            nombrePrincipal: "fuerza",
+            nombreAptitud: "forja",
+          },
+           { 
+            idtirada: uuidv4(), 
+            ippersonajes: pjSeleccionado, 
+            nombre: "Desvio Art. Marciales", 
+            principal: "destreza", 
+            secundaria: "artesMarciales", 
+            modificador: 0, 
+            esBase: true, 
+            dadosD20:  0,
+            dadosD10Bono:  0,
+            dadosD10: 0,
+            dadosD4Bono: 0,
+            dadosD6Bono: 0,
+            dadosD12Bono: 0,
+            nombrePrincipal: "destreza",
+            nombreAptitud: "artesMarciales",
+          },
+           { 
+            idtirada: uuidv4(), 
+            ippersonajes: pjSeleccionado, 
+            nombre: "Reconocer bestias", 
+            principal: "sabiduria", 
+            secundaria: "conBakemono", 
+            modificador: 0, 
+            esBase: true, 
+            dadosD20:  0,
+            dadosD10Bono:  0,
+            dadosD10: 0,
+            dadosD4Bono: 0,
+            dadosD6Bono: 0,
+            dadosD12Bono: 0,
+            nombrePrincipal: "sabiduria",
+            nombreAptitud: "con. bakemono",
+          },
+
+        ];
+
+        tiradas = [...tiradas, ...tiradasBase];
+        tiradasDelPj = [...tiradasDelPj, ...tiradasBase];
+
+        await AsyncStorage.setItem('tiradasGuardadasPj', JSON.stringify(tiradas));
+      }
+
+      setTiradasGuardadasPj(tiradasDelPj);
+
+    } catch (e) {
+      console.error('Error al cargar tiradas base:', e);
+    }
+  };
+
+  cargarTiradasBase();
+}, [pjSeleccionado]);
 
 
 
 
 //ESTO ES LO QUE DEBEREMOS EN TEORIA USAR PARA QUE CARGUE AUTOMATICAMENTE
-  /*
-  
-  useEffect(() => {
-  const cargarTiradasPj = async () => {
-    try {
-      const datos = await AsyncStorage.getItem('tiradasGuardadasPj');
-      let tiradas = datos ? JSON.parse(datos) : [];
+//pantalla deslizable es el padre, vamos a crear aca los botones en el storage   
 
-      // tiradas del personaje actual
-      const tiradasDelPj = tiradas.filter(
-        t => t.ippersonajes === pjSeleccionado
-      );
-
-      // si el personaje no tiene tiradas → crear base
-      if (tiradasDelPj.length === 0 && pjSeleccionado) {
-
-        const ahora = Date.now();
-
-        const tiradasBase = [
-          {
-            idtirada: ahora + 1,
-            ippersonajes: pjSeleccionado,
-            nombre: "Ataque",
-            principal: 0,
-            secundaria: 0,
-            modificador: 0,
-            dadosD20: 1,
-            dadosD10Bono: 0,
-            dadosD10: 0,
-            dadosD4Bono: 0,
-            dadosD6Bono: 0,
-            dadosD12Bono: 0,
-            nombrePrincipal: "",
-            nombreAptitud: ""
-          },
-          {
-            idtirada: ahora + 2,
-            ippersonajes: pjSeleccionado,
-            nombre: "Defensa",
-            principal: 0,
-            secundaria: 0,
-            modificador: 0,
-            dadosD20: 1,
-            dadosD10Bono: 0,
-            dadosD10: 0,
-            dadosD4Bono: 0,
-            dadosD6Bono: 0,
-            dadosD12Bono: 0,
-            nombrePrincipal: "",
-            nombreAptitud: ""
-          }
-        ];
-
-        tiradas = [...tiradas, ...tiradasBase];
-
-        await AsyncStorage.setItem(
-          'tiradasGuardadasPj',
-          JSON.stringify(tiradas)
-        );
-      }
-
-      setTiradasGuardadasPj(tiradas);
-
-    } catch (e) {
-      console.error('Error al cargar tiradas:', e);
-    }
-  };
-
-  cargarTiradasPj();
-}, [pjSeleccionado]);
-  */
 
   useEffect(() => {
   const cargarSonido = async () => {
