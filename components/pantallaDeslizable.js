@@ -11,6 +11,9 @@ import axios from 'axios';
 import { API_BASE_URL } from './config';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Audio } from 'expo-av';
+
+
 
 
 export const PantallaDeslizable = () => {
@@ -41,13 +44,25 @@ export const PantallaDeslizable = () => {
   const [cicatriz, setCicatriz] = useState('');
   const [consumision, setConsumision] = useState('');
 
-  const isInitialMount = useRef(true);
 
 
+  //en pj esta todo
+  // vamos a tener que armar las tiradas cargando en el storage
+console.log("Este es el pj: ",pj.nombre)
+console.log("Este es el pj: ",pj.destreza)
 
-
-
-
+const isInitialMount = useRef(true);
+const primerEvento = useRef(true);
+const swipeSound = useRef(null);
+const reproducirSonidoPantallaDeslizable = async () => {
+  try {
+    if (swipeSound.current) {
+      await swipeSound.current.replayAsync();
+    }
+  } catch (error) {
+    console.log("Error reproduciendo sonido de pantalla deslizable:", error);
+  }
+};
 
 
 const [tiradasGuardadasPj, setTiradasGuardadasPj] = useState([]);
@@ -69,6 +84,104 @@ const [tiradasGuardadasPj, setTiradasGuardadasPj] = useState([]);
     };
     cargarTiradasPj();
   }, []);
+
+
+
+
+//ESTO ES LO QUE DEBEREMOS EN TEORIA USAR PARA QUE CARGUE AUTOMATICAMENTE
+  /*
+  
+  useEffect(() => {
+  const cargarTiradasPj = async () => {
+    try {
+      const datos = await AsyncStorage.getItem('tiradasGuardadasPj');
+      let tiradas = datos ? JSON.parse(datos) : [];
+
+      // tiradas del personaje actual
+      const tiradasDelPj = tiradas.filter(
+        t => t.ippersonajes === pjSeleccionado
+      );
+
+      // si el personaje no tiene tiradas → crear base
+      if (tiradasDelPj.length === 0 && pjSeleccionado) {
+
+        const ahora = Date.now();
+
+        const tiradasBase = [
+          {
+            idtirada: ahora + 1,
+            ippersonajes: pjSeleccionado,
+            nombre: "Ataque",
+            principal: 0,
+            secundaria: 0,
+            modificador: 0,
+            dadosD20: 1,
+            dadosD10Bono: 0,
+            dadosD10: 0,
+            dadosD4Bono: 0,
+            dadosD6Bono: 0,
+            dadosD12Bono: 0,
+            nombrePrincipal: "",
+            nombreAptitud: ""
+          },
+          {
+            idtirada: ahora + 2,
+            ippersonajes: pjSeleccionado,
+            nombre: "Defensa",
+            principal: 0,
+            secundaria: 0,
+            modificador: 0,
+            dadosD20: 1,
+            dadosD10Bono: 0,
+            dadosD10: 0,
+            dadosD4Bono: 0,
+            dadosD6Bono: 0,
+            dadosD12Bono: 0,
+            nombrePrincipal: "",
+            nombreAptitud: ""
+          }
+        ];
+
+        tiradas = [...tiradas, ...tiradasBase];
+
+        await AsyncStorage.setItem(
+          'tiradasGuardadasPj',
+          JSON.stringify(tiradas)
+        );
+      }
+
+      setTiradasGuardadasPj(tiradas);
+
+    } catch (e) {
+      console.error('Error al cargar tiradas:', e);
+    }
+  };
+
+  cargarTiradasPj();
+}, [pjSeleccionado]);
+  */
+
+  useEffect(() => {
+  const cargarSonido = async () => {
+    try {
+        const { sound } = await Audio.Sound.createAsync(
+        require('../assets/pasarPantalla.mp3'),
+        { volume: 0.05 }
+      );
+      
+
+      swipeSound.current = sound;
+    } catch (error) {
+      console.log("Error cargando sonido:", error);
+    }
+  };
+
+  cargarSonido();
+
+  return () => {
+    swipeSound.current?.unloadAsync();
+  };
+}, []);
 
  const agregarTiradaPj = async (nueva) => {
   const existe = tiradasGuardadasPj.find(t => t.idtirada === nueva.idtirada);
@@ -243,7 +356,18 @@ const [tiradasGuardadasPj, setTiradasGuardadasPj] = useState([]);
   }
 
   return (
-    <PagerView style={styles.pagerView} initialPage={0}>
+   <PagerView
+  style={styles.pagerView}
+  initialPage={0}
+  onPageSelected={() => {
+    if (primerEvento.current) {
+      primerEvento.current = false;
+      return;
+    }
+
+    reproducirSonidoPantallaDeslizable();
+  }}
+>
       <View key="1" style={styles.page}>
         <FichaPersonaje
           eliminarPersonaje={eliminarPersonaje}

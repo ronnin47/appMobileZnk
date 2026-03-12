@@ -15,7 +15,7 @@ import { useNavigation } from '@react-navigation/native'; // para navegar
 import { LinearGradient } from 'expo-linear-gradient';
 const windowWidth = Dimensions.get('window').width;
 import { API_BASE_URL } from './config';
-
+import { Audio } from 'expo-av';
 const imagenBase = require('../assets/imagenBase.jpeg');
 
 export default function Principal() {
@@ -188,6 +188,20 @@ savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
   ];
 
 
+
+    const reproducirSonidoSeleccion = async () => {
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        require('../assets/seleccionB.mp3')
+      );
+      await sound.playAsync();
+    } catch (error) {
+      console.log("Error reproduciendo sonido:", error);
+    }
+  };
+
+  
+
 //Marmolado violeta
 //const fondoUrl = "https://i.pinimg.com/736x/9e/22/12/9e2212d6518fd97e391dc48b98957da9.jpg"; // 🔹 URL del fondo
 
@@ -283,12 +297,16 @@ return (
           key={item.id}
           style={styles.card}
           activeOpacity={0.9}
-          onPress={() => {
+          onPress={async () => {
+              await reproducirSonidoSeleccion();
+
             if (item.id === 'ranking') {
               navigation.navigate('Ranking');
             } else if(item.id=="poderesUnicos") {
+               
                navigation.navigate('Poderes Unicos');
             }else if(item.id=="logros") {
+                
                navigation.navigate('Logros');
             }else {
               alert(`Seleccionaste ${item.nombre}`);
@@ -352,8 +370,12 @@ return (
     key={saga.idsaga}
     style={styles.card}
     activeOpacity={0.9}
-    onPress={() => navigation.navigate('Sagas', { sagaId: saga.idsaga })}
+    onPress={async () => {
+      await reproducirSonidoSeleccion();
+      navigation.navigate('Sagas', { sagaId: saga.idsaga })}}
   >
+
+    
     <ImageWrapper
       uri={saga.imagenurl}
       fallback={require('../assets/imagenBase.jpeg')}
@@ -397,12 +419,17 @@ return (
           key={item.id}
           style={styles.card}
           activeOpacity={0.9}
-          onPress={() => {
+          onPress={async () => {
+            await reproducirSonidoSeleccion();
             if (item.id === 'objetosMagicos') {
+              
               navigation.navigate('Tesoros del universo');
             } else if(item.id=="neotecnia") {
+              
                navigation.navigate('Neotecnia');
             }else if(item.id=="herbolaria") {
+        
+
                navigation.navigate('Herbolaria');
             }else {
               alert(`Seleccionaste ${item.nombre}`);
@@ -465,6 +492,8 @@ const ImageWrapper = ({ uri, fallback }) => {
     />
   );
 };
+
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

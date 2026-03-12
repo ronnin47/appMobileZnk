@@ -10,7 +10,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from './AuthContext';
 import * as Animatable from 'react-native-animatable';
-
+import { Audio } from 'expo-av';
 
 export const Carrusel = ({ personajes }) => {
   const { setPjSeleccionado } = useContext(AuthContext);
@@ -28,12 +28,25 @@ export const Carrusel = ({ personajes }) => {
     const animar = animados[id];
 
     const onPress = () => {
+      reproducirSonidoSeleccion();  
       setAnimados(prev => ({ ...prev, [id]: true }));
       setTimeout(() => {
         setAnimados(prev => ({ ...prev, [id]: false }));
         handlePress(item);
       }, 400);
     };
+
+
+    const reproducirSonidoSeleccion = async () => {
+  try {
+    const { sound } = await Audio.Sound.createAsync(
+      require('../assets/seleccion.mp3'),{ volume: 0.1 }
+    );
+    await sound.playAsync();
+  } catch (error) {
+    console.log("Error reproduciendo sonido:", error);
+  }
+};
 
     return (
       <Animatable.View

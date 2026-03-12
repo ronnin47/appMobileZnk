@@ -1273,6 +1273,11 @@ const etiquetasLegibles = {
           tiradaSeleccionada && item.idtirada === tiradaSeleccionada.idtirada;
 
         return (
+          
+          
+
+
+          
           <Pressable
             key={item.idtirada + index}
             onPress={() => setearTiradas(item)}
@@ -1296,6 +1301,7 @@ const etiquetasLegibles = {
               },
             ]}
           >
+
             <Text
               style={{
                 color: estaSeleccionada ? '#222' : '#eee',
