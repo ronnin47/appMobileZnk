@@ -1337,7 +1337,7 @@ const etiquetasLegibles = {
             }
             style={({ pressed }) => [
               {
-                backgroundColor: estaSeleccionada ? "#fafafaec" : "#b39ddb9f",
+                backgroundColor: estaSeleccionada ? "#ffffff" : "#b39ddb9f",
                 
                 //backgroundColor: estaSeleccionada ? "#f7f7f7ec" : "#b39ddb9f",
                 width: "48%",
