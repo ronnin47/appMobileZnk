@@ -46,10 +46,7 @@ export const PantallaDeslizable = () => {
 
 
 
-  //en pj esta todo
-  // vamos a tener que armar las tiradas cargando en el storage
-console.log("Este es el pj: ",pj.nombre)
-console.log("Este es el pj: ",pj.destreza)
+
 
 const isInitialMount = useRef(true);
 const primerEvento = useRef(true);
@@ -98,7 +95,7 @@ const [tiradasGuardadasPj, setTiradasGuardadasPj] = useState([]);
       // Revisar si el bloque base ya existe
       const tieneBloqueBase = tiradasDelPj.some(t => t.esBase);
 
-      console.log("alerta ",pj.alerta)
+     
       if (!tieneBloqueBase && pjSeleccionado) {
      /*
      const caracteristicasSecundariasBase = [
@@ -455,7 +452,7 @@ const [tiradasGuardadasPj, setTiradasGuardadasPj] = useState([]);
 
  const agregarTiradaPj = async (nueva) => {
   const existe = tiradasGuardadasPj.find(t => t.idtirada === nueva.idtirada);
- //console.log(nueva)
+
   let actualizadas;
   if (existe) {
     // Reemplazar tirada existente (editar)

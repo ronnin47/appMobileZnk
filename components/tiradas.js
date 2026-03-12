@@ -188,8 +188,8 @@ useEffect(() => {
   const nombreTronco= nombrePrincipal
   const nombreApt= nombreAptitud
 
-  console.log("llego el nombre tronco: ",nombreTronco)
-   console.log("llego el nombre aptitud: ",nombreApt)
+  //console.log("llego el nombre tronco: ",nombreTronco)
+  // console.log("llego el nombre aptitud: ",nombreApt)
 
   let base = 1;
   if (principal == 0) {
@@ -315,11 +315,7 @@ if (secundariaValue >= 40 && secundariaValue <= 99) {
 const todosUno = dadosParaIncrementos.length > 0 && dadosParaIncrementos.every(dado => dado === 1);
 
 
-if (todosUno) {
-  console.log("⚠️ Todos los dados que cuentan para incrementos salieron 1: situación especial ⚠️");
-  // Aquí podrías definir un mensaje especial, o aplicar penalización, etc.
 
-}
 
 
 
@@ -1009,7 +1005,7 @@ const etiquetasLegibles = {
                       onPress={() => {
                         setPrincipal(item);
                          setNombreTroncoTirada(item);  
-                         console.log(item)
+                        
                         setMostrarSelectorPrincipal(false);
                       }}
                       style={{
@@ -1337,7 +1333,7 @@ const etiquetasLegibles = {
             }
             style={({ pressed }) => [
               {
-                backgroundColor: estaSeleccionada ? "#ffffff" : "#b39ddb9f",
+                backgroundColor: estaSeleccionada ? "#ffffff" : "#b39ddb60",
                 
                 //backgroundColor: estaSeleccionada ? "#f7f7f7ec" : "#b39ddb9f",
                 width: "48%",
@@ -1353,7 +1349,7 @@ const etiquetasLegibles = {
                 alignItems: "center",
 
                 borderWidth: estaSeleccionada ? 1.5 : 1,
-                borderColor: estaSeleccionada ? "#00ff0dff" : "#af8f8f",
+                borderColor: estaSeleccionada ? "#00ff0dff" : "#af8f8fda",
 
 
 
