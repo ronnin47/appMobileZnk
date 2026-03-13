@@ -323,10 +323,27 @@ const todosUno = dadosParaIncrementos.length > 0 && dadosParaIncrementos.every(d
 //********************************************* */
 
 
-  const baset = principalValue + secundariaValue;
-  let partes = [];
+const baset = principalValue + (secundariaValue || 0);
+let partes = [];
 
-  if (baset > 0) partes.push(`Base: ${baset}`);
+let textoBase = "";
+
+if (principalValue > 0) {
+  textoBase = `${nombreTronco || "Tronco"} ${principalValue}`;
+
+  if (secundariaValue > 0) {
+    const nombreSec = nombreApt?.trim() ? nombreApt : "Aptitud";
+    textoBase += ` + ${nombreSec} ${secundariaValue} = ${baset}`;
+  }
+} 
+else if (secundariaValue > 0) {
+  const nombreSec = nombreApt?.trim() ? nombreApt : "Aptitud";
+  textoBase = `${nombreSec} ${secundariaValue}`;
+}
+
+if (textoBase) partes.push(textoBase);
+
+
   if (modificadorValue !== 0) partes.push(`Modificador: ${modificadorValue}`); // ✅ Se muestra si existe
   if (tirada.length > 0) partes.push(`D10 esfuerzo: ${tirada.join(", ")}`);
   if (d10.length > 0) partes.push(`D10 Ken: ${d10.join(", ")}`);
@@ -336,7 +353,7 @@ const todosUno = dadosParaIncrementos.length > 0 && dadosParaIncrementos.every(d
   if (d4.length > 0) partes.push(`D4: ${d4.join(", ")}`);
   if (d12.length > 0) partes.push(`D12: ${d12.join(", ")}`);
 
-  const mensajeChat = `🎲 Tirada ${nombre?.trim() ? `"${nombre.toUpperCase()}"` : ""}  ${partes.join("   ")}                        Total: ${total}`;
+  const mensajeChat = `🎲 ${nombre?.trim() ? `"${nombre.toUpperCase()}"` : ""}  ${partes.join("   ")}                        Total: ${total}`;
 
  let partesIncremento = [];
 
@@ -361,7 +378,7 @@ const caracteristicasPrincipales = [
 ];
 
 const esCaracteristicaPrincipal = caracteristicasPrincipales.includes(
-  (secundaria || "").toLowerCase()
+  (nombreApt || "").toLowerCase()
 );
 
 if (puntosIncrementadosAptitud > 0 && !esCaracteristicaPrincipal && (secundariaValue > 0 || (nombreApt && nombreApt.trim() !== ""))){
@@ -426,7 +443,7 @@ const mensajeChatIncrementos = partesIncremento.join("\n");
   };
 
   socket.emit('chat-chat', mensaje);},2500)
-  }else 
+  }
 
   
 
@@ -451,6 +468,9 @@ const limpiarCamposTirada = () => {
   setDadosD10(0);
   setDadosD20(0);
   setDadosD10Bono(0);
+  setNombrePrincipal("");
+  setNombreAptitud("");
+
 };
 //ESTO ES PARA LA LOGICA INTERNA DE GUARDAR sobre el array que esta en el context
     const guardarCambios = () => {

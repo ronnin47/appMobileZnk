@@ -863,7 +863,7 @@ const bgConvicion="https://res.cloudinary.com/dzul1hatw/image/upload/v1763045699
 >
           
           <View style={{ flex: 1, marginRight: 8,  }}>
-            <Text style={styles.label}>Academisismo</Text><TextInput placeholder="Academisismo" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={academisismo} onChangeText={setAcademisismo} />
+            <Text style={styles.label}>Academicismo</Text><TextInput placeholder="Academicismo" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={academisismo} onChangeText={setAcademisismo} />
             <Text style={styles.label}>Atletismo</Text><TextInput placeholder="Atletismo" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={atletismo} onChangeText={setAtletismo} />
             <Text style={styles.label}>Mentir</Text><TextInput placeholder="Mentir" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={mentir} onChangeText={setMentir} />
             <Text style={styles.label}>Artes Marciales</Text><TextInput placeholder="Artes Marciales" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={artesMarciales} onChangeText={setArtesMarciales} />
