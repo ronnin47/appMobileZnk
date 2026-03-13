@@ -4,6 +4,7 @@ import { View, StyleSheet, ActivityIndicator, Alert,Text } from 'react-native';
 import PagerView from 'react-native-pager-view';
 import { FichaPersonaje } from './fichaPersonaje';
 import { Tiradas } from './tiradas';
+import { Partida } from './partida';
 import { NotasUsuario } from './notasUsuario';
 import { useNavigation } from '@react-navigation/native';
 import { showMessage } from 'react-native-flash-message';
@@ -679,6 +680,13 @@ const [tiradasGuardadasPj, setTiradasGuardadasPj] = useState([]);
 
       <View key="3" style={styles.page}>
         <NotasUsuario />
+      </View>
+
+      <View key="4" style={styles.page}>
+       <Partida 
+       key={pjSeleccionado}
+          pj={pj}
+       />
       </View>
     </PagerView>
   );

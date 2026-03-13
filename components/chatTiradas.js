@@ -66,6 +66,26 @@ const reproducirSonidoFracaso = async () => {
   }
 };
 
+
+const reproducirSonidoKen = async () => {
+  try {
+    const { sound } = await Audio.Sound.createAsync(
+      require("../assets/enviarKen.mp3")
+    );
+
+    await sound.playAsync();
+
+    sound.setOnPlaybackStatusUpdate((status) => {
+      if (status.didJustFinish) {
+        sound.unloadAsync();
+      }
+    });
+
+  } catch (error) {
+    console.log("Error reproduciendo sonido de Ken:", error);
+  }
+};
+
 const timestampEntradaChat = useRef(Date.now());
   const optimizarAvatarUrl = (url) => {
     if (!url) return null;
@@ -93,6 +113,8 @@ const timestampEntradaChat = useRef(Date.now());
     setTimeout(() => {
     Vibration.vibrate([80, 50, 80, 50, 150, 50, 300]);
   }, 300);
+
+  
 }
     
 if (ultimo.tipo === "fracasoRotundo" && ultimo.idpersonaje == p.idpersonaje) {
@@ -101,7 +123,17 @@ if (ultimo.tipo === "fracasoRotundo" && ultimo.idpersonaje == p.idpersonaje) {
     Vibration.vibrate([80, 50, 80, 50, 150, 50, 300]);  // igual
   }, 300);
 }
+/*
+  if (ultimo.tipo === "entregaKen" && ultimo.idpersonaje == p.idpersonaje) {
+  reproducirSonidoKen();
 
+    setTimeout(() => {
+    Vibration.vibrate([80, 50, 80, 50, 150, 50, 300]);
+  }, 300);
+
+  
+}
+*/
 }, [historialChat]);
 
   useEffect(() => {
@@ -128,6 +160,8 @@ if (ultimo.tipo === "fracasoRotundo" && ultimo.idpersonaje == p.idpersonaje) {
   'ken': 'zoomIn',
   'imagen': 'zoomIn',
   'chat': 'fadeIn',
+  'entregaKen': 'zoomIn',
+
 };
 
 
