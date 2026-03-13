@@ -149,12 +149,14 @@ export const Ranking = () => {
   const [pjBuscado, setPjBuscado] = useState('');
 
   const coleccionOrdenada = [...coleccionPersonajes].sort((a, b) => (parseInt(b.ken) || 0) - (parseInt(a.ken) || 0));
-
+/*
   const rankingMap = {};
   coleccionOrdenada.forEach((pj, index) => {
     rankingMap[pj.idpersonaje] = index + 1;
   });
+*/
 
+/*
   const personajesFiltrados = coleccionOrdenada.filter(pj => {
     const ki = parseInt(pj.ki) || 0;
     const fortaleza = parseInt(pj.fortaleza) || 0;
@@ -172,6 +174,33 @@ export const Ranking = () => {
       (vidaActual <= vidaTotal || ken >= 400)
     );
   });
+*/
+const personajesFiltrados = coleccionOrdenada.filter(pj => {
+  const ki = parseInt(pj.ki) || 0;
+  const fortaleza = parseInt(pj.fortaleza) || 0;
+  const positiva = parseInt(pj.positiva) || 0;
+  const negativa = parseInt(pj.negativa) || 0;
+  const vidaActual = parseInt(pj.vidaActual) || 0;
+  const ken = parseInt(pj.ken) || 0;
+
+  const vidaTotal = (ki + fortaleza) * (positiva + negativa);
+
+  return (
+    pj.pjPnj === true &&
+    ken >= 40 &&
+    (vidaActual <= vidaTotal || ken >= 400)
+  );
+});
+
+const personajesMostrados = personajesFiltrados.filter(pj =>
+  pj.nombre.toLowerCase().includes(pjBuscado.toLowerCase())
+);
+
+  const rankingMap = {};
+personajesFiltrados.forEach((pj, index) => {
+  rankingMap[pj.idpersonaje] = index + 1;
+});
+
 
   return (
     <View style={styles.container}>
@@ -184,7 +213,7 @@ export const Ranking = () => {
       />
 
       <FlatList
-        data={personajesFiltrados}
+        data={personajesMostrados}
         keyExtractor={(item) => item.idpersonaje.toString()}
         renderItem={({ item }) => <Cartita item={item} rank={rankingMap[item.idpersonaje]} />}
         contentContainerStyle={styles.cardsContainer}
