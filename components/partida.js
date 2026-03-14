@@ -1,10 +1,11 @@
 import React, { useContext, useState, useEffect,useRef } from 'react';
-import { View, Text, StyleSheet, Image, ImageBackground, TouchableOpacity, FlatList, TextInput } from 'react-native';
+import { View, Text, StyleSheet, Image, ImageBackground, TouchableOpacity,Modal, FlatList, TextInput } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from './AuthContext';
 import socket from './socket';
 import { Vibration } from 'react-native';
-
+import { API_BASE_URL } from './config';
+import axios from 'axios';
 import { Audio } from 'expo-av' 
 
 export const Partida = ({ pj }) => {
@@ -15,6 +16,12 @@ export const Partida = ({ pj }) => {
   const [kenPuntos, setKenPuntos] = useState({}); // Guardar puntos por personaje
 
   const imagenBase = require('../assets/imagenBase.jpeg');
+
+   const [historialKen, setHistorialKen] = useState([]);
+
+
+ const [modalVisible, setModalVisible] = useState(false);
+
 
   const fondoUrl =
     "https://res.cloudinary.com/dzul1hatw/image/upload/v1773419661/700ef2bb7f79b95bcd3a084cb2095559_cn3ywp.avif"
@@ -64,6 +71,33 @@ const sonidoSeleccionRef = useRef(null);
       console.log("Error reproduciendo sonido:", error);
     }
   };
+
+
+useEffect(() => {
+  if (!modalVisible) return;
+
+  const pedirHistorialKen = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/pedirHistorialKen`, {
+        params: { idpersonaje: pj.idpersonaje }
+      });
+
+      const { historialKen } = response.data;
+
+      console.log("HISTORIAL: ",historialKen)
+
+      if (Array.isArray(historialKen)) {
+        setHistorialKen(historialKen);
+      }
+    } catch (error) {
+      console.error('Error al consumir historial de ken del personaje:', error.message);
+    }
+  };
+
+  pedirHistorialKen();
+}, [modalVisible]);
+
+
 
 
   // Guardar personajes seleccionados en AsyncStorage
@@ -153,6 +187,62 @@ const sonidoSeleccionRef = useRef(null);
           value={busqueda}
           onChangeText={setBusqueda}
         />
+        {/* BOTÓN PARA ABRIR MODAL HISTORIAL */}
+<TouchableOpacity
+  style={styles.botonHistorial}
+  onPress={() => setModalVisible(true)}
+>
+  <Text style={{ color: "black", fontWeight: "bold" }}>Historial de Ken</Text>
+</TouchableOpacity>
+
+
+
+<Modal
+  animationType="slide"
+  transparent={true}
+  visible={modalVisible}
+  onRequestClose={() => setModalVisible(false)}
+>
+  <View style={styles.modalFondo}>
+    <View style={styles.modalContainer}>
+      {/* Botón X */}
+      <TouchableOpacity
+        style={styles.modalCerrarX}
+        onPress={() => setModalVisible(false)}
+      >
+        <Text style={{ color: "white", fontSize: 22, fontWeight: "bold" }}>×</Text>
+      </TouchableOpacity>
+
+      {/* Título */}
+      <Text style={styles.modalTitulo}>Historial de Ken</Text>
+
+      {/* FlatList scrollable */}
+      <FlatList
+        data={historialKen}
+        keyExtractor={(item, index) => item.id?.toString() || index.toString()}
+        renderItem={({ item }) => {
+             const fecha = new Date(Number(item.timestamp));
+          const fechaFormateada = fecha.toLocaleDateString();
+          const horaFormateada = fecha.toLocaleTimeString();
+
+          return (
+            <View style={styles.itemHistorial}>
+              <Text style={styles.mensajeTexto}>{item.mensaje || "Registro de Ken"}</Text>
+              <Text style={styles.fechaTexto}>{`${fechaFormateada} ${horaFormateada}`}</Text>
+            </View>
+          );
+        }}
+        ListEmptyComponent={
+          <Text style={{ color: "white", textAlign: "center", marginTop: 20 }}>
+            No hay registros
+          </Text>
+        }
+        contentContainerStyle={{ paddingBottom: 20 }}
+        style={{ width: "100%", maxHeight: "75%" }} // <- clave: altura máxima
+      />
+    </View>
+  </View>
+</Modal>
 
         {/* RESULTADOS BUSQUEDA */}
         {busqueda.length > 0 && (
@@ -255,4 +345,65 @@ const styles = StyleSheet.create({
   contadorPuntos: { color: "yellow", fontSize: 20, fontWeight: "bold", marginHorizontal: 10 },
   botonEnviarKen: {backgroundColor: "#007AFF", paddingVertical: 8, paddingHorizontal: 12, borderRadius: 6, marginLeft: 'auto' },
   botonEliminarX: { position: 'absolute', top: 6, right: 6, zIndex: 10, backgroundColor: 'red', width: 28, height: 28, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
+  
+  botonHistorial: { backgroundColor: "#FFD700", padding: 10, borderRadius: 6, marginBottom: 10, alignSelf: 'flex-start' },
+  modalFondo: { flex: 1, backgroundColor: "rgba(0,0,0,0.7)", justifyContent: "center", padding: 20 },
+  modalContainer: { backgroundColor: "#1a1a1a", borderRadius: 10, padding: 5, maxHeight: "100%" },
+  modalTitulo: { color: "gold", fontSize: 18, fontWeight: "bold", marginBottom: 10 },
+  botonCerrarModal: { backgroundColor: "#007AFF", marginTop: 10, padding: 10, borderRadius: 6 },
+
+modalFondo: {
+  flex: 1,
+  backgroundColor: "rgba(0,0,0,0.7)",
+  justifyContent: "center",
+  alignItems: "center",
+  padding: 15,
+},
+modalContainer: {
+  backgroundColor: "#1a1a1a",
+  borderRadius: 15,
+  padding: 20,
+  width: "90%",
+  maxHeight: "85%",
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 5 },
+  shadowOpacity: 0.5,
+  shadowRadius: 10,
+  elevation: 10,
+},
+modalTitulo: {
+  color: "gold",
+  fontSize: 22,
+  fontWeight: "bold",
+  marginBottom: 15,
+  textAlign: "center",
+},
+modalCerrarX: {
+  position: "absolute",
+  top: 10,
+  right: 10,
+  zIndex: 20,
+  backgroundColor: "red",
+  width: 30,
+  height: 30,
+  borderRadius: 15,
+  justifyContent: "center",
+  alignItems: "center",
+},
+itemHistorial: {
+  paddingVertical: 10,
+  borderBottomWidth: 0.5,
+  borderBottomColor: "#444",
+},
+mensajeTexto: {
+  color: "white",
+  fontSize: 16,
+},
+fechaTexto: {
+  color: "#ccc",
+  fontSize: 12,
+  marginTop: 2,
+  textAlign: "right",
+},
+
 });

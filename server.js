@@ -1906,6 +1906,25 @@ app.get('/buscarHistorialPj', async (req, res) => {
 });
 
 
+app.get('/pedirHistorialKen', async (req, res) => {
+  const { idpersonaje } = req.query; // viene del GET ?idpersonaje=123
+
+  try {
+    const result = await pool.query(
+      `SELECT * FROM mensajes
+       WHERE "idpersonajeReceptor" = $1  -- solo los mensajes donde este pj recibió Ken
+         AND tipo = 'entregaKen'
+       ORDER BY id DESC`, // ASC para orden cronológico
+      [idpersonaje]
+    );
+
+    res.status(200).json({ historialKen: result.rows });
+  } catch (error) {
+    console.error('Error al consumir historial de ken del personaje:', error);
+    res.status(500).json({ error: 'Error interno al obtener historial de ken del personaje' });
+  }
+});
+
 
 /*
 //******************PRIMER PASO 1*******************************

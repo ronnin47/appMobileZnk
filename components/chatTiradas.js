@@ -9,6 +9,7 @@ import { Vibration } from 'react-native';
 
 const fondoUrl="https://res.cloudinary.com/dzul1hatw/image/upload/v1763045771/955fcaca7b9e79d2146af67dd0498136_grsvyx.jpg";
 const fondoUrlFracaso="https://res.cloudinary.com/dzul1hatw/image/upload/v1773253072/55db976499bafdacb83f813c8c435f21_fi9vzq.jpg";
+const fondoUrlEntregaKen="https://res.cloudinary.com/dzul1hatw/image/upload/v1773441010/dcd4e87c42bab4c7c2bfdde73f75668e_fh5tvx.jpg";
  
  
 
@@ -124,8 +125,8 @@ if (ultimo.tipo === "fracasoRotundo" && ultimo.idpersonaje == p.idpersonaje) {
   }, 300);
 }
 
-  if (ultimo.tipo === "entregaKen") {
-  //reproducirSonidoKen();
+  if (ultimo.tipo === "entregaKen"&& ultimo.idusuarioReceptor == p.usuarioId) {
+  reproducirSonidoKen();
   console.log("Ultimo mensaje de entrega ken: ",ultimo)
 
     setTimeout(() => {
@@ -175,6 +176,7 @@ if (ultimo.tipo === "fracasoRotundo" && ultimo.idpersonaje == p.idpersonaje) {
         historialChat.map((msg, idx) => {
 
           const esPropio = msg.idpersonaje == p.idpersonaje;
+           const esParaMi = msg.idpersonajeReceptor == p.idpersonaje;
 
           const esIncremento = msg.tipo === "incrementos";
           const esIncrementoPropio = esIncremento && esPropio;
@@ -182,7 +184,10 @@ if (ultimo.tipo === "fracasoRotundo" && ultimo.idpersonaje == p.idpersonaje) {
           const esFracaso = msg.tipo === "fracasoRotundo";
           const esFracasoPropio = esFracaso && esPropio;
 
-          const esEspecialPropio = esIncrementoPropio || esFracasoPropio;
+           const esEntregaKen = msg.tipo === "entregaKen";
+          const esEntregaKenPropio = esEntregaKen && esParaMi;
+
+          const esEspecialPropio = esIncrementoPropio || esFracasoPropio || esEntregaKenPropio;
 
           const esImagen =
             typeof msg.mensaje === 'string' &&
@@ -245,6 +250,25 @@ if (ultimo.tipo === "fracasoRotundo" && ultimo.idpersonaje == p.idpersonaje) {
               {esFracasoPropio && (
                 <ImageBackground
                   source={{ uri: fondoUrlFracaso }}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0
+                  }}
+                  imageStyle={{
+                    opacity: 0.7,
+                    resizeMode: "cover",
+                    borderRadius: 14
+                  }}
+                />
+              )}
+
+
+              {esEntregaKenPropio && (
+                <ImageBackground
+                  source={{ uri: fondoUrlEntregaKen }}
                   style={{
                     position: "absolute",
                     top: 0,
