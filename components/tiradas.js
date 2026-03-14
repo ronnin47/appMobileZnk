@@ -188,8 +188,6 @@ useEffect(() => {
   const nombreTronco= nombrePrincipal
   const nombreApt= nombreAptitud
 
-  //console.log("llego el nombre tronco: ",nombreTronco)
-  // console.log("llego el nombre aptitud: ",nombreApt)
 
   let base = 1;
   if (principal == 0) {
@@ -247,17 +245,13 @@ setValModificador(modificadorValue);
 
 
 //*************************************************************** */
-  // aca tendremos que segun la cantidad de dados o el valor de la caracteristica principal
-  // dar una cantidad de exitos 10 para notificar de la situacion de incrmeentos y cuanto incrementa
-  
-
-   //0) determinar cuantos 10 se necesitan segun la caracteristica
+ 
+  //0) determinar cuantos 10 se necesitan segun la caracteristica
   let exitosRequeridosPrincipal = 1;
   
  
 
   //Tronco
-
     if (principalValue >= 20 && principalValue <= 59) {
     exitosRequeridosPrincipal = 2;
   } else if (principalValue >= 60 && principalValue <= 99) {
@@ -296,12 +290,12 @@ if (secundariaValue >= 40 && secundariaValue <= 99) {
 
   const puntosIncrementadosPrincipal= Math.floor(diecesTiradaPrincipal/exitosRequeridosPrincipal)
 
-  const puntosIncrementadosAptitud= Math.floor( diecesTiradaPrincipal/exitosRequeridosAptitud)
-
-
-
-
-
+  //no s eincrmeentan puntos de aptitud si esta en cero
+  //const puntosIncrementadosAptitud= Math.floor( diecesTiradaPrincipal/exitosRequeridosAptitud)
+  const puntosIncrementadosAptitud =
+  secundariaValue > 0
+    ? Math.floor(diecesTiradaPrincipal / exitosRequeridosAptitud)
+    : 0;
 
   // FRACASO ROUNDO
 /*
@@ -313,11 +307,6 @@ if (secundariaValue >= 40 && secundariaValue <= 99) {
   const dadosParaIncrementos = [...tirada, ...d10];
   // Verificar si todos son 1
 const todosUno = dadosParaIncrementos.length > 0 && dadosParaIncrementos.every(dado => dado === 1);
-
-
-
-
-
 
 
 //********************************************* */

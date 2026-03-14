@@ -113,20 +113,21 @@ const sonidoSeleccionRef = useRef(null);
   const enviarKen = (personaje) => {
     const valor = kenPuntos[personaje.idpersonaje] || 0;
     if (valor <= 0) return;
-
+    console.log(personaje.nombre)
     const mensaje = {
       usuarioId: pj.usuarioId,
       idpersonaje: pj.idpersonaje,
       nombre: pj.nombre,
-      idpersonajeReceptor: personaje.idpersonaje,
-      idUsuarioReceptor: personaje.usuarioId,
-      nombreReceptor: personaje.nombre,
       mensaje: `⭐ ${personaje.nombre} ⭐ recibio +${valor} puntos de Ken  de ${pj.nombre}`,
       ken: valor,
       estatus,
       imagenPjUrl: pj.imagenurl || "",
       nick: nick || "",
       tipo: "entregaKen",
+      idpersonajeReceptor: personaje.idpersonaje,
+      idusuarioReceptor: personaje.usuarioId,
+      nombreReceptor: personaje.nombre,
+
     };
 
     socket.emit('chat-chat', mensaje);

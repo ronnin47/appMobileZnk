@@ -123,9 +123,10 @@ if (ultimo.tipo === "fracasoRotundo" && ultimo.idpersonaje == p.idpersonaje) {
     Vibration.vibrate([80, 50, 80, 50, 150, 50, 300]);  // igual
   }, 300);
 }
-/*
-  if (ultimo.tipo === "entregaKen" && ultimo.idpersonaje == p.idpersonaje) {
-  reproducirSonidoKen();
+
+  if (ultimo.tipo === "entregaKen") {
+  //reproducirSonidoKen();
+  console.log("Ultimo mensaje de entrega ken: ",ultimo)
 
     setTimeout(() => {
     Vibration.vibrate([80, 50, 80, 50, 150, 50, 300]);
@@ -133,7 +134,7 @@ if (ultimo.tipo === "fracasoRotundo" && ultimo.idpersonaje == p.idpersonaje) {
 
   
 }
-*/
+
 }, [historialChat]);
 
   useEffect(() => {
