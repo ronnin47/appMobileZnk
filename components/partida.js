@@ -84,7 +84,7 @@ useEffect(() => {
 
       const { historialKen } = response.data;
 
-      console.log("HISTORIAL: ",historialKen)
+      //console.log("HISTORIAL: ",historialKen)
 
       if (Array.isArray(historialKen)) {
         setHistorialKen(historialKen);
@@ -147,7 +147,7 @@ useEffect(() => {
   const enviarKen = (personaje) => {
     const valor = kenPuntos[personaje.idpersonaje] || 0;
     if (valor <= 0) return;
-    console.log(personaje.nombre)
+    
     const mensaje = {
       usuarioId: pj.usuarioId,
       idpersonaje: pj.idpersonaje,

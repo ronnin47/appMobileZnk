@@ -127,7 +127,7 @@ if (ultimo.tipo === "fracasoRotundo" && ultimo.idpersonaje == p.idpersonaje) {
 
   if (ultimo.tipo === "entregaKen"&& ultimo.idusuarioReceptor == p.usuarioId) {
   reproducirSonidoKen();
-  console.log("Ultimo mensaje de entrega ken: ",ultimo)
+  //console.log("Ultimo mensaje de entrega ken: ",ultimo)
 
     setTimeout(() => {
     Vibration.vibrate([80, 50, 80, 50, 150, 50, 300]);
