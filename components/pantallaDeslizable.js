@@ -556,6 +556,31 @@ const [tiradasGuardadasPj, setTiradasGuardadasPj] = useState([]);
     guardarCambios();
   }, [ken, ki, fortaleza, vidaActual, kenActual, kiActual, positiva, negativa, cicatriz, consumision]);
 
+
+
+  const limpiarStoragePersonaje = async (idpersonaje) => {
+  try {
+    const rankingData = await AsyncStorage.getItem("rankingPersonajes");
+    const ranking = rankingData ? JSON.parse(rankingData) : {};
+
+    delete ranking[idpersonaje];
+
+    await AsyncStorage.setItem("rankingPersonajes", JSON.stringify(ranking));
+
+    const ultimoUsado = await AsyncStorage.getItem("ultimoUsado");
+    if (ultimoUsado === idpersonaje.toString()) {
+      await AsyncStorage.removeItem("ultimoUsado");
+    }
+
+    const ultimoCreado = await AsyncStorage.getItem("ultimoCreado");
+    if (ultimoCreado === idpersonaje.toString()) {
+      await AsyncStorage.removeItem("ultimoCreado");
+    }
+
+  } catch (error) {
+    console.log("Error limpiando storage personaje:", error);
+  }
+};
   // 🗑️ Lógica de eliminación segura
   const eliminarPersonaje = (idpersonaje) => {
     Alert.alert(
@@ -570,8 +595,11 @@ const [tiradasGuardadasPj, setTiradasGuardadasPj] = useState([]);
             try {
               const response = await axios.delete(`${API_BASE_URL}/deletePersonaje/${idpersonaje}`);
               if (response.status === 200) {
+                await limpiarStoragePersonaje(idpersonaje);
                 const nuevosPersonajes = personajes.filter(p => p.idpersonaje !== idpersonaje);
                 savePersonajes(nuevosPersonajes);
+
+                
 
                 if (pjSeleccionado === idpersonaje) {
                   setPjSeleccionado(null);

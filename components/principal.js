@@ -4,10 +4,12 @@ import { StyleSheet, Text, View, Dimensions, ScrollView,Image,ImageBackground  }
 import React, { useContext } from 'react';
 import { useState } from 'react';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { Carrusel } from './carrusel';
 import { AuthContext } from './AuthContext';
 import { TouchableOpacity } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native'; // para navegar
 //import { Nuevo } from './nuevo';
@@ -130,7 +132,7 @@ const crearFichaPersonaje = async () => {
 // ... después de recibir idpersonaje
 savePersonajes([...personajes, { ...pjNew, idpersonaje }]);
  saveColeccionPersonajes([...coleccionPersonajes, pjNew]);   
-
+await AsyncStorage.setItem("ultimoCreado", idpersonaje.toString());
   // 🔄 En lugar de agregar manualmente, recarga todos
     await consumir();
  //fetchSagas()

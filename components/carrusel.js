@@ -11,24 +11,130 @@ import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from './AuthContext';
 import * as Animatable from 'react-native-animatable';
 import { Audio } from 'expo-av';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 export const Carrusel = ({ personajes }) => {
   const { setPjSeleccionado } = useContext(AuthContext);
   const navigation = useNavigation();
   const imagenBase = require('../assets/imagenBase.jpeg');
   const [animados, setAnimados] = useState({});
-
+  const [personajesOrdenados, setPersonajesOrdenados] = useState([]);
+  const [ordenInicialAplicado, setOrdenInicialAplicado] = useState(false);
+const [sound, setSound] = useState(null);
+  /*
   const handlePress = (pj) => {
     setPjSeleccionado(pj.idpersonaje);
     navigation.navigate('PantallaDeslizable');
   };
+*/
+
+useEffect(() => {
+  let sonido;
+
+  const cargarSonido = async () => {
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        require('../assets/seleccion.mp3'),
+        { volume: 0.1 }
+      );
+
+      sonido = sound;
+      setSound(sound);
+    } catch (error) {
+      console.log("Error cargando sonido:", error);
+    }
+  };
+
+  cargarSonido();
+
+  return () => {
+    if (sonido) {
+      sonido.unloadAsync();
+    }
+  };
+}, []);
+
+
+const handlePress = async (pj) => {
+  try {
+    const data = await AsyncStorage.getItem("rankingPersonajes");
+    const ranking = data ? JSON.parse(data) : {};
+
+    ranking[pj.idpersonaje] = (ranking[pj.idpersonaje] || 0) + 1;
+
+    await AsyncStorage.setItem("rankingPersonajes", JSON.stringify(ranking));
+    await AsyncStorage.setItem("ultimoUsado", pj.idpersonaje.toString());
+
+  } catch (err) {
+    console.log("Error guardando ranking:", err);
+  }
+
+  setPjSeleccionado(pj.idpersonaje);
+  navigation.navigate('PantallaDeslizable');
+};
+
+const reproducirSonidoSeleccion = async () => {
+  if (sound) {
+    try {
+      await sound.replayAsync();
+    } catch (error) {
+      console.log("Error reproduciendo sonido:", error);
+    }
+  }
+};
+
+useEffect(() => {
+  if (ordenInicialAplicado) return;
+
+  const ordenar = async () => {
+    try {
+      const rankingData = await AsyncStorage.getItem("rankingPersonajes");
+      const ranking = rankingData ? JSON.parse(rankingData) : {};
+
+      const ultimoUsado = await AsyncStorage.getItem("ultimoUsado");
+      const ultimoCreado = await AsyncStorage.getItem("ultimoCreado");
+
+      const ordenados = [...(personajes || [])].sort((a, b) => {
+
+        if (a.idpersonaje.toString() === ultimoCreado) return -1;
+        if (b.idpersonaje.toString() === ultimoCreado) return 1;
+
+        if (a.idpersonaje.toString() === ultimoUsado) return -1;
+        if (b.idpersonaje.toString() === ultimoUsado) return 1;
+
+        const aCount = ranking[a.idpersonaje] || 0;
+        const bCount = ranking[b.idpersonaje] || 0;
+
+        return bCount - aCount;
+      });
+
+      setPersonajesOrdenados(ordenados);
+      setOrdenInicialAplicado(true);
+
+    } catch (err) {
+      console.log("Error ordenando carrusel", err);
+      setPersonajesOrdenados(personajes);
+      setOrdenInicialAplicado(true);
+    }
+  };
+
+  ordenar();
+
+}, [personajes]);
+
+
+
+
+
 
   const renderItem = ({ item }) => {
     const id = item.idpersonaje;
     const animar = animados[id];
 
     const onPress = () => {
-      reproducirSonidoSeleccion();  
+      reproducirSonidoSeleccion();
+        
       setAnimados(prev => ({ ...prev, [id]: true }));
       setTimeout(() => {
         setAnimados(prev => ({ ...prev, [id]: false }));
@@ -37,16 +143,7 @@ export const Carrusel = ({ personajes }) => {
     };
 
 
-    const reproducirSonidoSeleccion = async () => {
-  try {
-    const { sound } = await Audio.Sound.createAsync(
-      require('../assets/seleccion.mp3'),{ volume: 0.1 }
-    );
-    await sound.playAsync();
-  } catch (error) {
-    console.log("Error reproduciendo sonido:", error);
-  }
-};
+  
 
     return (
       <Animatable.View
@@ -73,12 +170,15 @@ export const Carrusel = ({ personajes }) => {
     );
   };
 
+
+
+
   return (
     <View style={styles.carruselContainer}>
       <FlatList
         horizontal
-        data={[...personajes].reverse()}
-        keyExtractor={(item) => item.idpersonaje?.toString() || Math.random().toString()}
+ data={personajesOrdenados.length ? personajesOrdenados : (personajes || [])}
+        keyExtractor={(item) => item.idpersonaje.toString()}
         renderItem={renderItem}
         showsHorizontalScrollIndicator={false}
         snapToInterval={150}
@@ -151,7 +251,7 @@ const styles = StyleSheet.create({
   width: '100%',
   paddingVertical: 6,
   // Gradiente tipo DaisyUI
-  backgroundColor: 'linear-gradient(90deg, rgba(43, 177, 154, 0.39) 0%, rgba(255, 220, 100,0.85) 100%)',
+  backgroundColor:'rgba(43, 177, 155, 0.34)',
   alignItems: 'center',
   borderBottomLeftRadius: 14,
   borderBottomRightRadius: 14,

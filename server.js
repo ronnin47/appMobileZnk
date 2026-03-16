@@ -63,6 +63,7 @@ function normalizarMensaje(mensaje) {
     idpersonajeReceptor:mensaje.idpersonajeReceptor?.toString() ?? '',
     idusuarioReceptor:mensaje.idusuarioReceptor?.toString() ?? '',
     nombreReceptor:mensaje.nombreReceptor?.toString() ?? '',
+    puntajeKen:mensaje.puntajeKen?.toString() ?? '',
   };
 }
 
@@ -114,8 +115,8 @@ io.on('connection', (socket) => {
           "usuarioId", idpersonaje, nombre, mensaje, estatus,
           imagenurl, "imagenPjUrl", nick,
           "kenActual", ken, "kiActual", ki,
-          "vidaActual", "vidaTotal", timestamp, tipo, "idpersonajeReceptor", "idusuarioReceptor", "nombreReceptor"
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16, $17,$18,$19)
+          "vidaActual", "vidaTotal", timestamp, tipo, "idpersonajeReceptor", "idusuarioReceptor", "nombreReceptor",puntajeKen
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16, $17,$18,$19, $20)
         RETURNING id
       `;
 
@@ -140,6 +141,7 @@ io.on('connection', (socket) => {
         msgNormalizado.idpersonajeReceptor,
         msgNormalizado.idusuarioReceptor,
         msgNormalizado.nombreReceptor,
+        msgNormalizado.puntajeKen,
 
       ]);
 

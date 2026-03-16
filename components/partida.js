@@ -153,7 +153,7 @@ useEffect(() => {
       idpersonaje: pj.idpersonaje,
       nombre: pj.nombre,
       mensaje: `⭐ ${personaje.nombre} ⭐ recibio +${valor} puntos de Ken  de ${pj.nombre}`,
-      ken: valor,
+      puntajeken: valor,
       estatus,
       imagenPjUrl: pj.imagenurl || "",
       nick: nick || "",
@@ -169,12 +169,49 @@ useEffect(() => {
     setKenPuntos({ ...kenPuntos, [personaje.idpersonaje]: 0 });
   };
 
+
+  const agruparSesionesKen = (historial) => {
+  if (!historial || historial.length === 0) return [];
+
+  const ordenados = [...historial].sort(
+    (a, b) => Number(a.timestamp) - Number(b.timestamp)
+  );
+
+  const sesiones = [];
+  let sesionActual = [];
+  let ultimoTiempo = null;
+
+  ordenados.forEach((item) => {
+    const tiempo = Number(item.timestamp);
+
+    if (!ultimoTiempo) {
+      sesionActual.push(item);
+    } else {
+      const diferencia = tiempo - ultimoTiempo;
+
+      if (diferencia <= 3600000) {
+        sesionActual.push(item);
+      } else {
+        sesiones.push(sesionActual);
+        sesionActual = [item];
+      }
+    }
+
+    ultimoTiempo = tiempo;
+  });
+
+  if (sesionActual.length) sesiones.push(sesionActual);
+
+  return sesiones;
+};
+
   // FILTRAR PERSONAJES
   const personajesFiltrados = coleccionPersonajes.filter(p =>
     p.nombre?.toLowerCase().includes(busqueda.toLowerCase()) &&
     p.idpersonaje !== pj.idpersonaje
   );
 
+  const sesionesKen = agruparSesionesKen(historialKen);
   return (
     <ImageBackground source={{ uri: fondoUrl }} style={{ flex: 1, backgroundColor:"black" }} resizeMode='cover'>
       <View style={styles.overlay}>
@@ -217,29 +254,51 @@ useEffect(() => {
       <Text style={styles.modalTitulo}>Historial de Ken</Text>
 
       {/* FlatList scrollable */}
-      <FlatList
-        data={historialKen}
-        keyExtractor={(item, index) => item.id?.toString() || index.toString()}
-        renderItem={({ item }) => {
-             const fecha = new Date(Number(item.timestamp));
-          const fechaFormateada = fecha.toLocaleDateString();
-          const horaFormateada = fecha.toLocaleTimeString();
+     <FlatList
+  data={sesionesKen}
+  keyExtractor={(item, index) => index.toString()}
+ renderItem={({ item }) => {
 
-          return (
-            <View style={styles.itemHistorial}>
-              <Text style={styles.mensajeTexto}>{item.mensaje || "Registro de Ken"}</Text>
-              <Text style={styles.fechaTexto}>{`${fechaFormateada} ${horaFormateada}`}</Text>
-            </View>
-          );
-        }}
-        ListEmptyComponent={
-          <Text style={{ color: "white", textAlign: "center", marginTop: 20 }}>
-            No hay registros
-          </Text>
-        }
-        contentContainerStyle={{ paddingBottom: 20 }}
-        style={{ width: "100%", maxHeight: "75%" }} // <- clave: altura máxima
-      />
+  const fechaSesion = new Date(Number(item[0].timestamp));
+  const fechaFormateada = fechaSesion.toLocaleDateString();
+
+  return (
+    <View style={styles.bloqueSesion}>
+
+      {/* TITULO SESION */}
+      <Text style={styles.tituloSesion}>
+        Sesión {fechaFormateada}
+      </Text>
+
+      {item.map((registro, i) => {
+
+        const fecha = new Date(Number(registro.timestamp));
+        const horaFormateada = fecha.toLocaleTimeString();
+
+        return (
+          <View key={i} style={styles.itemHistorial}>
+            <Text style={styles.mensajeTexto}>
+              {registro.mensaje || "Registro de Ken"}
+            </Text>
+
+            <Text style={styles.fechaTexto}>
+              {horaFormateada}
+            </Text>
+          </View>
+        );
+      })}
+
+    </View>
+  );
+}}
+  ListEmptyComponent={
+    <Text style={{ color: "white", textAlign: "center", marginTop: 20 }}>
+      No hay registros
+    </Text>
+  }
+  contentContainerStyle={{ paddingBottom: 20 }}
+  style={{ width: "100%", maxHeight: "90%" }}
+/>
     </View>
   </View>
 </Modal>
@@ -363,8 +422,8 @@ modalContainer: {
   backgroundColor: "#1a1a1a",
   borderRadius: 15,
   padding: 20,
-  width: "90%",
-  maxHeight: "85%",
+  width: "100%",
+  maxHeight: "100%",
   shadowColor: "#000",
   shadowOffset: { width: 0, height: 5 },
   shadowOpacity: 0.5,
@@ -405,5 +464,18 @@ fechaTexto: {
   marginTop: 2,
   textAlign: "right",
 },
-
+bloqueSesion: {
+  borderWidth: 2,
+  borderColor: "gold",
+  borderRadius: 12,
+  padding: 10,
+  marginBottom: 10,
+  backgroundColor: "rgba(255,255,255,0.03)",
+},
+tituloSesion: {
+  color: "gold",
+  fontWeight: "bold",
+  fontSize: 14,
+  marginBottom: 6,
+}
 });
