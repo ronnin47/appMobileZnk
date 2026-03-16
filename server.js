@@ -115,8 +115,8 @@ io.on('connection', (socket) => {
           "usuarioId", idpersonaje, nombre, mensaje, estatus,
           imagenurl, "imagenPjUrl", nick,
           "kenActual", ken, "kiActual", ki,
-          "vidaActual", "vidaTotal", timestamp, tipo, "idpersonajeReceptor", "idusuarioReceptor", "nombreReceptor",puntajeKen
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16, $17,$18,$19, $20)
+          "vidaActual", "vidaTotal", timestamp, tipo, "idpersonajeReceptor", "idusuarioReceptor", "nombreReceptor","puntajeKen"
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16, $17,$18,$19,$20)
         RETURNING id
       `;
 
@@ -1921,6 +1921,7 @@ app.get('/pedirHistorialKen', async (req, res) => {
     );
 
     res.status(200).json({ historialKen: result.rows });
+  
   } catch (error) {
     console.error('Error al consumir historial de ken del personaje:', error);
     res.status(500).json({ error: 'Error interno al obtener historial de ken del personaje' });

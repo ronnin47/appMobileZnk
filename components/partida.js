@@ -147,13 +147,16 @@ useEffect(() => {
   const enviarKen = (personaje) => {
     const valor = kenPuntos[personaje.idpersonaje] || 0;
     if (valor <= 0) return;
+
+
+    console.log("Valor de ken de puntaje ke", valor)
     
     const mensaje = {
       usuarioId: pj.usuarioId,
       idpersonaje: pj.idpersonaje,
       nombre: pj.nombre,
       mensaje: `⭐ ${personaje.nombre} ⭐ recibio +${valor} puntos de Ken  de ${pj.nombre}`,
-      puntajeken: valor,
+     
       estatus,
       imagenPjUrl: pj.imagenurl || "",
       nick: nick || "",
@@ -161,6 +164,7 @@ useEffect(() => {
       idpersonajeReceptor: personaje.idpersonaje,
       idusuarioReceptor: personaje.usuarioId,
       nombreReceptor: personaje.nombre,
+      puntajeKen: valor,
 
     };
 
@@ -279,6 +283,9 @@ useEffect(() => {
           <View key={i} style={styles.itemHistorial}>
             <Text style={styles.mensajeTexto}>
               {registro.mensaje || "Registro de Ken"}
+              {registro.puntajeKen || "sin valor"}
+              
+
             </Text>
 
             <Text style={styles.fechaTexto}>
