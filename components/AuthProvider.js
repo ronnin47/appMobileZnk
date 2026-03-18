@@ -115,7 +115,7 @@ const loadData = async () => {
     setEstatus(null);
   } finally {
     const transcurrido = Date.now() - inicio;
-    const restante = 6000 - transcurrido;
+    const restante = 12000 - transcurrido;
 
     if (restante > 0) {
       await esperar(restante);

@@ -8,6 +8,8 @@ import { API_BASE_URL } from './config';
 import axios from 'axios';
 import { Audio } from 'expo-av' 
 
+
+import { Estrellitas } from './estrellitas';
 export const Partida = ({ pj }) => {
   const { coleccionPersonajes, estatus, nick } = useContext(AuthContext);
 
@@ -25,7 +27,11 @@ export const Partida = ({ pj }) => {
 
   const fondoUrl =
     "https://res.cloudinary.com/dzul1hatw/image/upload/v1773419661/700ef2bb7f79b95bcd3a084cb2095559_cn3ywp.avif"
-  // Cargar personajes guardados al montar el componente
+  
+  
+  
+  const fondoUrlRegistroKen="https://res.cloudinary.com/dzul1hatw/image/upload/v1773775660/WhatsApp_Image_2026-03-17_at_16.13.54_1_w5quwi.jpg"
+    // Cargar personajes guardados al montar el componente
   useEffect(() => {
     const cargarPersonajes = async () => {
       try {
@@ -233,6 +239,7 @@ useEffect(() => {
   style={styles.botonHistorial}
   onPress={() => setModalVisible(true)}
 >
+  
   <Text style={{ color: "black", fontWeight: "bold" }}>Historial de Ken</Text>
 </TouchableOpacity>
 
@@ -244,6 +251,7 @@ useEffect(() => {
   visible={modalVisible}
   onRequestClose={() => setModalVisible(false)}
 >
+  
   <View style={styles.modalFondo}>
     <View style={styles.modalContainer}>
       {/* Botón X */}
@@ -266,13 +274,22 @@ useEffect(() => {
   const fechaSesion = new Date(Number(item[0].timestamp));
   const fechaFormateada = fechaSesion.toLocaleDateString();
 
-  return (
-    <View style={styles.bloqueSesion}>
+    const totalKenSesion = item.reduce((acc, reg) => {
+    return acc + Number(reg.puntajeKen || 0);
+  }, 0);
 
-      {/* TITULO SESION */}
-      <Text style={styles.tituloSesion}>
-        Sesión {fechaFormateada}
-      </Text>
+  return (
+     <ImageBackground source={{ uri: fondoUrlRegistroKen }} style={{ flex: 1, backgroundColor:"black" }} resizeMode='cover'>
+     <View style={styles.bloqueSesion}>
+<View style={styles.headerSesion}>
+  <Text style={styles.tituloSesion}>
+    Sesión {fechaFormateada}
+  </Text>
+
+  <Text style={styles.puntajeKenSesion}>
+    ✨ +{totalKenSesion} Ken
+  </Text>
+</View>
 
       {item.map((registro, i) => {
 
@@ -283,7 +300,7 @@ useEffect(() => {
           <View key={i} style={styles.itemHistorial}>
             <Text style={styles.mensajeTexto}>
               {registro.mensaje || "Registro de Ken"}
-              {registro.puntajeKen || "sin valor"}
+             
               
 
             </Text>
@@ -296,6 +313,8 @@ useEffect(() => {
       })}
 
     </View>
+  </ImageBackground>
+    
   );
 }}
   ListEmptyComponent={
@@ -355,14 +374,32 @@ useEffect(() => {
                 <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18 }}>×</Text>
               </TouchableOpacity>
 
-              {/* Fila de imagen + nombre */}
-              <View style={styles.row}>
-                <Image
-                  source={item.imagenurl ? { uri: item.imagenurl } : imagenBase}
-                  style={styles.avatarLista}
-                />
-                <Text style={styles.nombre}>{item.nombre}</Text>
-              </View>
+             {/* Fila de imagen + nombre */}
+<View style={styles.row}>
+
+  <View style={styles.colImagen}>
+    <Image
+      source={item.imagenurl ? { uri: item.imagenurl } : imagenBase}
+      style={styles.avatarLista}
+    />
+    <Text style={styles.dominio}>
+      {item.dominio || "Dominio desconocido"}
+    </Text>
+  </View>
+
+  <View style={styles.infoPersonaje}>
+    <Text style={styles.nombre} numberOfLines={1}>
+      {item.nombre}
+    </Text>
+
+    <Text style={styles.conviccion}>
+      {item.conviccion || "Conviccion desconocida"}
+    </Text>
+
+    <Estrellitas ken={parseInt(item.ken) || 0} />
+  </View>
+
+</View>
 
               {/* Contador con botones subir/bajar y Enviar */}
               <View style={styles.rowInput}>
@@ -400,17 +437,36 @@ const styles = StyleSheet.create({
   listaSeleccionados: { flex: 1, marginBottom: 60 },
   card: { flexDirection: "row", alignItems: "center", padding: 10, backgroundColor: "rgba(255,255,255,0.05)", borderRadius: 10, marginBottom: 8 },
   cardSeleccionado: { flexDirection: "column", padding: 12, backgroundColor: "rgba(0,0,0,0.45)", borderRadius: 10, marginBottom: 10, position: "relative" },
-  avatar: { width: 55, height: 55, borderRadius: 30, marginRight: 12, borderWidth: 2, borderColor: "#000" },
-  avatarLista: { width: 80, height: 80, borderRadius: 10, marginRight: 12, borderWidth: 2, borderColor: "#000" },
-  nombre: { flex: 1, color: "#FFD700", fontSize: 16, fontWeight: "bold" },
-  row: { flexDirection: "row", alignItems: "center", marginBottom: 8 },
-  rowInput: { flexDirection: "row", alignItems: "center", marginTop: 5 },
+  avatar: { width: 55, height: 55, borderRadius: 30, marginRight: 4, borderWidth: 2, borderColor: "#000" },
+  avatarLista: { width: 100, height: 100, borderRadius: 10,marginLeft:4, marginRight: 12, borderWidth: 2, borderColor: "#000" },
+  
+ nombre: {
+  color: "#FFD700",
+  fontSize: 16,
+  fontWeight: "bold",
+  flexShrink: 1,
+  paddingRight: 35
+},
+ dominio: {
+  color: "#f1e9eddc",
+  fontSize: 12,
+  fontWeight: "bold",
+
+},
+ conviccion: {
+  color: "#e7b018dc",
+  fontSize: 12,
+  fontWeight: "bold",
+  width: "100%",
+},
+
+  rowInput: { flexDirection: "row", alignItems: "center", marginTop: 0 },
   contadorContainer: { flexDirection: "row", alignItems: "center" },
-  botonSubirBajar: { backgroundColor: "#1a1a1a", paddingVertical: 6, paddingHorizontal: 12, borderRadius: 6 },
+  botonSubirBajar: { backgroundColor: "#060706e1", paddingVertical: 10, paddingHorizontal: 12, borderRadius: 6,borderWidth:1,borderColor:"#cdd1cd7a"},
   botonSubirBajarText: { color: "white", fontSize: 18, fontWeight: "bold" },
   contadorPuntos: { color: "yellow", fontSize: 20, fontWeight: "bold", marginHorizontal: 10 },
   botonEnviarKen: {backgroundColor: "#007AFF", paddingVertical: 8, paddingHorizontal: 12, borderRadius: 6, marginLeft: 'auto' },
-  botonEliminarX: { position: 'absolute', top: 6, right: 6, zIndex: 10, backgroundColor: 'red', width: 28, height: 28, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
+  botonEliminarX: { position: 'absolute', top: 6, right: 6, zIndex: 10, backgroundColor: "#f82222ea", width: 28, height: 28, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
   
   botonHistorial: { backgroundColor: "#FFD700", padding: 10, borderRadius: 6, marginBottom: 10, alignSelf: 'flex-start' },
   modalFondo: { flex: 1, backgroundColor: "rgba(0,0,0,0.7)", justifyContent: "center", padding: 20 },
@@ -484,5 +540,47 @@ tituloSesion: {
   fontWeight: "bold",
   fontSize: 14,
   marginBottom: 6,
-}
+},
+headerSesion: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: 8,
+},
+
+puntajeKenSesion: {
+  color: "yellow",
+  fontWeight: "bold",
+  fontSize: 16,
+  backgroundColor: "rgba(0,255,200,0.08)",
+  paddingVertical: 3,
+  paddingHorizontal: 10,
+  borderRadius: 8,
+},
+
+
+infoPersonaje: {
+  flexDirection: "column",
+  alignItems: "flex-start",
+  justifyContent: "flex-start",
+  flex: 1,
+  paddingRight: 10,
+   paddingLeft: 10
+},
+
+
+row: {
+  flexDirection: "row",
+  alignItems: "flex-start",
+  marginBottom: 10,
+  marginTop:0,
+  
+},
+
+colImagen: {
+  flexDirection: "column",
+  alignItems: "center",
+  marginRight: 2,
+  width: 90
+},
 });

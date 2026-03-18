@@ -21,7 +21,7 @@ import { AuthProvider } from './components/AuthProvider';
 import { Ranking } from './components/ranking';
 import { Sagas } from './components/sagas';
 import { PoderesUnicos } from './components/poderesUnicos';
-
+import { Audio } from 'expo-av';
 
 import { Logros } from './components/logros';
 
@@ -45,6 +45,9 @@ const Stack = createStackNavigator();
 
 const App = () => {
    const [appIsReady, setAppIsReady] = useState(false);
+
+
+
 
   useEffect(() => {
   const prepararApp = async () => {
@@ -86,7 +89,7 @@ if (!appIsReady) {
 const MainStack = () => {
   const { userToken, isLoading } = useContext(AuthContext);
    //Alert.alert("DEBUG", `MainStack: isLoading=${isLoading}, token=${userToken}`);
-
+     const sound = useRef(null);
   
 
 const translateY = useRef(new Animated.Value(0)).current;
@@ -108,6 +111,34 @@ useEffect(() => {
     ])
   ).start();
 }, []);
+
+useEffect(() => {
+  const reproducirMusica = async () => {
+    try {
+      const { sound: sonido } = await Audio.Sound.createAsync(
+        require('./assets/intro2.mp3'), // tu música
+        { isLooping: true, volume: 0.075 }
+      );
+
+      sound.current = sonido;
+      await sonido.playAsync();
+    } catch (error) {
+      console.log("Error reproduciendo audio", error);
+    }
+  };
+
+  if (isLoading) {
+    reproducirMusica();
+  }
+
+  return () => {
+    // 🔴 IMPORTANTÍSIMO: detener cuando sale
+    if (sound.current) {
+      sound.current.stopAsync();
+      sound.current.unloadAsync();
+    }
+  };
+}, [isLoading]);
 
 const textoCarga = `
 Pero las castas seguían enviando hordas, y los mismísimos hijos mayores de los señores oscuros comenzaron a llegar uno tras otro.
