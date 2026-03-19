@@ -85,8 +85,6 @@ const reproducirSonidoSeleccion = async () => {
 };
 
 useEffect(() => {
-  if (ordenInicialAplicado) return;
-
   const ordenar = async () => {
     try {
       const rankingData = await AsyncStorage.getItem("rankingPersonajes");
@@ -110,17 +108,14 @@ useEffect(() => {
       });
 
       setPersonajesOrdenados(ordenados);
-      setOrdenInicialAplicado(true);
 
     } catch (err) {
       console.log("Error ordenando carrusel", err);
       setPersonajesOrdenados(personajes);
-      setOrdenInicialAplicado(true);
     }
   };
 
   ordenar();
-
 }, [personajes]);
 
 
@@ -159,7 +154,11 @@ useEffect(() => {
           onPress={onPress}
         >
           <ImageWrapper
-            uri={item.imagen?.startsWith('data:image') ? item.imagen : item.imagenurl}
+            uri={
+  item.imagen && item.imagen.startsWith('data:image')
+    ? item.imagen
+    : item.imagenurl
+}
             fallback={imagenBase}
           />
           <View style={styles.overlay}>

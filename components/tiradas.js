@@ -769,7 +769,13 @@ const etiquetasLegibles = {
             onPress={() => setPjSeleccionado(pj.idpersonaje)}
           >
             <Image
-              source={pj.imagenurl ? { uri: pj.imagenurl } : imagenBase}
+               source={
+    pj.imagen && pj.imagen.startsWith('data:image')
+      ? { uri: pj.imagen }
+      : pj.imagenurl
+      ? { uri: pj.imagenurl }
+      : imagenBase
+  }
               style={[
                 styles.avatarImagen,
                 {

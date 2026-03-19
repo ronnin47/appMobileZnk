@@ -21,7 +21,14 @@ export const NotasUsuario = () => {
       {personaje && (
         <View style={styles.card}>
              
-          <Image source={personaje.imagenurl ? { uri: personaje.imagenurl } : imagenBase} style={styles.avatar} />
+          <Image              source={
+    personaje.imagen && personaje.imagen.startsWith('data:image')
+      ? { uri: personaje.imagen }
+      : personaje.imagenurl
+      ? { uri: personaje.imagenurl }
+      : imagenBase
+  }
+          style={styles.avatar} />
           <View style={styles.info}>
             <Text style={styles.nombre}>{personaje.nombre}</Text>
             <Text style={styles.conviccion}>{personaje.conviccion || "Sin convicción"}</Text>
