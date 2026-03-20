@@ -1,6 +1,6 @@
 import React, { useContext,useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
-import { View, Text, StyleSheet, Image,ScrollView,TextInput,TouchableOpacity,ActivityIndicator,ImageBackground  } from 'react-native';
+import { FlatList,View, Text, StyleSheet, Image,ScrollView,TextInput,TouchableOpacity,ActivityIndicator,ImageBackground  } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { KeyboardAvoidingView, Platform } from 'react-native';
 
@@ -204,7 +204,20 @@ const manejarToggleMarca = () => {
   
 const [imagenurl, setImagenurl] = useState(p.imagenurl || '');
 
+const [imagenSeleccionada, setImagenSeleccionada] = useState(p.imagenSeleccionada || 0);
+const [coleccionImagenes, setColeccionImagenes] = useState(p.coleccionImagenes || []);
 
+
+
+useEffect(() => {
+  if (p?.coleccionImagenes) {
+    setColeccionImagenes(
+      typeof p.coleccionImagenes === 'string'
+        ? JSON.parse(p.coleccionImagenes)
+        : p.coleccionImagenes
+    );
+  }
+}, [p]);
 
 
 
@@ -294,6 +307,8 @@ const guardarCambiosBBDD = async () => {
       resistencia: resistencia || 0,
       pjPnj:pjPnj,
       notasaga:[],
+      imagenurl: imagenurl,
+      imagenSeleccionada: imagenSeleccionada,
     };
     
    
@@ -438,6 +453,10 @@ const guardarCambiosBBDD = async () => {
     cicatriz: cicatriz,  
     resistencia:resistencia,
     pjPnj:pjPnj,
+    
+    imagenurl: imagenurl,
+    imagenSeleccionada:imagenSeleccionada,
+    coleccionImagenes:coleccionImagenes,
 
  
   };
@@ -528,6 +547,9 @@ useEffect(() => {
   pjPnj,
   imagenurl,
 
+  imagenSeleccionada,
+  coleccionImagenes,
+
 ]);
 
 
@@ -541,7 +563,20 @@ const getImageSource = () => {
     return imagenBase;
   }
 };
-  
+/*
+const getImageSource = () => {
+  if (imagen && imagen.startsWith('data:image')) {
+    return { uri: imagen };
+  } else if (imagen && typeof imagen === 'string') {
+    return { uri: imagen };
+  } else {
+    return imagenBase; // fallback
+  }
+};
+  */
+
+
+
 const seleccionarImagen = async () => {
   const resultado = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -561,6 +596,19 @@ const seleccionarImagen = async () => {
 };
 
 
+//aca selecionamos la imagen 
+const seleccionarImagenGaleria = (item) => {
+ console.log("esto tiene",item.url);
+ setImagen(item.url)
+console.log("iD DE IMAGEN SELECIONADA: ",item.id);
+ setImagenSeleccionada(item.id);
+
+
+ // esta si se renderiza
+ setImagenurl(item.url);
+};
+
+
 const colorPlaceHolder="#888" 
 
 
@@ -568,6 +616,67 @@ const colorPlaceHolder="#888"
 
 const bgConvicion="https://res.cloudinary.com/dzul1hatw/image/upload/v1763045699/b5054f6badb66a02e2cac6154cb9840d_s1owbe.jpg";
 
+
+
+
+
+
+
+
+
+
+const agregarImagen = async () => {
+  const resultado = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: true,
+    quality: 1,
+    base64: true, // ✅ ESTA LÍNEA es clave
+  });
+
+  if (!resultado.canceled) {
+    const { uri, base64 } = resultado.assets[0];
+    const extension = uri.split('.').pop().split('?')[0] || 'jpg';
+    const imagenColeccion = `data:image/${extension};base64,${base64}`;
+
+
+    guardarImagenEnColeccion(imagenColeccion);
+    //setImagen(imagenEnBase64); // ✅ imagen está lista para enviar
+   // console.log("Imagen base64 lista para guardar.");
+  }
+};
+
+
+const guardarImagenEnColeccion = async (imagenColeccion) => {
+  try {
+    const response = await axios.put(
+      `${API_BASE_URL}/agregarImagenColeccion/${p.idpersonaje}`,
+      { imagen: imagenColeccion }, // <-- envolver en objeto JSON
+      {
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+
+    console.log('Imagen guardada correctamente:', response.data);
+
+    // Actualizamos la colección local con lo que devuelve el backend
+    setColeccionImagenes(response.data.coleccion);
+
+      setTimeout(() => {
+      showMessage({
+        message: 'Imagen cargada en colección',
+        description: 'Tu nueva imagen se ha guardado correctamente.',
+        type: 'success',
+        icon: 'success',
+        duration: 3000
+      });
+    }, 500);
+
+    // Seleccionamos la última imagen agregada
+    // setImagenSeleccionada(response.data.coleccion[response.data.coleccion.length - 1]);
+  } catch (error) {
+    console.error('Error al guardar imagen en colección:', error);
+  }
+};
 
   return (
   
@@ -606,6 +715,8 @@ const bgConvicion="https://res.cloudinary.com/dzul1hatw/image/upload/v1763045699
       />
     </View>
 
+    
+
     {/* Nombre */}
     <View style={styles.nombreOverlay}>
       <Text style={styles.nombreSobreImagen}>{nombre}</Text>
@@ -617,6 +728,52 @@ const bgConvicion="https://res.cloudinary.com/dzul1hatw/image/upload/v1763045699
     </TouchableOpacity>
   </ImageBackground>
 </View>
+
+
+
+
+
+
+
+
+
+
+
+<FlatList
+  data={[...coleccionImagenes, { id: 'boton-agregar', tipo: 'boton' }]}
+  keyExtractor={(item) => item.id}
+  horizontal
+  showsHorizontalScrollIndicator={false}
+  renderItem={({ item }) => {
+    if (item.tipo === 'boton') {
+      return (
+        <TouchableOpacity onPress={agregarImagen}>
+          <View style={{ width: 60, height: 60, backgroundColor: '#222', justifyContent: 'center', alignItems: 'center', marginRight: 6 }}>
+            <Text style={{ color: 'white', fontSize: 20 }}>+</Text>
+          </View>
+        </TouchableOpacity>
+      );
+    }
+
+    return (
+      <TouchableOpacity
+        onPress={() => seleccionarImagenGaleria(item)}
+      >
+        <Image
+          source={{ uri: item.url }}
+          style={{
+            width: 60,
+            height: 60,
+            marginRight: 6,
+            borderWidth: imagenSeleccionada === item.id  ? 2 : 0,
+            borderColor: 'cyan',
+            borderRadius: 6,
+          }}
+        />
+      </TouchableOpacity>
+    );
+  }}
+/>
 
   {/* INPUT DE NOMBRE Y OTROS CAMPOS */}
   <View style={styles.inputsContainer}>
@@ -691,6 +848,21 @@ const bgConvicion="https://res.cloudinary.com/dzul1hatw/image/upload/v1763045699
   </View>
 
 </View>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

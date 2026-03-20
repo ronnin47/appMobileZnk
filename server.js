@@ -389,7 +389,7 @@ app.get('/consumirPersonajesUsuario', async (req, res) => {
         add1, "valAdd1", add2, "valAdd2", add3, "valAdd3", add4, "valAdd4",
         inventario, dominios, "kenActual", "kiActual", positiva, negativa, "vidaActual",
         hechizos, consumision, iniciativa, historia, "tecEspecial", conviccion, cicatriz,
-        notasaga, resistencia, "pjPnj", imagenurl, imagencloudid, "usuarioId"
+        notasaga, resistencia, "pjPnj", imagenurl, imagencloudid,"imagenSeleccionada","coleccionImagenes", "usuarioId"
       FROM personajes
       WHERE "usuarioId" = $1
       ORDER BY "idpersonaje" ASC
@@ -525,6 +525,8 @@ app.post('/insert-personaje', async (req, res) => {
   }
 });
 
+
+/*
 //OK!!
 app.put('/update-personaje/:id', async (req, res) => {
   const idpersonaje = req.params.id;
@@ -625,6 +627,102 @@ app.put('/update-personaje/:id', async (req, res) => {
     res.status(500).json({ error: 'Error al modificar el personaje.' });
   }
 });
+*/
+
+
+app.put('/update-personaje/:id', async (req, res) => {
+  const idpersonaje = req.params.id;
+
+  let {
+    nombre, dominio, raza, naturaleza, edad, ken, ki, destino, pDestino,
+    fuerza, fortaleza, destreza, agilidad, sabiduria, presencia, principio,
+    sentidos, academisismo, alerta, atletismo, conBakemono, mentir, pilotear,
+    artesMarciales, medicina, conObjMagicos, sigilo, conEsferas, conLeyendas,
+    forja, conDemonio, conEspiritual, manejoBlaster, manejoSombras, tratoBakemono,
+    conHechiceria, medVital, medEspiritual, rayo, fuego, frio, veneno, corte,
+    energia, ventajas, apCombate, valCombate, apCombate2, valCombate2,
+    add1, valAdd1, add2, valAdd2, add3, valAdd3, add4, valAdd4,
+    imagen, imagenurl, inventario, dominios, kenActual, kiActual,
+    positiva, negativa, vidaActual, hechizos, consumision, iniciativa,
+    historia, usuarioId, tecEspecial, conviccion, cicatriz, resistencia, imagenSeleccionada, pjPnj
+  } = req.body;
+
+
+
+  console.log("Imagen selecionada en el backend: ", imagenSeleccionada)
+  try {
+    let imagencloudid = null; // solo se usa si subimos a Cloudinary
+
+    // Si envían base64, lo subimos a Cloudinary y reemplazamos imagenurl
+    if (imagen && imagen.startsWith('data:image/')) {
+      const matches = imagen.match(/^data:image\/(\w+);base64,(.+)$/);
+      if (!matches) return res.status(400).json({ error: 'Imagen base64 inválida.' });
+
+      const ext = matches[1];
+      const data = matches[2];
+
+      const uploadResult = await cloudinary.uploader.upload(`data:image/${ext};base64,${data}`, {
+        folder: 'personajes',
+        public_id: `personaje_${idpersonaje}`,
+        overwrite: true,
+      });
+
+      imagenurl = uploadResult.secure_url;      // reemplaza la URL que venga del frontend
+      imagencloudid = uploadResult.public_id;
+    }
+
+    // UPDATE completo incluyendo imagenurl
+    const query = `
+      UPDATE personajes SET
+        nombre=$1, dominio=$2, raza=$3, naturaleza=$4, edad=$5,
+        ken=$6, ki=$7, destino=$8, "pDestino"=$9, fuerza=$10,
+        fortaleza=$11, destreza=$12, agilidad=$13, sabiduria=$14,
+        presencia=$15, principio=$16, sentidos=$17, academisismo=$18,
+        alerta=$19, atletismo=$20, "conBakemono"=$21, mentir=$22, pilotear=$23,
+        "artesMarciales"=$24, medicina=$25, "conObjMagicos"=$26, sigilo=$27,
+        "conEsferas"=$28, "conLeyendas"=$29, forja=$30, "conDemonio"=$31,
+        "conEspiritual"=$32, "manejoBlaster"=$33, "manejoSombras"=$34,
+        "tratoBakemono"=$35, "conHechiceria"=$36, "medVital"=$37, "medEspiritual"=$38,
+        rayo=$39, fuego=$40, frio=$41, veneno=$42, corte=$43, energia=$44, ventajas=$45,
+        "apCombate"=$46, "valCombate"=$47, "apCombate2"=$48, "valCombate2"=$49,
+        add1=$50, "valAdd1"=$51, add2=$52, "valAdd2"=$53, add3=$54, "valAdd3"=$55,
+        add4=$56, "valAdd4"=$57, inventario=$58, dominios=$59, "kenActual"=$60,
+        "kiActual"=$61, positiva=$62, negativa=$63, "vidaActual"=$64,
+        hechizos=$65, consumision=$66, iniciativa=$67, historia=$68,
+        "usuarioId"=$69, "tecEspecial"=$70, conviccion=$71, cicatriz=$72,
+        resistencia=$73, "pjPnj"=$74, imagenurl=$75, "imagenSeleccionada"=$76 
+      WHERE idpersonaje=$77
+    `;
+
+    const values = [
+      nombre, dominio, raza, naturaleza, edad, ken, ki, destino, pDestino,
+      fuerza, fortaleza, destreza, agilidad, sabiduria, presencia, principio,
+      sentidos, academisismo, alerta, atletismo, conBakemono, mentir, pilotear,
+      artesMarciales, medicina, conObjMagicos, sigilo, conEsferas, conLeyendas,
+      forja, conDemonio, conEspiritual, manejoBlaster, manejoSombras, tratoBakemono,
+      conHechiceria, medVital, medEspiritual, rayo, fuego, frio, veneno, corte,
+      energia, ventajas, apCombate, valCombate, apCombate2, valCombate2,
+      add1, valAdd1, add2, valAdd2, add3, valAdd3, add4, valAdd4,
+      inventario, dominios, kenActual, kiActual, positiva, negativa, vidaActual,
+      hechizos, consumision, iniciativa, historia, usuarioId,
+      tecEspecial, conviccion, cicatriz, resistencia, pjPnj, imagenurl,imagenSeleccionada, idpersonaje
+    ];
+
+    await pool.query(query, values);
+
+    res.status(201).json({
+      message: 'Personaje modificado exitosamente.',
+      idpersonaje,
+      imagenurl,
+      imagencloudid
+    });
+
+  } catch (err) {
+    console.error('Error al modificar el personaje:', err.message);
+    res.status(500).json({ error: 'Error al modificar el personaje.' });
+  }
+});
+
 
 //aca vamos a probar el delete
 app.delete('/deletePersonaje/:id', async (req, res) => {
@@ -690,7 +788,7 @@ app.get('/consumirPersonajesTodos', async (req, res) => {
         add1, "valAdd1", add2, "valAdd2", add3, "valAdd3", add4, "valAdd4",
         inventario, dominios, "kenActual", "kiActual", positiva, negativa, "vidaActual",
         hechizos, consumision, iniciativa, historia, "tecEspecial", conviccion, cicatriz,
-        notasaga, resistencia, "pjPnj", imagenurl,imagencloudid, "usuarioId"
+        notasaga, resistencia, "pjPnj", imagenurl,imagencloudid,"imagenSeleccionada","coleccionImagenes", "usuarioId"
       FROM personajes
     `;
 
@@ -1928,6 +2026,84 @@ app.get('/pedirHistorialKen', async (req, res) => {
   }
 });
 
+
+
+
+
+
+//VAMOS OTRA VUELTA MAS 
+app.put('/agregarImagenColeccion/:id', async (req, res) => {
+  const idpersonaje = req.params.id; // coincide con :id en la ruta
+  const { imagen } = req.body;       // solo necesitamos la imagen base64
+
+  console.log("ID del personaje para agregar imagen a coleccion: ", idpersonaje);
+  console.log("Imagen recibida para agregar a coleccion: ", imagen ? "Sí" : "No");
+
+  try {
+    if (!imagen || !imagen.startsWith('data:image/')) {
+      return res.status(400).json({ error: 'Imagen base64 inválida.' });
+    }
+
+    // Subimos la imagen a Cloudinary
+    const matches = imagen.match(/^data:image\/(\w+);base64,(.+)$/);
+    if (!matches) {
+      return res.status(400).json({ error: 'Formato de imagen inválido.' });
+    }
+
+    const ext = matches[1];
+    const data = matches[2];
+
+    const uploadResult = await cloudinary.uploader.upload(
+      `data:image/${ext};base64,${data}`,
+      {
+        folder: 'personajes',
+      }
+    );
+
+    const imagenurl = uploadResult.secure_url;
+    const cloudid = uploadResult.public_id; // usamos cloudid como id
+
+    // 🔥 Traemos la colección actual (CORREGIDO EL NOMBRE)
+    const { rows } = await pool.query(
+      'SELECT "coleccionImagenes" FROM personajes WHERE idpersonaje = $1',
+      [idpersonaje]
+    );
+
+    let coleccion = [];
+
+    if (rows[0] && rows[0].coleccionImagenes) {
+      // 🔥 Soporta string o JSON
+      coleccion = typeof rows[0].coleccionImagenes === 'string'
+        ? JSON.parse(rows[0].coleccionImagenes)
+        : rows[0].coleccionImagenes;
+    }
+
+    // Creamos el objeto de la nueva imagen
+    const nuevaImagen = {
+      id: cloudid,
+      url: imagenurl,
+    };
+
+    // Agregamos la nueva imagen
+    coleccion.push(nuevaImagen);
+
+    // Guardamos la colección actualizada
+    await pool.query(
+      'UPDATE personajes SET "coleccionImagenes" = $1 WHERE idpersonaje = $2',
+      [JSON.stringify(coleccion), idpersonaje]
+    );
+
+    // Respondemos con la colección completa
+    res.status(201).json({
+      message: 'Imagen agregada a la colección.',
+      coleccion,
+    });
+
+  } catch (err) {
+    console.error('Error al agregar imagen a la colección:', err.message);
+    res.status(500).json({ error: 'Error al agregar imagen a la colección.' });
+  }
+});
 
 /*
 //******************PRIMER PASO 1*******************************
