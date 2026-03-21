@@ -2031,7 +2031,7 @@ app.get('/pedirHistorialKen', async (req, res) => {
 
 
 
-//VAMOS OTRA VUELTA MAS 
+//ok
 app.put('/agregarImagenColeccion/:id', async (req, res) => {
   const idpersonaje = req.params.id; // coincide con :id en la ruta
   const { imagen } = req.body;       // solo necesitamos la imagen base64
@@ -2104,6 +2104,180 @@ app.put('/agregarImagenColeccion/:id', async (req, res) => {
     res.status(500).json({ error: 'Error al agregar imagen a la colección.' });
   }
 });
+
+
+//ok
+app.put('/cambiarImagenColeccion/:id', async (req, res) => {
+  const idpersonaje = req.params.id;
+  const { imagenId, nuevaImagen } = req.body; // <-- recibimos id de la imagen a reemplazar y Base64
+
+  console.log("ID personaje:", idpersonaje);
+  console.log("Imagen recibida:", nuevaImagen ? "Sí" : "No", "Imagen a reemplazar ID:", imagenId);
+
+  try {
+    if (!nuevaImagen || !nuevaImagen.startsWith('data:image/')) {
+      return res.status(400).json({ error: 'Imagen base64 inválida.' });
+    }
+
+    if (!imagenId) {
+      return res.status(400).json({ error: 'Debe enviarse el ID de la imagen a reemplazar.' });
+    }
+
+    // 🔹 Subimos la nueva imagen a Cloudinary
+    const matches = nuevaImagen.match(/^data:image\/(\w+);base64,(.+)$/);
+    if (!matches) {
+      return res.status(400).json({ error: 'Formato de imagen inválido.' });
+    }
+
+    const ext = matches[1];
+    const data = matches[2];
+
+    const uploadResult = await cloudinary.uploader.upload(
+      `data:image/${ext};base64,${data}`,
+      { folder: 'personajes' }
+    );
+
+    const imagenurl = uploadResult.secure_url;
+    const cloudid = uploadResult.public_id;
+
+    // 🔹 Traemos la colección actual
+    const { rows } = await pool.query(
+      'SELECT "coleccionImagenes" FROM personajes WHERE idpersonaje = $1',
+      [idpersonaje]
+    );
+
+    if (!rows[0]) return res.status(404).json({ error: 'Personaje no encontrado.' });
+
+    let coleccion = rows[0].coleccionImagenes || [];
+    coleccion = typeof coleccion === 'string' ? JSON.parse(coleccion) : coleccion;
+
+    // 🔹 Buscar y reemplazar la imagen vieja
+    const index = coleccion.findIndex(img => img.id === imagenId);
+    if (index === -1) return res.status(404).json({ error: 'Imagen no encontrada en la colección.' });
+
+    // 🔹 Opcional: borrar la imagen vieja de Cloudinary
+    try {
+      await cloudinary.uploader.destroy(coleccion[index].id);
+    } catch (err) {
+      console.warn('No se pudo borrar la imagen vieja de Cloudinary:', err.message);
+    }
+
+    // 🔹 Reemplazamos la imagen
+    coleccion[index] = { id: cloudid, url: imagenurl };
+
+   
+
+    await pool.query(
+  `UPDATE personajes 
+   SET "coleccionImagenes" = $1,
+       imagenurl = $2,
+       imagencloudid = $3,
+       "imagenSeleccionada" = $3
+   WHERE idpersonaje = $4`,
+  [JSON.stringify(coleccion), imagenurl, cloudid, idpersonaje]
+);
+
+   res.status(200).json({ 
+  message: 'Imagen reemplazada correctamente.', 
+  coleccion, 
+  nuevaImagenId: cloudid  // <-- agregamos el id de la nueva imagen
+});
+
+  } catch (err) {
+    console.error('Error al reemplazar imagen en la colección:', err.message);
+    res.status(500).json({ error: 'Error al reemplazar imagen en la colección.' });
+  }
+});
+
+
+//ok
+app.put('/eliminarImagenColeccion/:id', async (req, res) => {
+  const idpersonaje = req.params.id;
+  const { imagenId } = req.body;
+
+  console.log("ID personaje:", idpersonaje);
+  console.log("Imagen a eliminar:", imagenId);
+
+  try {
+    if (!imagenId) {
+      return res.status(400).json({ error: 'Debe enviarse el ID de la imagen.' });
+    }
+
+    // 🔹 Traer datos actuales
+    const { rows } = await pool.query(
+      'SELECT "coleccionImagenes", "imagenSeleccionada" FROM personajes WHERE idpersonaje = $1',
+      [idpersonaje]
+    );
+
+    if (!rows[0]) {
+      return res.status(404).json({ error: 'Personaje no encontrado.' });
+    }
+
+    let coleccion = rows[0].coleccionImagenes || [];
+    const imagenSeleccionada = rows[0].imagenSeleccionada;
+
+    coleccion = typeof coleccion === 'string' ? JSON.parse(coleccion) : coleccion;
+
+    // 🔹 Buscar imagen a eliminar
+    const index = coleccion.findIndex(img => img.id === imagenId);
+    if (index === -1) {
+      return res.status(404).json({ error: 'Imagen no encontrada en la colección.' });
+    }
+
+    // 🔹 Borrar de Cloudinary
+    try {
+      await cloudinary.uploader.destroy(coleccion[index].id);
+    } catch (err) {
+      console.warn('No se pudo borrar de Cloudinary:', err.message);
+    }
+
+    // 🔹 Eliminar de la colección
+    coleccion.splice(index, 1);
+
+    // 🔥 LÓGICA CLAVE: nueva imagen seleccionada
+    let nuevaSeleccion = null;
+
+    if (coleccion.length > 0) {
+      // si borraste la seleccionada → elegir otra
+      if (imagenSeleccionada === imagenId) {
+        nuevaSeleccion = coleccion[0]; // simple y efectivo
+      } else {
+        // mantener la misma seleccionada
+        nuevaSeleccion = coleccion.find(img => img.id === imagenSeleccionada) || coleccion[0];
+      }
+    }
+
+    // 🔹 Guardar en DB
+    await pool.query(
+      `UPDATE personajes 
+       SET "coleccionImagenes" = $1,
+           imagenurl = $2,
+           imagencloudid = $3,
+           "imagenSeleccionada" = $3
+       WHERE idpersonaje = $4`,
+      [
+        JSON.stringify(coleccion),
+        nuevaSeleccion ? nuevaSeleccion.url : null,
+        nuevaSeleccion ? nuevaSeleccion.id : null,
+        idpersonaje
+      ]
+    );
+
+    // 🔹 Respuesta
+    res.status(200).json({
+      message: 'Imagen eliminada correctamente.',
+      coleccion,
+      imagenSeleccionada: nuevaSeleccion ? nuevaSeleccion.id : null,
+      imagenurl: nuevaSeleccion ? nuevaSeleccion.url : null
+    });
+
+  } catch (err) {
+    console.error('Error al eliminar imagen:', err.message);
+    res.status(500).json({ error: 'Error al eliminar imagen.' });
+  }
+});
+
+
 
 /*
 //******************PRIMER PASO 1*******************************

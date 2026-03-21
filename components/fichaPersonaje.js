@@ -1,6 +1,6 @@
 import React, { useContext,useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
-import { FlatList,View, Text, StyleSheet, Image,ScrollView,TextInput,TouchableOpacity,ActivityIndicator,ImageBackground  } from 'react-native';
+import { Alert,FlatList,View, Text, StyleSheet, Image,ScrollView,TextInput,TouchableOpacity,ActivityIndicator,ImageBackground, Modal  } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { KeyboardAvoidingView, Platform } from 'react-native';
 
@@ -20,6 +20,7 @@ import { TecnicaEspecial } from './tecEpecial';
 import { API_BASE_URL } from './config'; 
 import { LinearGradient } from 'expo-linear-gradient';
 import { Tronco } from './tronco';
+import { Audio } from 'expo-av';
 
 // Componente Accordion personalizado
 const CustomAccordion = ({ title, expanded, onPress, children, icon }) => (
@@ -104,7 +105,7 @@ const check = Array.isArray(favoritos) && pjSeleccionado
   };
 
 
-
+const [sound, setSound] = useState(null);
 
 //ACA LOS STATES
   const [nombre,setNombre]=useState(p.nombre != null ? String(p.nombre) : '');
@@ -204,10 +205,10 @@ const manejarToggleMarca = () => {
   
 const [imagenurl, setImagenurl] = useState(p.imagenurl || '');
 
-const [imagenSeleccionada, setImagenSeleccionada] = useState(p.imagenSeleccionada || 0);
+const [imagenSeleccionada, setImagenSeleccionada] = useState(p.imagenSeleccionada || null);
 const [coleccionImagenes, setColeccionImagenes] = useState(p.coleccionImagenes || []);
-
-
+const [imagenGrande, setImagenGrande] = useState(null);
+const [imagenGrandeId, setImagenGrandeId] = useState(null);
 
 useEffect(() => {
   if (p?.coleccionImagenes) {
@@ -220,6 +221,43 @@ useEffect(() => {
 }, [p]);
 
 
+
+useEffect(() => {
+  let sonido;
+
+  const cargarSonido = async () => {
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        require('../assets/seleccionB.mp3'),
+        { volume: 0.1 }
+      );
+
+      sonido = sound;
+      setSound(sound);
+    } catch (error) {
+      console.log("Error cargando sonido:", error);
+    }
+  };
+
+  cargarSonido();
+
+  return () => {
+    if (sonido) {
+      sonido.unloadAsync();
+    }
+  };
+}, []);
+
+
+const reproducirSonidoSeleccion = async () => {
+  if (sound) {
+    try {
+      await sound.replayAsync();
+    } catch (error) {
+      console.log("Error reproduciendo sonido:", error);
+    }
+  }
+};
 
 const guardarCambiosBBDD = async () => {
 
@@ -576,7 +614,7 @@ const getImageSource = () => {
   */
 
 
-
+/*
 const seleccionarImagen = async () => {
   const resultado = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -594,18 +632,134 @@ const seleccionarImagen = async () => {
    // console.log("Imagen base64 lista para guardar.");
   }
 };
+*/
+
+
+
+
+const cambiarImagen = async (imagenSeleccionada) => {
+  //console.log("ID DE IMAGEN SELECCIONADA PARA REEMPLAZAR: BOTON DE ARRIBA ", imagenSeleccionada);
+
+  // 1️⃣ Abrir selector para nueva imagen
+  const resultado = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: true,
+    quality: 1,
+    base64: true,
+  });
+
+  if (!resultado.canceled) {
+    const { uri, base64 } = resultado.assets[0];
+    const extension = uri.split('.').pop().split('?')[0] || 'jpg';
+    const nuevaImagenBase64 = `data:image/${extension};base64,${base64}`;
+
+
+
+
+   cambiarImagenEnColeccion(imagenSeleccionada, nuevaImagenBase64);
+
+ 
+
+ 
+  }
+};
+
+
+const cambiarImagenEnColeccion = async (imagenId, imagenBase64) => {
+  try {
+    const response = await axios.put(
+      `${API_BASE_URL}/cambiarImagenColeccion/${p.idpersonaje}`,
+      { imagenId: imagenId, nuevaImagen: imagenBase64 },
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+
+
+    setColeccionImagenes(response.data.coleccion);
+
+const img = response.data.coleccion.find(img => img.id === response.data.nuevaImagenId);
+setImagenSeleccionada(img.id);
+setImagen(img.url);
+setImagenurl(img.url);
+   
+    setTimeout(() => {
+      showMessage({
+        message: 'Imagen reemplazada correctamente',
+        description: 'Tu nueva imagen se ha guardado en la galería.',
+        type: 'success',
+        icon: 'success',
+        duration: 3000
+      });
+    }, 500);
+
+  } catch (error) {
+    console.error('Error al reemplazar imagen en colección:', error);
+  }
+};
+
 
 
 //aca selecionamos la imagen 
 const seleccionarImagenGaleria = (item) => {
- console.log("esto tiene",item.url);
+ 
  setImagen(item.url)
-console.log("iD DE IMAGEN SELECIONADA: ",item.id);
+ 
+
  setImagenSeleccionada(item.id);
-
-
  // esta si se renderiza
  setImagenurl(item.url);
+};
+
+const deleteImage = (imagenId) => {
+  Alert.alert(
+    'Eliminar imagen',
+    '¿Seguro que querés eliminar esta imagen de la galería?',
+    [
+      {
+        text: 'Cancelar',
+        style: 'cancel',
+      },
+      {
+        text: 'Eliminar',
+        style: 'destructive',
+        onPress: () => confirmDeleteImage(imagenId),
+      },
+    ],
+    { cancelable: true }
+  );
+};
+
+
+const confirmDeleteImage = async (imagenId) => {
+  try {
+    const response = await axios.put(
+      `${API_BASE_URL}/eliminarImagenColeccion/${p.idpersonaje}`,
+      { imagenId },
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+
+    setColeccionImagenes(response.data.coleccion);
+
+    // Si eliminaste la que estaba abierta en grande
+    setImagenGrande(null);
+    setImagenGrandeId(null);
+
+   if (imagenSeleccionada === imagenId) {
+  setImagenSeleccionada(response.data.imagenSeleccionada || null);
+  setImagen(response.data.imagenurl || null);
+  setImagenurl(response.data.imagenurl || null);
+}
+
+    showMessage({
+      message: 'Imagen eliminada',
+      description: 'Se eliminó correctamente de la galería.',
+      type: 'success',
+      icon: 'success',
+      duration: 3000
+    });
+
+  } catch (error) {
+    console.error('Error al eliminar imagen:', error);
+  }
 };
 
 
@@ -722,10 +876,22 @@ const guardarImagenEnColeccion = async (imagenColeccion) => {
       <Text style={styles.nombreSobreImagen}>{nombre}</Text>
     </View>
 
-    {/* Botón cambiar imagen */}
-    <TouchableOpacity onPress={seleccionarImagen} style={styles.cambiarImagenBtn}>
+    {/* Botón cambiar imagen
+    
+     <TouchableOpacity onPress={seleccionarImagen} style={styles.cambiarImagenBtn}>
       <Text style={{ color: 'cyan' }}>Cambiar imagen</Text>
     </TouchableOpacity>
+    
+    
+    */}
+    { imagenSeleccionada ?  (<TouchableOpacity
+  onPress={() => cambiarImagen(imagenSeleccionada)}
+  style={styles.cambiarImagenBtn}
+>
+  <Text style={{ color: 'cyan' }}>Cambiar imagen</Text>
+</TouchableOpacity>) : null }
+
+   
   </ImageBackground>
 </View>
 
@@ -747,33 +913,121 @@ const guardarImagenEnColeccion = async (imagenColeccion) => {
   renderItem={({ item }) => {
     if (item.tipo === 'boton') {
       return (
-        <TouchableOpacity onPress={agregarImagen}>
-          <View style={{ width: 60, height: 60, backgroundColor: '#222', justifyContent: 'center', alignItems: 'center', marginRight: 6 }}>
-            <Text style={{ color: 'white', fontSize: 20 }}>+</Text>
-          </View>
+        <TouchableOpacity onPress={agregarImagen}   >
+
+        
+         <View
+          style={{
+            width: 60,
+            height: 60,
+            marginRight: 6,
+            borderRadius: 10,
+            backgroundColor: '#1a1a1a',
+            justifyContent: 'center',
+            alignItems: 'center',
+
+            // borde sutil
+            borderWidth: 1,
+            borderColor: '#333',
+
+            // sombra (Android + iOS)
+            elevation: 3,
+            shadowColor: '#000',
+            shadowOpacity: 0.3,
+            shadowRadius: 4,
+            shadowOffset: { width: 0, height: 2 },
+          }}
+        >
+          <Text
+            style={{
+              color: '#68a3aa', // cyan más moderno
+              fontSize: 26,
+              fontWeight: 'bold',
+            }}
+          >
+            +
+          </Text>
+        </View>
         </TouchableOpacity>
       );
     }
 
     return (
       <TouchableOpacity
-        onPress={() => seleccionarImagenGaleria(item)}
-      >
+  onPress={() => {
+    seleccionarImagenGaleria(item);
+    reproducirSonidoSeleccion();
+  }}
+  onLongPress={() => {
+    setImagenGrande(item.url);
+    setImagenGrandeId(item.id); // 👈 CLAVE
+  }}
+>
         <Image
-          source={{ uri: item.url }}
-          style={{
-            width: 60,
-            height: 60,
-            marginRight: 6,
-            borderWidth: imagenSeleccionada === item.id  ? 2 : 0,
-            borderColor: 'cyan',
-            borderRadius: 6,
-          }}
-        />
+  source={{ uri: item.url }}
+  style={{
+    width: 60,
+    height: 60,
+    marginRight: 6,
+    borderWidth: imagenSeleccionada === item.id ? 2 : 0,
+    borderColor: 'cyan',
+    borderRadius: 6,
+    opacity: imagenSeleccionada === item.id ? 1 : 0.4, // 👈 CLAVE
+  }}
+/>
       </TouchableOpacity>
     );
   }}
 />
+
+{imagenGrande && (
+  <TouchableOpacity
+    activeOpacity={1}
+    style={{
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.84)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 999,
+    }}
+    onPress={() => setImagenGrande(null)} // cerrar al tocar fondo
+  >
+
+   
+
+    {/* IMAGEN GRANDE */}
+  <Image
+    source={{ uri: imagenGrande }}
+    style={{ width: '80%', height: '70%' }}
+    resizeMode="contain"
+  />
+
+  {/* BOTÓN ELIMINAR */}
+  <TouchableOpacity
+    onPress={(e) => {
+      e.stopPropagation(); // 👈 evita cerrar el overlay
+      deleteImage(imagenGrandeId); // mejor usar el id de la imagen abierta
+    }}
+    style={{
+      marginTop: 15, // 👈 separación de la imagen
+      backgroundColor: 'red',
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+      borderRadius: 8,
+    }}
+  >
+    <Text style={{ color: 'white', fontWeight: 'bold' }}>
+      Eliminar imagen
+    </Text>
+  </TouchableOpacity>
+
+
+  </TouchableOpacity>
+)}
 
   {/* INPUT DE NOMBRE Y OTROS CAMPOS */}
   <View style={styles.inputsContainer}>
