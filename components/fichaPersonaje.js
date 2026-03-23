@@ -259,6 +259,28 @@ const reproducirSonidoSeleccion = async () => {
   }
 };
 
+
+const reproducirSonidoExito = async () => {
+  try {
+    const { sound } = await Audio.Sound.createAsync(
+      require('../assets/no.mp3'),
+      { volume: 0.3 }
+    );
+
+    await sound.playAsync();
+
+    sound.setOnPlaybackStatusUpdate((status) => {
+      if (status.didJustFinish) {
+        sound.unloadAsync(); // 🔥 liberar memoria
+      }
+    });
+
+  } catch (error) {
+    console.log("Error sonido:", error);
+  }
+};
+
+
 const guardarCambiosBBDD = async () => {
 
 
@@ -383,6 +405,11 @@ const guardarCambiosBBDD = async () => {
         }
       }
     }
+
+
+    await reproducirSonidoExito();
+
+
     setTimeout(() => {
       showMessage({
         message: 'Cambios guardados',

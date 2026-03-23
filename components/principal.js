@@ -1,7 +1,7 @@
 
 import 'react-native-gesture-handler';
 import { StyleSheet, Text, View, Dimensions, ScrollView,Image,ImageBackground  } from 'react-native';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useState } from 'react';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -190,20 +190,50 @@ await AsyncStorage.setItem("ultimoCreado", idpersonaje.toString());
   ];
 
 
+const reproducirSonidoSeleccion = async () => {
+  const { sound } = await Audio.Sound.createAsync(
+    require('../assets/seleccionB.mp3')
+  );
 
-    const reproducirSonidoSeleccion = async () => {
+  await sound.playAsync();
+
+  sound.setOnPlaybackStatusUpdate((status) => {
+    if (status.didJustFinish) {
+      sound.unloadAsync(); // 🔥 liberar
+    }
+  });
+};
+
+
+ useEffect(() => {
+  let sound;
+
+  const playSound = async () => {
     try {
-      const { sound } = await Audio.Sound.createAsync(
-        require('../assets/seleccionB.mp3')
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+      });
+
+      const { sound: sonido } = await Audio.Sound.createAsync(
+        require('../assets/llegadaJapo.mp3'),
+        {volume: 0.05 } // 🔥 música en loop
       );
+
+      sound = sonido;
       await sound.playAsync();
     } catch (error) {
       console.log("Error reproduciendo sonido:", error);
     }
   };
 
-  
+  playSound();
 
+  return () => {
+    if (sound) {
+      sound.unloadAsync();
+    }
+  };
+}, []);
 //Marmolado violeta
 //const fondoUrl = "https://i.pinimg.com/736x/9e/22/12/9e2212d6518fd97e391dc48b98957da9.jpg"; // 🔹 URL del fondo
 
