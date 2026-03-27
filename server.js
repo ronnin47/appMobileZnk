@@ -815,19 +815,17 @@ app.get('/consumirPersonajesTodos', async (req, res) => {
 
 
 // SAGAS
-//insert saga ok!!
+// INSERT SAGA OK ✅
 app.post('/insert-saga', async (req, res) => {
-
- // console.log("esto viene del cliente: ",req.body)
   const {
     titulo,
     presentacion,
-    imagensaga, // si tenés otro campo aparte de imagen
+    imagensaga,
     personajes,
   } = req.body;
 
   try {
-    // 1. Insertar saga sin imagenurl ni imagencloudid
+    // 1. Insertar saga base (sin imagenurl todavía)
     const insertQuery = `
       INSERT INTO sagas (titulo, presentacion, imagensaga, personajes)
       VALUES ($1, $2, $3, $4)
@@ -839,35 +837,47 @@ app.post('/insert-saga', async (req, res) => {
 
     const newSagaId = insertResult.rows[0].idsaga;
 
-    let imagenUrl = null;
+    // 🔥 Imagen por defecto SIEMPRE
+    let imagenUrl = "https://res.cloudinary.com/dzul1hatw/image/upload/v1774459888/imagenBase_whvcot.jpg";
     let imagenCloudId = null;
 
-    // 2. Si recibís imagen base64, subir a Cloudinary
-    if (imagensaga) {
+    // 2. Si viene imagen base64 válida → subir a Cloudinary
+    if (imagensaga && typeof imagensaga === 'string' && imagensaga.startsWith('data:image/')) {
       const matches = imagensaga.match(/^data:image\/(\w+);base64,(.+)$/);
-      if (!matches) return res.status(400).json({ error: 'Imagen base64 inválida.' });
 
-      const ext = matches[1];
-      const data = matches[2];
+      if (matches) {
+        const ext = matches[1];
+        const data = matches[2];
 
-      const uploadResult = await cloudinary.uploader.upload(`data:image/${ext};base64,${data}`, {
-        folder: 'sagas',
-        public_id: `saga_${newSagaId}`,
-        overwrite: true,
-      });
+        try {
+          const uploadResult = await cloudinary.uploader.upload(
+            `data:image/${ext};base64,${data}`,
+            {
+              folder: 'sagas',
+              public_id: `saga_${newSagaId}`,
+              overwrite: true,
+            }
+          );
 
-      imagenUrl = uploadResult.secure_url;
-      imagenCloudId = uploadResult.public_id;
+          imagenUrl = uploadResult.secure_url;
+          imagenCloudId = uploadResult.public_id;
 
-      // 3. Actualizar saga con URL e id Cloudinary
-      const updateQuery = `
-        UPDATE sagas SET imagenurl = $1, imagencloudid = $2 WHERE idsaga = $3
-      `;
+        } catch (uploadError) {
+          console.warn("⚠️ Error subiendo a Cloudinary, se usa imagen default:", uploadError.message);
+        }
 
-      await pool.query(updateQuery, [imagenUrl, imagenCloudId, newSagaId]);
+      } else {
+        console.warn("⚠️ Imagen base64 inválida, se usa imagen default");
+      }
     }
 
-    // 4. Retornar resultado con el idsaga y url de imagen
+    // 3. 🔥 SIEMPRE guardar imagen (default o subida)
+    await pool.query(
+      `UPDATE sagas SET imagenurl = $1, imagencloudid = $2 WHERE idsaga = $3`,
+      [imagenUrl, imagenCloudId, newSagaId]
+    );
+
+    // 4. Respuesta final
     res.status(201).json({
       message: 'Saga creada exitosamente.',
       idsaga: newSagaId,
@@ -876,7 +886,7 @@ app.post('/insert-saga', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error al insertar la saga:', error);
+    console.error('❌ Error al insertar la saga:', error);
     res.status(500).json({ error: 'Error al insertar la saga.' });
   }
 });

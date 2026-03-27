@@ -163,7 +163,8 @@ await AsyncStorage.setItem("ultimoCreado", idpersonaje.toString());
       //console.log("URL imagen:", imagenurl);
 
 
-      setSagas([...sagas, { ...datosSaga, idsaga }]);
+      //setSagas([...sagas, { ...datosSaga, idsaga }]);
+        await fetchSagas();
     } else {
       console.warn("Algo salió mal al crear la saga:", response.data);
     }
