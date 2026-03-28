@@ -256,10 +256,28 @@ setValModificador(modificadorValue);
     exitosRequeridosPrincipal = 2;
   } else if (principalValue >= 60 && principalValue <= 99) {
     exitosRequeridosPrincipal = 3;
-  } else if (principalValue >= 100 && principalValue <= 160) {
+  } else if (principalValue >= 100 && principalValue <= 159) {
     exitosRequeridosPrincipal = 4;
-  } else if (principalValue >= 161 && principalValue <= 199) {
+  } else if (principalValue >= 160 && principalValue <= 199) {
     exitosRequeridosPrincipal = 5;
+  } else if (principalValue >= 200 && principalValue <= 259) {
+    exitosRequeridosPrincipal = 6;
+  } else if (principalValue >= 260 && principalValue <= 299) {
+    exitosRequeridosPrincipal = 7;
+  } else if (principalValue >= 300 && principalValue <= 359) {
+    exitosRequeridosPrincipal = 8;
+  } else if (principalValue >= 360 && principalValue <= 399) {
+    exitosRequeridosPrincipal = 9;
+  } else if (principalValue >= 400 && principalValue <= 459) {
+    exitosRequeridosPrincipal = 10;
+  }else if (principalValue >= 460 && principalValue <= 499) {
+    exitosRequeridosPrincipal = 11;
+  } else if (principalValue >= 500 && principalValue <= 559) {
+    exitosRequeridosPrincipal = 12;
+  } else if (principalValue >= 560 && principalValue <= 599) {
+    exitosRequeridosPrincipal = 13;
+  } else if (principalValue >= 600 && principalValue <= 659) {
+    exitosRequeridosPrincipal = 14;
   }
 
 
