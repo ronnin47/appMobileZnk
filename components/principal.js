@@ -251,6 +251,7 @@ const reproducirSonidoSeleccion = async () => {
 //este va
 const fondoUrl = "https://res.cloudinary.com/dzul1hatw/image/upload/v1761594578/f9f44f13d3e40198f916d1f7db44559e_jrkvux.jpg"; 
 
+
 return (
 
      <ImageBackground

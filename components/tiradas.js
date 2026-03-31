@@ -104,7 +104,13 @@ const botonAnimRef = useRef(null);
  const [nombreAptitudTirada,setNombreAptitudTirada]=useState("");
  const [nombreAptitud, setNombreAptitud] = useState("");
 
+  const [estadoDeFase, setEstadoDeFase] = useState("SIN HERIDAS");
 
+
+  //const [intensidadMin, setIntensidadMin] = useState(0.05);
+//const [intensidadMax, setIntensidadMax] = useState(0.2);
+const [estaHerido, setEstaHerido] = useState(false);
+const pulso = useRef(new Animated.Value(0)).current;
   
  const scrollRef = useRef(null);
   const windowWidth = Dimensions.get('window').width;
@@ -179,7 +185,82 @@ useEffect(() => {
 
 
 
-//**************aca seguro */
+//ACA QUEDAMOS CON LA CUESTION DE QUE SI LA VIDA ES MAYOR A 0 ESTA HERIDO, SI ES 0 O MENOR NO LO ESTA, Y SEGUN ESO SE ACTIVA LA ANIMACION DE PULSO ROJO EN EL AVATAR
+useEffect(() => {
+  const estadosHerido = [
+      "RAZGADO",
+      "MALTRECHO",
+      "MALHERIDO",
+    
+      "INCONCIENTE",
+      "INCAPACITADO",
+      "MORIBUNDO",
+      "MUERTO"
+  ];
+
+  if (estadosHerido.includes(estadoDeFase)) {
+    setEstaHerido(true);
+  } else {
+    setEstaHerido(false);
+  }
+}, [estadoDeFase]);
+
+
+useEffect(() => {
+
+  if (!estaHerido || estadoDeFase === "MUERTO") return;
+
+  let duracion = 4000;
+
+
+  switch (estadoDeFase) {
+    case "RAZGADO":
+      duracion = 4000;
+      break;
+
+    case "MALTRECHO":
+      duracion = 3000;
+      break;
+
+    case "MALHERIDO":
+      duracion = 2600;
+      break;
+
+    case "INCONCIENTE":
+      duracion = 1500;
+      break;
+
+    case "INCAPACITADO":
+      duracion = 1000;
+      break;
+
+    case "MORIBUNDO":
+      duracion = 700;
+      break;
+  }
+
+  const loop = Animated.loop(
+    Animated.sequence([
+      Animated.timing(pulso, {
+        toValue: 1,
+        duration: duracion,
+        useNativeDriver: false,
+      }),
+      Animated.timing(pulso, {
+        toValue: 0,
+        duration: duracion,
+        useNativeDriver: false,
+      }),
+    ])
+  );
+
+  loop.start();
+
+  return () => loop.stop();
+}, [estaHerido, estadoDeFase]);
+
+
+
  const tirarDados = () => {
   const principalValue = principal === "" ? 0 : parseInt(principal);
   const secundariaValue = secundaria === "" ? 0 : parseInt(secundaria);
@@ -459,12 +540,6 @@ const mensajeChatIncrementos = partesIncremento.join("\n");
 
 
 
-
-
-
-
-
-
 const limpiarCamposTirada = () => {
   setPrincipal("");
   setSecundaria("");
@@ -499,13 +574,6 @@ const limpiarCamposTirada = () => {
 
   //se refiere a la cantidad de vida por fase 
   const faseSalud = parseInt(ki) + parseInt(fortaleza);
-
-
-
-
-
-
-  // Ordenar personajes de mayor a menor id
 
 //const personajesOrdenados = [...(personajesFavoritos || [])].sort((a, b) => b.idpersonaje - a.idpersonaje);
 const personajesOrdenados = useMemo(() => {
@@ -549,10 +617,6 @@ const personajesOrdenados = useMemo(() => {
   }, [pjSeleccionado, personajesOrdenados]);
 
 const [modalVisibleTirada, setModalVisibleTirada] = useState(false);
-
-
-
-
 const [nombreTirada, setNombreTirada] = useState('');
 const [tiradaSeleccionada, setTiradaSeleccionada] = useState(null);
 const [mostrarSelectorPrincipal, setMostrarSelectorPrincipal] = useState(false);
@@ -709,9 +773,6 @@ function obtenerCaracteristicasSecundariasConExtras(pj) {
 
 const caracteristicasSecundarias = obtenerCaracteristicasSecundariasConExtras(pj);
 
-
-
-
 const etiquetasLegibles = {
   academisismo: 'Academisismo',
   alerta: 'Alerta',
@@ -744,7 +805,6 @@ const etiquetasLegibles = {
 
 
 
-
  const sonidoDados = async () => {
   setTimeout(async () => {
     try {
@@ -766,102 +826,217 @@ const etiquetasLegibles = {
   }, 1000); // 1000 ms = 1 segundo de retraso
 };
 
+
+
+// dentro del componente, antes del return
+let intensidadMin = 0.05;
+let intensidadMax = 0.2;
+
+switch (estadoDeFase) {
+  case "RAZGADO":
+    intensidadMin = 0.05;
+    intensidadMax = 0.25;
+    break;
+
+  case "MALTRECHO":
+    intensidadMin = 0.08;
+    intensidadMax = 0.33;
+    break;
+
+  case "MALHERIDO":
+    intensidadMin = 0.08;
+    intensidadMax = 0.42;
+    break;
+
+  case "INCONCIENTE":
+    intensidadMin = 0.1;
+    intensidadMax = 0.58;
+    break;
+
+  case "INCAPACITADO":
+    intensidadMin = 0.12;
+    intensidadMax = 0.65;
+    break;
+
+  case "MORIBUNDO":
+    intensidadMin = 0.15;
+    intensidadMax = 0.8;
+    break;
+
+  case "MUERTO":
+    intensidadMin = 0;
+    intensidadMax = 0;
+    break;
+}
+
   return (
     <>
-   <View style={styles.containerAvatares}>
-  {personajesOrdenados.length === 0 ? (
-    <></>
-  ) : (
-    <ScrollView
-      horizontal
-      ref={scrollRef}
-      contentContainerStyle={styles.avatarContainer}
-      showsHorizontalScrollIndicator={false}
-    >
-      {personajesOrdenados.map((pj) => {
-        const isSelected = pj.idpersonaje === pjSeleccionado;
-        return (
-          <TouchableOpacity
-            key={pj.idpersonaje}
-            style={styles.avatarCard}
-            onPress={() => setPjSeleccionado(pj.idpersonaje)}
-          >
-            <Image
-               source={
-    pj.imagen && pj.imagen.startsWith('data:image')
-      ? { uri: pj.imagen }
-      : pj.imagenurl
-      ? { uri: pj.imagenurl }
-      : imagenBase
-  }
-              style={[
-                styles.avatarImagen,
-                {
-                  opacity: isSelected ? 1 : 0.7,  // Opacidad total para seleccionado, 50% para los demás
-                },
-                isSelected && {
-                  borderWidth: 3,
-                  borderColor: 'cyan',
-                  shadowColor: 'black',
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.4,
-                  shadowRadius: 6,
-                  elevation: 8,
-                  backgroundColor: 'white',
-                },
-              ]}
-            />
-            <Text
-              style={[
-                styles.avatarNombre,
-                {
-                  opacity: isSelected ? 1 : 0.5,
-                },
-                isSelected && { borderWidth: 0.9, color: 'cyan' },
-              ]}
+    <View style={styles.containerAvatares}>
+    {personajesOrdenados.length === 0 ? (
+      <></>
+    ) : (
+      <ScrollView
+        horizontal
+        ref={scrollRef}
+        contentContainerStyle={styles.avatarContainer}
+        showsHorizontalScrollIndicator={false}
+      >
+        {personajesOrdenados.map((pj) => {
+          const isSelected = pj.idpersonaje === pjSeleccionado;
+          return (
+            <TouchableOpacity
+              key={pj.idpersonaje}
+              style={styles.avatarCard}
+              onPress={() => setPjSeleccionado(pj.idpersonaje)}
             >
-              {pj.nombre}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
-    </ScrollView>
-  )}
-   </View>
+              <Image
+                source={
+      pj.imagen && pj.imagen.startsWith('data:image')
+        ? { uri: pj.imagen }
+        : pj.imagenurl
+        ? { uri: pj.imagenurl }
+        : imagenBase
+    }
+                style={[
+                  styles.avatarImagen,
+                  {
+                    opacity: isSelected ? 1 : 0.7,  // Opacidad total para seleccionado, 50% para los demás
+                  },
+                  isSelected && {
+                    borderWidth: 3,
+                    borderColor: 'cyan',
+                    shadowColor: 'black',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.4,
+                    shadowRadius: 6,
+                    elevation: 8,
+                    backgroundColor: 'white',
+                  },
+                ]}
+              />
+              <Text
+                style={[
+                  styles.avatarNombre,
+                  {
+                    opacity: isSelected ? 1 : 0.5,
+                  },
+                  isSelected && { borderWidth: 0.9, color: 'cyan' },
+                ]}
+              >
+                {pj.nombre}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
+    )}
+    </View>
 
+    <ChatTiradas p={p}/>
+    
+    <ScrollView style={styles.container}>
 
+    <View style={styles.barras}>
 
-     <ChatTiradas p={p}/>
+      {/* Barra de vida */}
+      <View style={{ position: 'relative', zIndex: 0 }}>
 
-      <ScrollView style={styles.container}>
+            {estadoDeFase === "MUERTO" ? (
+            <View
+              pointerEvents="none"
+              style={{
+                ...StyleSheet.absoluteFillObject,
+                backgroundColor: 'rgba(10, 10, 10, 0.61)',
+                zIndex: 1,
+                borderRadius: 6,
+              }}
+            />
+          ) : (
+            estaHerido && (
+              <Animated.View
+                pointerEvents="none"
+                style={{
+                  ...StyleSheet.absoluteFillObject,
 
-          <View style={styles.barras}>
-            <View >
-              <BarraVida            
-              setKenActual={setKenActual}
-              vidaActual={Number(vidaActual)||0}
-              setVidaActual={setVidaActual}
-              pj={p} ki={ki} setKi={setKi} fortaleza={fortaleza} setFortaleza={setFortaleza}  positiva={Number(positiva) || 0} negativa={Number(negativa) || 0} cicatriz={Number(cicatriz) || 0}>
-             </BarraVida>
-            </View>
+                  backgroundColor: pulso.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [
+                      'rgba(255,0,0,0.08)',
+                      'rgba(255,0,0,0.4)',
+                    ],
+                  }),
 
-            <View>
-              <BarraKi 
-                kiActual={Number(kiActual)||0}
-                setKiActual={setKiActual}
-                consumision={consumision}
-                setConsumision={setConsumision}
-                pj={p} ki={ki} setKi={setKi}>
-              </BarraKi>
-            </View>
+                  backgroundColor: pulso.interpolate({
+  inputRange: [0, 1],
+  outputRange: [
+    `rgba(255,0,0,${intensidadMin})`,
+    `rgba(255,0,0,${intensidadMax})`,
+  ],
+}),
 
-            <View>
-              <BarraKen
-              kenActual={Number(kenActual)||0}
-              setKenActual={setKenActual}
-              pj={p} ken={ken} setKen={setKen}></BarraKen>
-            </View>       
-        </View>
+                  borderWidth: pulso.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.5, 1.5],
+                  }),
+
+                  borderColor: pulso.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [
+                      'rgba(10, 10, 10, 0.3)',
+                      'rgba(255, 0, 0, 0.47)',
+                    ],
+                  }),
+
+                  borderRadius: 6,
+                  zIndex: 1,
+                }}
+              />
+            )
+          )}
+
+        <BarraVida            
+          setKenActual={setKenActual}
+          vidaActual={Number(vidaActual) || 0}
+          setVidaActual={setVidaActual}
+          pj={p}   
+          estadoDeFase={estadoDeFase}
+          setEstadoDeFase={setEstadoDeFase}
+          ki={ki}
+          setKi={setKi}
+          fortaleza={fortaleza}
+          setFortaleza={setFortaleza}
+          positiva={Number(positiva) || 0}
+          negativa={Number(negativa) || 0}
+          cicatriz={Number(cicatriz) || 0}
+        />
+
+      </View>
+
+      {/* Barra Ki */}
+      <View style={{ zIndex: 0 }}>
+        <BarraKi 
+          kiActual={Number(kiActual) || 0}
+          setKiActual={setKiActual}
+          consumision={consumision}
+          setConsumision={setConsumision}
+          pj={p}
+          ki={ki}
+          setKi={setKi}
+        />
+      </View>
+
+      {/* Barra Ken */}
+      <View style={{ zIndex: 0 }}>
+        <BarraKen
+          kenActual={Number(kenActual) || 0}
+          setKenActual={setKenActual}
+          pj={p}
+          ken={ken}
+          setKen={setKen}
+        />
+      </View>
+
+    </View>
       
         
         <TextInput
@@ -1493,6 +1668,10 @@ const etiquetasLegibles = {
          </View>
 
       </ScrollView>
+
+
+
+  
     </>
   );
 };
@@ -1619,6 +1798,7 @@ dadoRow: {
   marginBottom: 8,
 },
 barras: {
+   position: 'relative',
   marginBottom:20,
   marginTop:10,
 },

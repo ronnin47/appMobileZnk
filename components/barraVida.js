@@ -6,7 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import { Audio } from 'expo-av';
 
-export const BarraVida = ({pj, ki, setKi, fortaleza, setFortaleza, positiva, negativa, cicatriz, vidaActual, setVidaActual}) => {
+export const BarraVida = ({pj, ki, setKi, fortaleza, setFortaleza, positiva, negativa, cicatriz, vidaActual, setVidaActual,estadoDeFase,setEstadoDeFase}) => {
 
 
   const { personajes, savePersonajes,estatus,pjSeleccionado,nick } = useContext(AuthContext);
@@ -46,7 +46,7 @@ const faseSalud = React.useMemo(() => {
   }
   
   
-  const [estadoDeFase, setEstadoDeFase] = useState("SIN HERIDAS");
+ // const [estadoDeFase, setEstadoDeFase] = useState("SIN HERIDAS");
   const [porcentajeVidaPositiva, setPorcentajeVidaPositiva] = useState(porcentajeVidaPositivaInicial);
   const [porcentajeVidaNegativa, setPorcentajeVidaNegativa] = useState(porcentajeVidaNegativaInicial);
   const [consumirVida, setConsumirVida] = useState(0);
