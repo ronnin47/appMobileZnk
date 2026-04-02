@@ -6,51 +6,211 @@ import socket from './socket';
 import { Vibration } from 'react-native';
 import { API_BASE_URL } from './config';
 import axios from 'axios';
-import { Audio } from 'expo-av' 
-
-
+import { Audio } from 'expo-av'; 
 import { Estrellitas } from './estrellitas';
-export const Partida = ({ pj }) => {
-  const { coleccionPersonajes, estatus, nick } = useContext(AuthContext);
+import { Animated } from 'react-native';
+
+export const Party = ({ pj }) => {
+  const { historialChat,coleccionPersonajes, estatus, nick } = useContext(AuthContext);
+  const [estadoTiempoReal, setEstadoTiempoReal] = useState({}); 
+
 
   const [busqueda, setBusqueda] = useState('');
   const [personajesAgregados, setPersonajesAgregados] = useState([]);
   const [kenPuntos, setKenPuntos] = useState({}); // Guardar puntos por personaje
-
   const imagenBase = require('../assets/imagenBase.jpeg');
-
-   const [historialKen, setHistorialKen] = useState([]);
-
-
- const [modalVisible, setModalVisible] = useState(false);
-
-
-  const fondoUrl =
-    "https://res.cloudinary.com/dzul1hatw/image/upload/v1773419661/700ef2bb7f79b95bcd3a084cb2095559_cn3ywp.avif"
-  
-  
-  
+  const [historialKen, setHistorialKen] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  //const fondoUrl ="https://res.cloudinary.com/dzul1hatw/image/upload/v1773419661/700ef2bb7f79b95bcd3a084cb2095559_cn3ywp.avif"
+  const fondoUrl="https://res.cloudinary.com/dzul1hatw/image/upload/v1774897126/descarga_drneff.jpg";
   const fondoUrlRegistroKen="https://res.cloudinary.com/dzul1hatw/image/upload/v1773775660/WhatsApp_Image_2026-03-17_at_16.13.54_1_w5quwi.jpg"
-    // Cargar personajes guardados al montar el componente
-  useEffect(() => {
-    const cargarPersonajes = async () => {
-      try {
-        const data = await AsyncStorage.getItem(`personajesSeleccionados_${pj.idpersonaje}`);
-        if (data) {
-          const parsed = JSON.parse(data);
-          setPersonajesAgregados(parsed);
+  
 
-          // Inicializar kenPuntos si es necesario
-          const inicialKen = {};
-          parsed.forEach(p => inicialKen[p.idpersonaje] = 0);
-          setKenPuntos(inicialKen);
+
+
+
+//recuperamos los personajes
+  useEffect(() => {
+  const cargarPersonajes = async () => {
+    try {
+      const data = await AsyncStorage.getItem(
+        `personajesSeleccionadosV2_${pj.idpersonaje}`
+      );
+
+      if (data) {
+        const parsed = JSON.parse(data);
+
+        let listaPersonajes = [];
+
+        if (Array.isArray(parsed)) {
+          if (typeof parsed[0] === "object") {
+            // formato viejo
+            listaPersonajes = parsed;
+          } else {
+            // formato nuevo (IDs)
+            listaPersonajes = coleccionPersonajes.filter(p =>
+              parsed.includes(p.idpersonaje)
+            );
+          }
         }
-      } catch (err) {
-        console.log("Error cargando personajes:", err);
+
+        setPersonajesAgregados(listaPersonajes);
+
+       setKenPuntos({});
       }
-    };
-    cargarPersonajes();
-  }, [pj.idpersonaje]);
+    } catch (err) {
+      console.log("Error cargando personajes:", err);
+    }
+  };
+
+  cargarPersonajes();
+}, [pj.idpersonaje, coleccionPersonajes]);
+
+
+  const guardarPersonajes = async (lista) => {
+  try {
+    const ids = lista.map(p => p.idpersonaje);
+    await AsyncStorage.setItem(
+      `personajesSeleccionadosV2_${pj.idpersonaje}`,
+      JSON.stringify(ids)
+    );
+  } catch (err) {
+    console.log("Error guardando personajes:", err);
+  }
+};
+
+//agreagmos personajes
+ const agregarPersonaje = (personaje) => {
+  const existe = personajesAgregados.some(
+    p => p.idpersonaje === personaje.idpersonaje
+  );
+
+  if (!existe) {
+    const nuevaLista = [...personajesAgregados, personaje];
+    setPersonajesAgregados(nuevaLista);
+    guardarPersonajes(nuevaLista);
+
+    setBusqueda('');
+    setKenPuntos({
+      ...kenPuntos,
+      [personaje.idpersonaje]: 0
+    });
+  }
+};
+
+//eliminamos personajes del storage
+ const eliminarPersonaje = (id) => {
+  if (id == null) return;
+
+  const nuevaLista = personajesAgregados.filter(
+    p => p.idpersonaje !== id
+  );
+
+  setPersonajesAgregados(nuevaLista);
+  guardarPersonajes(nuevaLista);
+
+  const nuevosKen = { ...kenPuntos };
+  delete nuevosKen[id];
+  setKenPuntos(nuevosKen);
+};
+
+
+
+
+// REACCIONAR A CAMBIOS EN EL HISTORIAL DE CHAT
+useEffect(() => {
+  if (!historialChat.length) return;
+
+  const nuevoEstado = {};
+
+  // recorrer de atrás hacia adelante
+  for (let i = historialChat.length - 1; i >= 0; i--) {
+    const msg = historialChat[i];
+
+    if (
+      msg.tipo !== "vida" &&
+      msg.tipo !== "ki" &&
+      msg.tipo !== "ken"
+    ) continue;
+
+    const id = String(msg.idpersonaje);
+
+    // si no es de mi lista, ignorar
+    const esDeMiLista = personajesAgregados.some(
+      p => String(p.idpersonaje) === id
+    );
+    if (!esDeMiLista) continue;
+
+    if (!nuevoEstado[id]) {
+      nuevoEstado[id] = {};
+    }
+
+    // solo setear si todavía no lo tenemos
+    
+
+        if (msg.tipo === "vida") {
+        if (nuevoEstado[id].vidaActual == null && msg.vidaActual != null) {
+            nuevoEstado[id].vidaActual = msg.vidaActual;
+        }
+
+        if (nuevoEstado[id].vidaTotal == null && msg.vidaTotal != null) {
+            nuevoEstado[id].vidaTotal = msg.vidaTotal;
+        }
+    }
+  
+
+        if (msg.tipo === "ki") {
+        if (nuevoEstado[id].kiActual == null && msg.kiActual != null) {
+            nuevoEstado[id].kiActual = msg.kiActual;
+        }
+
+        if (nuevoEstado[id].kiTotal == null && msg.ki != null) {
+  nuevoEstado[id].kiTotal = msg.ki;
+}
+    }
+
+
+        if (msg.tipo === "ken") {
+        if (nuevoEstado[id].kenActual == null && msg.kenActual != null) {
+            nuevoEstado[id].kenActual = msg.kenActual;
+        }
+
+       if (nuevoEstado[id].kenTotal == null && msg.ken != null) {
+  nuevoEstado[id].kenTotal = msg.ken;
+}
+    }
+  }
+
+  setEstadoTiempoReal(nuevoEstado);
+
+}, [historialChat, personajesAgregados]);
+
+
+
+
+const pulso = useRef(new Animated.Value(0)).current;
+
+useEffect(() => {
+  const loop = Animated.loop(
+    Animated.sequence([
+      Animated.timing(pulso, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: false,
+      }),
+      Animated.timing(pulso, {
+        toValue: 0,
+        duration: 600,
+        useNativeDriver: false,
+      }),
+    ])
+  );
+
+  loop.start();
+
+  return () => loop.stop();
+}, []);
+
 
 const sonidoSeleccionRef = useRef(null);
 
@@ -104,41 +264,6 @@ useEffect(() => {
 }, [modalVisible]);
 
 
-
-
-  // Guardar personajes seleccionados en AsyncStorage
-  const guardarPersonajes = async (lista) => {
-    try {
-      await AsyncStorage.setItem(`personajesSeleccionados_${pj.idpersonaje}`, JSON.stringify(lista));
-    } catch (err) {
-      console.log("Error guardando personajes:", err);
-    }
-  };
-
-  // AGREGAR PERSONAJE
-  const agregarPersonaje = (personaje) => {
-    const existe = personajesAgregados.some(p => p.idpersonaje === personaje.idpersonaje);
-    if (!existe) {
-      const nuevaLista = [...personajesAgregados, personaje];
-      setPersonajesAgregados(nuevaLista);
-      guardarPersonajes(nuevaLista);
-
-      setBusqueda('');
-      setKenPuntos({ ...kenPuntos, [personaje.idpersonaje]: 0 });
-    }
-  };
-
-  // ELIMINAR PERSONAJE
-  const eliminarPersonaje = (id) => {
-    const nuevaLista = personajesAgregados.filter(p => p.idpersonaje !== id);
-    setPersonajesAgregados(nuevaLista);
-    guardarPersonajes(nuevaLista);
-
-    const nuevosKen = { ...kenPuntos };
-    delete nuevosKen[id];
-    setKenPuntos(nuevosKen);
-  };
-
   // SUBIR PUNTOS
   const subirPunto = (id) => {
     setKenPuntos({ ...kenPuntos, [id]: (kenPuntos[id] || 0) + 1 });
@@ -155,7 +280,7 @@ useEffect(() => {
     if (valor <= 0) return;
 
 
-    console.log("Valor de ken de puntaje ke", valor)
+    
     
     const mensaje = {
       usuarioId: pj.usuarioId,
@@ -222,6 +347,59 @@ useEffect(() => {
   );
 
   const sesionesKen = agruparSesionesKen(historialKen);
+
+
+
+  const calcularVidaTotal = (pj) => { 
+    const ki = Number(pj.ki) || 0; const fortaleza = Number(pj.fortaleza) || 0; const positiva = Number(pj.positiva) || 0; const negativa = Number(pj.negativa) || 0; const faseSalud = ki >= 10 ? ki + fortaleza : fortaleza; 
+    return faseSalud * (positiva + negativa); 
+};
+
+
+
+const calcularEstadoFase = (pj, vidaActual) => {
+  const vida = Number(vidaActual) || 0;
+  const ki = Number(pj.ki) || 0;
+  const fortaleza = Number(pj.fortaleza) || 0;
+  const positiva = Number(pj.positiva) || 0;
+  const negativa = Number(pj.negativa) || 0;
+
+  const faseSalud = ki >= 10 ? ki + fortaleza : fortaleza;
+
+  const vidaTotalPositiva = faseSalud * positiva;
+  const vidaTotal = faseSalud * (positiva + negativa);
+
+  if (vida === 0) return "SIN HERIDAS";
+  if (vida > vidaTotal) return "MUERTO";
+
+  if (vida <= vidaTotalPositiva) {
+    if (vida >= vidaTotalPositiva - faseSalud) return "MALHERIDO";
+    if (vida >= vidaTotalPositiva - faseSalud * 2) return "MALTRECHO";
+    return "RAZGADO";
+  }
+
+  const exceso = vida - vidaTotalPositiva;
+
+  if (exceso <= faseSalud) {
+    if (negativa === 1) return "MORIBUNDO";
+    if (negativa === 2) return "INCAPACITADO";
+    if (negativa >= 3) return "INCONCIENTE";
+  }
+
+  if (exceso <= faseSalud * 2) {
+    if (negativa <= 2) return "MORIBUNDO";
+    return "INCAPACITADO";
+  }
+
+  if (exceso <= faseSalud * 3) {
+    if (negativa >= 3) return "MORIBUNDO";
+  }
+
+  return "MUERTO";
+};
+
+
+
   return (
     <ImageBackground source={{ uri: fondoUrl }} style={{ flex: 1, backgroundColor:"black" }} resizeMode='cover'>
       <View style={styles.overlay}>
@@ -268,7 +446,8 @@ useEffect(() => {
       {/* FlatList scrollable */}
      <FlatList
   data={sesionesKen}
-  keyExtractor={(item, index) => index.toString()}
+  //keyExtractor={(item, index) => index.toString()}
+  keyExtractor={(item, index) => String(item?.idpersonaje ?? index)}
  renderItem={({ item }) => {
 
   const fechaSesion = new Date(Number(item[0].timestamp));
@@ -277,6 +456,10 @@ useEffect(() => {
     const totalKenSesion = item.reduce((acc, reg) => {
     return acc + Number(reg.puntajeKen || 0);
   }, 0);
+
+
+
+
 
   return (
      <ImageBackground source={{ uri: fondoUrlRegistroKen }} style={{ flex: 1, backgroundColor:"black" }} resizeMode='cover'>
@@ -333,7 +516,8 @@ useEffect(() => {
         {busqueda.length > 0 && (
           <FlatList
             data={personajesFiltrados}
-            keyExtractor={(item) => item.idpersonaje.toString()}
+            //keyExtractor={(item) => item.idpersonaje.toString()}
+            keyExtractor={(item, index) => String(item?.idpersonaje ?? index)}
             style={styles.resultados}
             keyboardShouldPersistTaps="handled"
             renderItem={({ item }) => {
@@ -360,10 +544,33 @@ useEffect(() => {
 
         <FlatList
           data={personajesAgregados}
-          keyExtractor={(item) => item.idpersonaje.toString()}
+         // keyExtractor={(item) => item.idpersonaje.toString()}
+         keyExtractor={(item, index) => String(item?.idpersonaje ?? index)}
           style={styles.listaSeleccionados}
           keyboardShouldPersistTaps="handled"
-          renderItem={({ item }) => (
+          renderItem={({ item }) => {
+
+
+            const estado = estadoTiempoReal[String(item.idpersonaje)] || {};
+
+            const vidaActual = estado.vidaActual ?? item.vidaActual ?? 0;
+            const vidaTotal = estado.vidaTotal ?? calcularVidaTotal(item) ?? 1;
+
+
+            
+            const kiActual = estado.kiActual ?? item.kiActual ?? 0;
+            const kiTotal = estado.kiTotal ?? item.ki ?? 1;
+          
+
+            const kenActual = estado.kenActual ?? item.kenActual ?? 0;
+            const kenTotal = estado.kenTotal ?? item.ken ?? 1;
+            
+            const estadoFase = calcularEstadoFase(item, vidaActual);
+
+
+
+
+           return(          
             <View style={styles.cardSeleccionado}>
 
               {/* Botón Quitar X */}
@@ -377,27 +584,50 @@ useEffect(() => {
              {/* Fila de imagen + nombre */}
 <View style={styles.row}>
 
-  <View style={styles.colImagen}>
-    <Image
-      source={item.imagenurl ? { uri: item.imagenurl } : imagenBase}
-      style={styles.avatarLista}
-    />
-    <Text style={styles.dominio}>
-      {item.dominio || "Dominio desconocido"}
-    </Text>
-  </View>
+                    <View style={styles.colImagen}>
+                        <Image
+                        source={item.imagenurl ? { uri: item.imagenurl } : imagenBase}
+                        style={styles.avatarLista}
+                        />
+                        <Text style={styles.dominio}>
+                        {item.dominio || "Dominio desconocido"}
+                        </Text>
 
-  <View style={styles.infoPersonaje}>
-    <Text style={styles.nombre} numberOfLines={1}>
-      {item.nombre}
-    </Text>
+                         
+                        <Estrellitas ken={parseInt(item.ken) || 0} />
+                    </View>
 
-    <Text style={styles.conviccion}>
-      {item.conviccion || "Conviccion desconocida"}
-    </Text>
+                    <View style={styles.infoPersonaje}>
+                        <Text style={styles.nombre} numberOfLines={1}>
+                        {item.nombre}
+                        </Text>
 
-    <Estrellitas ken={parseInt(item.ken) || 0} />
-  </View>
+                        
+
+                       <Text style={styles.textVida}> 
+                        vida: {vidaActual}/{vidaTotal || "??"}     {estadoFase}
+                        </Text> 
+                        
+
+    
+                        <BarraVida 
+                        actual={vidaActual} 
+                        total={vidaTotal} 
+                        color="red"
+                         estadoFase={estadoFase}
+                         pulso={pulso} /> 
+                        
+                        <Text style={styles.textKi}> ki: {kiActual}/{kiTotal || "??"} </Text> 
+                        <Barra actual={kiActual} total={kiTotal} color="blue" /> 
+                        <Text style={styles.textKen}> ken: {kenActual}/{kenTotal || "??"} </Text> 
+                        
+                        <Barra actual={kenActual} total={kenTotal} color="green" />
+
+                        <Text style={styles.conviccion}>
+                        {item.conviccion || "Conviccion desconocida"}
+                        </Text>
+                    
+                    </View>
 
 </View>
 
@@ -422,21 +652,119 @@ useEffect(() => {
                 </TouchableOpacity>
               </View>
             </View>
-          )}
+            );
+          }}
         />
       </View>
     </ImageBackground>
   );
 };
 
+
+
+
+const Barra = ({ actual, total, color }) => { 
+    const porcentaje = parseInt(total) ? (actual / parseInt(total)) * 100 : 0; 
+    
+    return ( 
+    <View style={{ width: "100%", height: 10, backgroundColor: "#f3dc0eef", borderRadius: 5, overflow: "hidden" }}> 
+    
+    <View style={{ width: `${porcentaje}%`, height: "100%", backgroundColor: color }} /> 
+
+    </View> 
+    
+); 
+    };
+
+
+
+const BarraVida = ({ actual, total, color, estadoFase, pulso }) => {
+  const porcentaje = parseInt(total) ? (actual / parseInt(total)) * 100 : 0;
+
+  let intensidadMin = 0;
+  let intensidadMax = 0;
+
+  switch (estadoFase) {
+    case "RAZGADO":
+      intensidadMin = 0.05;
+      intensidadMax = 0.25;
+      color="red";
+      break;
+    case "MALTRECHO":
+      intensidadMin = 0.08;
+      intensidadMax = 0.33;
+      color="red";
+      break;
+    case "MALHERIDO":
+      intensidadMin = 0.08;
+      intensidadMax = 0.42;
+      color="red";
+      break;
+    case "INCONCIENTE":
+      intensidadMin = 0.1;
+      intensidadMax = 0.58;
+        color = "#57007ada";
+      break;
+    case "INCAPACITADO":
+      intensidadMin = 0.12;
+      intensidadMax = 0.65;
+       color = "#57007ada";
+      break;
+    case "MORIBUNDO":
+      intensidadMin = 0.15;
+      intensidadMax = 0.8;
+       color = "#57007a7a";
+      break;
+    default:
+      intensidadMin = 0;
+      intensidadMax = 0;
+  }
+
+  const muerto = estadoFase === "MUERTO";
+
+  const colorBarra = muerto ? "#131212d7" : color;
+  const mostrarPulso = estadoFase !== "SIN HERIDAS" && !muerto;
+
+  return (
+    <View style={{ width: "100%", height: 10, borderRadius: 5, overflow: "hidden" }}>
+      
+      <View style={{ position: "absolute", width: "100%", height: "100%", backgroundColor: "#f3dc0eef" }} />
+
+      <View style={{ width: `${porcentaje}%`, height: "100%", backgroundColor: colorBarra }} />
+
+      {mostrarPulso && (
+        <Animated.View
+          pointerEvents="none"
+          style={{
+            ...StyleSheet.absoluteFillObject,
+            backgroundColor: pulso.interpolate({
+              inputRange: [0, 1],
+              outputRange: [
+                `rgba(255,0,0,${intensidadMin})`,
+                `rgba(255,0,0,${intensidadMax})`,
+              ],
+            }),
+          }}
+        />
+      )}
+
+    </View>
+  );
+};
+
 const styles = StyleSheet.create({
   overlay: { flex: 1, padding: 12, backgroundColor: "rgba(54, 52, 52, 0.18)" },
-  buscador: { backgroundColor: "#1a1a1a", color: "white", padding: 12, borderRadius: 10, marginBottom: 10, marginTop: 40 },
+  buscador: { backgroundColor: "#1a1a1ae1", color: "white", padding: 12, borderRadius: 10, marginBottom: 10, marginTop: 40 },
   resultados: { maxHeight: 180, marginBottom: 20 },
   tituloSeleccionados: { color: "gold", fontSize: 18, marginBottom: 10, fontWeight: "bold" },
   listaSeleccionados: { flex: 1, marginBottom: 60 },
-  card: { flexDirection: "row", alignItems: "center", padding: 10, backgroundColor: "rgba(255,255,255,0.05)", borderRadius: 10, marginBottom: 8 },
-  cardSeleccionado: { flexDirection: "column", padding: 12, backgroundColor: "rgba(0,0,0,0.45)", borderRadius: 10, marginBottom: 10, position: "relative" },
+  card: { flexDirection: "row", alignItems: "center", padding: 10, backgroundColor: "rgba(8, 8, 8, 0.84)", borderRadius: 10, marginBottom: 8 },
+  cardSeleccionado: { 
+    flexDirection: "column", 
+    padding: 12, 
+    backgroundColor: "rgba(0, 0, 0, 0.87)", 
+    borderRadius: 10, 
+    marginBottom: 10, position: "relative" },
   avatar: { width: 55, height: 55, borderRadius: 30, marginRight: 4, borderWidth: 2, borderColor: "#000" },
   avatarLista: { width: 100, height: 100, borderRadius: 10,marginLeft:4, marginRight: 12, borderWidth: 2, borderColor: "#000" },
   
@@ -458,6 +786,7 @@ const styles = StyleSheet.create({
   fontSize: 12,
   fontWeight: "bold",
   width: "100%",
+  marginTop: 12,
 },
 
   rowInput: { flexDirection: "row", alignItems: "center", marginTop: 0 },
@@ -583,4 +912,7 @@ colImagen: {
   marginRight: 2,
   width: 90
 },
+
+
+textVida: { color: "#f7261fdc", fontSize: 13, fontWeight: "bold", width: "100%", }, textKi: { color: "#1762d1dc", fontSize: 13, fontWeight: "bold", width: "100%", }, textKen: { color: "#0bf00bec", fontSize: 13, fontWeight: "bold", width: "100%", },
 });
