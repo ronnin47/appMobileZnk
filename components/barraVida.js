@@ -351,6 +351,55 @@ reproducirSonido();
   }
 
 
+
+  const renderLineas = () => {
+  const lineas = [];
+  const cantidad = parseInt(positiva);
+
+  if (!cantidad || cantidad <= 1) return null;
+
+  for (let i = 1; i < cantidad; i++) {
+    const left = (i / cantidad) * 100;
+
+    lineas.push(
+      <View
+        key={i}
+        style={[
+          styles.lineaDivision,
+          { left: `${left}%` },
+        ]}
+      />
+    );
+  }
+
+  return lineas;
+};
+
+
+const renderLineasNegativas = () => {
+  const lineas = [];
+  const cantidad = parseInt(negativa);
+
+  if (!cantidad || cantidad <= 1) return null;
+
+  for (let i = 1; i < cantidad; i++) {
+    const left = (i / cantidad) * 100;
+
+    lineas.push(
+      <View
+        key={i}
+        style={[
+          styles.lineaDivisionNegativa,
+          { left: `${left}%` },
+        ]}
+      />
+    );
+  }
+
+  return lineas;
+};
+
+
 return (
   
       <LinearGradient
@@ -369,51 +418,59 @@ return (
       <View style={[styles.barraAmarilla, { width: '100%' }]} />
 
       <LinearGradient
-      colors={['#aa8484', '#B22222', '#4B1C0B']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={[
-          styles.barraRoja,
-          { width: `${Math.min((vidaActual / vidaTotalPositiva) * 100, 100)}%` },
-        ]}
-      />
+    colors={['#aa8484', '#B22222', '#4B1C0B']}
+    start={{ x: 0, y: 0 }}
+    end={{ x: 1, y: 0 }}
+    style={[
+      styles.barraRoja,
+      { width: `${Math.min((vidaActual / vidaTotalPositiva) * 100, 100)}%` },
+    ]}
+  />
 
-      {/* Mostrar texto solo si NO hay daño negativo */}
-      {vidaActual <= vidaTotalPositiva && (
-          <Text style={styles.textoVidaEnBarra}>
-        Vida: {vidaActual}/{vidaTotal}{" "}
-        <Text style={styles.estadoText}>{estadoDeFase}</Text>
-      </Text>
-      )}
-    </View>
+  {/* líneas encima */}
+  <View style={styles.overlayLineas}>
+    {renderLineas()}
+  </View>
+
+  {vidaActual <= vidaTotalPositiva && (
+    <Text style={styles.textoVidaEnBarra}>
+      Vida: {vidaActual}/{vidaTotal}{" "}
+      <Text style={styles.estadoText}>{estadoDeFase}</Text>
+    </Text>
+  )}
+</View>
 
     {/* Barra negativa, solo si hay daño más allá de la positiva */}
-    {vidaActual > vidaTotalPositiva && (
-      <View style={styles.barraContenedor}>
-        <View style={[styles.barraAmarilla, { width: '100%' }]} />
+   {vidaActual > vidaTotalPositiva && (
+  <View style={styles.barraContenedor}>
+    <View style={[styles.barraAmarilla, { width: '100%' }]} />
 
-        <LinearGradient
-          colors={['#4B0082', '#8A2BE2', '#DDA0DD']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={[
-            styles.barraVioleta,
-            {
-              width: `${Math.min(
-                ((vidaActual - vidaTotalPositiva) / vidaTotalNegativa) * 100,
-                100
-              )}%`,
-            },
-          ]}
-        />
+    <LinearGradient
+      colors={['#4B0082', '#8A2BE2', '#DDA0DD']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 0 }}
+      style={[
+        styles.barraVioleta,
+        {
+          width: `${Math.min(
+            ((vidaActual - vidaTotalPositiva) / vidaTotalNegativa) * 100,
+            100
+          )}%`,
+        },
+      ]}
+    />
 
-        {/* Mostrar texto dentro de la barra negativa si hay daño negativo */}
-         <Text style={styles.textoVidaEnBarra}>
-        Vida: {vidaActual}/{vidaTotal}{" "}
-        <Text style={styles.estadoText}>{estadoDeFase}</Text>
-      </Text>
-      </View>
-    )}
+    {/* líneas inclinadas */}
+    <View style={styles.overlayLineas}>
+      {renderLineasNegativas()}
+    </View>
+
+    <Text style={styles.textoVidaEnBarra}>
+      Vida: {vidaActual}/{vidaTotal}{" "}
+      <Text style={styles.estadoText}>{estadoDeFase}</Text>
+    </Text>
+  </View>
+)}
 
    <View style={styles.fila}>
   <TextInput
@@ -461,7 +518,7 @@ const styles = StyleSheet.create({
   estadoText: {
     color: 'black',
     marginBottom: 6,
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: 'sans-serif-condensed',
   },
   vidaText: {
@@ -555,5 +612,28 @@ botonTexto: {
   fontWeight: 'bold',
   fontSize: 16,
   fontFamily: 'sans-serif-condensed',
-}
+},
+overlayLineas: {
+  ...StyleSheet.absoluteFillObject,
+  flexDirection: 'row',
+  pointerEvents: 'none',
+},
+
+lineaDivision: {
+  position: 'absolute',
+  width: 2,
+  height: '140%', // un poco más alta para cubrir la inclinación
+  backgroundColor: '#ffff00d3',
+  opacity: 0.8,
+  transform: [{ rotate: '15deg' }], // inclinación
+},
+lineaDivisionNegativa: {
+  position: 'absolute',
+  width: 2,
+  height: '140%',
+  backgroundColor: '#ffff00d3',
+  opacity: 0.8,
+  transform: [{ rotate: '15deg' }],
+},
+
 });

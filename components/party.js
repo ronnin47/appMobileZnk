@@ -25,9 +25,9 @@ export const Party = ({ pj }) => {
   const fondoUrl="https://res.cloudinary.com/dzul1hatw/image/upload/v1774897126/descarga_drneff.jpg";
   const fondoUrlRegistroKen="https://res.cloudinary.com/dzul1hatw/image/upload/v1773775660/WhatsApp_Image_2026-03-17_at_16.13.54_1_w5quwi.jpg"
   
+const fondoUrlLeyenda="https://res.cloudinary.com/dzul1hatw/image/upload/v1775231592/9c44e6368ca569c0a2ec788f053b6c3d_kj2rsn.jpg";
 
-
-
+const fondoUrlNormal="https://res.cloudinary.com/dzul1hatw/image/upload/v1775230094/5ffb7588b70b88f2f5341e3c0ce369a9_iwz1zm.avif";
 
 //recuperamos los personajes
   useEffect(() => {
@@ -458,7 +458,7 @@ const calcularEstadoFase = (pj, vidaActual) => {
   }, 0);
 
 
-
+const Contenedor = esLeyenda ? ImageBackground : View;
 
 
   return (
@@ -567,11 +567,24 @@ const calcularEstadoFase = (pj, vidaActual) => {
             
             const estadoFase = calcularEstadoFase(item, vidaActual);
 
+            //si es una estrella del destino
+           const esLeyenda = Number(item.ken) >= 400;
 
 
 
            return(          
-            <View style={styles.cardSeleccionado}>
+           <ImageBackground
+  source={
+    esLeyenda
+      ? { uri: fondoUrlLeyenda }
+      : { uri: fondoUrlNormal } // o una imagen negra
+  }
+  style={[
+  styles.cardSeleccionado,
+  esLeyenda && styles.cardSeleccionadoLeyenda
+]}
+  imageStyle={{ borderRadius: 10 }}
+>
 
               {/* Botón Quitar X */}
               <TouchableOpacity
@@ -582,54 +595,54 @@ const calcularEstadoFase = (pj, vidaActual) => {
               </TouchableOpacity>
 
              {/* Fila de imagen + nombre */}
-<View style={styles.row}>
+            <View style={styles.row}>
 
-                    <View style={styles.colImagen}>
-                        <Image
-                        source={item.imagenurl ? { uri: item.imagenurl } : imagenBase}
-                        style={styles.avatarLista}
-                        />
-                        <Text style={styles.dominio}>
-                        {item.dominio || "Dominio desconocido"}
-                        </Text>
+                                <View style={styles.colImagen}>
+                                    <Image
+                                    source={item.imagenurl ? { uri: item.imagenurl } : imagenBase}
+                                    style={styles.avatarLista}
+                                    />
+                                    <Text style={styles.dominio}>
+                                    {item.dominio || "Dominio desconocido"}
+                                    </Text>
 
-                         
-                        <Estrellitas ken={parseInt(item.ken) || 0} />
-                    </View>
+                                    
+                                    <Estrellitas ken={parseInt(item.ken) || 0} />
+                                </View>
 
-                    <View style={styles.infoPersonaje}>
-                        <Text style={styles.nombre} numberOfLines={1}>
-                        {item.nombre}
-                        </Text>
+                                <View style={styles.infoPersonaje}>
+                                    <Text style={styles.nombre} numberOfLines={1}>
+                                    {item.nombre}
+                                    </Text>
 
-                        
+                                    
 
-                       <Text style={styles.textVida}> 
-                        vida: {vidaActual}/{vidaTotal || "??"}     {estadoFase}
-                        </Text> 
-                        
+                                  <Text style={styles.textVida}> 
+                                    vida: {vidaActual}/{vidaTotal || "??"}     {estadoFase}
+                                    </Text> 
+                                    
 
-    
-                        <BarraVida 
-                        actual={vidaActual} 
-                        total={vidaTotal} 
-                        color="red"
-                         estadoFase={estadoFase}
-                         pulso={pulso} /> 
-                        
-                        <Text style={styles.textKi}> ki: {kiActual}/{kiTotal || "??"} </Text> 
-                        <Barra actual={kiActual} total={kiTotal} color="blue" /> 
-                        <Text style={styles.textKen}> ken: {kenActual}/{kenTotal || "??"} </Text> 
-                        
-                        <Barra actual={kenActual} total={kenTotal} color="green" />
+                
+                                    <BarraVida 
+                                    actual={vidaActual} 
+                                    total={vidaTotal} 
+                                    color="red"
+                                    estadoFase={estadoFase}
+                                    pulso={pulso} /> 
+                                    
+                                    <Text style={styles.textKi}> ki: {kiActual}/{kiTotal || "??"} </Text> 
+                                    <Barra actual={kiActual} total={kiTotal} color="blue" /> 
+                                    <Text style={styles.textKen}> ken: {kenActual}/{kenTotal || "??"} </Text> 
+                                    
+                                    <Barra actual={kenActual} total={kenTotal} color="green" />
 
-                        <Text style={styles.conviccion}>
-                        {item.conviccion || "Conviccion desconocida"}
-                        </Text>
-                    
-                    </View>
+                                    <Text style={styles.conviccion}>
+                                    {item.conviccion || "Conviccion desconocida"}
+                                    </Text>
+                                
+                                </View>
 
-</View>
+            </View>
 
               {/* Contador con botones subir/bajar y Enviar */}
               <View style={styles.rowInput}>
@@ -651,7 +664,7 @@ const calcularEstadoFase = (pj, vidaActual) => {
                   <Text style={{ color: 'white', fontWeight: 'bold' }}>Enviar</Text>
                 </TouchableOpacity>
               </View>
-            </View>
+            </ImageBackground>
             );
           }}
         />
@@ -762,9 +775,30 @@ const styles = StyleSheet.create({
   cardSeleccionado: { 
     flexDirection: "column", 
     padding: 12, 
+      borderWidth: 1,
+  borderColor: "#fcfcfc75", // oro más limpio
     backgroundColor: "rgba(0, 0, 0, 0.87)", 
     borderRadius: 10, 
     marginBottom: 10, position: "relative" },
+
+ cardSeleccionadoLeyenda: {
+  flexDirection: "column",
+  padding: 14,
+  borderWidth: 2,
+  borderColor: "#f7f0f0fd", // oro más limpio
+  backgroundColor: "rgba(10, 10, 10, 0.87)",
+  borderRadius: 10,
+  marginBottom: 12,
+  position: "relative",
+
+  // sombra (Android + iOS)
+  elevation: 10,
+  shadowColor: "#fdfdf9",
+  shadowOffset: { width: 0, height: 0 },
+  shadowOpacity: 0.6,
+  shadowRadius: 10,
+},
+
   avatar: { width: 55, height: 55, borderRadius: 30, marginRight: 4, borderWidth: 2, borderColor: "#000" },
   avatarLista: { width: 100, height: 100, borderRadius: 10,marginLeft:4, marginRight: 12, borderWidth: 2, borderColor: "#000" },
   
