@@ -1038,32 +1038,8 @@ switch (estadoDeFase) {
 
     </View>
       
-        
-        <TextInput
-          style={styles.input}
-          placeholder="Caracteristica principal"
-          placeholderTextColor="#ccc"
-          keyboardType="default"
-          value={principal}
-          onChangeText={setPrincipal}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Caracteristica secundaria"
-          placeholderTextColor="#ccc"
-          keyboardType="default"
-          value={secundaria}
-          onChangeText={setSecundaria}
-        />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Modificadores"
-          placeholderTextColor="#ccc"
-          keyboardType="default"
-          value={modificador}
-          onChangeText={setModificador}
-        />
+
 
         <View style={styles.dadosContainer}>
   {/* Primera columna con primeros 3 dados */}
@@ -1127,6 +1103,95 @@ switch (estadoDeFase) {
     ))}
   </View>
 </View>
+
+    
+
+      <View style={{flex:1, alignItems:'center', flexDirection:'row', paddingHorizontal: 10,marginTop: 20, marginBottom: 20}}>
+      
+      <View style={{flex:1, alignItems:'center', flexDirection:'column'}}>
+        <TextInput
+          style={[
+            styles.input,
+            { color: '#39e43f', textAlign: 'center', width: 100, fontSize: 22, fontWeight: 'bold' },
+          ]}
+          placeholder="..."
+          placeholderTextColor="#ccc"
+          keyboardType="default"
+          value={principal}
+          onChangeText={setPrincipal}
+        />
+
+        <Text style={{
+          width: 100,
+          color: '#39e43f',
+          textTransform: 'uppercase',
+          fontSize: 10,
+          fontFamily: 'Arial',
+          textAlign: 'center',
+          marginBottom: 4
+        }}>
+          {nombrePrincipal || "Principal"}
+        </Text>
+      </View>
+
+      <View style={{flex:1, alignItems:'center', flexDirection:'column'}}>
+        
+         <TextInput
+          style={[styles.input,{ color: "#fbe200",textAlign: 'center', width: 100, fontSize: 16, fontWeight: 'bold' }]}
+          placeholder="..."
+          placeholderTextColor="#ccc"
+          keyboardType="default"
+          value={secundaria}
+          onChangeText={setSecundaria}
+        />
+         <Text style={{
+              width: 100,
+              color: "#fbe200",
+              textTransform: 'uppercase',
+              fontSize: 10,
+              fontFamily: 'Arial',
+              textAlign: 'center',
+              marginBottom: 4
+            }}>
+          {nombreAptitud || "secundaria"}
+          </Text>
+
+      </View>
+
+      <View style={{flex:1, alignItems:'center', flexDirection:'column'}}>
+            <TextInput
+          style={[styles.input,{ color:'#2196F3',textAlign: 'center', width: 100, fontSize: 16, fontWeight: 'bold' }]}
+          placeholder="..."
+          placeholderTextColor="#ccc"
+          keyboardType="default"
+          value={modificador}
+          onChangeText={setModificador}
+        />
+         
+         <Text style={{
+              width: 100,
+              color: '#2196F3',
+              textTransform: 'uppercase',
+              fontSize: 10,
+              fontFamily: 'Arial',
+              textAlign: 'center',
+              marginBottom: 4
+            }}>
+              Modificador
+          </Text>
+        
+      </View>
+
+      
+
+      </View>
+
+
+       
+        
+
+       
+
 
 
 
