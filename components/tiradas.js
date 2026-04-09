@@ -1,6 +1,6 @@
 import React, { useContext, useState, useRef, useEffect,useMemo } from 'react';
 import { AuthContext } from './AuthContext';
-import { Dimensions,Animated, View,Text, TextInput, TouchableOpacity, StyleSheet, ScrollView,Image,Modal,Pressable,FlatList, Button } from 'react-native';
+import { Dimensions,Animated, View,Text, TextInput, TouchableOpacity, StyleSheet, ScrollView,Image,Modal,Pressable,FlatList, Button,ImageBackground } from 'react-native';
 import { ChatTiradas } from './chatTiradas';
 import { BarraVida } from './barraVida';
 import { BarraKi } from './barraKi';
@@ -54,7 +54,7 @@ export const Tiradas = ({ pj,ki,setKi,fortaleza,setFortaleza,ken,setKen,
   const { personajes, historialChat, setHistorialChat,savePersonajes,estatus,favoritos,setFavoritos,pjSeleccionado,setPjSeleccionado,nick} = useContext(AuthContext);
   
   const imagenBase = require('../assets/imagenBase.jpeg');
- 
+  const imagenFondoUrl ="https://res.cloudinary.com/dzul1hatw/image/upload/v1773775660/WhatsApp_Image_2026-03-17_at_16.13.54_1_w5quwi.jpg";
   //const p = personajes.find((p) => p.idpersonaje === pj.idpersonaje);
   const p = personajes.find(p => p.idpersonaje === pjSeleccionado);
   
@@ -934,805 +934,813 @@ switch (estadoDeFase) {
 
     <ChatTiradas p={p}/>
     
-    <ScrollView style={styles.container}>
 
-    <View style={styles.barras}>
+    <ImageBackground
+      source={{uri:imagenFondoUrl}} // ruta de tu imagen
+      style={{ flex: 1 }}
+      resizeMode="cover"
+    >
+      <ScrollView style={styles.container}>
 
-      {/* Barra de vida */}
-      <View style={{ position: 'relative', zIndex: 0 }}>
+          <View style={styles.barras}>
 
-            {estadoDeFase === "MUERTO" ? (
-            <View
-              pointerEvents="none"
-              style={{
-                ...StyleSheet.absoluteFillObject,
-                backgroundColor: 'rgba(10, 10, 10, 0.61)',
-                zIndex: 1,
-                borderRadius: 6,
-              }}
-            />
-          ) : (
-            estaHerido && (
-              <Animated.View
-                pointerEvents="none"
-                style={{
-                  ...StyleSheet.absoluteFillObject,
+            {/* Barra de vida */}
+            <View style={{ position: 'relative', zIndex: 0 }}>
 
-                  backgroundColor: pulso.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [
-                      'rgba(255,0,0,0.08)',
-                      'rgba(255,0,0,0.4)',
-                    ],
-                  }),
+                  {estadoDeFase === "MUERTO" ? (
+                  <View
+                    pointerEvents="none"
+                    style={{
+                      ...StyleSheet.absoluteFillObject,
+                      backgroundColor: 'rgba(10, 10, 10, 0.61)',
+                      zIndex: 1,
+                      borderRadius: 6,
+                    }}
+                  />
+                ) : (
+                  estaHerido && (
+                    <Animated.View
+                      pointerEvents="none"
+                      style={{
+                        ...StyleSheet.absoluteFillObject,
 
-                  backgroundColor: pulso.interpolate({
-  inputRange: [0, 1],
-  outputRange: [
-    `rgba(255,0,0,${intensidadMin})`,
-    `rgba(255,0,0,${intensidadMax})`,
-  ],
-}),
+                        backgroundColor: pulso.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [
+                            'rgba(255,0,0,0.08)',
+                            'rgba(255,0,0,0.4)',
+                          ],
+                        }),
 
-                  borderWidth: pulso.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0.5, 1.5],
-                  }),
+                        backgroundColor: pulso.interpolate({
+        inputRange: [0, 1],
+        outputRange: [
+          `rgba(255,0,0,${intensidadMin})`,
+          `rgba(255,0,0,${intensidadMax})`,
+        ],
+      }),
 
-                  borderColor: pulso.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [
-                      'rgba(10, 10, 10, 0.3)',
-                      'rgba(255, 0, 0, 0.47)',
-                    ],
-                  }),
+                        borderWidth: pulso.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [0.5, 1.5],
+                        }),
 
-                  borderRadius: 6,
-                  zIndex: 1,
-                }}
+                        borderColor: pulso.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [
+                            'rgba(10, 10, 10, 0.3)',
+                            'rgba(255, 0, 0, 0.47)',
+                          ],
+                        }),
+
+                        borderRadius: 6,
+                        zIndex: 1,
+                      }}
+                    />
+                  )
+                )}
+
+              <BarraVida            
+                setKenActual={setKenActual}
+                vidaActual={Number(vidaActual) || 0}
+                setVidaActual={setVidaActual}
+                pj={p}   
+                estadoDeFase={estadoDeFase}
+                setEstadoDeFase={setEstadoDeFase}
+                ki={ki}
+                setKi={setKi}
+                fortaleza={fortaleza}
+                setFortaleza={setFortaleza}
+                positiva={Number(positiva) || 0}
+                negativa={Number(negativa) || 0}
+                cicatriz={Number(cicatriz) || 0}
               />
-            )
-          )}
 
-        <BarraVida            
-          setKenActual={setKenActual}
-          vidaActual={Number(vidaActual) || 0}
-          setVidaActual={setVidaActual}
-          pj={p}   
-          estadoDeFase={estadoDeFase}
-          setEstadoDeFase={setEstadoDeFase}
-          ki={ki}
-          setKi={setKi}
-          fortaleza={fortaleza}
-          setFortaleza={setFortaleza}
-          positiva={Number(positiva) || 0}
-          negativa={Number(negativa) || 0}
-          cicatriz={Number(cicatriz) || 0}
-        />
+            </View>
 
-      </View>
+            {/* Barra Ki */}
+            <View style={{ zIndex: 0 }}>
+              <BarraKi 
+                kiActual={Number(kiActual) || 0}
+                setKiActual={setKiActual}
+                consumision={consumision}
+                setConsumision={setConsumision}
+                pj={p}
+                ki={ki}
+                setKi={setKi}
+              />
+            </View>
 
-      {/* Barra Ki */}
-      <View style={{ zIndex: 0 }}>
-        <BarraKi 
-          kiActual={Number(kiActual) || 0}
-          setKiActual={setKiActual}
-          consumision={consumision}
-          setConsumision={setConsumision}
-          pj={p}
-          ki={ki}
-          setKi={setKi}
-        />
-      </View>
+            {/* Barra Ken */}
+            <View style={{ zIndex: 0 }}>
+              <BarraKen
+                kenActual={Number(kenActual) || 0}
+                setKenActual={setKenActual}
+                pj={p}
+                ken={ken}
+                setKen={setKen}
+              />
+            </View>
 
-      {/* Barra Ken */}
-      <View style={{ zIndex: 0 }}>
-        <BarraKen
-          kenActual={Number(kenActual) || 0}
-          setKenActual={setKenActual}
-          pj={p}
-          ken={ken}
-          setKen={setKen}
-        />
-      </View>
-
-    </View>
-      
+          </View>
+            
 
 
 
-        <View style={styles.dadosContainer}>
-  {/* Primera columna con primeros 3 dados */}
-  <View style={styles.columna}>
-    {[
-       { label: "D10 bono", valor: dadosD10Bono, add: () => setDadosD10Bono(d => d + 1), rest: () => setDadosD10Bono(d => Math.max(0, d - 1)) },
-      { label: "D12 bono", valor: dadosD12Bono, add: () => setDadosD12Bono(d => d + 1), rest: () => setDadosD12Bono(d => Math.max(0, d - 1)) },
-      { label: "D4 bono", valor: dadosD4Bono, add: () => setDadosD4Bono(d => d + 1), rest: () => setDadosD4Bono(d => Math.max(0, d - 1)) },
-      
-     
-     
-    ].map((dado, idx) => (
-      <View key={idx} style={styles.dadoRow}>
-        <Text style={styles.dadoLabel}>
-          {dado.label}:{' '}
-           <Text style={{
-              color: dado.valor > 0 ? 'yellow' : 'white',
-              fontWeight: 'bold',
+              <View style={styles.dadosContainer}>
+        {/* Primera columna con primeros 3 dados */}
+        <View style={styles.columna}>
+          {[
+            { label: "D10 bono", valor: dadosD10Bono, add: () => setDadosD10Bono(d => d + 1), rest: () => setDadosD10Bono(d => Math.max(0, d - 1)) },
+            { label: "D12 bono", valor: dadosD12Bono, add: () => setDadosD12Bono(d => d + 1), rest: () => setDadosD12Bono(d => Math.max(0, d - 1)) },
+            { label: "D4 bono", valor: dadosD4Bono, add: () => setDadosD4Bono(d => d + 1), rest: () => setDadosD4Bono(d => Math.max(0, d - 1)) },
+            
+          
+          
+          ].map((dado, idx) => (
+            <View key={idx} style={styles.dadoRow}>
+              <Text style={styles.dadoLabel}>
+                {dado.label}:{' '}
+                <Text style={{
+                    color: dado.valor > 0 ? 'yellow' : 'white',
+                    fontWeight: 'bold',
+                    
+                  }}>{dado.valor}</Text>
+              </Text>
+              <View style={styles.botones}>
+                <TouchableOpacity style={styles.boton} onPress={dado.rest}>
+                  <Text style={styles.botonTexto}>-</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.boton} onPress={dado.add}>
+                  <Text style={styles.botonTexto}>+</Text>
+                </TouchableOpacity>         
+              </View>
+            </View>
+          ))}
+        </View>
+
+        {/* Segunda columna con los otros 3 dados */}
+        <View style={styles.columna}>
+          {[
+            { label: "D10 Ken", valor: dadosD10, add: () => setDadosD10(d => d + 1), rest: () => setDadosD10(d => Math.max(0, d - 1)) },
+            { label: "D20", valor: dadosD20, add: () => setDadosD20(d => d + 1), rest: () => setDadosD20(d => Math.max(0, d - 1)) },
+            { label: "D6 bono", valor: dadosD6Bono, add: () => setDadosD6Bono(d => d + 1), rest: () => setDadosD6Bono(d => Math.max(0, d - 1)) },
+            
+            
+          ].map((dado, idx) => (
+            <View key={idx} style={styles.dadoRow}>
+              <Text style={styles.dadoLabel}>
+                {dado.label}:{' '}
+                <Text style={{
+                    color: dado.valor > 0 ? 'yellow' : 'white',
+                    fontWeight: 'bold'
+                  }}>{dado.valor}</Text>
+              </Text>
+              <View style={styles.botones}>
+                <TouchableOpacity style={styles.boton} onPress={dado.rest}>
+                  <Text style={styles.botonTexto}>-</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.boton} onPress={dado.add}>
+                  <Text style={styles.botonTexto}>+</Text>
+                </TouchableOpacity>
               
-            }}>{dado.valor}</Text>
-        </Text>
-        <View style={styles.botones}>
-          <TouchableOpacity style={styles.boton} onPress={dado.rest}>
-            <Text style={styles.botonTexto}>-</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.boton} onPress={dado.add}>
-            <Text style={styles.botonTexto}>+</Text>
-          </TouchableOpacity>         
+              </View>
+            </View>
+          ))}
         </View>
       </View>
-    ))}
-  </View>
 
-  {/* Segunda columna con los otros 3 dados */}
-  <View style={styles.columna}>
-    {[
-       { label: "D10 Ken", valor: dadosD10, add: () => setDadosD10(d => d + 1), rest: () => setDadosD10(d => Math.max(0, d - 1)) },
-      { label: "D20", valor: dadosD20, add: () => setDadosD20(d => d + 1), rest: () => setDadosD20(d => Math.max(0, d - 1)) },
-      { label: "D6 bono", valor: dadosD6Bono, add: () => setDadosD6Bono(d => d + 1), rest: () => setDadosD6Bono(d => Math.max(0, d - 1)) },
-      
-      
-    ].map((dado, idx) => (
-      <View key={idx} style={styles.dadoRow}>
-        <Text style={styles.dadoLabel}>
-          {dado.label}:{' '}
-          <Text style={{
-              color: dado.valor > 0 ? 'yellow' : 'white',
-              fontWeight: 'bold'
-            }}>{dado.valor}</Text>
-        </Text>
-        <View style={styles.botones}>
-           <TouchableOpacity style={styles.boton} onPress={dado.rest}>
-            <Text style={styles.botonTexto}>-</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.boton} onPress={dado.add}>
-            <Text style={styles.botonTexto}>+</Text>
-          </TouchableOpacity>
-         
-        </View>
-      </View>
-    ))}
-  </View>
-</View>
+          
 
-    
-
-      <View style={{flex:1, alignItems:'center', flexDirection:'row', paddingHorizontal: 10,marginTop: 20, marginBottom: 20}}>
-      
-      <View style={{flex:1, alignItems:'center', flexDirection:'column'}}>
-        <TextInput
-          style={[
-            styles.input,
-            { color: '#39e43f', textAlign: 'center', width: 100, fontSize: 22, fontWeight: 'bold' },
-          ]}
-          placeholder="..."
-          placeholderTextColor="#ccc"
-          keyboardType="default"
-          value={principal}
-          onChangeText={setPrincipal}
-        />
-
-        <Text style={{
-          width: 100,
-          color: '#39e43f',
-          textTransform: 'uppercase',
-          fontSize: 10,
-          fontFamily: 'Arial',
-          textAlign: 'center',
-          marginBottom: 4
-        }}>
-          {nombrePrincipal || "Principal"}
-        </Text>
-      </View>
-
-      <View style={{flex:1, alignItems:'center', flexDirection:'column'}}>
-        
-         <TextInput
-          style={[styles.input,{ color: "#fbe200",textAlign: 'center', width: 100, fontSize: 16, fontWeight: 'bold' }]}
-          placeholder="..."
-          placeholderTextColor="#ccc"
-          keyboardType="default"
-          value={secundaria}
-          onChangeText={setSecundaria}
-        />
-         <Text style={{
-              width: 100,
-              color: "#fbe200",
-              textTransform: 'uppercase',
-              fontSize: 10,
-              fontFamily: 'Arial',
-              textAlign: 'center',
-              marginBottom: 4
-            }}>
-          {nombreAptitud || "secundaria"}
-          </Text>
-
-      </View>
-
-      <View style={{flex:1, alignItems:'center', flexDirection:'column'}}>
-            <TextInput
-          style={[styles.input,{ color:'#2196F3',textAlign: 'center', width: 100, fontSize: 16, fontWeight: 'bold' }]}
-          placeholder="..."
-          placeholderTextColor="#ccc"
-          keyboardType="default"
-          value={modificador}
-          onChangeText={setModificador}
-        />
-         
-         <Text style={{
-              width: 100,
-              color: '#2196F3',
-              textTransform: 'uppercase',
-              fontSize: 10,
-              fontFamily: 'Arial',
-              textAlign: 'center',
-              marginBottom: 4
-            }}>
-              Modificador
-          </Text>
-        
-      </View>
-
-      
-
-      </View>
-
-
-       
-        
-
-       
-
-
-
-
-
-
-
-<Modal
-  visible={modalVisibleTirada}
-  animationType="slide"
-  transparent={true}
-  onRequestClose={() => {
-    setTiradaSeleccionada(null);
-    setModalVisibleTirada(false);
-  }}
->
-  {/* TouchableWithoutFeedback solo en el fondo para detectar toque fuera */}
-  <TouchableWithoutFeedback
-    onPress={() => {
-      Keyboard.dismiss(); // opcional, para cerrar teclado si está abierto
-      setModalVisibleTirada(false);
-      setTiradaSeleccionada(null); // limpiar selección al cerrar tocando fuera
-    }}
-  >
-    <View style={styles.modalFondo}>
-      {/* Este TouchableWithoutFeedback absorbe los toques dentro del modal para que no propaguen */}
-      <TouchableWithoutFeedback onPress={() => { /* no hace nada para bloquear cierre */ }}>
-        <View style={styles.modalContenidoGrande}>
-          <Text style={styles.modalTitulo}>⚔️ Armar Tirada</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Nombre de la tirada"
-            placeholderTextColor="#ccc"
-            keyboardType="default"
-            value={nombreTirada}
-            onChangeText={setNombreTirada}
-          />
-
-
-
-          <View style={{ marginBottom: 16 }}>
-            <Text style={styles.label}>Caracteristica Principal</Text>
-            <View style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              borderWidth: 1,
-              borderColor: '#555',
-              borderRadius: 8,
-              paddingHorizontal: 10,
-              backgroundColor: '#1a1a1a'
-            }}>
+            <View style={{flex:1, alignItems:'center', flexDirection:'row', paddingHorizontal: 10,marginTop: 20, marginBottom: 20}}>
+            
+            <View style={{flex:1, alignItems:'center', flexDirection:'column'}}>
               <TextInput
-                style={{
-                  flex: 1,
-                  color: 'white',
-                  paddingVertical: 8,
-                  fontSize: 16,
-                }}
-                placeholder="Caracteristica principal"
-                placeholderTextColor="#888"
+                style={[
+                  styles.input,
+                  { color: '#39e43f', textAlign: 'center', width: 100, fontSize: 22, fontWeight: 'bold' },
+                ]}
+                placeholder="..."
+                placeholderTextColor="#ccc"
+                keyboardType="default"
                 value={principal}
                 onChangeText={setPrincipal}
               />
-              <TouchableOpacity
-                onPress={() => setMostrarSelectorPrincipal(!mostrarSelectorPrincipal)}
-                style={{ paddingHorizontal: 8 }}
-              >
-                <Text style={{ fontSize: 18, color: 'white' }}>▼</Text>
-              </TouchableOpacity>
-            </View>
-            {mostrarSelectorPrincipal && (
-              <View style={{
-                marginTop: 6,
-                backgroundColor: '#003b5c',
-                borderRadius: 6,
-                borderWidth: 1,
-                borderColor: '#00b4d8',
-                maxHeight: 140
+
+              <Text style={{
+                width: 100,
+                color: '#39e43f',
+                textTransform: 'uppercase',
+                fontSize: 10,
+                fontFamily: 'Arial',
+                textAlign: 'center',
+                marginBottom: 4
               }}>
-                <FlatList
-                  data={caracteristicasPrinciaples}
-                  keyExtractor={(item) => item}
-                  renderItem={({ item }) => (
-                    <TouchableOpacity
-                      onPress={() => {
-                        setPrincipal(item);
-                         setNombreTroncoTirada(item);  
-                        
-                        setMostrarSelectorPrincipal(false);
-                      }}
-                      style={{
-                        paddingVertical: 10,
-                        paddingHorizontal: 12,
-                        borderBottomWidth: 1,
-                        borderBottomColor: '#0077a6'
-                      }}
-                    >
-                      <Text style={{ color: 'white', fontSize: 15 }}>{item}</Text>
-                    </TouchableOpacity>
-                  )}
-                />
-              </View>
-            )}
-          </View>
-
-
-
-
-          <View style={{ marginBottom: 16 }}>
-            <Text style={styles.label}>Característica secundaria</Text>
-            <View style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              borderWidth: 1,
-              borderColor: '#555',
-              borderRadius: 8,
-              paddingHorizontal: 10,
-              backgroundColor: '#1a1a1a'
-            }}>
-             <TextInput
-  style={{
-    flex: 1,
-    color: 'white',
-    paddingVertical: 8,
-    fontSize: 16,
-  }}
-  placeholder="Caracteristica secundaria"
-  placeholderTextColor="#888"
-  value={secundaria}
-  onChangeText={setSecundaria}
-/>
-              <TouchableOpacity
-                onPress={() => setMostrarSelectorSecundaria(!mostrarSelectorSecundaria)}
-                style={{ paddingHorizontal: 8 }}
-              >
-                <Text style={{ fontSize: 18, color: 'white' }}>▼</Text>
-              </TouchableOpacity>
-            </View>
-            {mostrarSelectorSecundaria && (
-              <View style={{
-                marginTop: 6,
-                backgroundColor: '#003b5c',
-                borderRadius: 6,
-                borderWidth: 1,
-                borderColor: '#00b4d8',
-                maxHeight: 140
-              }}>
-                <FlatList
-                  data={caracteristicasSecundarias}
-                  keyExtractor={(item) => item}
-                  renderItem={({ item }) => (
-                    <TouchableOpacity
-                      onPress={() => {
-                        setSecundaria(item);
-                        setNombreAptitudTirada(item);  
-                        setMostrarSelectorSecundaria(false);
-                      }}
-                      style={{
-                        paddingVertical: 10,
-                        paddingHorizontal: 12,
-                        borderBottomWidth: 1,
-                        borderBottomColor: '#0077a6'
-                      }}
-                    >
-                      <Text style={{ color: 'white', fontSize: 15 }}>
-                        {etiquetasLegibles[item] || item}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                />
-              </View>
-            )}
-          </View>
-
-          <TextInput
-            style={styles.input}
-            placeholder="Modificador"
-            placeholderTextColor="#ccc"
-            keyboardType="default"
-            value={modificador}
-            onChangeText={setModificador}
-          />
-
-          <View style={styles.dadosContainer}>
-            {/* Columna izquierda */}
-            <View style={styles.columna}>
-              {[{ label: "D10 bono", valor: dadosD10Bono, add: () => setDadosD10Bono(d => d + 1), rest: () => setDadosD10Bono(d => Math.max(0, d - 1)) },
-                { label: "D12 bono", valor: dadosD12Bono, add: () => setDadosD12Bono(d => d + 1), rest: () => setDadosD12Bono(d => Math.max(0, d - 1)) },
-                { label: "D4 bono", valor: dadosD4Bono, add: () => setDadosD4Bono(d => d + 1), rest: () => setDadosD4Bono(d => Math.max(0, d - 1)) },
-              ].map((dado, idx) => (
-                <View key={idx} style={styles.dadoRow}>
-                  <Text style={styles.dadoLabel}>
-                    {dado.label}:{' '}
-                    <Text style={{
-                      color: dado.valor > 0 ? 'yellow' : 'white',
-                      fontWeight: 'bold',
-                    }}>{dado.valor}</Text>
-                  </Text>
-                  <View style={styles.botones}>
-                    <TouchableOpacity style={styles.boton} onPress={dado.rest}>
-                      <Text style={styles.botonTexto}>-</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.boton} onPress={dado.add}>
-                      <Text style={styles.botonTexto}>+</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              ))}
-            </View>
-
-            {/* Columna derecha */}
-            <View style={styles.columna}>
-              {[{ label: "D10 Ken", valor: dadosD10, add: () => setDadosD10(d => d + 1), rest: () => setDadosD10(d => Math.max(0, d - 1)) },
-                { label: "D20", valor: dadosD20, add: () => setDadosD20(d => d + 1), rest: () => setDadosD20(d => Math.max(0, d - 1)) },
-                { label: "D6 bono", valor: dadosD6Bono, add: () => setDadosD6Bono(d => d + 1), rest: () => setDadosD6Bono(d => Math.max(0, d - 1)) },
-              ].map((dado, idx) => (
-                <View key={idx} style={styles.dadoRow}>
-                  <Text style={styles.dadoLabel}>
-                    {dado.label}:{' '}
-                    <Text style={{
-                      color: dado.valor > 0 ? 'yellow' : 'white',
-                      fontWeight: 'bold'
-                    }}>{dado.valor}</Text>
-                  </Text>
-                  <View style={styles.botones}>
-                    <TouchableOpacity style={styles.boton} onPress={dado.rest}>
-                      <Text style={styles.botonTexto}>-</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.boton} onPress={dado.add}>
-                      <Text style={styles.botonTexto}>+</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              ))}
-            </View>
-          </View>
-
-          <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginBottom: 20 }}>
-
-            <Pressable
-              style={({ pressed }) => [
-                styles.confirmarBoton,
-                pressed && { opacity: 0.7, transform: [{ scale: 0.97 }] } // efecto al presionar
-              ]}
-              onPress={() => {
-                // Aquí ejecutás la lógica de tirada
-                //console.log("Guardando tirada con:",nombreTirada, principal, secundaria, dadosD20, dadosD10Bono);
-                const idtirada = tiradaSeleccionada ? tiradaSeleccionada.idtirada : Date.now();
-                const tiradaPj = {
-                  idtirada,
-                  ippersonajes: p.idpersonaje,
-                  nombre: nombreTirada || "",
-                  principal: principal || 0,
-                  secundaria: secundaria || 0,
-                  modificador:modificador || 0,
-                  dadosD20: dadosD20 || 0,
-                  dadosD10Bono: dadosD10Bono || 0,
-                  dadosD10: dadosD10 || 0,
-                  dadosD4Bono: dadosD4Bono || 0,
-                  dadosD6Bono: dadosD6Bono || 0,
-                  dadosD12Bono: dadosD12Bono || 0,
-                  nombrePrincipal: nombreTroncoTirada || "",
-                  nombreAptitud: nombreAptitudTirada || "",
-                 
-                }
-                agregarTiradaPj(tiradaPj)
-                setTiradaSeleccionada(null);
-                limpiarCamposTirada();
-                setNombreTirada("")
-                setModalVisibleTirada(false);
-              }}
-            >
-              <Text
-                style={[
-                  styles.confirmarTexto,
-                  tiradaSeleccionada && { color: '#000', } // cambia color de texto si está editando
-                ]}
-              >
-                {tiradaSeleccionada ? '✏️ Editar Tirada' : '🎲 Guardar Tirada'}
+                {nombrePrincipal || "Principal"}
               </Text>
-            </Pressable>
+            </View>
 
-            {tiradaSeleccionada && (
-              <Pressable
-                style={({ pressed }) => [
-                  styles.confirmarBoton,
-                  pressed && { opacity: 0.7, transform: [{ scale: 0.97 }] },
-                  , { backgroundColor: '#dd302abd', marginTop: 12, borderWidth: 1, borderColor: "gray" }
-                ]}
-                onPress={() => {
-                  eliminarTiradasPj(tiradaSeleccionada.idtirada);
-                  setTiradaSeleccionada(null);
-                  setModalVisibleTirada(false);
-                }}
-              >
-                <Text style={[styles.confirmarTexto, { color: '#fff' }]}>🗑️ Eliminar Tirada</Text>
-              </Pressable>
-            )}
+            <View style={{flex:1, alignItems:'center', flexDirection:'column'}}>
+              
+              <TextInput
+                style={[styles.input,{ color: "#fbe200",textAlign: 'center', width: 100, fontSize: 16, fontWeight: 'bold' }]}
+                placeholder="..."
+                placeholderTextColor="#ccc"
+                keyboardType="default"
+                value={secundaria}
+                onChangeText={setSecundaria}
+              />
+              <Text style={{
+                    width: 100,
+                    color: "#fbe200",
+                    textTransform: 'uppercase',
+                    fontSize: 10,
+                    fontFamily: 'Arial',
+                    textAlign: 'center',
+                    marginBottom: 4
+                  }}>
+                {nombreAptitud || "secundaria"}
+                </Text>
 
-          </View>
+            </View>
 
-          {/* 
-          <Pressable onPress={() => setModalVisibleTirada(false)} style={{ marginTop: 10 }}>
-            <Text style={{ color: '#aaa' }}>Cancelar</Text>
-          </Pressable> 
-          */}
-
-        </View>
-      </TouchableWithoutFeedback>
-    </View>
-  </TouchableWithoutFeedback>
-</Modal>
-
-
-
-
-
-
-
-
-<View style={{ width: '100%', alignItems: 'center',padding:6 }}>
-  <View style={{ flexDirection: 'row', width: '90%',alignItems: 'center' ,justifyContent:"center" }}>
-
-    <LinearGradient
-      colors={['#cfd396ff', '#1f6f94ff', '#383f7c36']}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 0 }}
-      style={[
-        styles.botonPrincipal,
-        { width: '30%', marginLeft: 10 },
-        tiradaSeleccionada && {
-          borderWidth: 1.5,
-          borderColor: '#00ff0dff',
-          shadowColor: '#00ff0dff',
-          shadowOffset: { width: 0, height: 3 },
-          shadowOpacity: 0.9,
-          shadowRadius: 20,
-          elevation: 8,
-        }
-      ]}
-    >
-      <TouchableOpacity  
-      onPress={() => {
-        if (!tiradaSeleccionada) {
-          limpiarCamposTirada();
-        }
-        setModalVisibleTirada(true);
-      }}
-
-       style={styles.botonToque}> 
-        <Text style={styles.botonPrincipalTexto}>+🎲</Text>
-      </TouchableOpacity>
-    </LinearGradient>
-
-   <Animatable.View ref={botonAnimRef} style={[styles.botonPrincipal, { width: '50%', marginLeft: 10 }]}>
-  <LinearGradient
-    colors={['#EF6C00', '#E65100', '#BF360C']}
-    start={{ x: 0, y: 0 }}
-    end={{ x: 1, y: 0 }}
-    style={{ flex: 1, borderRadius: 10, overflow: 'hidden' }} // Para que la animación respete bordes
-  >
-    <TouchableOpacity
-      style={styles.botonToque}
-      onPress={() => {
-        tirarDados();
-       
-        limpiarCamposTirada();
-        setTimeout(() => {
-            botonAnimRef.current?.rubberBand(400); 
-           Vibration.vibrate([80, 50, 80, 50, 150, 50, 300]);
-        
-        }, 1000);
-         sonidoDados();
-
-      }}
-    >
-      <Text style={styles.botonPrincipalTexto}>Tirar Dados</Text>
-    </TouchableOpacity>
-  </LinearGradient>
-</Animatable.View>
-
-   
-  </View>
-</View>
-
-
-
-{/* BOTONES DE TIRADAS */}
-{tiradasGuardadasPj.length > 0 && (
-  <View
-    style={{
-      paddingTop: 20,
-      paddingHorizontal: 10,
-      flexDirection: "row",
-      flexWrap: "wrap",
-      justifyContent: "space-between",
-    }}
-  >
-    {tiradasGuardadasPj
-      .filter((t) => t.ippersonajes === p.idpersonaje)
-      .sort((a, b) => a.nombre.localeCompare(b.nombre))
-      .map((item, index) => {
-        const estaSeleccionada =
-          tiradaSeleccionada &&
-          item.idtirada === tiradaSeleccionada.idtirada;
-
-        return (
-          <Pressable
-            key={item.idtirada + index}
-            onPress={async () => {
-              await reproducirSonidoSeleccion();
-              setearTiradas(item)}
-            }
-            style={({ pressed }) => [
-              {
-                backgroundColor: estaSeleccionada ? "#ffffff" : "#b39ddb60",
-                
-                //backgroundColor: estaSeleccionada ? "#f7f7f7ec" : "#b39ddb9f",
-                width: "48%",
-                minHeight: 44,
-
-                paddingVertical: 12,
-                paddingHorizontal: 12,
-
-                borderRadius: 10,
-                marginBottom: 12,
-
-                justifyContent: "center",
-                alignItems: "center",
-
-                borderWidth: estaSeleccionada ? 1.5 : 1,
-                borderColor: estaSeleccionada ? "#00ff0dff" : "#af8f8fda",
-
-
+            <View style={{flex:1, alignItems:'center', flexDirection:'column'}}>
+                  <TextInput
+                style={[styles.input,{ color:'#2196F3',textAlign: 'center', width: 100, fontSize: 16, fontWeight: 'bold' }]}
+                placeholder="..."
+                placeholderTextColor="#ccc"
+                keyboardType="default"
+                value={modificador}
+                onChangeText={setModificador}
+              />
+              
+              <Text style={{
+                    width: 100,
+                    color: '#2196F3',
+                    textTransform: 'uppercase',
+                    fontSize: 10,
+                    fontFamily: 'Arial',
+                    textAlign: 'center',
+                    marginBottom: 4
+                  }}>
+                    Modificador
+                </Text>
+              
+            </View>
 
             
 
-                elevation: estaSeleccionada ? 6 : 2,
+            </View>
 
-                opacity: pressed ? 0.6 : 1,
-              },
-            ]}
-          >
-            <Text
-              numberOfLines={1}
-              style={{
-                color: estaSeleccionada ? "#111" : "#fffdfd",
-                fontWeight: estaSeleccionada ? "700" : "500",
-                fontSize: 13,
-              }}
-            >
-              {item.nombre}
-            </Text>
-          </Pressable>
-        );
-      })}
-  </View>
-)}
- 
 
-      
+            
+              
 
-      
-     <View>
-      <TouchableOpacity
-  onPress={() => setMostrarResultadosTirada(prev => !prev)}
-  activeOpacity={0.7}
- style={[styles.acordeonHeader,{borderWidth:0.2, borderColor:"gray", borderRadius:8}]}
->
-  <Text style={styles.acordeonTitulo}>
-    Resultado tirada {mostrarResultadosTirada ? '▲' : '▼'}
-  </Text>
-</TouchableOpacity>
+            
 
-      
-      </View>   
-       {mostrarResultadosTirada && (
-          <View style={styles.resultado}>
-          <Text style={styles.resultadoTexto}>Caracteristcia principal: {valPrincipal}</Text>
-          <Text style={styles.resultadoTexto}>Caracteristcia secundaria: {valSecundaria}</Text>
-          <Text style={styles.resultadoTexto}>Modificador: {valModificador}</Text>
-          <Text style={styles.resultadoTexto}>D10 esfuerzo: {valTirada}</Text>
-          <Text style={styles.resultadoTexto}>Bono D10 Ken: {valTiradaD10}</Text>
-          <Text style={styles.resultadoTexto}>Bono D20 bono: {valTiradaD20}</Text>
-          <Text style={styles.resultadoTexto}>Bono D10 bono: {valTiradaD10Bono}</Text>
-          <Text style={styles.resultadoTexto}>Bono D12 bono: {valTiradaD12}</Text>
-          <Text style={styles.resultadoTexto}>Bono D6 bono: {valTiradaD6}</Text>
-          <Text style={styles.resultadoTexto}>Bono D4 bono: {valTiradaD4}</Text>
-          
-          
-          <Text style={styles.resultadoTotal}>TOTAL: {sumaTirada}</Text>
-        </View>
-       )}
 
-         <View style={styles.acordeonContainer}>
-              <TouchableOpacity onPress={() => setAbierto(!abierto)} style={styles.acordeonHeader}>
-                <Text style={styles.acordeonTitulo}>Fases y cicatrices {abierto ? '▲' : '▼'}</Text>
-              </TouchableOpacity>
 
-              {abierto && (
-                <View style={styles.inputsContainer}>
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.labelFases}>Fases de Salud {faseSalud} pv</Text>
-                    <Text style={styles.label}>Fases positivas</Text>
+
+
+
+
+      <Modal
+        visible={modalVisibleTirada}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => {
+          setTiradaSeleccionada(null);
+          setModalVisibleTirada(false);
+        }}
+      >
+        {/* TouchableWithoutFeedback solo en el fondo para detectar toque fuera */}
+        <TouchableWithoutFeedback
+          onPress={() => {
+            Keyboard.dismiss(); // opcional, para cerrar teclado si está abierto
+            setModalVisibleTirada(false);
+            setTiradaSeleccionada(null); // limpiar selección al cerrar tocando fuera
+          }}
+        >
+          <View style={styles.modalFondo}>
+            {/* Este TouchableWithoutFeedback absorbe los toques dentro del modal para que no propaguen */}
+            <TouchableWithoutFeedback onPress={() => { /* no hace nada para bloquear cierre */ }}>
+              <View style={styles.modalContenidoGrande}>
+                <Text style={styles.modalTitulo}>⚔️ Armar Tirada</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nombre de la tirada"
+                  placeholderTextColor="#ccc"
+                  keyboardType="default"
+                  value={nombreTirada}
+                  onChangeText={setNombreTirada}
+                />
+
+
+
+                <View style={{ marginBottom: 16 }}>
+                  <Text style={styles.label}>Caracteristica Principal</Text>
+                  <View style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: '#555',
+                    borderRadius: 8,
+                    paddingHorizontal: 10,
+                    backgroundColor: '#1a1a1a'
+                  }}>
                     <TextInput
-                      style={styles.input}
-                      placeholder="Fases positivas"
-                      placeholderTextColor="#aaa"
-                      value={positiva}
-                      onChangeText={setPositiva}
-                      keyboardType="numbers-and-punctuation"
+                      style={{
+                        flex: 1,
+                        color: 'white',
+                        paddingVertical: 8,
+                        fontSize: 16,
+                      }}
+                      placeholder="Caracteristica principal"
+                      placeholderTextColor="#888"
+                      value={principal}
+                      onChangeText={setPrincipal}
                     />
+                    <TouchableOpacity
+                      onPress={() => setMostrarSelectorPrincipal(!mostrarSelectorPrincipal)}
+                      style={{ paddingHorizontal: 8 }}
+                    >
+                      <Text style={{ fontSize: 18, color: 'white' }}>▼</Text>
+                    </TouchableOpacity>
+                  </View>
+                  {mostrarSelectorPrincipal && (
+                    <View style={{
+                      marginTop: 6,
+                      backgroundColor: '#003b5c',
+                      borderRadius: 6,
+                      borderWidth: 1,
+                      borderColor: '#00b4d8',
+                      maxHeight: 140
+                    }}>
+                      <FlatList
+                        data={caracteristicasPrinciaples}
+                        keyExtractor={(item) => item}
+                        renderItem={({ item }) => (
+                          <TouchableOpacity
+                            onPress={() => {
+                              setPrincipal(item);
+                              setNombreTroncoTirada(item);  
+                              
+                              setMostrarSelectorPrincipal(false);
+                            }}
+                            style={{
+                              paddingVertical: 10,
+                              paddingHorizontal: 12,
+                              borderBottomWidth: 1,
+                              borderBottomColor: '#0077a6'
+                            }}
+                          >
+                            <Text style={{ color: 'white', fontSize: 15 }}>{item}</Text>
+                          </TouchableOpacity>
+                        )}
+                      />
+                    </View>
+                  )}
+                </View>
+
+
+
+
+                <View style={{ marginBottom: 16 }}>
+                  <Text style={styles.label}>Característica secundaria</Text>
+                  <View style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: '#555',
+                    borderRadius: 8,
+                    paddingHorizontal: 10,
+                    backgroundColor: '#1a1a1a'
+                  }}>
+                  <TextInput
+        style={{
+          flex: 1,
+          color: 'white',
+          paddingVertical: 8,
+          fontSize: 16,
+        }}
+        placeholder="Caracteristica secundaria"
+        placeholderTextColor="#888"
+        value={secundaria}
+        onChangeText={setSecundaria}
+      />
+                    <TouchableOpacity
+                      onPress={() => setMostrarSelectorSecundaria(!mostrarSelectorSecundaria)}
+                      style={{ paddingHorizontal: 8 }}
+                    >
+                      <Text style={{ fontSize: 18, color: 'white' }}>▼</Text>
+                    </TouchableOpacity>
+                  </View>
+                  {mostrarSelectorSecundaria && (
+                    <View style={{
+                      marginTop: 6,
+                      backgroundColor: '#003b5c',
+                      borderRadius: 6,
+                      borderWidth: 1,
+                      borderColor: '#00b4d8',
+                      maxHeight: 140
+                    }}>
+                      <FlatList
+                        data={caracteristicasSecundarias}
+                        keyExtractor={(item) => item}
+                        renderItem={({ item }) => (
+                          <TouchableOpacity
+                            onPress={() => {
+                              setSecundaria(item);
+                              setNombreAptitudTirada(item);  
+                              setMostrarSelectorSecundaria(false);
+                            }}
+                            style={{
+                              paddingVertical: 10,
+                              paddingHorizontal: 12,
+                              borderBottomWidth: 1,
+                              borderBottomColor: '#0077a6'
+                            }}
+                          >
+                            <Text style={{ color: 'white', fontSize: 15 }}>
+                              {etiquetasLegibles[item] || item}
+                            </Text>
+                          </TouchableOpacity>
+                        )}
+                      />
+                    </View>
+                  )}
+                </View>
+
+                <TextInput
+                  style={styles.input}
+                  placeholder="Modificador"
+                  placeholderTextColor="#ccc"
+                  keyboardType="default"
+                  value={modificador}
+                  onChangeText={setModificador}
+                />
+
+                <View style={styles.dadosContainer}>
+                  {/* Columna izquierda */}
+                  <View style={styles.columna}>
+                    {[{ label: "D10 bono", valor: dadosD10Bono, add: () => setDadosD10Bono(d => d + 1), rest: () => setDadosD10Bono(d => Math.max(0, d - 1)) },
+                      { label: "D12 bono", valor: dadosD12Bono, add: () => setDadosD12Bono(d => d + 1), rest: () => setDadosD12Bono(d => Math.max(0, d - 1)) },
+                      { label: "D4 bono", valor: dadosD4Bono, add: () => setDadosD4Bono(d => d + 1), rest: () => setDadosD4Bono(d => Math.max(0, d - 1)) },
+                    ].map((dado, idx) => (
+                      <View key={idx} style={styles.dadoRow}>
+                        <Text style={styles.dadoLabel}>
+                          {dado.label}:{' '}
+                          <Text style={{
+                            color: dado.valor > 0 ? 'yellow' : 'white',
+                            fontWeight: 'bold',
+                          }}>{dado.valor}</Text>
+                        </Text>
+                        <View style={styles.botones}>
+                          <TouchableOpacity style={styles.boton} onPress={dado.rest}>
+                            <Text style={styles.botonTexto}>-</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity style={styles.boton} onPress={dado.add}>
+                            <Text style={styles.botonTexto}>+</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    ))}
                   </View>
 
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Fases negativas</Text>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Fases negativas"
-                      placeholderTextColor="#aaa"
-                      value={negativa}
-                      onChangeText={setNegativa}
-                      keyboardType="numbers-and-punctuation"
-                    />
-                  </View>
-
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Puntos de cicatrices</Text>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Puntos de cicatrices"
-                      placeholderTextColor="#aaa"
-                      value={cicatriz}
-                      onChangeText={setCicatriz}
-                      keyboardType="numbers-and-punctuation"
-                    />
+                  {/* Columna derecha */}
+                  <View style={styles.columna}>
+                    {[{ label: "D10 Ken", valor: dadosD10, add: () => setDadosD10(d => d + 1), rest: () => setDadosD10(d => Math.max(0, d - 1)) },
+                      { label: "D20", valor: dadosD20, add: () => setDadosD20(d => d + 1), rest: () => setDadosD20(d => Math.max(0, d - 1)) },
+                      { label: "D6 bono", valor: dadosD6Bono, add: () => setDadosD6Bono(d => d + 1), rest: () => setDadosD6Bono(d => Math.max(0, d - 1)) },
+                    ].map((dado, idx) => (
+                      <View key={idx} style={styles.dadoRow}>
+                        <Text style={styles.dadoLabel}>
+                          {dado.label}:{' '}
+                          <Text style={{
+                            color: dado.valor > 0 ? 'yellow' : 'white',
+                            fontWeight: 'bold'
+                          }}>{dado.valor}</Text>
+                        </Text>
+                        <View style={styles.botones}>
+                          <TouchableOpacity style={styles.boton} onPress={dado.rest}>
+                            <Text style={styles.botonTexto}>-</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity style={styles.boton} onPress={dado.add}>
+                            <Text style={styles.botonTexto}>+</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    ))}
                   </View>
                 </View>
-              )}
-         </View>
+
+                <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginBottom: 20 }}>
+
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.confirmarBoton,
+                      pressed && { opacity: 0.7, transform: [{ scale: 0.97 }] } // efecto al presionar
+                    ]}
+                    onPress={() => {
+                      // Aquí ejecutás la lógica de tirada
+                      //console.log("Guardando tirada con:",nombreTirada, principal, secundaria, dadosD20, dadosD10Bono);
+                      const idtirada = tiradaSeleccionada ? tiradaSeleccionada.idtirada : Date.now();
+                      const tiradaPj = {
+                        idtirada,
+                        ippersonajes: p.idpersonaje,
+                        nombre: nombreTirada || "",
+                        principal: principal || 0,
+                        secundaria: secundaria || 0,
+                        modificador:modificador || 0,
+                        dadosD20: dadosD20 || 0,
+                        dadosD10Bono: dadosD10Bono || 0,
+                        dadosD10: dadosD10 || 0,
+                        dadosD4Bono: dadosD4Bono || 0,
+                        dadosD6Bono: dadosD6Bono || 0,
+                        dadosD12Bono: dadosD12Bono || 0,
+                        nombrePrincipal: nombreTroncoTirada || "",
+                        nombreAptitud: nombreAptitudTirada || "",
+                      
+                      }
+                      agregarTiradaPj(tiradaPj)
+                      setTiradaSeleccionada(null);
+                      limpiarCamposTirada();
+                      setNombreTirada("")
+                      setModalVisibleTirada(false);
+                    }}
+                  >
+                    <Text
+                      style={[
+                        styles.confirmarTexto,
+                        tiradaSeleccionada && { color: '#000', } // cambia color de texto si está editando
+                      ]}
+                    >
+                      {tiradaSeleccionada ? '✏️ Editar Tirada' : '🎲 Guardar Tirada'}
+                    </Text>
+                  </Pressable>
+
+                  {tiradaSeleccionada && (
+                    <Pressable
+                      style={({ pressed }) => [
+                        styles.confirmarBoton,
+                        pressed && { opacity: 0.7, transform: [{ scale: 0.97 }] },
+                        , { backgroundColor: '#dd302abd', marginTop: 12, borderWidth: 1, borderColor: "gray" }
+                      ]}
+                      onPress={() => {
+                        eliminarTiradasPj(tiradaSeleccionada.idtirada);
+                        setTiradaSeleccionada(null);
+                        setModalVisibleTirada(false);
+                      }}
+                    >
+                      <Text style={[styles.confirmarTexto, { color: '#fff' }]}>🗑️ Eliminar Tirada</Text>
+                    </Pressable>
+                  )}
+
+                </View>
+
+                {/* 
+                <Pressable onPress={() => setModalVisibleTirada(false)} style={{ marginTop: 10 }}>
+                  <Text style={{ color: '#aaa' }}>Cancelar</Text>
+                </Pressable> 
+                */}
+
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
+
+
+
+
+
+
+
+      <View style={{ width: '100%', alignItems: 'center',padding:6 }}>
+        <View style={{ flexDirection: 'row', width: '90%',alignItems: 'center' ,justifyContent:"center" }}>
+
+          <LinearGradient
+            colors={['#cfd396ff', '#1f6f94ff', '#383f7c36']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={[
+              styles.botonPrincipal,
+              { width: '30%', marginLeft: 10 },
+              tiradaSeleccionada && {
+                borderWidth: 1.5,
+                borderColor: '#00ff0dff',
+                shadowColor: '#00ff0dff',
+                shadowOffset: { width: 0, height: 3 },
+                shadowOpacity: 0.9,
+                shadowRadius: 20,
+                elevation: 8,
+              }
+            ]}
+          >
+            <TouchableOpacity  
+            onPress={() => {
+              if (!tiradaSeleccionada) {
+                limpiarCamposTirada();
+              }
+              setModalVisibleTirada(true);
+            }}
+
+            style={styles.botonToque}> 
+              <Text style={styles.botonPrincipalTexto}>+🎲</Text>
+            </TouchableOpacity>
+          </LinearGradient>
+
+        <Animatable.View ref={botonAnimRef} style={[styles.botonPrincipal, { width: '50%', marginLeft: 10 }]}>
+        <LinearGradient
+          colors={['#EF6C00', '#E65100', '#BF360C']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={{ flex: 1, borderRadius: 10, overflow: 'hidden' }} // Para que la animación respete bordes
+        >
+          <TouchableOpacity
+            style={styles.botonToque}
+            onPress={() => {
+              tirarDados();
+            
+              limpiarCamposTirada();
+              setTimeout(() => {
+                  botonAnimRef.current?.rubberBand(400); 
+                Vibration.vibrate([80, 50, 80, 50, 150, 50, 300]);
+              
+              }, 1000);
+              sonidoDados();
+
+            }}
+          >
+            <Text style={styles.botonPrincipalTexto}>Tirar Dados</Text>
+          </TouchableOpacity>
+        </LinearGradient>
+      </Animatable.View>
+
+        
+        </View>
+      </View>
+
+
+
+      {/* BOTONES DE TIRADAS */}
+      {tiradasGuardadasPj.length > 0 && (
+        <View
+          style={{
+            paddingTop: 20,
+            paddingHorizontal: 10,
+            flexDirection: "row",
+            flexWrap: "wrap",
+            justifyContent: "space-between",
+          }}
+        >
+          {tiradasGuardadasPj
+            .filter((t) => t.ippersonajes === p.idpersonaje)
+            .sort((a, b) => a.nombre.localeCompare(b.nombre))
+            .map((item, index) => {
+              const estaSeleccionada =
+                tiradaSeleccionada &&
+                item.idtirada === tiradaSeleccionada.idtirada;
+
+              return (
+                <Pressable
+                  key={item.idtirada + index}
+                  onPress={async () => {
+                    await reproducirSonidoSeleccion();
+                    setearTiradas(item)}
+                  }
+                  style={({ pressed }) => [
+                    {
+                      backgroundColor: estaSeleccionada ? "#ffffff" : "#56496df1",
+                      
+                      //backgroundColor: estaSeleccionada ? "#f7f7f7ec" : "#b39ddb9f",
+                      width: "48%",
+                      minHeight: 44,
+
+                      paddingVertical: 12,
+                      paddingHorizontal: 12,
+
+                      borderRadius: 10,
+                      marginBottom: 12,
+
+                      justifyContent: "center",
+                      alignItems: "center",
+
+                      borderWidth: estaSeleccionada ? 1.5 : 1,
+                      borderColor: estaSeleccionada ? "#00ff0dff" : "#af8f8fda",
+
+
+
+                  
+
+                      elevation: estaSeleccionada ? 6 : 2,
+
+                      opacity: pressed ? 0.6 : 1,
+                    },
+                  ]}
+                >
+                  <Text
+                    numberOfLines={1}
+                    style={{
+                      color: estaSeleccionada ? "#111" : "#fffdfd",
+                      fontWeight: estaSeleccionada ? "700" : "500",
+                      fontSize: 13,
+                    }}
+                  >
+                    {item.nombre}
+                  </Text>
+                </Pressable>
+              );
+            })}
+        </View>
+      )}
+      
+
+            
+
+            
+          <View>
+            <TouchableOpacity
+        onPress={() => setMostrarResultadosTirada(prev => !prev)}
+        activeOpacity={0.7}
+      style={[styles.acordeonHeader,{borderWidth:0.2, borderColor:"gray", borderRadius:8}]}
+      >
+        <Text style={styles.acordeonTitulo}>
+          Resultado tirada {mostrarResultadosTirada ? '▲' : '▼'}
+        </Text>
+      </TouchableOpacity>
+
+            
+            </View>   
+            {mostrarResultadosTirada && (
+                <View style={styles.resultado}>
+                <Text style={styles.resultadoTexto}>Caracteristcia principal: {valPrincipal}</Text>
+                <Text style={styles.resultadoTexto}>Caracteristcia secundaria: {valSecundaria}</Text>
+                <Text style={styles.resultadoTexto}>Modificador: {valModificador}</Text>
+                <Text style={styles.resultadoTexto}>D10 esfuerzo: {valTirada}</Text>
+                <Text style={styles.resultadoTexto}>Bono D10 Ken: {valTiradaD10}</Text>
+                <Text style={styles.resultadoTexto}>Bono D20 bono: {valTiradaD20}</Text>
+                <Text style={styles.resultadoTexto}>Bono D10 bono: {valTiradaD10Bono}</Text>
+                <Text style={styles.resultadoTexto}>Bono D12 bono: {valTiradaD12}</Text>
+                <Text style={styles.resultadoTexto}>Bono D6 bono: {valTiradaD6}</Text>
+                <Text style={styles.resultadoTexto}>Bono D4 bono: {valTiradaD4}</Text>
+                
+                
+                <Text style={styles.resultadoTotal}>TOTAL: {sumaTirada}</Text>
+              </View>
+            )}
+
+              <View style={styles.acordeonContainer}>
+                    <TouchableOpacity onPress={() => setAbierto(!abierto)} style={styles.acordeonHeader}>
+                      <Text style={styles.acordeonTitulo}>Fases y cicatrices {abierto ? '▲' : '▼'}</Text>
+                    </TouchableOpacity>
+
+                    {abierto && (
+                      <View style={styles.inputsContainer}>
+                        <View style={styles.inputGroup}>
+                          <Text style={styles.labelFases}>Fases de Salud {faseSalud} pv</Text>
+                          <Text style={styles.label}>Fases positivas</Text>
+                          <TextInput
+                            style={styles.input}
+                            placeholder="Fases positivas"
+                            placeholderTextColor="#aaa"
+                            value={positiva}
+                            onChangeText={setPositiva}
+                            keyboardType="numbers-and-punctuation"
+                          />
+                        </View>
+
+                        <View style={styles.inputGroup}>
+                          <Text style={styles.label}>Fases negativas</Text>
+                          <TextInput
+                            style={styles.input}
+                            placeholder="Fases negativas"
+                            placeholderTextColor="#aaa"
+                            value={negativa}
+                            onChangeText={setNegativa}
+                            keyboardType="numbers-and-punctuation"
+                          />
+                        </View>
+
+                        <View style={styles.inputGroup}>
+                          <Text style={styles.label}>Puntos de cicatrices</Text>
+                          <TextInput
+                            style={styles.input}
+                            placeholder="Puntos de cicatrices"
+                            placeholderTextColor="#aaa"
+                            value={cicatriz}
+                            onChangeText={setCicatriz}
+                            keyboardType="numbers-and-punctuation"
+                          />
+                        </View>
+                      </View>
+                    )}
+              </View>
 
       </ScrollView>
+</ImageBackground>
+    
 
 
 
@@ -1771,7 +1779,7 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: 12,
-    backgroundColor: "#1a1a1a",
+    backgroundColor: "#1a1a1a77",
     flex: 1,
   },
   titulo: {
