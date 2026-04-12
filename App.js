@@ -34,6 +34,8 @@ import { ObjetosMagicos } from './components/objetosMagicos';
 import { Neotecnia } from './components/neotecnia';
 import { Herbolaria} from './components/herbolaria';
 
+import{ Animaciones } from './components/animaciones';
+
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -158,7 +160,7 @@ if (isLoading) {
       resizeMode="cover"
     >
       <View style={styles.overlay}>
-          <View style={{ height:"95%", overflow: 'hidden', width: '100%', marginTop: 60, }}>
+          <View style={{ height:"85%", overflow: 'hidden', width: '100%', marginTop: 60, }}>
              <Animated.View
           style={{
             transform: [{ translateY }],
@@ -173,8 +175,54 @@ if (isLoading) {
 
           </View>
         
-       
-        <ActivityIndicator size="large" color="cyan" />
+        {/************************ aca vamos a poner el naka*****************************/}
+<View
+  style={{
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  }}
+>
+  <View style={{ position: "relative", width: 80, height: 100 }}>
+    
+    {/* Spinner abajo (fondo) */}
+    <View
+      style={{
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 60,
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 1,
+        elevation: 1,
+      }}
+    >
+      <ActivityIndicator size="small" color="#7dd8b2" />
+    </View>
+
+    {/* Naka arriba (encima visualmente si se cruzan) */}
+    <View
+      style={{
+        position: "absolute",
+        top: -20,
+        left: 0,
+        right: 0,
+        height: 40,
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 2,
+        elevation: 2,
+      }}
+    >
+      <Animaciones scaleSize={0.6} />
+    </View>
+
+  </View>
+</View>
+        
+        
       </View>
     </ImageBackground>
   );
