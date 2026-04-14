@@ -463,6 +463,29 @@ const toggleFavorito = async (idPersonaje) => {
 };
 
 
+
+//para el update de animaciones pra la coleccion de todos los personajes 
+const updateAnimacionPersonaje = (idpersonaje, animacion) => {
+  setColeccionPersonajes(prev =>
+    prev.map(p =>
+      p.idpersonaje === idpersonaje
+        ? { ...p, ...animacion }
+        : p
+    )
+  );
+};
+
+//update para la coleccion del usuario
+const updateAnimacionPersonajeUsuario = (idpersonaje, animacion) => {
+  setPersonajes(prev =>
+    prev.map(p =>
+      p.idpersonaje === idpersonaje
+        ? { ...p, ...animacion }
+        : p
+    )
+  );
+};
+
   
   return (
     <AuthContext.Provider
@@ -503,6 +526,9 @@ const toggleFavorito = async (idPersonaje) => {
         notasUsuario,
         setNotasUsuario,
         loadData,
+
+        updateAnimacionPersonaje,
+        updateAnimacionPersonajeUsuario,
       }}
     >
       {children}

@@ -21,6 +21,7 @@ import { API_BASE_URL } from './config';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Tronco } from './tronco';
 import { Audio } from 'expo-av';
+import { AnimacionModel } from './animacionModel';
 
 // Componente Accordion personalizado
 const CustomAccordion = ({ title, expanded, onPress, children, icon }) => (
@@ -1056,28 +1057,85 @@ const guardarImagenEnColeccion = async (imagenColeccion) => {
   </TouchableOpacity>
 )}
 
-  {/* INPUT DE NOMBRE Y OTROS CAMPOS */}
-  <View style={styles.inputsContainer}>
 
-    <Text style={styles.label}>Nombre</Text> 
-    <TextInput placeholder="Nombre" placeholderTextColor={colorPlaceHolder} style={styles.inputTexto} value={nombre} onChangeText={setNombre} />
+<View style={{ flexDirection: 'row', alignItems: 'flex-start', marginTop: 10 }}>
 
+  
+
+  {/* INPUTS */}
+  <View style={[styles.inputsContainer, { flex: 1 }]}>
+
+    <Text style={styles.label}>Nombre</Text>
+    <TextInput
+      placeholder="Nombre"
+      placeholderTextColor={colorPlaceHolder}
+      style={styles.inputTexto}
+      value={nombre}
+      onChangeText={setNombre}
+    />
 
     <Text style={styles.label}>Raza</Text>
-    <TextInput placeholder="Raza" placeholderTextColor={colorPlaceHolder} style={styles.inputTexto} value={raza} onChangeText={setRaza} />
+    <TextInput
+      placeholder="Raza"
+      placeholderTextColor={colorPlaceHolder}
+      style={styles.inputTexto}
+      value={raza}
+      onChangeText={setRaza}
+    />
 
     <Text style={styles.label}>Dominio</Text>
-    <TextInput placeholder="Dominio" placeholderTextColor={colorPlaceHolder} style={styles.inputTexto} value={dominio} onChangeText={setDominio} />
-
+    <TextInput
+      placeholder="Dominio"
+      placeholderTextColor={colorPlaceHolder}
+      style={styles.inputTexto}
+      value={dominio}
+      onChangeText={setDominio}
+    />
 
     <Text style={styles.label}>Naturaleza</Text>
-    <TextInput placeholder="Naturaleza" placeholderTextColor={colorPlaceHolder} style={styles.inputTexto} value={naturaleza} onChangeText={setNaturaleza} />
+    <TextInput
+      placeholder="Naturaleza"
+      placeholderTextColor={colorPlaceHolder}
+      style={styles.inputTexto}
+      value={naturaleza}
+      onChangeText={setNaturaleza}
+    />
 
     <Text style={styles.label}>Edad</Text>
-    <TextInput placeholder="Edad" placeholderTextColor={colorPlaceHolder} style={styles.inputTexto} value={edad} onChangeText={setEdad} />
+    <TextInput
+      placeholder="Edad"
+      placeholderTextColor={colorPlaceHolder}
+      style={styles.inputTexto}
+      value={edad}
+      onChangeText={setEdad}
+    />
 
-    
   </View>
+
+  {p.spriteurl ? (
+    <View
+  style={{
+    marginLeft: 5,
+    marginTop: 40,
+    marginRight: 10,
+    width: 170,
+    height: 170,
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+  }}
+>
+      <AnimacionModel
+        source={{ uri: p.spriteurl }}
+        scaleSize={0.8}
+        filas={p.filas}
+        columnas={p.columnas}
+        fps={p.fps}
+      />
+    </View>
+  ) : null}
+
+</View>
 
   {/* KI, KEN, DESTINOS */}
   <View style={styles.statsRow}>

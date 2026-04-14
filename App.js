@@ -29,6 +29,8 @@ import { ErrorBoundary } from './ErrorBoundary'; // o la ruta correcta
 import FlashMessage from 'react-native-flash-message';
 import { Platform } from 'react-native';
 
+import { NarradorPanel } from './components/narrador';
+
 
 import { ObjetosMagicos } from './components/objetosMagicos';
 import { Neotecnia } from './components/neotecnia';
@@ -243,6 +245,22 @@ if (isLoading) {
       {/* Protegidas por userToken */}
       <Stack.Screen name="PantallaDeslizable" component={PantallaDeslizable}  
       options={{ headerShown: false }}  />
+
+       <Stack.Screen name="Narradores" component={NarradorPanel}   
+      options={{
+          headerTitle: 'Narradores', // o '' si no querés texto
+          headerBackTitleVisible: false,
+          headerStyle: {
+            backgroundColor: '#121212', // Fondo oscuro
+            height: 80,
+          },
+          headerTintColor: 'white', // Color de la flechita y backTitle
+          headerTitleStyle: {
+            color: 'white', // ✅ Color del texto del título
+            fontWeight: 'bold',
+            fontSize: 20,
+          },
+        }}/>
       
       <Stack.Screen name="Ranking" component={Ranking}   
       options={{

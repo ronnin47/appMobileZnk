@@ -18,6 +18,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 const windowWidth = Dimensions.get('window').width;
 import { API_BASE_URL } from './config';
 import { Audio } from 'expo-av';
+
+
+
+import { NarradoraPanel } from './narrador';
 const imagenBase = require('../assets/imagenBase.jpeg');
 
 export default function Principal() {
@@ -175,13 +179,30 @@ await AsyncStorage.setItem("ultimoCreado", idpersonaje.toString());
 };
 
   const universoCelesteItems = [
-        { id: 'ranking', nombre: 'Ranking', imagen:"https://res.cloudinary.com/dzul1hatw/image/upload/v1753555471/puerta_mo6o6p.jpg"},
+   
+
+    { id: 'ranking', nombre: 'Ranking', imagen:"https://res.cloudinary.com/dzul1hatw/image/upload/v1753555471/puerta_mo6o6p.jpg"},
 
     { id: 'logros', nombre: 'Logros', imagen: "https://res.cloudinary.com/dzul1hatw/image/upload/v1753280092/tesoros/tesoro_24.jpg" },
 
     { id: 'poderesUnicos', nombre: 'Poderes Unicos', imagen:"https://res.cloudinary.com/dzul1hatw/image/upload/v1753555606/tecnicaEspecial_e0glko.jpg" },
+
+    
     
   ];
+
+  const itemsRender = estatus === "narrador"
+  ? [
+      {
+        id: 'narrador',
+        nombre: 'Narrador',
+        imagen: "https://res.cloudinary.com/dzul1hatw/image/upload/v1752714398/personajes/personaje_1009.jpg"
+      },
+      ...universoCelesteItems
+    ]
+  : universoCelesteItems;
+
+
 
 
     const componentesManual = [
@@ -326,7 +347,7 @@ return (
           ]}>Universo Celeste</Text>
   <ScrollView horizontal showsHorizontalScrollIndicator={false}>
     <View style={styles.row}>
-      {universoCelesteItems.map((item) => (
+      {itemsRender.map((item) => (
         <TouchableOpacity
           key={item.id}
           style={styles.card}
@@ -342,6 +363,9 @@ return (
             }else if(item.id=="logros") {
                 
                navigation.navigate('Logros');
+            }else if(item.id=="narrador") {
+                
+               navigation.navigate('Narradores');
             }else {
               alert(`Seleccionaste ${item.nombre}`);
             }
@@ -361,6 +385,9 @@ return (
       ))}
     </View>
   </ScrollView>
+
+
+
      </View>
 
 

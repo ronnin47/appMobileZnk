@@ -379,20 +379,30 @@ app.get('/consumirPersonajesUsuario', async (req, res) => {
    // console.log("el id del usuario es: ",usuarioId)
     const userQuery = `
       SELECT 
-        idpersonaje, nombre, dominio, raza, naturaleza, edad, ken, ki, destino, "pDestino",
-        fuerza, fortaleza, destreza, agilidad, sabiduria, presencia, principio,
-        sentidos, academisismo, alerta, atletismo, "conBakemono", mentir, pilotear,
-        "artesMarciales", medicina, "conObjMagicos", sigilo, "conEsferas", "conLeyendas",
-        forja, "conDemonio", "conEspiritual", "manejoBlaster", "manejoSombras", "tratoBakemono",
-        "conHechiceria", "medVital", "medEspiritual", rayo, fuego, frio, veneno, corte,
-        energia, ventajas, "apCombate", "valCombate", "apCombate2", "valCombate2",
-        add1, "valAdd1", add2, "valAdd2", add3, "valAdd3", add4, "valAdd4",
-        inventario, dominios, "kenActual", "kiActual", positiva, negativa, "vidaActual",
-        hechizos, consumision, iniciativa, historia, "tecEspecial", conviccion, cicatriz,
-        notasaga, resistencia, "pjPnj", imagenurl, imagencloudid,"imagenSeleccionada","coleccionImagenes", "usuarioId"
-      FROM personajes
-      WHERE "usuarioId" = $1
-      ORDER BY "idpersonaje" ASC
+        p.idpersonaje, p.nombre, p.dominio, p.raza, p.naturaleza, p.edad, p.ken, p.ki, p.destino, p."pDestino",
+        p.fuerza, p.fortaleza, p.destreza, p.agilidad, p.sabiduria, p.presencia, p.principio,
+        p.sentidos, p.academisismo, p.alerta, p.atletismo, p."conBakemono", p.mentir, p.pilotear,
+        p."artesMarciales", p.medicina, p."conObjMagicos", p.sigilo, p."conEsferas", p."conLeyendas",
+        p.forja, p."conDemonio", p."conEspiritual", p."manejoBlaster", p."manejoSombras", p."tratoBakemono",
+        p."conHechiceria", p."medVital", p."medEspiritual", p.rayo, p.fuego, p.frio, p.veneno, p.corte,
+        p.energia, p.ventajas, p."apCombate", p."valCombate", p."apCombate2", p."valCombate2",
+        p.add1, p."valAdd1", p.add2, p."valAdd2", p.add3, p."valAdd3", p.add4, p."valAdd4",
+        p.inventario, p.dominios, p."kenActual", p."kiActual", p.positiva, p.negativa, p."vidaActual",
+        p.hechizos, p.consumision, p.iniciativa, p.historia, p."tecEspecial", p.conviccion, p.cicatriz,
+        p.notasaga, p.resistencia, p."pjPnj", p.imagenurl, p.imagencloudid,p."imagenSeleccionada",p."coleccionImagenes", p."usuarioId",
+        
+    a.spriteurl,
+    a.filas,
+    a.columnas,
+    a.fps,
+    a.public_id AS animacion_public_id
+
+  FROM personajes p
+  LEFT JOIN animaciones a
+    ON a.idpersonaje = p.idpersonaje
+
+  WHERE p."usuarioId" = $1
+  ORDER BY p.idpersonaje ASC
     `;
     const userResult = await pool.query(userQuery,[usuarioId]);
 
@@ -778,18 +788,24 @@ app.get('/consumirPersonajesTodos', async (req, res) => {
   try {
     const userQuery = `
       SELECT 
-        idpersonaje, nombre, dominio, raza, naturaleza, edad, ken, ki, destino, "pDestino",
-        fuerza, fortaleza, destreza, agilidad, sabiduria, presencia, principio,
-        sentidos, academisismo, alerta, atletismo, "conBakemono", mentir, pilotear,
-        "artesMarciales", medicina, "conObjMagicos", sigilo, "conEsferas", "conLeyendas",
-        forja, "conDemonio", "conEspiritual", "manejoBlaster", "manejoSombras", "tratoBakemono",
-        "conHechiceria", "medVital", "medEspiritual", rayo, fuego, frio, veneno, corte,
-        energia, ventajas, "apCombate", "valCombate", "apCombate2", "valCombate2",
-        add1, "valAdd1", add2, "valAdd2", add3, "valAdd3", add4, "valAdd4",
-        inventario, dominios, "kenActual", "kiActual", positiva, negativa, "vidaActual",
-        hechizos, consumision, iniciativa, historia, "tecEspecial", conviccion, cicatriz,
-        notasaga, resistencia, "pjPnj", imagenurl,imagencloudid,"imagenSeleccionada","coleccionImagenes", "usuarioId"
-      FROM personajes
+        p.idpersonaje, p.nombre, p.dominio, p.raza, p.naturaleza, p.edad, p.ken, p.ki, p.destino, p."pDestino",
+        p.fuerza, p.fortaleza, p.destreza, p.agilidad, p.sabiduria, p.presencia, p.principio,
+        p.sentidos, p.academisismo, p.alerta, p.atletismo, p."conBakemono", p.mentir, p.pilotear,
+        p."artesMarciales", p.medicina, p."conObjMagicos", p.sigilo, p."conEsferas", p."conLeyendas",
+        p.forja, p."conDemonio", p."conEspiritual", p."manejoBlaster", p."manejoSombras", p."tratoBakemono",
+        p."conHechiceria", p."medVital", p."medEspiritual", p.rayo, p.fuego, p.frio, p.veneno, p.corte,
+        p.energia, p.ventajas, p."apCombate", p."valCombate", p."apCombate2", p."valCombate2",
+        p.add1, p."valAdd1", p.add2, p."valAdd2",	p.add3,	p."valAdd3",	p.add4,	p."valAdd4",
+        p.inventario, p.dominios, p."kenActual", p."kiActual", p.positiva, p.negativa, p."vidaActual",
+        p.hechizos, p.consumision, p.iniciativa, p.historia, p."tecEspecial", p.conviccion, p.cicatriz,
+        p.notasaga, p.resistencia, p."pjPnj", p.imagenurl,p.imagencloudid,p."imagenSeleccionada",p."coleccionImagenes", p."usuarioId", a.spriteurl,
+    a.filas,
+    a.columnas,
+    a.fps,
+    a.public_id AS animacion_public_id
+        FROM personajes p
+  LEFT JOIN animaciones a
+    ON a.idpersonaje = p.idpersonaje
     `;
 
 
@@ -1232,6 +1248,98 @@ app.put('/updateUsuarios/:usuarioId', async (req, res) => {
     res.status(500).json({ error: 'Error del servidor' });
   }
 });
+
+
+
+
+
+
+app.post("/upload-sprite", async (req, res) => {
+  const { idpersonaje, imagen, filas, columnas, fps } = req.body;
+
+  try {
+    if (!idpersonaje) {
+      return res.status(400).json({ error: "idpersonaje requerido" });
+    }
+
+    const f = Number(filas);
+    const c = Number(columnas);
+    const velocidad = Number(fps);
+
+    if ([f, c, velocidad].some(v => Number.isNaN(v))) {
+      return res.status(400).json({ error: "Datos de animación inválidos" });
+    }
+
+    let imageUrl = null;
+    let publicId = null;
+
+    // SOLO SI VIENE IMAGEN NUEVA
+    if (imagen) {
+      const matches = imagen.match(/^data:(image\/\w+);base64,(.+)$/);
+
+      if (!matches) {
+        return res.status(400).json({ error: "Imagen base64 inválida" });
+      }
+
+      const mimeType = matches[1];
+      const data = matches[2];
+
+      const uploadResult = await cloudinary.uploader.upload(
+        `data:${mimeType};base64,${data}`,
+        {
+          folder: "sprites",
+          public_id: `sprite_${idpersonaje}`,
+          overwrite: true,
+        }
+      );
+
+      imageUrl = uploadResult.secure_url;
+      publicId = uploadResult.public_id;
+    }
+
+    // UPSERT
+    const query = `
+      INSERT INTO animaciones (idpersonaje, spriteurl, filas, columnas, fps, public_id)
+      VALUES ($1, COALESCE($2, (SELECT spriteurl FROM animaciones WHERE idpersonaje=$1)),
+              $3, $4, $5,
+              COALESCE($6, (SELECT public_id FROM animaciones WHERE idpersonaje=$1)))
+      ON CONFLICT (idpersonaje)
+      DO UPDATE SET
+        spriteurl = COALESCE(EXCLUDED.spriteurl, animaciones.spriteurl),
+        filas = EXCLUDED.filas,
+        columnas = EXCLUDED.columnas,
+        fps = EXCLUDED.fps,
+        public_id = COALESCE(EXCLUDED.public_id, animaciones.public_id)
+      RETURNING *;
+    `;
+
+    const result = await pool.query(query, [
+      idpersonaje,
+      imageUrl,
+      f,
+      c,
+      velocidad,
+      publicId,
+    ]);
+
+    return res.status(200).json({
+      message: "Sprite actualizado correctamente",
+      animacion: result.rows[0],
+    });
+
+  } catch (err) {
+    console.error("Error upload sprite:", err);
+    return res.status(500).json({
+      error: "Error al subir sprite",
+    });
+  }
+});
+
+
+
+
+
+
 
 
 
