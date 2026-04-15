@@ -9,6 +9,7 @@ import axios from 'axios';
 import { Audio } from 'expo-av'; 
 import { Estrellitas } from './estrellitas';
 import { Animated } from 'react-native';
+import { AnimacionModel } from './animacionModel';
 
 export const Party = ({ pj }) => {
   const { historialChat,coleccionPersonajes, estatus, nick } = useContext(AuthContext);
@@ -522,6 +523,9 @@ const Contenedor = esLeyenda ? ImageBackground : View;
             keyboardShouldPersistTaps="handled"
             renderItem={({ item }) => {
               const yaAgregado = personajesAgregados.some(p => p.idpersonaje === item.idpersonaje);
+
+
+              
               return (
                 <TouchableOpacity
                   style={[styles.card, yaAgregado && { opacity: 0.5 }]}
@@ -571,20 +575,23 @@ const Contenedor = esLeyenda ? ImageBackground : View;
            const esLeyenda = Number(item.ken) >= 400;
 
 
+           
+
+
 
            return(          
            <ImageBackground
-  source={
-    esLeyenda
-      ? { uri: fondoUrlLeyenda }
-      : { uri: fondoUrlNormal } // o una imagen negra
-  }
-  style={[
-  styles.cardSeleccionado,
-  esLeyenda && styles.cardSeleccionadoLeyenda
-]}
-  imageStyle={{ borderRadius: 10 }}
->
+                source={
+                  esLeyenda
+                    ? { uri: fondoUrlLeyenda }
+                    : { uri: fondoUrlNormal } // o una imagen negra
+                }
+                style={[
+                styles.cardSeleccionado,
+                esLeyenda && styles.cardSeleccionadoLeyenda
+              ]}
+                imageStyle={{ borderRadius: 10 }}
+              >
 
               {/* Botón Quitar X */}
               <TouchableOpacity
@@ -639,7 +646,27 @@ const Contenedor = esLeyenda ? ImageBackground : View;
                                     <Text style={styles.conviccion}>
                                     {item.conviccion || "Conviccion desconocida"}
                                     </Text>
-                                
+
+
+
+
+
+                                    
+                                        {/* ANIMACIÓN */}
+                                      
+                                          {item.spriteurl ? (
+                                          <View style={styles.spriteFlotante}>
+                                            <AnimacionModel
+                                              source={{ uri: item.spriteurl }}
+                                              scaleSize={0.6}
+                                              filas={item.filas}
+                                              columnas={item.columnas}
+                                              fps={item.fps}
+                                            />
+                                          </View>
+                                        ) : null}
+                                     
+                    
                                 </View>
 
             </View>
@@ -945,6 +972,19 @@ colImagen: {
   alignItems: "center",
   marginRight: 2,
   width: 90
+},
+spriteFlotante: {
+  position: "absolute",
+  right: 80,
+  top: 130,
+  width: 130,
+  height: 90,
+  justifyContent: "center",
+  alignItems: "center",
+ // backgroundColor: "rgba(0,0,0,0.55)",
+  borderRadius: 12,
+  //borderWidth: 1,
+  //borderColor: "rgba(255,255,255,0.15)",
 },
 
 

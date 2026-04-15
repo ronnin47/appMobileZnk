@@ -19,7 +19,6 @@ import { AuthContext } from "./AuthContext";
 import * as ImagePicker from "expo-image-picker";
 import { Image as ExpoImage } from "expo-image";
 import { AnimacionModel } from "./animacionModel";
-
 import { API_BASE_URL } from './config';
 import axios from 'axios';
 import { showMessage } from 'react-native-flash-message';
@@ -27,12 +26,13 @@ import { showMessage } from 'react-native-flash-message';
 
 const imagenFondo="https://res.cloudinary.com/dzul1hatw/image/upload/v1775771291/af44fff87cc52df9db1bb26a243620ef_lpnyip.jpg"
 
+
+
 // =====================
 // MODAL
 // =====================
 const ModalPersonaje = ({ visible, personaje, onClose, updateAnimacionPersonaje, updateAnimacionPersonajeUsuario }) => {
   const anim = useRef(new Animated.Value(0)).current;
-
   const [sprite, setSprite] = useState(null);
   const [filas, setFilas] = useState("3");
   const [columnas, setColumnas] = useState("4");
@@ -50,6 +50,11 @@ const ModalPersonaje = ({ visible, personaje, onClose, updateAnimacionPersonaje,
   }, [visible]);
 
   useEffect(() => {
+     
+    //console.log("revisamos si recibe public_id:",personaje?.spriteurl);
+    //console.log("revisamos si recibe public_id:",personaje?.public_id);
+
+
     if (visible && personaje) {
       setFilas(String(personaje.filas ?? 3));
       setColumnas(String(personaje.columnas ?? 4));
@@ -107,6 +112,7 @@ const ModalPersonaje = ({ visible, personaje, onClose, updateAnimacionPersonaje,
     });
   };
 
+  //peticion o fecth que la manda al servidor
   const guardarSprite = async () => {
     const f = Number(filas);
     const c = Number(columnas);
@@ -156,7 +162,20 @@ const ModalPersonaje = ({ visible, personaje, onClose, updateAnimacionPersonaje,
         public_id: animacion.public_id,
       });
 
-      Alert.alert("OK", "Sprite guardado correctamente");
+    
+
+      setTimeout(() => {
+            showMessage({
+              message: 'Sprite cargado',
+              description: 'Tu nuevo sprite se ha guardado correctamente.',
+              type: 'success',
+              icon: 'success',
+              duration: 3000
+            });
+          }, 500);
+
+      onClose();
+
     } catch (error) {
       console.log("UPLOAD ERROR:", error?.response?.data || error.message);
       Alert.alert(
@@ -165,6 +184,74 @@ const ModalPersonaje = ({ visible, personaje, onClose, updateAnimacionPersonaje,
       );
     }
   };
+
+
+   //peticion o fecth que elimina el sprite del personaje, seteando los campos a null o vacios en la base de datos
+const eliminarSprite = async () => {
+  console.log("public_id a eliminar:", personaje?.public_id);
+
+  try {
+    const res = await axios.put(
+      `${API_BASE_URL}/eliminarSprite`,
+      {
+        idpersonaje: personaje?.idpersonaje,
+        public_id: personaje?.public_id,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const animacion = res.data?.animacion;
+
+    updateAnimacionPersonaje(personaje?.idpersonaje, {
+      spriteurl: animacion.spriteurl,
+      filas: animacion.filas,
+      columnas: animacion.columnas,
+      fps: animacion.fps,
+      public_id: animacion.public_id,
+    });
+
+    updateAnimacionPersonajeUsuario(personaje?.idpersonaje, {
+      spriteurl: animacion.spriteurl,
+      filas: animacion.filas,
+      columnas: animacion.columnas,
+      fps: animacion.fps,
+      public_id: animacion.public_id,
+    });
+
+    setSprite(null);
+
+    //Alert.alert("OK", "Sprite eliminado correctamente");
+
+    setTimeout(() => {
+        showMessage({
+          message: "Sprite eliminado",
+          description: "La animación y la imagen fueron eliminadas correctamente.",
+          type: "success",
+          icon: "success",
+          duration: 3000,
+        });
+      }, 500);
+
+    onClose();
+
+
+  } catch (error) {
+    console.log(
+      "Eliminar Sprite ERROR:",
+      error?.response?.data || error.message
+    );
+
+    Alert.alert(
+      "Error",
+      error?.response?.data?.error || "No se pudo eliminar el sprite"
+    );
+  }
+};
+
 
   return (
     <Modal transparent visible={visible} animationType="none">
@@ -292,12 +379,48 @@ const ModalPersonaje = ({ visible, personaje, onClose, updateAnimacionPersonaje,
             >
               <Text style={styles.textoBoton}>Guardar</Text>
             </TouchableOpacity>
+
+            
+
+
+
+            {personaje?.spriteurl && (
+             <TouchableOpacity
+                    style={styles.botonEliminarSprite}
+                    onPress={() => {
+                      Alert.alert(
+                        "Eliminar sprite",
+                        "¿Querés eliminar este sprite de forma permanente?",
+                        [
+                          {
+                            text: "Cancelar",
+                            style: "cancel",
+                          },
+                          {
+                            text: "Eliminar",
+                            style: "destructive",
+                            onPress: eliminarSprite,
+                          },
+                        ]
+                      );
+                    }}
+                  >
+                    <Text style={styles.textoBoton}>Eliminar</Text>
+                  </TouchableOpacity>
+            )}
+
+            
+          
+
           </View>
         </Animated.View>
       </View>
     </Modal>
   );
 };
+
+
+
 
 
 
@@ -350,6 +473,7 @@ export const NarradorPanel = () => {
   };
 
   const abrirModal = (pj) => {
+  
     setPersonajeActivo(pj);
     setModalVisible(true);
   };
@@ -418,7 +542,10 @@ export const NarradorPanel = () => {
 
             <TouchableOpacity
               style={styles.botonAccion}
-              onPress={() => abrirModal(item)}
+               onPress={() => {
+             
+              abrirModal(item);
+            }}
             >
               <Text style={{ color: "white", fontWeight: "bold" }}>⚡</Text>
             </TouchableOpacity>
@@ -661,6 +788,16 @@ const styles = StyleSheet.create({
     backgroundColor: "green",
     padding: 10,
     borderRadius: 8,
+  },
+    botonEliminarSprite: {
+    width: "100%",
+    backgroundColor: "#e62d20e0",
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop:10,
+    borderWidth:1,
+    borderColor:"#f3db07da"
   },
 
   textoBoton: {

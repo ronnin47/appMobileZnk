@@ -395,7 +395,7 @@ app.get('/consumirPersonajesUsuario', async (req, res) => {
     a.filas,
     a.columnas,
     a.fps,
-    a.public_id AS animacion_public_id
+    a.public_id 
 
   FROM personajes p
   LEFT JOIN animaciones a
@@ -802,7 +802,7 @@ app.get('/consumirPersonajesTodos', async (req, res) => {
     a.filas,
     a.columnas,
     a.fps,
-    a.public_id AS animacion_public_id
+    a.public_id 
         FROM personajes p
   LEFT JOIN animaciones a
     ON a.idpersonaje = p.idpersonaje
@@ -1253,7 +1253,7 @@ app.put('/updateUsuarios/:usuarioId', async (req, res) => {
 
 
 
-
+//update sprite ok!!
 app.post("/upload-sprite", async (req, res) => {
   const { idpersonaje, imagen, filas, columnas, fps } = req.body;
 
@@ -1335,6 +1335,60 @@ app.post("/upload-sprite", async (req, res) => {
   }
 });
 
+
+app.put("/eliminarSprite", async (req, res) => {
+  const { idpersonaje, public_id } = req.body;
+
+  //console.log("Eliminar sprite:", idpersonaje, public_id);
+
+  try {
+    if (!idpersonaje) {
+      return res.status(400).json({
+        error: "Falta idpersonaje",
+      });
+    }
+
+    // Borra la imagen en Cloudinary
+    if (public_id) {
+      const resultadoCloudinary = await cloudinary.uploader.destroy(public_id);
+
+      console.log("Cloudinary destroy:", resultadoCloudinary);
+    }
+
+    // Limpia la animación en la base
+    const result = await pool.query(
+      `
+      UPDATE animaciones
+      SET
+        spriteurl = NULL,
+        public_id = NULL,
+        filas = 3,
+        columnas = 4,
+        fps = 6
+      WHERE idpersonaje = $1
+      RETURNING spriteurl, filas, columnas, fps, public_id
+      `,
+      [idpersonaje]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: "Animación no encontrada",
+      });
+    }
+
+    res.json({
+      ok: true,
+      animacion: result.rows[0],
+    });
+  } catch (err) {
+    console.log("ERROR eliminarSprite:", err);
+
+    res.status(500).json({
+      error: "No se pudo eliminar el sprite",
+    });
+  }
+});
 
 
 
