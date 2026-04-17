@@ -218,7 +218,7 @@ if (isLoading) {
         elevation: 2,
       }}
     >
-      <Animaciones scaleSize={0.6} />
+      <Animaciones scaleSize={0.5} />
     </View>
 
   </View>
