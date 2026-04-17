@@ -9,11 +9,11 @@ import Animated, {
   cancelAnimation,
 } from "react-native-reanimated";
 import { Audio } from "expo-av";
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 
 export const AnimacionModel = ({
   source,
-  scaleSize = 0.5,
+  scalesize = 0.8,
   filas = 3,
   columnas = 4,
   fps = 6,
@@ -35,6 +35,7 @@ const [boost, setBoost] = useState(1);
   const rows = Number(filas) || 3;
   const cols = Number(columnas) || 4;
   const frames = rows * cols;
+   const scale = Number(scalesize) || 0.8;
 
   //const duration = fps ? (1000 / fps) * frames : 8000;
 const duration = fps ? ((1000 / fps) * frames) / boost : 8000;
@@ -195,7 +196,7 @@ const duration = fps ? ((1000 / fps) * frames) / boost : 8000;
             overflow: "hidden",
             backgroundColor: "transparent",
             transform: [
-              { scale: scaleSize },
+               { scale: scale },
               { scaleX: flip ? -1 : 1 },
             ],
           }}

@@ -38,6 +38,7 @@ const ModalPersonaje = ({ visible, personaje, onClose, updateAnimacionPersonaje,
   const [filas, setFilas] = useState("3");
   const [columnas, setColumnas] = useState("4");
   const [fps, setFps] = useState("6");
+  const [scalesize, setScalesize] = useState("0.8");
 
   useEffect(() => {
     if (visible) {
@@ -60,6 +61,7 @@ const ModalPersonaje = ({ visible, personaje, onClose, updateAnimacionPersonaje,
       setFilas(String(personaje.filas ?? 3));
       setColumnas(String(personaje.columnas ?? 4));
       setFps(String(personaje.fps ?? 6));
+      setScalesize(String(personaje.scalesize ?? 0.8));
 
       if (personaje.spriteurl) {
         setSprite({
@@ -119,7 +121,9 @@ const ModalPersonaje = ({ visible, personaje, onClose, updateAnimacionPersonaje,
     const c = Number(columnas);
     const velocidad = Number(fps);
 
-    if (!f || !c || !velocidad) {
+    const scale = Number(scalesize);
+
+    if (!f || !c || !velocidad || !scale) {
       Alert.alert("Error", "Datos inválidos");
       return;
     }
@@ -137,6 +141,7 @@ const ModalPersonaje = ({ visible, personaje, onClose, updateAnimacionPersonaje,
         filas: f,
         columnas: c,
         fps: velocidad,
+        scalesize: scale,
       };
 
       const res = await axios.post(`${API_BASE_URL}/upload-sprite`, payload, {
@@ -153,6 +158,7 @@ const ModalPersonaje = ({ visible, personaje, onClose, updateAnimacionPersonaje,
         columnas: animacion.columnas,
         fps: animacion.fps,
         public_id: animacion.public_id,
+        scalesize: animacion.scalesize,
       });
 
       updateAnimacionPersonajeUsuario(personaje?.idpersonaje, {
@@ -161,6 +167,7 @@ const ModalPersonaje = ({ visible, personaje, onClose, updateAnimacionPersonaje,
         columnas: animacion.columnas,
         fps: animacion.fps,
         public_id: animacion.public_id,
+        scalesize: animacion.scalesize,
       });
 
     
@@ -213,6 +220,7 @@ const eliminarSprite = async () => {
       columnas: animacion.columnas,
       fps: animacion.fps,
       public_id: animacion.public_id,
+      scalesize: animacion.scalesize,
     });
 
     updateAnimacionPersonajeUsuario(personaje?.idpersonaje, {
@@ -221,6 +229,7 @@ const eliminarSprite = async () => {
       columnas: animacion.columnas,
       fps: animacion.fps,
       public_id: animacion.public_id,
+      scalesize: animacion.scalesize,
     });
 
     setSprite(null);
@@ -325,6 +334,23 @@ const eliminarSprite = async () => {
                     />
                   </View>
 
+                   <View style={{ alignItems: "center" }}>
+                    <Text style={{ color: "yellow", fontSize: 11 }}>Escala</Text>
+                    <TextInput
+                      value={scalesize}
+                      onChangeText={setScalesize}
+                      keyboardType="numeric"
+                      style={{
+                        width: 60,
+                        backgroundColor: "#222",
+                        color: "white",
+                        padding: 6,
+                        borderRadius: 6,
+                        textAlign: "center",
+                      }}
+                    />
+                  </View>
+
                   <View style={{ alignItems: "center" }}>
                     <Text style={{ color: "yellow", fontSize: 11 }}>FPS</Text>
                     <TextInput
@@ -363,10 +389,11 @@ const eliminarSprite = async () => {
                         ? `data:${sprite.mime};base64,${sprite.base64}`
                         : sprite.uri,
                     }}
-                    scaleSize={0.8}
+                    
                     filas={Number(filas)}
                     columnas={Number(columnas)}
                     fps={Number(fps)}
+                    scalesize={Number(scalesize) || 0.8}
                   />
                 </View>
               </>
@@ -420,9 +447,6 @@ const eliminarSprite = async () => {
   );
 };
 
-
-
-
 // estos dos los podriamos usar en la party
 const ModalCaracteristicas = ({ visible, personaje, onClose }) => {
   const cerrar = () => {
@@ -456,7 +480,7 @@ const ModalCaracteristicas = ({ visible, personaje, onClose }) => {
           >
             <Text
               style={{
-                color: "#e5e5e5",
+                color: "#f5d108",
                 fontSize: 20,
                 fontWeight: "700",
                 flex: 1,
@@ -798,7 +822,7 @@ const ModalInventario = ({ visible, personaje, onClose }) => {
           >
             <Text
               style={{
-                color: "#e5e5e5",
+                color: "#df83da",
                 fontSize: 20,
                 fontWeight: "700",
                 flex: 1,
@@ -1140,7 +1164,7 @@ const ModalTecnicas = ({ visible, personaje, onClose }) => {
               borderBottomColor: "#222",
             }}
           >
-            <Text style={{ color: "#e5e5e5", fontSize: 20, fontWeight: "700" }}>
+            <Text style={{ color: "#bff541c7", fontSize: 20, fontWeight: "700" }}>
               Técnicas
             </Text>
 
@@ -1530,7 +1554,7 @@ return(
                  {item.spriteurl ? (
                   <AnimacionModel
                     source={{ uri: item.spriteurl }}
-                    scaleSize={0.8}
+                    scalesize={item.scalesize || 0.8}
                     filas={item.filas}
                     columnas={item.columnas}
                     fps={item.fps}
@@ -1543,164 +1567,155 @@ return(
                 </View>
               </View>
 
-  <View style={{
-  marginLeft: 10,
-  flex: 1,
-  minWidth: 0,
-}}>
+              <View style={{
+                  marginLeft: 10,
+                  flex: 1,
+                  minWidth: 0,
+                }}>
 
-  <Text style={{
-    color: "#FFD700",
-    fontWeight: "bold",
-    flexWrap: "wrap",
-    fontSize:18,
-  }}>
-    {item.nombre}
-  </Text>
+                    <Text style={{
+                      color: "#FFD700",
+                      fontWeight: "bold",
+                      flexWrap: "wrap",
+                      fontSize:18,
+                    }}>
+                      {item.nombre}
+                    </Text>
 
-  <Text style={{
-    color: "#0fd3ec",
-    fontSize: 12,
-    flexWrap: "wrap",
-  }}>
-    {item.dominio}
-  </Text>
+                    <Text style={{
+                      color: "#0fd3ec",
+                      fontSize: 12,
+                      flexWrap: "wrap",
+                    }}>
+                      {item.dominio}
+                    </Text>
 
-  <Text style={{
-    color: "#ccc",
-    fontSize: 12,
-    flexWrap: "wrap",
-  }}>
-    {item.conviccion}
-  </Text>
+                    <Text style={{
+                      color: "#ccc",
+                      fontSize: 12,
+                      flexWrap: "wrap",
+                    }}>
+                      {item.conviccion}
+                    </Text>
 
-                             <View style={{ marginTop: 6 }}>
-                               <Text style={styles.textVida}> 
-                                                                 vida: {vidaActual}/{vidaTotal || "??"}     {estadoFase}
-                                                                 </Text> 
+                    <View style={{ marginTop: 6 }}>
+                      <Text style={styles.textVida}> 
+                                                        vida: {vidaActual}/{vidaTotal || "??"}     {estadoFase}
+                                                        </Text> 
 
-                                   <BarraVida 
-                                    actual={vidaActual} 
-                                    total={vidaTotal} 
-                                    color="red"
-                                    estadoFase={estadoFase}
-                                    pulso={pulso} /> 
-                                    
-                                    <Text style={styles.textKi}> ki: {kiActual}/{kiTotal || "??"} </Text> 
-                                    <Barra actual={kiActual} total={kiTotal} color="blue" /> 
-                                    <Text style={styles.textKen}> ken: {kenActual}/{kenTotal || "??"} </Text> 
-                                    
-                                    <Barra actual={kenActual} total={kenTotal} color="green" />
-                             </View>
-
-
+                          <BarraVida 
+                          actual={vidaActual} 
+                          total={vidaTotal} 
+                          color="red"
+                          estadoFase={estadoFase}
+                          pulso={pulso} /> 
+                          
+                          <Text style={styles.textKi}> ki: {kiActual}/{kiTotal || "??"} </Text> 
+                          <Barra actual={kiActual} total={kiTotal} color="blue" /> 
+                          <Text style={styles.textKen}> ken: {kenActual}/{kenTotal || "??"} </Text> 
+                          
+                          <Barra actual={kenActual} total={kenTotal} color="green" />
+                    </View>
 
 
 
+                      <TouchableOpacity
+                        onPress={() => {
+                          setPersonajeActivo(item);
+                          setModalVisibleCaracteristicas(true);
+                        }}
+                        activeOpacity={0.8}
+                        style={{
+                          backgroundColor: "#8c68e0",
+                          paddingVertical: 8,
+                          paddingHorizontal: 4,
+                          borderRadius: 10,
+                          justifyContent: "center",
+                          alignItems: "center",
+                          borderWidth:1,
+                          borderColor:"#1a0842",
+                          width: 120,
+                          marginTop: 10,
+                          
+                        }}
+                      >
+                        <Text
+                          style={{
+                            color: "#fff",
+                            fontSize: 12,
+                            fontWeight: "600",
+                          }}
+                        >
+                          Caracteristicas
+                        </Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        onPress={() => {
+                          setPersonajeActivo(item);
+                          setModalVisibleInventario(true);
+                        }}
+                        activeOpacity={0.8}
+                        style={{
+                          backgroundColor: "#e068a4",
+                          paddingVertical: 8,
+                          paddingHorizontal: 4,
+                          borderRadius: 10,
+                          justifyContent: "center",
+                          alignItems: "center",
+                          borderWidth:1,
+                          borderColor:"#f4f4f5",
+                          width: 120,
+                          marginTop: 10,
+                          
+                        }}
+                      >
+                        <Text
+                          style={{
+                            color: "#f8f8f8",
+                            fontSize: 12,
+                            fontWeight: "600",
+                          }}
+                        >
+                          Inventario
+                        </Text>
+                      </TouchableOpacity>
 
 
+                      <TouchableOpacity
+                        onPress={() => {
+                          setPersonajeActivo(item);
+                          setModalVisibleTecnicas(true);
+                        }}
+                        activeOpacity={0.8}
+                        style={{
+                          backgroundColor: "#0acc81",
+                          paddingVertical: 8,
+                          paddingHorizontal: 4,
+                          borderRadius: 10,
+                          justifyContent: "center",
+                          alignItems: "center",
+                          borderWidth:1,
+                          borderColor:"#f3eef3",
+                          width: 120,
+                          marginTop: 10,
+                          
+                        }}
+                      >
+                        <Text
+                          style={{
+                            color: "#0f0e0e",
+                            fontSize: 12,
+                            fontWeight: "600",
+                          
+                          
+                          }}
+                        >
+                          Poderes
+                        </Text>
+                      </TouchableOpacity>
 
-
-
-
-
-  <TouchableOpacity
-  onPress={() => {
-    setPersonajeActivo(item);
-    setModalVisibleCaracteristicas(true);
-  }}
-  activeOpacity={0.8}
-  style={{
-    backgroundColor: "#8c68e0",
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-    borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth:1,
-    borderColor:"#1a0842",
-    width: 120,
-    marginTop: 10,
-    
-  }}
->
-  <Text
-    style={{
-      color: "#fff",
-      fontSize: 12,
-      fontWeight: "600",
-    }}
-  >
-    Caracteristicas
-  </Text>
-</TouchableOpacity>
-
-  <TouchableOpacity
-  onPress={() => {
-    setPersonajeActivo(item);
-    setModalVisibleInventario(true);
-  }}
-  activeOpacity={0.8}
-  style={{
-    backgroundColor: "#e068a4",
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-    borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth:1,
-    borderColor:"#f4f4f5",
-    width: 120,
-    marginTop: 10,
-    
-  }}
->
-  <Text
-    style={{
-      color: "#f8f8f8",
-      fontSize: 12,
-      fontWeight: "600",
-    }}
-  >
-    Inventario
-  </Text>
-</TouchableOpacity>
-
-
-  <TouchableOpacity
-  onPress={() => {
-    setPersonajeActivo(item);
-    setModalVisibleTecnicas(true);
-  }}
-  activeOpacity={0.8}
-  style={{
-    backgroundColor: "#0acc81",
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-    borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth:1,
-    borderColor:"#f3eef3",
-    width: 120,
-    marginTop: 10,
-    
-  }}
->
-  <Text
-    style={{
-      color: "#0f0e0e",
-      fontSize: 12,
-      fontWeight: "600",
-     
-    
-    }}
-  >
-    Poderes
-  </Text>
-</TouchableOpacity>
-
-</View>
+              </View>
 
             </View>
           </ImageBackground>
@@ -1762,8 +1777,6 @@ return(
     </View>
   );
 };
-
-
 
 
 

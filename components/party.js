@@ -548,31 +548,22 @@ const Contenedor = esLeyenda ? ImageBackground : View;
 
         <FlatList
           data={personajesAgregados}
-         // keyExtractor={(item) => item.idpersonaje.toString()}
-         keyExtractor={(item, index) => String(item?.idpersonaje ?? index)}
+          keyExtractor={(item, index) => String(item?.idpersonaje ?? index)}
           style={styles.listaSeleccionados}
           keyboardShouldPersistTaps="handled"
           renderItem={({ item }) => {
 
 
-            const estado = estadoTiempoReal[String(item.idpersonaje)] || {};
-
-            const vidaActual = estado.vidaActual ?? item.vidaActual ?? 0;
-            const vidaTotal = estado.vidaTotal ?? calcularVidaTotal(item) ?? 1;
-
-
-            
-            const kiActual = estado.kiActual ?? item.kiActual ?? 0;
-            const kiTotal = estado.kiTotal ?? item.ki ?? 1;
-          
-
-            const kenActual = estado.kenActual ?? item.kenActual ?? 0;
-            const kenTotal = estado.kenTotal ?? item.ken ?? 1;
-            
-            const estadoFase = calcularEstadoFase(item, vidaActual);
-
-            //si es una estrella del destino
-           const esLeyenda = Number(item.ken) >= 400;
+          const estado = estadoTiempoReal[String(item.idpersonaje)] || {};
+          const vidaActual = estado.vidaActual ?? item.vidaActual ?? 0;
+          const vidaTotal = estado.vidaTotal ?? calcularVidaTotal(item) ?? 1;
+          const kiActual = estado.kiActual ?? item.kiActual ?? 0;
+          const kiTotal = estado.kiTotal ?? item.ki ?? 1;
+          const kenActual = estado.kenActual ?? item.kenActual ?? 0;
+          const kenTotal = estado.kenTotal ?? item.ken ?? 1;
+          const estadoFase = calcularEstadoFase(item, vidaActual);
+          //si es una estrella del destino
+          const esLeyenda = Number(item.ken) >= 400;
 
 
            
@@ -580,7 +571,7 @@ const Contenedor = esLeyenda ? ImageBackground : View;
 
 
            return(          
-           <ImageBackground
+            <ImageBackground
                 source={
                   esLeyenda
                     ? { uri: fondoUrlLeyenda }
@@ -593,104 +584,156 @@ const Contenedor = esLeyenda ? ImageBackground : View;
                 imageStyle={{ borderRadius: 10 }}
               >
 
-              {/* Botón Quitar X */}
-              <TouchableOpacity
-                style={styles.botonEliminarX}
-                onPress={() => eliminarPersonaje(item.idpersonaje)}
-              >
-                <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18 }}>×</Text>
-              </TouchableOpacity>
+                  {/* Botón Quitar X */}
+                  <TouchableOpacity
+                    style={styles.botonEliminarX}
+                    onPress={() => eliminarPersonaje(item.idpersonaje)}
+                  >
+                    <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18 }}>×</Text>
+                  </TouchableOpacity>
 
-             {/* Fila de imagen + nombre */}
-            <View style={styles.row}>
+                  {/* Fila de imagen a la izqueirda y info a la derecha */}
+                  <View style={styles.row}>
+ 
+                                      <View style={styles.colImagen}>
+                                        <View style={{ alignItems: "center" }}>
+                                            <Image
+                                              source={item.imagenurl ? { uri: item.imagenurl } : imagenBase}
+                                              style={styles.avatarLista}
+                                            />
 
-                                <View style={styles.colImagen}>
-                                    <Image
-                                    source={item.imagenurl ? { uri: item.imagenurl } : imagenBase}
-                                    style={styles.avatarLista}
-                                    />
-                                    <Text style={styles.dominio}>
-                                    {item.dominio || "Dominio desconocido"}
-                                    </Text>
+                                            <Text style={styles.dominio}>
+                                              {item.dominio || "Dominio desconocido"}
+                                            </Text>
+                                          </View>
 
-                                    
-                                    <Estrellitas ken={parseInt(item.ken) || 0} />
-                                </View>
+                                           {item.spriteurl ? (
+                                              <View
+                                                style={{
+                                                  maxWidth: 120,
+                                                  maxHeight: 120,
+                                                  overflow: "hidden",
+                                                  justifyContent: "center",
+                                                  alignItems: "center",
+                                                }}
+                                              >
+                                                <AnimacionModel
+                                                  source={{ uri: item.spriteurl }}
+                                                  scalesize={item.scalesize || 0.8}
+                                                  filas={item.filas}
+                                                  columnas={item.columnas}
+                                                  fps={item.fps}
+                                                />
+                                              </View>
+                                            ) : null}
 
-                                <View style={styles.infoPersonaje}>
-                                    <Text style={styles.nombre} numberOfLines={1}>
-                                    {item.nombre}
-                                    </Text>
+               
+                                         
+                                      </View>
 
-                                    
+                                      <View style={styles.infoPersonaje}>
+                                          
+                                         <View
+                                          style={{
+                                            flexDirection: "column",
+                                            alignItems: "flex-start",
+                                          }}
+                                        >
+                                          <Text
+                                            style={{
+                                              fontSize: 16,
+                                              lineHeight: 14,
+                                              marginBottom: 0,
+                                              paddingBottom: 0,
+                                              fontWeight: "bold",
+                                                flexShrink: 1,
+                                                color:"#FFD700",
+                                            }}
+                                            numberOfLines={1}
+                                          >
+                                            {item.nombre}
+                                          </Text>
 
-                                  <Text style={styles.textVida}> 
-                                    vida: {vidaActual}/{vidaTotal || "??"}     {estadoFase}
-                                    </Text> 
-                                    
+                                          <View
+                                            style={{
+                                              marginTop: -6,
+                                              flexDirection: "row",
+                                              alignItems: "center",
+                                            }}
+                                          >
+                                            <Estrellitas ken={parseInt(item.ken) || 0} />
+                                          </View>
+                                        </View>
+
+                                        <Text style={styles.textVida}> 
+                                          vida: {vidaActual}/{vidaTotal || "??"}     {estadoFase}
+                                          </Text> 
+                                          
+
+                      
+                                          <BarraVida 
+                                          actual={vidaActual} 
+                                          total={vidaTotal} 
+                                          color="red"
+                                          estadoFase={estadoFase}
+                                          pulso={pulso} /> 
+                                          
+                                          <Text style={styles.textKi}> ki: {kiActual}/{kiTotal || "??"} </Text> 
+                                          <Barra actual={kiActual} total={kiTotal} color="blue" /> 
+                                          <Text style={styles.textKen}> ken: {kenActual}/{kenTotal || "??"} </Text> 
+                                          
+                                          <Barra actual={kenActual} total={kenTotal} color="green" />
+
+                                          <Text style={styles.conviccion}>
+                                          {item.conviccion || "Conviccion desconocida"}
+                                          </Text>
+
+
+                                            {/* Contador con botones subir/bajar y Enviar */}
+                  <View 
+                  style={[
+                    styles.rowInput,
+                    {
+                      marginTop: 40,
+                      justifyContent: "flex-end",
+                      alignItems: "center",
+                      gap: 20,
+                      width: "100%",
+                    },
+                  ]}
+                  >
+                   
+                   
+                    <View style={[styles.contadorContainer,{marginLeft:20}]}>
+                      <TouchableOpacity style={styles.botonSubirBajar} onPress={() => bajarPunto(item.idpersonaje)}>
+                        <Text style={styles.botonSubirBajarText}>-</Text>
+                      </TouchableOpacity>
+
+                      <Text style={styles.contadorPuntos}>{kenPuntos[item.idpersonaje] || 0}</Text>
+
+                      <TouchableOpacity style={styles.botonSubirBajar} onPress={() => subirPunto(item.idpersonaje)}>
+                        <Text style={styles.botonSubirBajarText}>+</Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    <TouchableOpacity style={styles.botonEnviarKen} onPress={() => {
+                        reproducirSonidoSeleccion();
+                        enviarKen(item)}}>
+                      <Text style={{ color: 'white', fontWeight: 'bold' }}>+ Ken</Text>
+                    </TouchableOpacity>
+
+
+                  </View>
+                                            
+                                          
+                          
+                                      </View>
+
+                  </View>
 
                 
-                                    <BarraVida 
-                                    actual={vidaActual} 
-                                    total={vidaTotal} 
-                                    color="red"
-                                    estadoFase={estadoFase}
-                                    pulso={pulso} /> 
-                                    
-                                    <Text style={styles.textKi}> ki: {kiActual}/{kiTotal || "??"} </Text> 
-                                    <Barra actual={kiActual} total={kiTotal} color="blue" /> 
-                                    <Text style={styles.textKen}> ken: {kenActual}/{kenTotal || "??"} </Text> 
-                                    
-                                    <Barra actual={kenActual} total={kenTotal} color="green" />
-
-                                    <Text style={styles.conviccion}>
-                                    {item.conviccion || "Conviccion desconocida"}
-                                    </Text>
 
 
-
-
-
-                                    
-                                        {/* ANIMACIÓN */}
-                                      
-                                          {item.spriteurl ? (
-                                          <View style={styles.spriteFlotante}>
-                                            <AnimacionModel
-                                              source={{ uri: item.spriteurl }}
-                                              scaleSize={0.6}
-                                              filas={item.filas}
-                                              columnas={item.columnas}
-                                              fps={item.fps}
-                                            />
-                                          </View>
-                                        ) : null}
-                                     
-                    
-                                </View>
-
-            </View>
-
-              {/* Contador con botones subir/bajar y Enviar */}
-              <View style={styles.rowInput}>
-                <View style={styles.contadorContainer}>
-                  <TouchableOpacity style={styles.botonSubirBajar} onPress={() => bajarPunto(item.idpersonaje)}>
-                    <Text style={styles.botonSubirBajarText}>-</Text>
-                  </TouchableOpacity>
-
-                  <Text style={styles.contadorPuntos}>{kenPuntos[item.idpersonaje] || 0}</Text>
-
-                  <TouchableOpacity style={styles.botonSubirBajar} onPress={() => subirPunto(item.idpersonaje)}>
-                    <Text style={styles.botonSubirBajarText}>+</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <TouchableOpacity style={styles.botonEnviarKen} onPress={() => {
-                     reproducirSonidoSeleccion();
-                    enviarKen(item)}}>
-                  <Text style={{ color: 'white', fontWeight: 'bold' }}>Enviar</Text>
-                </TouchableOpacity>
-              </View>
             </ImageBackground>
             );
           }}
@@ -714,9 +757,7 @@ const Barra = ({ actual, total, color }) => {
     </View> 
     
 ); 
-    };
-
-
+};
 
 const BarraVida = ({ actual, total, color, estadoFase, pulso }) => {
   const porcentaje = parseInt(total) ? (actual / parseInt(total)) * 100 : 0;
@@ -806,11 +847,12 @@ const styles = StyleSheet.create({
   borderColor: "#fcfcfc75", // oro más limpio
     backgroundColor: "rgba(0, 0, 0, 0.87)", 
     borderRadius: 10, 
-    marginBottom: 10, position: "relative" },
+    marginBottom: 10, 
+    position: "relative" },
 
  cardSeleccionadoLeyenda: {
   flexDirection: "column",
-  padding: 14,
+  padding: 12,
   borderWidth: 2,
   borderColor: "#f7f0f0fd", // oro más limpio
   backgroundColor: "rgba(10, 10, 10, 0.87)",
@@ -850,12 +892,19 @@ const styles = StyleSheet.create({
   marginTop: 12,
 },
 
-  rowInput: { flexDirection: "row", alignItems: "center", marginTop: 0 },
+  rowInput: { flexDirection: "row", alignItems: "center" },
   contadorContainer: { flexDirection: "row", alignItems: "center" },
   botonSubirBajar: { backgroundColor: "#060706e1", paddingVertical: 10, paddingHorizontal: 12, borderRadius: 6,borderWidth:1,borderColor:"#cdd1cd7a"},
   botonSubirBajarText: { color: "white", fontSize: 18, fontWeight: "bold" },
   contadorPuntos: { color: "yellow", fontSize: 20, fontWeight: "bold", marginHorizontal: 10 },
-  botonEnviarKen: {backgroundColor: "#007AFF", paddingVertical: 8, paddingHorizontal: 12, borderRadius: 6, marginLeft: 'auto' },
+  botonEnviarKen: {
+    backgroundColor: "#a674c7ad", 
+    paddingVertical: 8, 
+    paddingHorizontal: 12, 
+    borderRadius: 6, 
+    marginLeft: 'auto',
+  borderWidth: 1,
+  borderColor: "gray"},
   botonEliminarX: { position: 'absolute', top: 6, right: 6, zIndex: 10, backgroundColor: "#f82222ea", width: 28, height: 28, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
   
   botonHistorial: { backgroundColor: "#FFD700", padding: 10, borderRadius: 6, marginBottom: 10, alignSelf: 'flex-start' },
@@ -955,7 +1004,7 @@ infoPersonaje: {
   justifyContent: "flex-start",
   flex: 1,
   paddingRight: 10,
-   paddingLeft: 10
+  paddingLeft: 10
 },
 
 
@@ -970,8 +1019,10 @@ row: {
 colImagen: {
   flexDirection: "column",
   alignItems: "center",
+  justifyContent: "space-between",
   marginRight: 2,
-  width: 90
+  width: 100,
+  alignSelf: "stretch",
 },
 spriteFlotante: {
   position: "absolute",
@@ -988,5 +1039,7 @@ spriteFlotante: {
 },
 
 
-textVida: { color: "#f7261fdc", fontSize: 13, fontWeight: "bold", width: "100%", }, textKi: { color: "#1762d1dc", fontSize: 13, fontWeight: "bold", width: "100%", }, textKen: { color: "#0bf00bec", fontSize: 13, fontWeight: "bold", width: "100%", },
+textVida: { color: "#f7261fdc", fontSize: 13, fontWeight: "bold", width: "100%", }, 
+textKi: { color: "#1762d1dc", fontSize: 13, fontWeight: "bold", width: "100%", }, 
+textKen: { color: "#0bf00bec", fontSize: 13, fontWeight: "bold", width: "100%", },
 });

@@ -395,6 +395,7 @@ app.get('/consumirPersonajesUsuario', async (req, res) => {
     a.filas,
     a.columnas,
     a.fps,
+    a.scalesize,
     a.public_id 
 
   FROM personajes p
@@ -802,6 +803,7 @@ app.get('/consumirPersonajesTodos', async (req, res) => {
     a.filas,
     a.columnas,
     a.fps,
+    a.scalesize,
     a.public_id 
         FROM personajes p
   LEFT JOIN animaciones a
@@ -1255,7 +1257,7 @@ app.put('/updateUsuarios/:usuarioId', async (req, res) => {
 
 //update sprite ok!!
 app.post("/upload-sprite", async (req, res) => {
-  const { idpersonaje, imagen, filas, columnas, fps } = req.body;
+  const { idpersonaje, imagen, filas, columnas, fps, scalesize } = req.body;
 
   try {
     if (!idpersonaje) {
@@ -1265,6 +1267,7 @@ app.post("/upload-sprite", async (req, res) => {
     const f = Number(filas);
     const c = Number(columnas);
     const velocidad = Number(fps);
+    const scale = Number(scalesize) || 0.8; // estoy metiendo este nuevo campo para que el frontend me diga a qué escala mostrar el sprite, porque algunos vienen gigantes y otros chiquitos. No es obligatorio, si no viene asumo 0.8 que es un buen tamaño intermedio.
 
     if ([f, c, velocidad].some(v => Number.isNaN(v))) {
       return res.status(400).json({ error: "Datos de animación inválidos" });
@@ -1298,20 +1301,35 @@ app.post("/upload-sprite", async (req, res) => {
     }
 
     // UPSERT
-    const query = `
-      INSERT INTO animaciones (idpersonaje, spriteurl, filas, columnas, fps, public_id)
-      VALUES ($1, COALESCE($2, (SELECT spriteurl FROM animaciones WHERE idpersonaje=$1)),
-              $3, $4, $5,
-              COALESCE($6, (SELECT public_id FROM animaciones WHERE idpersonaje=$1)))
-      ON CONFLICT (idpersonaje)
-      DO UPDATE SET
-        spriteurl = COALESCE(EXCLUDED.spriteurl, animaciones.spriteurl),
-        filas = EXCLUDED.filas,
-        columnas = EXCLUDED.columnas,
-        fps = EXCLUDED.fps,
-        public_id = COALESCE(EXCLUDED.public_id, animaciones.public_id)
-      RETURNING *;
-    `;
+   const query = `
+  INSERT INTO animaciones (
+    idpersonaje,
+    spriteurl,
+    filas,
+    columnas,
+    fps,
+    scalesize,
+    public_id
+  )
+  VALUES (
+    $1,
+    COALESCE($2, (SELECT spriteurl FROM animaciones WHERE idpersonaje=$1)),
+    $3,
+    $4,
+    $5,
+    $6,
+    COALESCE($7, (SELECT public_id FROM animaciones WHERE idpersonaje=$1))
+  )
+  ON CONFLICT (idpersonaje)
+  DO UPDATE SET
+    spriteurl = COALESCE(EXCLUDED.spriteurl, animaciones.spriteurl),
+    filas = EXCLUDED.filas,
+    columnas = EXCLUDED.columnas,
+    fps = EXCLUDED.fps,
+    scalesize = EXCLUDED.scalesize,
+    public_id = COALESCE(EXCLUDED.public_id, animaciones.public_id)
+  RETURNING *;
+`;
 
     const result = await pool.query(query, [
       idpersonaje,
@@ -1319,6 +1337,7 @@ app.post("/upload-sprite", async (req, res) => {
       f,
       c,
       velocidad,
+      scale,
       publicId,
     ]);
 
