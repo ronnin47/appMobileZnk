@@ -70,7 +70,6 @@ const CustomAccordion = ({ title, expanded, onPress, children, icon }) => (
 export const FichaPersonaje = ({ pj, ki, setKi, fortaleza, setFortaleza, ken,setKen,eliminarPersonaje,vidaActual,kiActual,kenActual,setVidaActual,setKiActual,setKenActual,positiva,setPositiva,negativa,setNegativa,cicatriz,setCicatriz,consumision,setConsumision }) => {
   
   const { personajes, savePersonajes,coleccionPersonajes,saveColeccionPersonajes,pjSeleccionado,favoritos,toggleFavorito } = useContext(AuthContext);
- 
   const imagenBase = require('../assets/imagenBase.jpeg');
 
 //PARA EL TEMA DE LOS COLAPSE
@@ -106,7 +105,7 @@ const check = Array.isArray(favoritos) && pjSeleccionado
   };
 
 
-const [sound, setSound] = useState(null);
+  const [sound, setSound] = useState(null);
 
 //ACA LOS STATES
   const [nombre,setNombre]=useState(p.nombre != null ? String(p.nombre) : '');
@@ -618,8 +617,6 @@ useEffect(() => {
 
 ]);
 
-
-
 const getImageSource = () => {
   if (imagen && imagen.startsWith('data:image')) {
     return { uri: imagen };
@@ -629,40 +626,6 @@ const getImageSource = () => {
     return imagenBase;
   }
 };
-/*
-const getImageSource = () => {
-  if (imagen && imagen.startsWith('data:image')) {
-    return { uri: imagen };
-  } else if (imagen && typeof imagen === 'string') {
-    return { uri: imagen };
-  } else {
-    return imagenBase; // fallback
-  }
-};
-  */
-
-
-/*
-const seleccionarImagen = async () => {
-  const resultado = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    allowsEditing: true,
-    quality: 1,
-    base64: true, // ✅ ESTA LÍNEA es clave
-  });
-
-  if (!resultado.canceled) {
-    const { uri, base64 } = resultado.assets[0];
-    const extension = uri.split('.').pop().split('?')[0] || 'jpg';
-    const imagenEnBase64 = `data:image/${extension};base64,${base64}`;
-
-    setImagen(imagenEnBase64); // ✅ imagen está lista para enviar
-   // console.log("Imagen base64 lista para guardar.");
-  }
-};
-*/
-
-
 
 
 const cambiarImagen = async (imagenSeleccionada) => {
@@ -725,8 +688,6 @@ setImagenurl(img.url);
 };
 
 
-
-//aca selecionamos la imagen 
 const seleccionarImagenGaleria = (item) => {
  
  setImagen(item.url)
@@ -790,22 +751,8 @@ const confirmDeleteImage = async (imagenId) => {
   }
 };
 
-
 const colorPlaceHolder="#888" 
-
-
-
-
 const bgConvicion="https://res.cloudinary.com/dzul1hatw/image/upload/v1763045699/b5054f6badb66a02e2cac6154cb9840d_s1owbe.jpg";
-
-
-
-
-
-
-
-
-
 
 const agregarImagen = async () => {
   const resultado = await ImagePicker.launchImageLibraryAsync({
@@ -860,752 +807,737 @@ const guardarImagenEnColeccion = async (imagenColeccion) => {
   }
 };
 
-  return (
-  
-
-     <View style={{ flex: 1 }}>
-    {/* BOTÓN FIJO */}
-    <TouchableOpacity style={styles.botonGuardarFijo} onPress={guardarCambiosBBDD}>
-      <Icon name="save" size={32} color="#00FF00" />
-    </TouchableOpacity>
-
- <ScrollView
-      keyboardShouldPersistTaps="handled"
-      contentContainerStyle={[styles.container, { flexGrow: 1}]}
-    >
-      <View style={{ marginTop:20 }}>
-
-     <View style={styles.card}>
-
-<View style={styles.imagenBanner}>
-  <ImageBackground
-    source={getImageSource()}
-    style={styles.bannerFondo}
-    resizeMode="cover"
-  >
-    {/* TRONCO superpuesto */}
-    <View style={styles.troncoOverlay}>
-      <Tronco
-        fza={fuerza}
-        fort={fortaleza}
-        des={destreza}
-        agi={agilidad}
-        sab={sabiduria}
-        sen={sentidos}
-        pre={presencia}
-        pri={principio}
-      />
-    </View>
-
-    
-
-    {/* Nombre */}
-    <View style={styles.nombreOverlay}>
-      <Text style={styles.nombreSobreImagen}>{nombre}</Text>
-    </View>
-
-    {/* Botón cambiar imagen
-    
-     <TouchableOpacity onPress={seleccionarImagen} style={styles.cambiarImagenBtn}>
-      <Text style={{ color: 'cyan' }}>Cambiar imagen</Text>
-    </TouchableOpacity>
-    
-    
-    */}
-    { imagenSeleccionada ?  (<TouchableOpacity
-  onPress={() => cambiarImagen(imagenSeleccionada)}
-  style={styles.cambiarImagenBtn}
->
-  <Text style={{ color: 'cyan' }}>Cambiar imagen</Text>
-</TouchableOpacity>) : null }
-
-   
-  </ImageBackground>
-</View>
-
-
-
-
-
-
-
-
-
-
-
-<FlatList
-  data={[...coleccionImagenes, { id: 'boton-agregar', tipo: 'boton' }]}
-  keyExtractor={(item) => item.id}
-  horizontal
-  showsHorizontalScrollIndicator={false}
-  renderItem={({ item }) => {
-    if (item.tipo === 'boton') {
-      return (
-        <TouchableOpacity onPress={agregarImagen}   >
-
-        
-         <View
-          style={{
-            width: 60,
-            height: 60,
-            marginRight: 6,
-            borderRadius: 10,
-            backgroundColor: '#1a1a1a',
-            justifyContent: 'center',
-            alignItems: 'center',
-
-            // borde sutil
-            borderWidth: 1,
-            borderColor: '#333',
-
-            // sombra (Android + iOS)
-            elevation: 3,
-            shadowColor: '#000',
-            shadowOpacity: 0.3,
-            shadowRadius: 4,
-            shadowOffset: { width: 0, height: 2 },
-          }}
-        >
-          <Text
-            style={{
-              color: '#68a3aa', // cyan más moderno
-              fontSize: 26,
-              fontWeight: 'bold',
-            }}
-          >
-            +
-          </Text>
-        </View>
-        </TouchableOpacity>
-      );
-    }
-
-    return (
-      <TouchableOpacity
-  onPress={() => {
-    seleccionarImagenGaleria(item);
-    reproducirSonidoSeleccion();
-  }}
-  onLongPress={() => {
-    setImagenGrande(item.url);
-    setImagenGrandeId(item.id); // 👈 CLAVE
-  }}
->
-        <Image
-  source={{ uri: item.url }}
-  style={{
-    width: 60,
-    height: 60,
-    marginRight: 6,
-    borderWidth: imagenSeleccionada === item.id ? 2 : 0,
-    borderColor: 'cyan',
-    borderRadius: 6,
-    opacity: imagenSeleccionada === item.id ? 1 : 0.4, // 👈 CLAVE
-  }}
-/>
+return (
+    <View style={{ flex: 1 }}>
+      {/* BOTÓN FIJO */}
+      <TouchableOpacity style={styles.botonGuardarFijo} onPress={guardarCambiosBBDD}>
+        <Icon name="save" size={32} color="#00FF00" />
       </TouchableOpacity>
-    );
-  }}
-/>
 
-{imagenGrande && (
-  <TouchableOpacity
-    activeOpacity={1}
-    style={{
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.84)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      zIndex: 999,
-    }}
-    onPress={() => setImagenGrande(null)} // cerrar al tocar fondo
-  >
-
-   
-
-    {/* IMAGEN GRANDE */}
-  <Image
-    source={{ uri: imagenGrande }}
-    style={{ width: '80%', height: '70%' }}
-    resizeMode="contain"
-  />
-
-  {/* BOTÓN ELIMINAR */}
-  <TouchableOpacity
-    onPress={(e) => {
-      e.stopPropagation(); // 👈 evita cerrar el overlay
-      deleteImage(imagenGrandeId); // mejor usar el id de la imagen abierta
-    }}
-    style={{
-      marginTop: 15, // 👈 separación de la imagen
-      backgroundColor: 'red',
-      paddingHorizontal: 20,
-      paddingVertical: 10,
-      borderRadius: 8,
-    }}
-  >
-    <Text style={{ color: 'white', fontWeight: 'bold' }}>
-      Eliminar imagen
-    </Text>
-  </TouchableOpacity>
-
-
-  </TouchableOpacity>
-)}
-
-
-<View style={{ flexDirection: 'row', alignItems: 'flex-start', marginTop: 10 }}>
-
-  
-
-  {/* INPUTS */}
-  <View style={[styles.inputsContainer, { flex: 1 }]}>
-
-    <Text style={styles.label}>Nombre</Text>
-    <TextInput
-      placeholder="Nombre"
-      placeholderTextColor={colorPlaceHolder}
-      style={styles.inputTexto}
-      value={nombre}
-      onChangeText={setNombre}
-    />
-
-    <Text style={styles.label}>Raza</Text>
-    <TextInput
-      placeholder="Raza"
-      placeholderTextColor={colorPlaceHolder}
-      style={styles.inputTexto}
-      value={raza}
-      onChangeText={setRaza}
-    />
-
-    <Text style={styles.label}>Dominio</Text>
-    <TextInput
-      placeholder="Dominio"
-      placeholderTextColor={colorPlaceHolder}
-      style={styles.inputTexto}
-      value={dominio}
-      onChangeText={setDominio}
-    />
-
-    <Text style={styles.label}>Naturaleza</Text>
-    <TextInput
-      placeholder="Naturaleza"
-      placeholderTextColor={colorPlaceHolder}
-      style={styles.inputTexto}
-      value={naturaleza}
-      onChangeText={setNaturaleza}
-    />
-
-    <Text style={styles.label}>Edad</Text>
-    <TextInput
-      placeholder="Edad"
-      placeholderTextColor={colorPlaceHolder}
-      style={styles.inputTexto}
-      value={edad}
-      onChangeText={setEdad}
-    />
-
-  </View>
-
-  {p.spriteurl ? (
-    <View
-  style={{
-    marginLeft: 5,
-    marginTop: 40,
-    marginRight: 10,
-    width: 170,
-    height: 170,
-    justifyContent: "center",
-    alignItems: "center",
-    overflow: "hidden",
-  }}
->
-      <AnimacionModel
-        source={{ uri: p.spriteurl }}
-        scaleSize={0.8}
-        filas={p.filas}
-        columnas={p.columnas}
-        fps={p.fps}
-      />
-    </View>
-  ) : null}
-
-</View>
-
-  {/* KI, KEN, DESTINOS */}
-  <View style={styles.statsRow}>
-    <View style={styles.statColumn}>
-      <Text style={styles.label}>Ki</Text>
-      <TextInput style={styles.inputNumero} value={ki} onChangeText={setKi} placeholder="Ki" placeholderTextColor={colorPlaceHolder} />
-
-      <Text style={styles.label}>Nivel de Destino</Text>
-      <TextInput style={styles.inputNumero} value={destino} onChangeText={setDestino} placeholder="Nivel de Destino" placeholderTextColor={colorPlaceHolder} />
-    </View>
-    <View style={styles.statColumn}>
-      <Text style={styles.label}>Ken</Text>
-      <TextInput style={styles.inputNumero} value={ken} onChangeText={setKen} placeholder="Ken" placeholderTextColor={colorPlaceHolder} />
-
-      <Text style={styles.label}>P. de Destino</Text>
-      <TextInput style={styles.inputNumero} value={pDestino} onChangeText={setPdestino} placeholder="P. de Destino" placeholderTextColor={colorPlaceHolder} />
-    </View>
-  </View>
-
-  {/* CONVICCIÓN */}
-  <Text style={[styles.label, { textAlign: 'center' }]}>Convicción</Text>
-     <ImageBackground
-      source={{ uri: bgConvicion }}
-      style={styles.background}
-      imageStyle={{ borderRadius: 6 }}
-    >
-     <TextInput
-    placeholder="Convicción"
-    placeholderTextColor={colorPlaceHolder}
-    multiline
-    style={styles.inputTextoConv}
-    value={conviccion}
-    onChangeText={setConviccion}
-    
-  />
-    </ImageBackground>
- 
-
-  {/* CHECKBOXES */}
-  <View style={styles.checkboxRow}>
-    <TouchableOpacity onPress={manejarToggleMarca} style={styles.checkboxContainer}>
-      <Text style={styles.checkbox}>{p.pjPnj ? '☑️' : '⬜'}</Text>
-      <Text style={styles.checkboxLabel}>Marca del destino</Text>
-    </TouchableOpacity>
-    <TouchableOpacity onPress={manejarToggle} style={styles.checkboxContainer}>
-      <Text style={styles.checkbox}>{check ? '✅' : '⬜'}</Text>
-      <Text style={styles.checkboxLabel}>Favorito</Text>
-    </TouchableOpacity>
-  </View>
-
-</View>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    {/* CARACTERITICAS PRINCIPALES- CARACTERISTICAS SECUNDARIAS Y TODAS LAS SECCIONES RESTANTES*/} 
-      <View style={{ marginTop: 12 }}>
-
-         <CustomAccordion
-          title="Caracteristicas"
-          expanded={expanded === 'caracteristicas'}
-          onPress={() => handlePress('caracteristicas')}
-          icon="dumbbell"
+      <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={[styles.container, { flexGrow: 1}]}
         >
+          <View style={{ marginTop:20 }}>
 
+          <View style={styles.card}>
 
-
-{/*  aca estamso trabajando  */} 
-          <View style={{ marginTop: 12 }}>
-      <ImageBackground
-          source={{ uri: fondoUrl }}
-          style={{ flex: 1, opacity: 1,marginBottom:20 }}
+      <View style={styles.imagenBanner}>
+        <ImageBackground
+          source={getImageSource()}
+          style={styles.bannerFondo}
           resizeMode="cover"
         >
-        {/* 🔹 Capa oscura semitransparente para mejorar el contraste */}
-        <View
-          style={{
-            ...StyleSheet.absoluteFillObject,
-            backgroundColor: 'rgba(0, 0, 0, 0.49)',
-          }}
+          {/* TRONCO superpuesto */}
+          <View style={styles.troncoOverlay}>
+            <Tronco
+              fza={fuerza}
+              fort={fortaleza}
+              des={destreza}
+              agi={agilidad}
+              sab={sabiduria}
+              sen={sentidos}
+              pre={presencia}
+              pri={principio}
+            />
+          </View>
+
+          
+
+          {/* Nombre */}
+          <View style={styles.nombreOverlay}>
+            <Text style={styles.nombreSobreImagen}>{nombre}</Text>
+          </View>
+
+
+          { imagenSeleccionada ?  (<TouchableOpacity
+        onPress={() => cambiarImagen(imagenSeleccionada)}
+        style={styles.cambiarImagenBtn}
+        >
+        <Text style={{ color: 'cyan' }}>Cambiar imagen</Text>
+        </TouchableOpacity>) : null }
+
+          
+        </ImageBackground>
+      </View>
+
+
+      <FlatList
+      data={[...coleccionImagenes, { id: 'boton-agregar', tipo: 'boton' }]}
+      keyExtractor={(item) => item.id}
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      renderItem={({ item }) => {
+        if (item.tipo === 'boton') {
+          return (
+            <TouchableOpacity onPress={agregarImagen}   >
+
+            
+              <View
+              style={{
+                width: 60,
+                height: 60,
+                marginRight: 6,
+                borderRadius: 10,
+                backgroundColor: '#1a1a1a',
+                justifyContent: 'center',
+                alignItems: 'center',
+
+                // borde sutil
+                borderWidth: 1,
+                borderColor: '#333',
+
+                // sombra (Android + iOS)
+                elevation: 3,
+                shadowColor: '#000',
+                shadowOpacity: 0.3,
+                shadowRadius: 4,
+                shadowOffset: { width: 0, height: 2 },
+              }}
+            >
+              <Text
+                style={{
+                  color: '#68a3aa', // cyan más moderno
+                  fontSize: 26,
+                  fontWeight: 'bold',
+                }}
+              >
+                +
+              </Text>
+            </View>
+            </TouchableOpacity>
+          );
+        }
+
+        return (
+          <TouchableOpacity
+      onPress={() => {
+        seleccionarImagenGaleria(item);
+        reproducirSonidoSeleccion();
+      }}
+      onLongPress={() => {
+        setImagenGrande(item.url);
+        setImagenGrandeId(item.id); // 👈 CLAVE
+      }}
+      >
+            <Image
+      source={{ uri: item.url }}
+      style={{
+        width: 60,
+        height: 60,
+        marginRight: 6,
+        borderWidth: imagenSeleccionada === item.id ? 2 : 0,
+        borderColor: 'cyan',
+        borderRadius: 6,
+        opacity: imagenSeleccionada === item.id ? 1 : 0.4, // 👈 CLAVE
+      }}
+      />
+          </TouchableOpacity>
+        );
+      }}
+      />
+
+      {imagenGrande && (
+      <TouchableOpacity
+        activeOpacity={1}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.84)',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 999,
+        }}
+        onPress={() => setImagenGrande(null)} // cerrar al tocar fondo
+      >
+
+        
+
+        {/* IMAGEN GRANDE */}
+      <Image
+        source={{ uri: imagenGrande }}
+        style={{ width: '80%', height: '70%' }}
+        resizeMode="contain"
+      />
+
+      {/* BOTÓN ELIMINAR */}
+      <TouchableOpacity
+        onPress={(e) => {
+          e.stopPropagation(); // 👈 evita cerrar el overlay
+          deleteImage(imagenGrandeId); // mejor usar el id de la imagen abierta
+        }}
+        style={{
+          marginTop: 15, // 👈 separación de la imagen
+          backgroundColor: 'red',
+          paddingHorizontal: 20,
+          paddingVertical: 10,
+          borderRadius: 8,
+        }}
+      >
+        <Text style={{ color: 'white', fontWeight: 'bold' }}>
+          Eliminar imagen
+        </Text>
+      </TouchableOpacity>
+
+
+      </TouchableOpacity>
+      )}
+
+
+      <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginTop: 10 }}>
+
+
+
+      {/* INPUTS */}
+      <View style={[styles.inputsContainer, { flex: 1 }]}>
+
+        <Text style={styles.label}>Nombre</Text>
+        <TextInput
+          placeholder="Nombre"
+          placeholderTextColor={colorPlaceHolder}
+          style={styles.inputTexto}
+          value={nombre}
+          onChangeText={setNombre}
         />
 
-          {/* 🔹 Contenido (mantiene tu mismo orden y estilos) */}
-          <View
-            style={[
-              styles.gridContainer,
-              {
-                padding: 10,
-                borderWidth: 1,
-                borderColor: 'gray',
-              
-                borderRadius: 5,
-                paddingLeft: 10,
-              },
-            ]}
-  >
-    <View style={styles.inputGroup}>
-      <Text style={styles.labelTronco}>力 Fuerza</Text>
-      <TextInput
-        keyboardType="default"
-        style={styles.inputNumero}
-        value={fuerza}
-        onChangeText={setFuerza}
-        placeholder="Fza"
-        placeholderTextColor={colorPlaceHolder}
-      />
-    </View>
+        <Text style={styles.label}>Raza</Text>
+        <TextInput
+          placeholder="Raza"
+          placeholderTextColor={colorPlaceHolder}
+          style={styles.inputTexto}
+          value={raza}
+          onChangeText={setRaza}
+        />
 
-    <View style={styles.inputGroup}>
-      <Text style={styles.labelTronco}>剛 Fortaleza</Text>
-      <TextInput
-        keyboardType="default"
-        style={styles.inputNumero}
-        value={fortaleza}
-        onChangeText={setFortaleza}
-        placeholder="For"
-        placeholderTextColor={colorPlaceHolder}
-      />
-    </View>
+        <Text style={styles.label}>Dominio</Text>
+        <TextInput
+          placeholder="Dominio"
+          placeholderTextColor={colorPlaceHolder}
+          style={styles.inputTexto}
+          value={dominio}
+          onChangeText={setDominio}
+        />
 
-    <View style={styles.inputGroup}>
-      <Text style={styles.labelTronco}>技 Destreza</Text>
-      <TextInput
-        keyboardType="default"
-        style={styles.inputNumero}
-        value={destreza}
-        onChangeText={setDestreza}
-        placeholder="Des"
-        placeholderTextColor={colorPlaceHolder}
-      />
-    </View>
+        <Text style={styles.label}>Naturaleza</Text>
+        <TextInput
+          placeholder="Naturaleza"
+          placeholderTextColor={colorPlaceHolder}
+          style={styles.inputTexto}
+          value={naturaleza}
+          onChangeText={setNaturaleza}
+        />
 
-    <View style={styles.inputGroup}>
-      <Text style={styles.labelTronco}>敏 Agilidad</Text>
-      <TextInput
-        keyboardType="default"
-        style={styles.inputNumero}
-        value={agilidad}
-        onChangeText={setAgilidad}
-        placeholder="Agi"
-        placeholderTextColor={colorPlaceHolder}
-      />
-    </View>
+        <Text style={styles.label}>Edad</Text>
+        <TextInput
+          placeholder="Edad"
+          placeholderTextColor={colorPlaceHolder}
+          style={styles.inputTexto}
+          value={edad}
+          onChangeText={setEdad}
+        />
 
-    <View style={styles.inputGroup}>
-      <Text style={styles.labelTronco}>知 Sabiduría</Text>
-      <TextInput
-        keyboardType="default"
-        style={styles.inputNumero}
-        value={sabiduria}
-        onChangeText={setSabiduria}
-        placeholder="Sab"
-        placeholderTextColor={colorPlaceHolder}
-      />
-    </View>
+      </View>
 
-    <View style={styles.inputGroup}>
-      <Text style={styles.labelTronco}>威 Presencia</Text>
-      <TextInput
-        keyboardType="default"
-        style={styles.inputNumero}
-        value={presencia}
-        onChangeText={setPresencia}
-        placeholder="Pre"
-        placeholderTextColor={colorPlaceHolder}
-      />
-    </View>
-
-    <View style={styles.inputGroup}>
-      <Text style={styles.labelTronco}>原 Principio</Text>
-      <TextInput
-        keyboardType="default"
-        style={styles.inputNumero}
-        value={principio}
-        onChangeText={setPrincipio}
-        placeholder="Pri"
-        placeholderTextColor={colorPlaceHolder}
-      />
-    </View>
-
-    <View style={styles.inputGroup}>
-      <Text style={styles.labelTronco}>感 Sentidos</Text>
-      <TextInput
-        keyboardType="default"
-        style={styles.inputNumero}
-        value={sentidos}
-        onChangeText={setSentidos}
-        placeholder="Sen"
-        placeholderTextColor={colorPlaceHolder}
-      />
-    </View>
-          </View>
-      </ImageBackground>
-           
-          
-
-        <ImageBackground
-      source={{ uri: fondoUrl }}
-      style={{ flex: 1, opacity: 1, marginBottom:20 }}
-      resizeMode="cover"
-    >
-    {/* 🔹 Capa oscura semitransparente para mejorar el contraste */}
-    <View
+      {p.spriteurl ? (
+        <View
       style={{
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0, 0, 0, 0.67)',
+        marginLeft: 5,
+        marginTop: 40,
+        marginRight: 10,
+        width: 170,
+        height: 170,
+        justifyContent: "center",
+        alignItems: "center",
+        overflow: "hidden",
       }}
-    />
+      >
+          <AnimacionModel
+            source={{ uri: p.spriteurl }}
+            scaleSize={0.8}
+            filas={p.filas}
+            columnas={p.columnas}
+            fps={p.fps}
+          />
+        </View>
+      ) : null}
 
-      {/* 🔹 Contenido (mantiene tu mismo orden y estilos) */}
-      <View
-        style={[
-          styles.gridContainer,
-          {
-            padding: 10,
-            borderWidth: 1,
-            borderColor: 'gray',
-            borderRadius: 5,
-            paddingLeft: 10,
-          },
-        ]}
->
-          
-          <View style={{ flex: 1, marginRight: 8,  }}>
-            <Text style={styles.label}>Academicismo</Text><TextInput placeholder="Academicismo" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={academisismo} onChangeText={setAcademisismo} />
-            <Text style={styles.label}>Atletismo</Text><TextInput placeholder="Atletismo" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={atletismo} onChangeText={setAtletismo} />
-            <Text style={styles.label}>Mentir</Text><TextInput placeholder="Mentir" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={mentir} onChangeText={setMentir} />
-            <Text style={styles.label}>Artes Marciales</Text><TextInput placeholder="Artes Marciales" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={artesMarciales} onChangeText={setArtesMarciales} />
-            <Text style={styles.label}>Con Obj. Mágicos</Text><TextInput placeholder="Con Obj. Mágicos" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={conObjMagicos} onChangeText={setConObjMagicos} />
-            <Text style={styles.label}>Con Leyendas</Text><TextInput placeholder="Con Leyendas" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={conLeyendas} onChangeText={setConLeyendas} />
-            <Text style={styles.label}>Con Espiritual</Text><TextInput placeholder="Con Espiritual" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={conEspiritual} onChangeText={setConEspiritual} />
-            <Text style={styles.label}>Manejo Sombras</Text><TextInput placeholder="Manejo Sombras" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={manejoSombras} onChangeText={setManejoSombras} />
-            <Text style={styles.label}>Con Hechicería</Text><TextInput placeholder="Con Hechicería" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={conHechiceria} onChangeText={setConHechiceria} />
-            <Text style={styles.label}>Med Espiritual</Text><TextInput placeholder="Med Espiritual" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={medEspiritual} onChangeText={setMedEspiritual} />
-            <Text style={styles.label}>Fuego</Text><TextInput placeholder="Fuego" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={fuego} onChangeText={setFuego} />
-            <Text style={styles.label}>Veneno</Text><TextInput placeholder="Veneno" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={veneno} onChangeText={setVeneno} />
-            <Text style={styles.label}>Energía</Text><TextInput placeholder="Energía" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={energia} onChangeText={setEnergia} />
-            
+      </View>
 
-            <TextInput
-              placeholder="Ingresa Armamento"
-              placeholderTextColor={colorPlaceHolder}
-                keyboardType="default"
-              style={[styles.label, {  height: 19 ,marginTop: 0,marginBottom: 0, paddingTop:0, paddingBottom: 2 }]} 
-              value={apCombate}
-              onChangeText={setApCombate}
-            />
-            <TextInput
-              placeholder="0"
-              placeholderTextColor={colorPlaceHolder}
-              keyboardType="default"
-              style={[styles.inputNumero, { marginTop: 0 }]}
-              value={valCombate}
-              onChangeText={setValCombate}
-            />
+      {/* KI, KEN, DESTINOS */}
+      <View style={styles.statsRow}>
+        <View style={styles.statColumn}>
+          <Text style={styles.label}>Ki</Text>
+          <TextInput 
+          style={styles.inputNumero} 
+          value={ki} 
+          onChangeText={setKi} 
+          placeholder="Ki" 
+          placeholderTextColor={colorPlaceHolder}
+          keyboardType='numeric' />
 
-            <TextInput
-              placeholder="Ingresa Armamento"
-              placeholderTextColor={colorPlaceHolder}
-                keyboardType="default"
-              style={[styles.label, { height: 19, marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 2 }]}
-              value={apCombate2}
-              onChangeText={setApCombate2}
-            />
-            <TextInput
-              placeholder="0"
-              placeholderTextColor={colorPlaceHolder}
-              keyboardType="default"
-              style={[styles.inputNumero, { marginTop: 0 }]}
-              value={valCombate2}
-              onChangeText={setValCombate2}
-            />  
+          <Text style={styles.label}>Nivel de Destino</Text>
+          <TextInput 
+          style={styles.inputNumero} 
+          value={destino} 
+          onChangeText={setDestino} 
+          placeholder="Nivel de Destino" 
+          placeholderTextColor={colorPlaceHolder}
+          keyboardType='numeric'
+           />
+        </View>
+        <View style={styles.statColumn}>
+          <Text style={styles.label}>Ken</Text>
+          <TextInput 
+          style={styles.inputNumero} 
+          value={ken} 
+          onChangeText={setKen} 
+          placeholder="Ken" 
+          placeholderTextColor={colorPlaceHolder} 
+          keyboardType='numeric'
+          />
 
-            <TextInput
-              placeholder="Aptitud nueva"
-              placeholderTextColor={colorPlaceHolder}
-                keyboardType="default"
-              style={[styles.label, { height: 19, marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 2 }]}
-              value={add3}
-              onChangeText={setAdd3}
-            />
-            <TextInput
-              placeholder="0"
-              placeholderTextColor={colorPlaceHolder}
-              keyboardType="default"
-              style={[styles.inputNumero, { marginTop: 0 }]}
-              value={valAdd3}
-              onChangeText={setValAdd3}
-            />
+          <Text style={styles.label}>P. de Destino</Text>
+          <TextInput 
+          style={styles.inputNumero} 
+          value={pDestino} 
+          onChangeText={setPdestino} 
+          placeholder="P. de Destino" 
+          placeholderTextColor={colorPlaceHolder}
+          keyboardType='numeric'
+          />
+        </View>
+      </View>
 
-            <TextInput
-              placeholder="Aptitud nueva"
-              placeholderTextColor={colorPlaceHolder}
-                keyboardType="default"
-              style={[styles.label, { height: 19, marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 2 }]}
-              value={add4}
-              onChangeText={setAdd4}
-            />
-            <TextInput
-              placeholder="0"
-              placeholderTextColor={colorPlaceHolder}
-              keyboardType="default"
-              style={[styles.inputNumero, { marginTop: 0 }]}
-              value={valAdd4}
-              onChangeText={setValAdd4}
-            />
-
-            
-
-          </View>
-
-          <View style={{ flex: 1, marginLeft: 8 }}>
-            <Text style={styles.label}>Alerta</Text><TextInput placeholder="Alerta" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={alerta} onChangeText={setAlerta} />
-            <Text style={styles.label}>Con Bakemono</Text><TextInput placeholder="Con Bakemono" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={conBakemono} onChangeText={setConBakemono} />
-            <Text style={styles.label}>Pilotear</Text><TextInput placeholder="Pilotear" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={pilotear} onChangeText={setPilotear} />
-            <Text style={styles.label}>Medicina</Text><TextInput placeholder="Medicina" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={medicina} onChangeText={setMedicina} />
-            <Text style={styles.label}>Sigilo</Text><TextInput placeholder="Sigilo" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={sigilo} onChangeText={setSigilo} />
-            <Text style={styles.label}>Con Esferas</Text><TextInput placeholder="Con Esferas" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={conEsferas} onChangeText={setConEsferas} />
-            <Text style={styles.label}>Forja</Text><TextInput placeholder="Forja" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={forja} onChangeText={setForja} />
-            <Text style={styles.label}>Con Demonio</Text><TextInput placeholder="Con Demonio" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={conDemonio} onChangeText={setConDemonio} />
-            <Text style={styles.label}>Manejo Blaster</Text><TextInput placeholder="Manejo Blaster" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={manejoBlaster} onChangeText={setManejoBlaster} />
-            <Text style={styles.label}>Trato Bakemono</Text><TextInput placeholder="Trato Bakemono" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={tratoBakemono} onChangeText={setTratoBakemono} />
-            <Text style={styles.label}>Med Vital</Text><TextInput placeholder="Med Vital" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={medVital} onChangeText={setMedVital} />
-            <Text style={styles.label}>Rayo</Text><TextInput placeholder="Rayo" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={rayo} onChangeText={setRayo} />
-            <Text style={styles.label}>Frío</Text><TextInput placeholder="Frío" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={frio} onChangeText={setFrio} />
-            <Text style={styles.label}>Corte</Text><TextInput placeholder="Corte" placeholderTextColor={colorPlaceHolder} keyboardType="default" style={styles.inputNumero} value={corte} onChangeText={setCorte} /> 
-
-
-
-            <TextInput
-              placeholder="Aptitud nueva"
-              placeholderTextColor={colorPlaceHolder}
-              style={[styles.label, { height: 19, marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 2 }]}
-              value={add1}
-              onChangeText={setAdd1}
-            />
-            <TextInput
-              placeholder="0"
-              placeholderTextColor={colorPlaceHolder}
-              keyboardType="default"
-              style={[styles.inputNumero, { marginTop: 0 }]}
-              value={valAdd1}
-              onChangeText={setValAdd1}
-            />
-
-            <TextInput
-              placeholder="Aptitud nueva"
-              placeholderTextColor={colorPlaceHolder}
-              style={[styles.label, { height: 19, marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 2 }]}
-              value={add2}
-              onChangeText={setAdd2}
-            />
-            <TextInput
-              placeholder="0"
-              placeholderTextColor={colorPlaceHolder}
-              keyboardType="default"
-              style={[styles.inputNumero, { marginTop: 0 }]}
-              value={valAdd2}
-              onChangeText={setValAdd2}
-            />
-
-
-            
-          </View>
-          </View>
+      {/* CONVICCIÓN */}
+      <Text style={[styles.label, { textAlign: 'center' }]}>Convicción</Text>
+          <ImageBackground
+          source={{ uri: bgConvicion }}
+          style={styles.background}
+          imageStyle={{ borderRadius: 6 }}
+        >
+          <TextInput
+        placeholder="Convicción"
+        placeholderTextColor={colorPlaceHolder}
+        multiline
+        style={styles.inputTextoConv}
+        value={conviccion}
+        onChangeText={setConviccion}
         
+      />
         </ImageBackground>
-           
-          </View>
-           
-         
-        </CustomAccordion>
 
-        <CustomAccordion
-          title="Ventajas y Desventajas"
-          expanded={expanded === 'ventajas'}
-          onPress={() => handlePress('ventajas')}
-          icon="star"
-        >
-            <Ventajas ventajas={ventajas} setVentajas={setVentajas} />
-        </CustomAccordion>
 
-        <CustomAccordion
-          title="Inventario"
-          expanded={expanded === 'inventario'}                     
-          onPress={() => handlePress('inventario')}
-          icon="backpack"
-        >
-          <Inventario inventario={inventario} setInventario={setInventario} />
-        </CustomAccordion>
+      {/* CHECKBOXES */}
+      <View style={styles.checkboxRow}>
+        <TouchableOpacity onPress={manejarToggleMarca} style={styles.checkboxContainer}>
+          <Text style={styles.checkbox}>{p.pjPnj ? '☑️' : '⬜'}</Text>
+          <Text style={styles.checkboxLabel}>Marca del destino</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={manejarToggle} style={styles.checkboxContainer}>
+          <Text style={styles.checkbox}>{check ? '✅' : '⬜'}</Text>
+          <Text style={styles.checkboxLabel}>Favorito</Text>
+        </TouchableOpacity>
+      </View>
 
-        <CustomAccordion
-          title="Dominios y Tecnicas"
-          expanded={expanded === 'dominios'}
-          onPress={() => handlePress('dominios')}
-          icon="lightning-bolt"
-        >
-          <Dominios dominios={dominios} setDominios={setDominios} />
-        </CustomAccordion>
+      </View>
+        {/* CARACTERITICAS PRINCIPALES- CARACTERISTICAS SECUNDARIAS Y TODAS LAS SECCIONES RESTANTES*/} 
+          <View style={{ marginTop: 12 }}>
 
-        <CustomAccordion
-          title="Hechicería"
-          expanded={expanded === 'hechiceria'}
-          onPress={() => handlePress('hechiceria')}
-          icon="wand-magic"
-        >
-          <Hechizos hechizos={hechizos} setHechizos={setHechizos}></Hechizos>
-        </CustomAccordion>
+              <CustomAccordion
+              title="Caracteristicas"
+              expanded={expanded === 'caracteristicas'}
+              onPress={() => handlePress('caracteristicas')}
+              icon="dumbbell"
+            >
+      
+              <View style={{ marginTop: 12 }}>
+                <ImageBackground
+                    source={{ uri: fondoUrl }}
+                    style={{ flex: 1, opacity: 1,marginBottom:20 }}
+                    resizeMode="cover"
+                  >
+                  {/* 🔹 Capa oscura semitransparente para mejorar el contraste */}
+                  <View
+                    style={{
+                      ...StyleSheet.absoluteFillObject,
+                      backgroundColor: 'rgba(0, 0, 0, 0.49)',
+                    }}
+                  />
 
-        <CustomAccordion
-          title="Historia"
-          expanded={expanded === 'historia'}
-          onPress={() => handlePress('historia')}
-          icon="book-open"
-        >
-          <Historia historia={historia} setHistoria={setHistoria}></Historia>
-        </CustomAccordion>
+                    {/* 🔹 Contenido (mantiene tu mismo orden y estilos) */}
+                    <View
+                      style={[
+                        styles.gridContainer,
+                        {
+                          padding: 10,
+                          borderWidth: 1,
+                          borderColor: 'gray',
+                        
+                          borderRadius: 5,
+                          paddingLeft: 10,
+                        },
+                      ]}
+            >
+              <View style={styles.inputGroup}>
+                <Text style={styles.labelTronco}>力 Fuerza</Text>
+                <TextInput
+                  keyboardType='numeric'
+                  style={styles.inputNumero}
+                  value={fuerza}
+                  onChangeText={setFuerza}
+                  placeholder="Fza"
+                  placeholderTextColor={colorPlaceHolder}
+                />
+              </View>
 
-        <CustomAccordion
-          title="Tecnicas, poderes y objetos unicos"
-          expanded={expanded === 'tecEspecial'}
-          onPress={() => handlePress('tecEspecial')}
-          icon="crown"
-        >
-          <TecnicaEspecial tecEspecial={tecEspecial} setTecEspecial={setTecEspecial}></TecnicaEspecial>
-        </CustomAccordion>
+              <View style={styles.inputGroup}>
+                <Text style={styles.labelTronco}>剛 Fortaleza</Text>
+                <TextInput
+                  keyboardType='numeric'
+                  style={styles.inputNumero}
+                  value={fortaleza}
+                  onChangeText={setFortaleza}
+                  placeholder="For"
+                  placeholderTextColor={colorPlaceHolder}
+                />
+              </View>
 
-        <CustomAccordion
-          title="Eliminar Personaje"
-          expanded={expanded === 'eliminarPj'}
-          onPress={() => handlePress('eliminarPj')}
-          icon="trash-can"
-        >
-          <Button
-                mode="contained"
-                onPress={() => eliminarPersonaje(pj.idpersonaje)}
-                style={{ backgroundColor: '#FF4500', margin: 10 }}
-                labelStyle={{ color: '#fff' }}
+              <View style={styles.inputGroup}>
+                <Text style={styles.labelTronco}>技 Destreza</Text>
+                <TextInput
+                  keyboardType='numeric'
+                  style={styles.inputNumero}
+                  value={destreza}
+                  onChangeText={setDestreza}
+                  placeholder="Des"
+                  placeholderTextColor={colorPlaceHolder}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.labelTronco}>敏 Agilidad</Text>
+                <TextInput
+                  keyboardType='numeric'
+                  style={styles.inputNumero}
+                  value={agilidad}
+                  onChangeText={setAgilidad}
+                  placeholder="Agi"
+                  placeholderTextColor={colorPlaceHolder}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.labelTronco}>知 Sabiduría</Text>
+                <TextInput
+                  keyboardType='numeric'
+                  style={styles.inputNumero}
+                  value={sabiduria}
+                  onChangeText={setSabiduria}
+                  placeholder="Sab"
+                  placeholderTextColor={colorPlaceHolder}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.labelTronco}>威 Presencia</Text>
+                <TextInput
+                  keyboardType='numeric'
+                  style={styles.inputNumero}
+                  value={presencia}
+                  onChangeText={setPresencia}
+                  placeholder="Pre"
+                  placeholderTextColor={colorPlaceHolder}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.labelTronco}>原 Principio</Text>
+                <TextInput
+                  keyboardType='numeric'
+                  style={styles.inputNumero}
+                  value={principio}
+                  onChangeText={setPrincipio}
+                  placeholder="Pri"
+                  placeholderTextColor={colorPlaceHolder}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.labelTronco}>感 Sentidos</Text>
+                <TextInput
+                  keyboardType='numeric'
+                  style={styles.inputNumero}
+                  value={sentidos}
+                  onChangeText={setSentidos}
+                  placeholder="Sen"
+                  placeholderTextColor={colorPlaceHolder}
+                />
+              </View>
+                    </View>
+                </ImageBackground>
+                
+              
+
+                  <ImageBackground
+                source={{ uri: fondoUrl }}
+                style={{ flex: 1, opacity: 1, marginBottom:20 }}
+                resizeMode="cover"
               >
-                Confirmar eliminación de {nombre}
-              </Button>
-        </CustomAccordion>
+              {/* 🔹 Capa oscura semitransparente para mejorar el contraste */}
+              <View
+                style={{
+                  ...StyleSheet.absoluteFillObject,
+                  backgroundColor: 'rgba(0, 0, 0, 0.67)',
+                }}
+              />
 
-       
-      </View>
+                {/* 🔹 Contenido (mantiene tu mismo orden y estilos) */}
+                <View
+                  style={[
+                    styles.gridContainer,
+                    {
+                      padding: 10,
+                      borderWidth: 1,
+                      borderColor: 'gray',
+                      borderRadius: 5,
+                      paddingLeft: 10,
+                    },
+                  ]}
+            >
+                    
+                    <View style={{ flex: 1, marginRight: 8,  }}>
+                      <Text style={styles.label}>Academicismo</Text><TextInput placeholder="Academicismo" placeholderTextColor={colorPlaceHolder} keyboardType='numeric' style={styles.inputNumero} value={academisismo} onChangeText={setAcademisismo} />
+                      <Text style={styles.label}>Atletismo</Text><TextInput placeholder="Atletismo" placeholderTextColor={colorPlaceHolder} keyboardType='numeric' style={styles.inputNumero} value={atletismo} onChangeText={setAtletismo} />
+                      <Text style={styles.label}>Mentir</Text><TextInput placeholder="Mentir" placeholderTextColor={colorPlaceHolder} keyboardType='numeric' style={styles.inputNumero} value={mentir} onChangeText={setMentir} />
+                      <Text style={styles.label}>Artes Marciales</Text><TextInput placeholder="Artes Marciales" placeholderTextColor={colorPlaceHolder} keyboardType='numeric' style={styles.inputNumero} value={artesMarciales} onChangeText={setArtesMarciales} />
+                      <Text style={styles.label}>Con Obj. Mágicos</Text><TextInput placeholder="Con Obj. Mágicos" placeholderTextColor={colorPlaceHolder} keyboardType='numeric' style={styles.inputNumero} value={conObjMagicos} onChangeText={setConObjMagicos} />
+                      <Text style={styles.label}>Con Leyendas</Text><TextInput placeholder="Con Leyendas" placeholderTextColor={colorPlaceHolder} keyboardType='numeric' style={styles.inputNumero} value={conLeyendas} onChangeText={setConLeyendas} />
+                      <Text style={styles.label}>Con Espiritual</Text><TextInput placeholder="Con Espiritual" placeholderTextColor={colorPlaceHolder} keyboardType='numeric' style={styles.inputNumero} value={conEspiritual} onChangeText={setConEspiritual} />
+                      <Text style={styles.label}>Manejo Sombras</Text><TextInput placeholder="Manejo Sombras" placeholderTextColor={colorPlaceHolder} keyboardType='numeric' style={styles.inputNumero} value={manejoSombras} onChangeText={setManejoSombras} />
+                      <Text style={styles.label}>Con Hechicería</Text><TextInput placeholder="Con Hechicería" placeholderTextColor={colorPlaceHolder} keyboardType='numeric' style={styles.inputNumero} value={conHechiceria} onChangeText={setConHechiceria} />
+                      <Text style={styles.label}>Med Espiritual</Text><TextInput placeholder="Med Espiritual" placeholderTextColor={colorPlaceHolder} keyboardType='numeric' style={styles.inputNumero} value={medEspiritual} onChangeText={setMedEspiritual} />
+                      <Text style={styles.label}>Fuego</Text><TextInput placeholder="Fuego" placeholderTextColor={colorPlaceHolder} keyboardType='numeric' style={styles.inputNumero} value={fuego} onChangeText={setFuego} />
+                      <Text style={styles.label}>Veneno</Text><TextInput placeholder="Veneno" placeholderTextColor={colorPlaceHolder} keyboardType='numeric' style={styles.inputNumero} value={veneno} onChangeText={setVeneno} />
+                      <Text style={styles.label}>Energía</Text><TextInput placeholder="Energía" placeholderTextColor={colorPlaceHolder} keyboardType='numeric' style={styles.inputNumero} value={energia} onChangeText={setEnergia} />
+                      
+
+                      <TextInput
+                        placeholder="Ingresa Armamento"
+                        placeholderTextColor={colorPlaceHolder}
+                        keyboardType="default"
+                        style={[styles.label, {  height: 19 ,marginTop: 0,marginBottom: 0, paddingTop:0, paddingBottom: 2 }]} 
+                        value={apCombate}
+                        onChangeText={setApCombate}
+                      />
+                      <TextInput
+                        placeholder="0"
+                        placeholderTextColor={colorPlaceHolder}
+                        keyboardType='numeric'
+                        style={[styles.inputNumero, { marginTop: 0 }]}
+                        value={valCombate}
+                        onChangeText={setValCombate}
+                      />
+
+                      <TextInput
+                        placeholder="Ingresa Armamento"
+                        placeholderTextColor={colorPlaceHolder}
+                        keyboardType="default"
+                        style={[styles.label, { height: 19, marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 2 }]}
+                        value={apCombate2}
+                        onChangeText={setApCombate2}
+                      />
+                      <TextInput
+                        placeholder="0"
+                        placeholderTextColor={colorPlaceHolder}
+                        keyboardType='numeric'
+                        style={[styles.inputNumero, { marginTop: 0 }]}
+                        value={valCombate2}
+                        onChangeText={setValCombate2}
+                      />  
+
+                      <TextInput
+                        placeholder="Aptitud nueva"
+                        placeholderTextColor={colorPlaceHolder}
+                        keyboardType="default"
+                        style={[styles.label, { height: 19, marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 2 }]}
+                        value={add3}
+                        onChangeText={setAdd3}
+                      />
+                      <TextInput
+                        placeholder="0"
+                        placeholderTextColor={colorPlaceHolder}
+                        keyboardType='numeric'
+                        style={[styles.inputNumero, { marginTop: 0 }]}
+                        value={valAdd3}
+                        onChangeText={setValAdd3}
+                      />
+
+                      <TextInput
+                        placeholder="Aptitud nueva"
+                        placeholderTextColor={colorPlaceHolder}
+                        keyboardType="default"
+                        style={[styles.label, { height: 19, marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 2 }]}
+                        value={add4}
+                        onChangeText={setAdd4}
+                      />
+                      <TextInput
+                        placeholder="0"
+                        placeholderTextColor={colorPlaceHolder}
+                        keyboardType='numeric'
+                        style={[styles.inputNumero, { marginTop: 0 }]}
+                        value={valAdd4}
+                        onChangeText={setValAdd4}
+                      />
+
+                      
+
+                    </View>
+
+                    <View style={{ flex: 1, marginLeft: 8 }}>
+                      <Text style={styles.label}>Alerta</Text><TextInput placeholder="Alerta" placeholderTextColor={colorPlaceHolder} keyboardType="numeric" style={styles.inputNumero} value={alerta} onChangeText={setAlerta} />
+                      <Text style={styles.label}>Con Bakemono</Text><TextInput placeholder="Con Bakemono" placeholderTextColor={colorPlaceHolder} keyboardType='numeric' style={styles.inputNumero} value={conBakemono} onChangeText={setConBakemono} />
+                      <Text style={styles.label}>Pilotear</Text><TextInput placeholder="Pilotear" placeholderTextColor={colorPlaceHolder} keyboardType='numeric' style={styles.inputNumero} value={pilotear} onChangeText={setPilotear} />
+                      <Text style={styles.label}>Medicina</Text><TextInput placeholder="Medicina" placeholderTextColor={colorPlaceHolder} keyboardType='numeric' style={styles.inputNumero} value={medicina} onChangeText={setMedicina} />
+                      <Text style={styles.label}>Sigilo</Text><TextInput placeholder="Sigilo" placeholderTextColor={colorPlaceHolder} keyboardType='numeric' style={styles.inputNumero} value={sigilo} onChangeText={setSigilo} />
+                      <Text style={styles.label}>Con Esferas</Text><TextInput placeholder="Con Esferas" placeholderTextColor={colorPlaceHolder} keyboardType='numeric' style={styles.inputNumero} value={conEsferas} onChangeText={setConEsferas} />
+                      <Text style={styles.label}>Forja</Text><TextInput placeholder="Forja" placeholderTextColor={colorPlaceHolder} keyboardType='numeric' style={styles.inputNumero} value={forja} onChangeText={setForja} />
+                      <Text style={styles.label}>Con Demonio</Text><TextInput placeholder="Con Demonio" placeholderTextColor={colorPlaceHolder} keyboardType='numeric' style={styles.inputNumero} value={conDemonio} onChangeText={setConDemonio} />
+                      <Text style={styles.label}>Manejo Blaster</Text><TextInput placeholder="Manejo Blaster" placeholderTextColor={colorPlaceHolder} keyboardType='numeric' style={styles.inputNumero} value={manejoBlaster} onChangeText={setManejoBlaster} />
+                      <Text style={styles.label}>Trato Bakemono</Text><TextInput placeholder="Trato Bakemono" placeholderTextColor={colorPlaceHolder} keyboardType='numeric' style={styles.inputNumero} value={tratoBakemono} onChangeText={setTratoBakemono} />
+                      <Text style={styles.label}>Med Vital</Text><TextInput placeholder="Med Vital" placeholderTextColor={colorPlaceHolder} keyboardType='numeric' style={styles.inputNumero} value={medVital} onChangeText={setMedVital} />
+                      <Text style={styles.label}>Rayo</Text><TextInput placeholder="Rayo" placeholderTextColor={colorPlaceHolder} keyboardType='numeric'style={styles.inputNumero} value={rayo} onChangeText={setRayo} />
+                      <Text style={styles.label}>Frío</Text><TextInput placeholder="Frío" placeholderTextColor={colorPlaceHolder} keyboardType='numeric' style={styles.inputNumero} value={frio} onChangeText={setFrio} />
+                      <Text style={styles.label}>Corte</Text><TextInput placeholder="Corte" placeholderTextColor={colorPlaceHolder} keyboardType='numeric' style={styles.inputNumero} value={corte} onChangeText={setCorte} /> 
 
 
-          
-      </View>
-          
-  </ScrollView>
 
-    </View>
- 
+                      <TextInput
+                        placeholder="Aptitud nueva"
+                        placeholderTextColor={colorPlaceHolder}
+                        style={[styles.label, { height: 19, marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 2 }]}
+                        value={add1}
+                        onChangeText={setAdd1}
+                        keyboardType='default'
+                      />
+                      <TextInput
+                        placeholder="0"
+                        placeholderTextColor={colorPlaceHolder}
+                        keyboardType='numeric'
+                        style={[styles.inputNumero, { marginTop: 0 }]}
+                        value={valAdd1}
+                        onChangeText={setValAdd1}
+                      />
 
-  );
+                      <TextInput
+                        placeholder="Aptitud nueva"
+                        placeholderTextColor={colorPlaceHolder}
+                        style={[styles.label, { height: 19, marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 2 }]}
+                        value={add2}
+                        onChangeText={setAdd2}
+                        keyboardType='default'
+                      />
+                      <TextInput
+                        placeholder="0"
+                        placeholderTextColor={colorPlaceHolder}
+                        keyboardType='numeric'
+                        style={[styles.inputNumero, { marginTop: 0 }]}
+                        value={valAdd2}
+                        onChangeText={setValAdd2}
+                      />
+                      
+                    </View>
+                    </View>
+                  
+                  </ImageBackground>
+                      
+              </View>
+                
+              
+            </CustomAccordion>
+
+            <CustomAccordion
+              title="Ventajas y Desventajas"
+              expanded={expanded === 'ventajas'}
+              onPress={() => handlePress('ventajas')}
+              icon="star"
+            >
+                <Ventajas ventajas={ventajas} setVentajas={setVentajas} />
+            </CustomAccordion>
+
+            <CustomAccordion
+              title="Inventario"
+              expanded={expanded === 'inventario'}                     
+              onPress={() => handlePress('inventario')}
+              icon="backpack"
+            >
+              <Inventario inventario={inventario} setInventario={setInventario} />
+            </CustomAccordion>
+
+            <CustomAccordion
+              title="Dominios y Tecnicas"
+              expanded={expanded === 'dominios'}
+              onPress={() => handlePress('dominios')}
+              icon="lightning-bolt"
+            >
+              <Dominios dominios={dominios} setDominios={setDominios} />
+            </CustomAccordion>
+
+            <CustomAccordion
+              title="Hechicería"
+              expanded={expanded === 'hechiceria'}
+              onPress={() => handlePress('hechiceria')}
+              icon="wand-magic"
+            >
+              <Hechizos hechizos={hechizos} setHechizos={setHechizos}></Hechizos>
+            </CustomAccordion>
+
+            <CustomAccordion
+              title="Historia"
+              expanded={expanded === 'historia'}
+              onPress={() => handlePress('historia')}
+              icon="book-open"
+            >
+              <Historia historia={historia} setHistoria={setHistoria}></Historia>
+            </CustomAccordion>
+
+            <CustomAccordion
+              title="Tecnicas, poderes y objetos unicos"
+              expanded={expanded === 'tecEspecial'}
+              onPress={() => handlePress('tecEspecial')}
+              icon="crown"
+            >
+              <TecnicaEspecial tecEspecial={tecEspecial} setTecEspecial={setTecEspecial}></TecnicaEspecial>
+            </CustomAccordion>
+
+            <CustomAccordion
+              title="Eliminar Personaje"
+              expanded={expanded === 'eliminarPj'}
+              onPress={() => handlePress('eliminarPj')}
+              icon="trash-can"
+            >
+              <Button
+                    mode="contained"
+                    onPress={() => eliminarPersonaje(pj.idpersonaje)}
+                    style={{ backgroundColor: '#FF4500', margin: 10 }}
+                    labelStyle={{ color: '#fff' }}
+                  >
+                    Confirmar eliminación de {nombre}
+                  </Button>
+            </CustomAccordion>
+
+            
+          </View>
+
+
+              
+          </View>
+              
+      </ScrollView>
+     </View>
+);
 };
 
 const styles = StyleSheet.create({
@@ -1770,22 +1702,6 @@ inputTextoNombre: {
   fontFamily: 'AnimeAce2.0',
   
 }, 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 imagenBanner: {
   width: '100%',
   height: 300,
