@@ -1056,10 +1056,11 @@ return (
       >
           <AnimacionModel
             source={{ uri: p.spriteurl }}
-            scaleSize={0.8}
-            filas={p.filas}
-            columnas={p.columnas}
-            fps={p.fps}
+            scalesize={Number(p.scalesize) || 0.8}
+            filas={Number(p.filas)}
+            columnas={Number(p.columnas)}
+            fps={Number(p.fps)}
+             
           />
         </View>
       ) : null}
