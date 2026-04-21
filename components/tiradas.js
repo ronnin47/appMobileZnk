@@ -114,17 +114,7 @@ const pulso = useRef(new Animated.Value(0)).current;
   
  const scrollRef = useRef(null);
   const windowWidth = Dimensions.get('window').width;
- //MEJORA
-    if (!pj || !pj.nombre) {
-    return <ActivityIndicator size="large" />;
-  }          
-  if (!p) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.error}>Personaje no encontrado</Text>
-      </View>
-    );
-  }
+
 
   
 const personajesFavoritos = useMemo(() => {
@@ -868,6 +858,19 @@ switch (estadoDeFase) {
     intensidadMax = 0;
     break;
 }
+
+
+ //MEJORA
+    if (!pj || !pj.nombre) {
+    return <ActivityIndicator size="large" />;
+  }          
+  if (!p) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.error}>Personaje no encontrado</Text>
+      </View>
+    );
+  }
 
   return (
     <>
