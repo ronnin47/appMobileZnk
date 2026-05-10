@@ -1652,6 +1652,7 @@ switch (estadoDeFase) {
                     }}
                   >
                     {item.nombre}
+                     
                   </Text>
                 </Pressable>
               );

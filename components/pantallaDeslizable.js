@@ -456,61 +456,86 @@ const [tiradasGuardadasPj, setTiradasGuardadasPj] = useState([]);
   };
 }, []);
 
- const agregarTiradaPj = async (nueva) => {
-  const existe = tiradasGuardadasPj.find(t => t.idtirada === nueva.idtirada);
-
-  let actualizadas;
-  if (existe) {
-    // Reemplazar tirada existente (editar)
-    actualizadas = tiradasGuardadasPj.map(t =>
-      t.idtirada === nueva.idtirada ? nueva : t
-    );
-     showMessage({
-                  message: 'Tirada actualizada',
-                  description: 'Los cambios de tirada se actualizaron correctamente.',
-                  type: 'success',
-                  icon: 'success',
-                  duration: 3000,
-                });
-  } else {
-    // Agregar nueva tirada
-    actualizadas = [...tiradasGuardadasPj, nueva];
-     showMessage({
-                  message: 'Nueva irada agregada',
-                  description: 'Se guardo una nueva tirada.',
-                  type: 'success',
-                  icon: 'success',
-                  duration: 3000,
-                });
-  }
- 
-
-  setTiradasGuardadasPj(actualizadas);
-
+const agregarTiradaPj = async (nueva) => {
   try {
-    await AsyncStorage.setItem('tiradasGuardadasPj', JSON.stringify(actualizadas));
+    const datos = await AsyncStorage.getItem('tiradasGuardadasPj');
+    const todasLasTiradas = datos ? JSON.parse(datos) : [];
+
+    const indiceExistente = todasLasTiradas.findIndex(
+      (t) => t.idtirada === nueva.idtirada
+    );
+
+    let actualizadas;
+
+    if (indiceExistente !== -1) {
+      actualizadas = [...todasLasTiradas];
+      actualizadas[indiceExistente] = nueva;
+
+      showMessage({
+        message: 'Tirada actualizada',
+        description: 'Los cambios de tirada se actualizaron correctamente.',
+        type: 'success',
+        icon: 'success',
+        duration: 3000,
+      });
+    } else {
+      actualizadas = [...todasLasTiradas, nueva];
+
+      showMessage({
+        message: 'Nueva tirada agregada',
+        description: 'Se guardó una nueva tirada.',
+        type: 'success',
+        icon: 'success',
+        duration: 3000,
+      });
+    }
+
+    await AsyncStorage.setItem(
+      'tiradasGuardadasPj',
+      JSON.stringify(actualizadas)
+    );
+
+    const tiradasDelPj = actualizadas.filter(
+      (t) => t.ippersonajes === pjSeleccionado
+    );
+
+    setTiradasGuardadasPj(tiradasDelPj);
   } catch (e) {
     console.error('Error guardando tiradas:', e);
   }
 };
 
-  // 🔹 Eliminar una tirada
-  const eliminarTiradasPj = async (idtirada) => {
-    const filtradas = tiradasGuardadasPj.filter(t => t.idtirada !== idtirada);
-    setTiradasGuardadasPj(filtradas);
-    try {
-      await AsyncStorage.setItem('tiradasGuardadasPj', JSON.stringify(filtradas));
-       showMessage({
-                  message: 'Tirada eliminada',
-                  description: 'La tirada se borro de tu lista.',
-                  type: 'danger',
-                  icon: 'danger',
-                  duration: 3000,
-                });
-    } catch (e) {
-      console.error('Error eliminando tirada:', e);
-    }
-  };
+const eliminarTiradasPj = async (idtirada) => {
+  try {
+    const datos = await AsyncStorage.getItem('tiradasGuardadasPj');
+    const todasLasTiradas = datos ? JSON.parse(datos) : [];
+
+    const actualizadas = todasLasTiradas.filter(
+      (t) => t.idtirada !== idtirada
+    );
+
+    await AsyncStorage.setItem(
+      'tiradasGuardadasPj',
+      JSON.stringify(actualizadas)
+    );
+
+    const tiradasDelPj = actualizadas.filter(
+      (t) => t.ippersonajes === pjSeleccionado
+    );
+
+    setTiradasGuardadasPj(tiradasDelPj);
+
+    showMessage({
+      message: 'Tirada eliminada',
+      description: 'La tirada se borró de tu lista.',
+      type: 'danger',
+      icon: 'danger',
+      duration: 3000,
+    });
+  } catch (e) {
+    console.error('Error eliminando tirada:', e);
+  }
+};
 
 
   useEffect(() => {
