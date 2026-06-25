@@ -2470,6 +2470,566 @@ app.put('/eliminarImagenColeccion/:id', async (req, res) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//aplicacion de escritorio ok!!
+
+app.get('/ConsumirItemsInventario/:idPersonaje', async (req, res) => {
+    const idPersonaje = req.params.idPersonaje;
+
+   // console.log(`[INVENTARIO] Request recibida para personaje: ${idPersonaje}`);
+
+    try {
+        const result = await pool.query(
+            `SELECT *
+             FROM items
+             WHERE idpersonaje = $1`,
+            [idPersonaje]
+        );
+
+        //console.log(`[INVENTARIO] OK personaje ${idPersonaje} - items encontrados: ${result.rows.length}`);
+
+        return res.json(result.rows);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: error.message });
+    }
+});
+
+
+
+//get para consumir los items del manual ok!
+
+app.get('/ConsumirItemsManual', async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT *
+            FROM tesoros
+        `);
+
+
+        //console.log(`[Consumir Tesoros] OK - items encontrados: ${result.rows.length}`);
+         //console.log(result.rows[0]);
+        return res.json(result.rows);
+
+
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: error.message });
+    }
+});
+
+
+//insert item ok!!
+app.post('/insertItem', async (req, res) => {
+
+  const nombre = req.body.Nombre || req.body.nombre || "Ítem sin nombre";
+  const tipo = req.body.Tipo || req.body.tipo || "";
+  const rareza = req.body.Rareza || req.body.rareza || "";
+  const cantidad = req.body.Cantidad || req.body.cantidad || 1;
+
+  const idpersonaje = req.body.PersonajeId || req.body.idpersonaje;
+
+  const descripcion = req.body.descripcion || req.body.Descripcion || "";
+  const sistema = req.body.Sistema || req.body.sistema || "";
+  const precio = req.body.precio || req.body.Precio || 0;
+  const imagen = req.body.Imagen_url || null;
+  const posicion = req.body.Posicion ?? req.body.posicion ?? null;
+    
+  const contenedor = req.body.Contenedor ?? req.body.contenedor ?? null;
+  const efecto = req.body.Efecto ?? req.body.efecto ?? null;
+
+  console.log(`
+=== NUEVO ITEM RECIBIDO ===
+Nombre: ${nombre}
+Tipo: ${tipo}
+Rareza: ${rareza}
+Cantidad: ${cantidad}
+PersonajeId: ${idpersonaje}
+Descripción: ${descripcion}
+Sistema: ${sistema}
+Precio: ${precio}
+Posición: ${posicion}
+Contenedor: ${contenedor}
+Imagen: ${imagen ? "[RECIBIDA]" : "[NULL]"}
+Efecto: ${efecto}
+==========================
+`);
+
+  if (!idpersonaje) {
+    return res.status(400).json({ error: 'Falta idpersonaje' });
+  }
+
+  const clientDb = await pool.connect();
+
+  try {
+    await clientDb.query('BEGIN');
+
+    const queryItem = `
+      INSERT INTO items (
+        nombre, tipo, descripcion, sistema,
+        precio, rareza, cantidad,
+        posicion, contenedor, efecto, idpersonaje
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+      RETURNING id
+    `;
+
+    const resultItem = await clientDb.query(queryItem, [
+      nombre,
+      tipo,
+      descripcion,
+      sistema,
+      precio,
+      rareza,
+      cantidad,
+      posicion,
+      contenedor,
+      efecto,
+      idpersonaje
+    ]);
+
+    const newId = resultItem.rows[0].id;
+
+    let imageUrl = null;
+
+    if (imagen) {
+      if (imagen.startsWith('http')) {
+        imageUrl = imagen;
+
+        await clientDb.query(
+          'UPDATE items SET imagen_url = $1 WHERE id = $2',
+          [imageUrl, newId]
+        );
+
+      } else {
+        const matches = imagen.match(/^data:image\/(\w+);base64,(.+)$/);
+
+        if (matches) {
+          const ext = matches[1];
+          const data = matches[2];
+
+          const uploadResult = await cloudinary.uploader.upload(
+            `data:image/${ext};base64,${data}`,
+            {
+              folder: 'items',
+              public_id: `item_${newId}`,
+              overwrite: true,
+            }
+          );
+
+          imageUrl = uploadResult.secure_url;
+
+          await clientDb.query(
+            'UPDATE items SET imagen_url = $1, imagen_cloud_id = $2 WHERE id = $3',
+            [imageUrl, uploadResult.public_id, newId]
+          );
+        }
+      }
+    }
+
+    await clientDb.query('COMMIT');
+
+    res.status(201).json({
+      message: 'Item creado correctamente',
+      iditem: newId,
+      idpersonaje,
+      imagen_url: imageUrl
+    });
+
+  } catch (err) {
+    await clientDb.query('ROLLBACK');
+    console.error(err);
+    res.status(500).json({ error: 'Error interno al insertar item' });
+  } finally {
+    clientDb.release();
+  }
+});
+
+
+//actualizar ok!!
+app.put('/ActualizarPosicionItem', async (req, res) => {
+    try {
+        const { ItemId, Posicion, Contenedor } = req.body;
+/*
+        console.log('--- UPDATE ITEM ---');
+console.log('ItemId:', req.body.ItemId);
+console.log('Posicion:', req.body.Posicion);
+console.log('Contenedor:', req.body.Contenedor);
+console.log('-------------------');
+*/
+        if (!ItemId) {
+            return res.status(400).json({ error: 'ItemId requerido' });
+        }
+
+        await pool.query(
+            `
+            UPDATE items
+            SET posicion = $1,
+                contenedor = $2
+            WHERE id = $3
+            `,
+            [Posicion, Contenedor, ItemId]
+        );
+
+        return res.status(200).json({ message: 'OK' });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: error.message });
+    }
+});
+
+//delete item ok!!
+app.delete('/deleteItem', async (req, res) => {
+
+  const iditem = req.body.iditem || req.body.IdItem;
+
+  console.log("ID del item a eliminar: ", iditem);
+  if (!iditem) {
+    return res.status(400).json({ error: 'Falta iditem' });
+  }
+
+  const clientDb = await pool.connect();
+
+  try {
+    await clientDb.query('BEGIN');
+
+    // 1. obtener datos de la acción (incluye imagen cloud id)
+    const selectQuery = `
+      SELECT imagen_cloud_id, imagen_url
+      FROM items
+      WHERE id = $1
+    `;
+
+    const result = await clientDb.query(selectQuery, [iditem]);
+
+    if (result.rows.length === 0) {
+      await clientDb.query('ROLLBACK');
+      return res.status(404).json({ error: 'Item no encontrado' });
+    }
+
+    const { imagen_cloud_id } = result.rows[0];
+
+    // 2. eliminar de cloudinary si existe
+    if (imagen_cloud_id) {
+      try {
+        await cloudinary.uploader.destroy(imagen_cloud_id);
+      } catch (cloudErr) {
+        console.error("Error eliminando imagen Cloudinary:", cloudErr);
+        // no cortamos la eliminación por esto
+      }
+    }
+
+    // 3. eliminar de base de datos
+    await clientDb.query(
+      'DELETE FROM items WHERE id = $1',
+      [iditem]
+    );
+
+    await clientDb.query('COMMIT');
+
+    res.status(200).json({
+      message: 'Item eliminado correctamente',
+      iditem
+    });
+
+  } catch (err) {
+    await clientDb.query('ROLLBACK');
+    console.error(err);
+    res.status(500).json({ error: 'Error interno al eliminar item' });
+
+  } finally {
+    clientDb.release();
+  }
+});
+
+
+
+
+
+
+
+//ACIONES Y PODERES
+
+//Consumir lista ok!!
+
+app.get('/ConsumirListaAcciones/:idPersonaje', async (req, res) => {
+    const idPersonaje = req.params.idPersonaje;
+
+    console.log(`[CONSUMIR LISTA ACCIONES SE DISPARO] Request recibida para personaje: ${idPersonaje}`);
+
+    try {
+        const result = await pool.query(
+            `SELECT *
+             FROM acciones
+             WHERE idpersonaje = $1`,
+            [idPersonaje]
+        );
+
+        console.log(`[CONSUMIR LISTA ACCIONES] OK personaje ${idPersonaje} - acciones encontradas: ${result.rows.length}`);
+
+        return res.json(result.rows);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: error.message });
+    }
+});
+
+
+
+//probado
+app.post('/insertAccion', async (req, res) => {
+
+  const nombre = req.body.Nombre || req.body.nombre || "Accion sin nombre";
+  const tipo = req.body.Tipo || req.body.tipo || "";
+  const rareza = req.body.Rareza || req.body.rareza || "";
+  //const cantidad = req.body.Cantidad || req.body.cantidad || 1;
+
+  const idpersonaje = req.body.PersonajeId || req.body.idpersonaje;
+
+  const descripcion = req.body.descripcion || req.body.Descripcion || "";
+  const sistema = req.body.Sistema || req.body.sistema || "";
+  const precio = req.body.precio || req.body.Precio || 0;
+  const imagen = req.body.Imagen_url || null;
+  const posicion = req.body.Posicion ?? req.body.posicion ?? null;
+  const contenedor = req.body.Contenedor || req.body.contenedor || null;
+
+   const efecto = req.body.Efecto || req.body.efecto || null;
+
+
+  console.log(`
+=== NUEVA ACCION RECIBIDA DESDE EL CLIENTE ===
+Nombre: ${nombre}
+Tipo: ${tipo}
+Rareza: ${rareza}
+
+PersonajeId: ${idpersonaje}
+Descripción: ${descripcion}
+Sistema: ${sistema}
+Precio: ${precio}
+Posición: ${posicion}
+Contenedor: ${contenedor}
+Imagen: ${imagen ? "[RECIBIDA]" : "[NULL]"}
+Efecto: ${efecto}
+==========================
+`);
+
+  if (!idpersonaje) {
+    return res.status(400).json({ error: 'Falta idpersonaje' });
+  }
+
+  const clientDb = await pool.connect();
+
+  try {
+    await clientDb.query('BEGIN');
+
+    const queryItem = `
+      INSERT INTO acciones (
+        nombre, tipo, descripcion, sistema,
+        precio, rareza, 
+        posicion, contenedor,  efecto, idpersonaje
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+      RETURNING id
+    `;
+
+    const resultItem = await clientDb.query(queryItem, [
+      nombre,
+      tipo,
+      descripcion,
+      sistema,
+      precio,
+      rareza,
+     
+      posicion,
+      contenedor,
+      efecto,
+      idpersonaje
+    ]);
+
+    const newId = resultItem.rows[0].id;
+
+    let imageUrl = null;
+
+    if (imagen) {
+      if (imagen.startsWith('http')) {
+        imageUrl = imagen;
+
+        await clientDb.query(
+          'UPDATE acciones SET imagen_url = $1 WHERE id = $2',
+          [imageUrl, newId]
+        );
+
+      } else {
+        const matches = imagen.match(/^data:image\/(\w+);base64,(.+)$/);
+
+        if (matches) {
+          const ext = matches[1];
+          const data = matches[2];
+
+          const uploadResult = await cloudinary.uploader.upload(
+            `data:image/${ext};base64,${data}`,
+            {
+              folder: 'acciones',
+              public_id: `accion_${newId}`,
+              overwrite: true,
+            }
+          );
+
+          imageUrl = uploadResult.secure_url;
+
+          await clientDb.query(
+            'UPDATE acciones SET imagen_url = $1, imagen_cloud_id = $2 WHERE id = $3',
+            [imageUrl, uploadResult.public_id, newId]
+          );
+        }
+      }
+    }
+
+    await clientDb.query('COMMIT');
+
+    res.status(201).json({
+      message: 'Accion creada correctamente',
+      iditem: newId,
+      idpersonaje,
+      imagen_url: imageUrl
+    });
+
+  } catch (err) {
+    await clientDb.query('ROLLBACK');
+    console.error(err);
+    res.status(500).json({ error: 'Error interno al insertar accion' });
+  } finally {
+    clientDb.release();
+  }
+});
+
+
+
+
+//actualizar ok!!
+app.put('/ActualizarPosicionAccion', async (req, res) => {
+    try {
+        const { ItemId, Posicion, Contenedor } = req.body;
+
+        console.log('--- UPDATE ACCION ---');
+console.log('ItemId:', req.body.ItemId);
+console.log('Posicion:', req.body.Posicion);
+console.log('Contenedor:', req.body.Contenedor);
+console.log('-------------------');
+
+        if (!ItemId) {
+            return res.status(400).json({ error: 'ItemId requerido' });
+        }
+
+        await pool.query(
+            `
+            UPDATE acciones
+            SET posicion = $1,
+                contenedor = $2
+            WHERE id = $3
+            `,
+            [Posicion, Contenedor, ItemId]
+        );
+
+        return res.status(200).json({ message: 'OK' });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: error.message });
+    }
+});
+
+
+
+
+
+
+
+//ELIMINAR ACCION OK!!
+
+app.delete('/deleteAccion', async (req, res) => {
+
+  const idaccion = req.body.idaccion || req.body.IdAccion;
+
+  //console.log("ID de la acción a eliminar: ", idaccion);
+  if (!idaccion) {
+    return res.status(400).json({ error: 'Falta idaccion' });
+  }
+
+  const clientDb = await pool.connect();
+
+  try {
+    await clientDb.query('BEGIN');
+
+    // 1. obtener datos de la acción (incluye imagen cloud id)
+    const selectQuery = `
+      SELECT imagen_cloud_id, imagen_url
+      FROM acciones
+      WHERE id = $1
+    `;
+
+    const result = await clientDb.query(selectQuery, [idaccion]);
+
+    if (result.rows.length === 0) {
+      await clientDb.query('ROLLBACK');
+      return res.status(404).json({ error: 'Accion no encontrada' });
+    }
+
+    const { imagen_cloud_id } = result.rows[0];
+
+    // 2. eliminar de cloudinary si existe
+    if (imagen_cloud_id) {
+      try {
+        await cloudinary.uploader.destroy(imagen_cloud_id);
+      } catch (cloudErr) {
+        console.error("Error eliminando imagen Cloudinary:", cloudErr);
+        // no cortamos la eliminación por esto
+      }
+    }
+
+    // 3. eliminar de base de datos
+    await clientDb.query(
+      'DELETE FROM acciones WHERE id = $1',
+      [idaccion]
+    );
+
+    await clientDb.query('COMMIT');
+
+    res.status(200).json({
+      message: 'Accion eliminada correctamente',
+      idaccion
+    });
+
+  } catch (err) {
+    await clientDb.query('ROLLBACK');
+    console.error(err);
+    res.status(500).json({ error: 'Error interno al eliminar accion' });
+
+  } finally {
+    clientDb.release();
+  }
+});
+
 /*
 //******************PRIMER PASO 1*******************************
 //Script PARA MIGRAR PERSONAJES A CLOUDNARY y traerme la url y cludid a la base de datos OK!!
