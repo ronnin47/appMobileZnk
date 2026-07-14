@@ -448,6 +448,12 @@ app.post('/insert-personaje', async (req, res) => {
     tecEspecial, conviccion, cicatriz, notasaga, resistencia, pjPnj
   } = req.body;
 
+  console.log(`
+===== INSERT PERSONAJE =====
+Usuario: ${usuarioId}
+Nombre: ${nombre}
+`);
+
   try {
     // 1. Insertar personaje sin imagenurl
     const query = `
@@ -658,7 +664,11 @@ app.put('/update-personaje/:id', async (req, res) => {
     historia, usuarioId, tecEspecial, conviccion, cicatriz, resistencia, imagenSeleccionada, pjPnj
   } = req.body;
 
-
+ console.log("=================================");
+  console.log("ACTUALIZANDO PERSONAJE");
+  console.log("ID personaje:", idpersonaje);
+  console.log("Nombre:", nombre);
+  console.log("=================================");
 
   console.log("Imagen selecionada en el backend: ", imagenSeleccionada)
   try {
@@ -718,6 +728,44 @@ app.put('/update-personaje/:id', async (req, res) => {
       hechizos, consumision, iniciativa, historia, usuarioId,
       tecEspecial, conviccion, cicatriz, resistencia, pjPnj, imagenurl,imagenSeleccionada, idpersonaje
     ];
+
+
+
+    const nombresCampos = [
+  "nombre", "dominio", "raza", "naturaleza", "edad",
+  "ken", "ki", "destino", "pDestino", "fuerza",
+  "fortaleza", "destreza", "agilidad", "sabiduria",
+  "presencia", "principio", "sentidos", "academisismo",
+  "alerta", "atletismo", "conBakemono", "mentir",
+  "pilotear", "artesMarciales", "medicina",
+  "conObjMagicos", "sigilo", "conEsferas",
+  "conLeyendas", "forja", "conDemonio",
+  "conEspiritual", "manejoBlaster",
+  "manejoSombras", "tratoBakemono",
+  "conHechiceria", "medVital", "medEspiritual",
+  "rayo", "fuego", "frio", "veneno", "corte",
+  "energia", "ventajas", "apCombate",
+  "valCombate", "apCombate2", "valCombate2",
+  "add1", "valAdd1", "add2", "valAdd2",
+  "add3", "valAdd3", "add4", "valAdd4",
+  "inventario", "dominios", "kenActual",
+  "kiActual", "positiva", "negativa",
+  "vidaActual", "hechizos", "consumision",
+  "iniciativa", "historia", "usuarioId",
+  "tecEspecial", "conviccion", "cicatriz",
+  "resistencia", "pjPnj", "imagenurl",
+  "imagenSeleccionada", "idpersonaje"
+];
+
+values.forEach((valor, index) => {
+  if (valor === "") {
+    console.log("=================================");
+    console.log("CAMPO VACIO DETECTADO:");
+    console.log("Campo:", nombresCampos[index]);
+    console.log("Posicion SQL:", index + 1);
+    console.log("=================================");
+  }
+});
 
     await pool.query(query, values);
 
@@ -2775,7 +2823,7 @@ app.delete('/deleteItem', async (req, res) => {
 app.get('/ConsumirListaAcciones/:idPersonaje', async (req, res) => {
     const idPersonaje = req.params.idPersonaje;
 
-    console.log(`[CONSUMIR LISTA ACCIONES SE DISPARO] Request recibida para personaje: ${idPersonaje}`);
+    //console.log(`[CONSUMIR LISTA ACCIONES SE DISPARO] Request recibida para personaje: ${idPersonaje}`);
 
     try {
         const result = await pool.query(
@@ -2785,7 +2833,7 @@ app.get('/ConsumirListaAcciones/:idPersonaje', async (req, res) => {
             [idPersonaje]
         );
 
-        console.log(`[CONSUMIR LISTA ACCIONES] OK personaje ${idPersonaje} - acciones encontradas: ${result.rows.length}`);
+       // console.log(`[CONSUMIR LISTA ACCIONES] OK personaje ${idPersonaje} - acciones encontradas: ${result.rows.length}`);
 
         return res.json(result.rows);
     } catch (error) {
@@ -3029,6 +3077,191 @@ app.delete('/deleteAccion', async (req, res) => {
     clientDb.release();
   }
 });
+
+
+
+
+
+
+
+//VENTAJAS EN LA APLICACION DE ESCRITORIO WPF
+
+
+app.get('/ConsumirVentajasDesventajasTodas', async (req, res) => {
+
+    try {
+
+        const result = await pool.query(
+            `SELECT *
+             FROM ventajas`
+        );
+
+        //console.log("Cantidad de ventajas:", result.rows.length);
+
+        return res.json({
+            message: "Consulta exitosa",
+            cantidad: result.rows.length,
+            coleccionVentajas: result.rows
+        });
+
+    } catch (error) {
+
+        console.log(error);
+        return res.status(500).json({ error: error.message });
+    }
+});
+
+
+app.get('/ConsumirIdsVentajasPersonaje/:idPersonaje', async (req, res) => {
+    const idPersonaje = req.params.idPersonaje;
+
+    console.log("Personaje recibido:", idPersonaje);
+
+    try {
+        const result = await pool.query(
+            `SELECT idventaja_fk
+             FROM personajes_ventajas
+             WHERE idpersonaje_fk = $1`,
+            [idPersonaje]
+        );
+
+        const idsVentajas = result.rows.map(v => v.idventaja_fk);
+
+       // console.log("Ventajas encontradas:", idsVentajas);
+
+        return res.json(idsVentajas);
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: error.message });
+    }
+});
+
+
+
+
+
+
+
+app.post('/AgregarVentajaPersonaje', async (req, res) => {
+
+  const idPersonaje = req.body.idPersonaje || req.body.idpersonaje;
+  const idVentaja = req.body.idVentaja || req.body.idventaja;
+/*
+  console.log(`
+=== AGREGAR VENTAJA ===
+Personaje: ${idPersonaje}
+Ventaja: ${idVentaja}
+=======================
+`);
+*/
+  if (!idPersonaje || !idVentaja) {
+    return res.status(400).json({
+      error: "Faltan datos."
+    });
+  }
+
+  const clientDb = await pool.connect();
+
+  try {
+
+    await clientDb.query("BEGIN");
+
+    const query = `
+      INSERT INTO personajes_ventajas
+      (
+        idpersonaje_fk,
+        idventaja_fk
+      )
+      VALUES
+      (
+        $1,
+        $2
+      )
+      RETURNING idpersonajes_ventajas
+    `;
+
+    const resultado = await clientDb.query(query, [
+      idPersonaje,
+      idVentaja
+    ]);
+
+    await clientDb.query("COMMIT");
+
+    res.status(201).json({
+      message: "Ventaja agregada correctamente.",
+      id: resultado.rows[0].id
+    });
+
+  }
+  catch (err) {
+
+    await clientDb.query("ROLLBACK");
+
+    console.error(err);
+
+    res.status(500).json({
+      error: "Error al agregar la ventaja."
+    });
+
+  }
+  finally {
+
+    clientDb.release();
+
+  }
+
+});
+
+
+
+app.post('/EliminarVentajaPersonaje', async (req, res) => {
+
+  const idPersonaje = req.body.idPersonaje || req.body.idpersonaje;
+  const idVentaja = req.body.idVentaja || req.body.idventaja;
+
+  if (!idPersonaje || !idVentaja) {
+    return res.status(400).json({
+      error: 'Faltan idPersonaje o idVentaja'
+    });
+  }
+
+  try {
+
+    const resultado = await pool.query(
+      `DELETE FROM personajes_ventajas
+       WHERE idpersonaje_fk = $1
+       AND idventaja_fk = $2`,
+      [idPersonaje, idVentaja]
+    );
+
+    if (resultado.rowCount === 0) {
+      return res.status(404).json({
+        error: 'La ventaja no estaba asignada al personaje'
+      });
+    }
+
+    res.status(200).json({
+      message: 'Ventaja eliminada correctamente'
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      error: 'Error interno al eliminar la ventaja'
+    });
+  }
+
+});
+
+
+
+
+
+
+
+
+
 
 /*
 //******************PRIMER PASO 1*******************************
