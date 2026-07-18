@@ -2519,6 +2519,54 @@ app.put('/eliminarImagenColeccion/:id', async (req, res) => {
 
 
 
+app.put('/seleccionarImagen/:id', async (req, res) => {
+
+    const idpersonaje = req.params.id;
+
+    const { imagenSeleccionada, imagenurl } = req.body;
+
+
+    console.log("====== SELECCIONAR IMAGEN ======");
+    console.log("ID personaje:", idpersonaje);
+    console.log("imagenSeleccionada:", imagenSeleccionada);
+    console.log("imagenurl:", imagenurl);
+    console.log("Body completo:", req.body);
+
+
+    try {
+
+        const resultado = await pool.query(
+            `UPDATE personajes
+             SET "imagenSeleccionada" = $1,
+                 imagenurl = $2
+             WHERE idpersonaje = $3`,
+            [
+                imagenSeleccionada,
+                imagenurl,
+                idpersonaje
+            ]
+        );
+
+
+        console.log("Filas modificadas:", resultado.rowCount);
+
+
+        res.json({ 
+            mensaje: "Imagen seleccionada actualizada",
+            filas: resultado.rowCount
+        });
+
+
+    } catch (error) {
+
+        console.error("ERROR seleccionando imagen:", error.message);
+
+        res.status(500).json({
+            error: error.message
+        });
+    }
+});
+
 
 
 
@@ -2856,28 +2904,50 @@ app.post('/insertAccion', async (req, res) => {
 
   const descripcion = req.body.descripcion || req.body.Descripcion || "";
   const sistema = req.body.Sistema || req.body.sistema || "";
-  const precio = req.body.precio || req.body.Precio || 0;
+  //const precio = req.body.precio || req.body.Precio || 0;
   const imagen = req.body.Imagen_url || null;
   const posicion = req.body.Posicion ?? req.body.posicion ?? null;
   const contenedor = req.body.Contenedor || req.body.contenedor || null;
 
-   const efecto = req.body.Efecto || req.body.efecto || null;
+  const efecto = req.body.Efecto || req.body.efecto || null;
 
 
-  console.log(`
+    // Campos específicos de tipo de acción
+  const prioridad = req.body.Prioridad || "";
+  const dominio = req.body.Dominio || "";
+  const arte = req.body.Arte || "";
+  const ryu = req.body.Ryu || "";
+  const tiempo_invocacion = req.body.Tiempo_invocacion || "";
+  const nivel_ki = req.body.Nivel_ki ?? 0;
+  const coste_ki = req.body.Coste_ki ?? 0;
+
+
+ console.log(`
 === NUEVA ACCION RECIBIDA DESDE EL CLIENTE ===
+
 Nombre: ${nombre}
 Tipo: ${tipo}
 Rareza: ${rareza}
 
 PersonajeId: ${idpersonaje}
+
 Descripción: ${descripcion}
 Sistema: ${sistema}
-Precio: ${precio}
+
+Prioridad: ${prioridad}
+Dominio: ${dominio}
+Arte: ${arte}
+Ryu: ${ryu}
+Tiempo invocacion: ${tiempo_invocacion}
+Nivel Ki: ${nivel_ki}
+Coste Ki: ${coste_ki}
+
 Posición: ${posicion}
 Contenedor: ${contenedor}
+
 Imagen: ${imagen ? "[RECIBIDA]" : "[NULL]"}
 Efecto: ${efecto}
+
 ==========================
 `);
 
@@ -2890,28 +2960,52 @@ Efecto: ${efecto}
   try {
     await clientDb.query('BEGIN');
 
-    const queryItem = `
+   const queryItem = `
       INSERT INTO acciones (
-        nombre, tipo, descripcion, sistema,
-        precio, rareza, 
-        posicion, contenedor,  efecto, idpersonaje
+        nombre,
+        tipo,
+        descripcion,
+        sistema,
+        rareza,
+        posicion,
+        contenedor,
+        efecto,
+        idpersonaje,
+
+        prioridad,
+        dominio,
+        arte,
+        ryu,
+        tiempo_invocacion,
+        nivel_ki,
+        coste_ki
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+      VALUES (
+        $1,$2,$3,$4,$5,
+        $6,$7,$8,$9,
+        $10,$11,$12,$13,$14,$15,$16
+      )
       RETURNING id
     `;
+
 
     const resultItem = await clientDb.query(queryItem, [
       nombre,
       tipo,
       descripcion,
       sistema,
-      precio,
       rareza,
-     
       posicion,
       contenedor,
       efecto,
-      idpersonaje
+      idpersonaje,
+      prioridad,
+      dominio,
+      arte,
+      ryu,
+      tiempo_invocacion,
+      nivel_ki,
+      coste_ki
     ]);
 
     const newId = resultItem.rows[0].id;
@@ -2972,6 +3066,211 @@ Efecto: ${efecto}
 });
 
 
+//**************************************************
+//ESTAMOS ACAA**************************************
+app.post('/insertAccionBiblioteca', async (req, res) => {
+
+  const nombre = req.body.Nombre || req.body.nombre || "Accion sin nombre";
+  const tipo = req.body.Tipo || req.body.tipo || "";
+  const rareza = req.body.Rareza || req.body.rareza || "";
+
+  const descripcion = req.body.descripcion || req.body.Descripcion || "";
+  const sistema = req.body.Sistema || req.body.sistema || "";
+
+  const imagen = req.body.Imagen_url || null;
+  const efecto = req.body.Efecto || req.body.efecto || null;
+
+
+  const prioridad = req.body.Prioridad || "";
+const dominio = req.body.Dominio || "";
+const arte = req.body.Arte || "";
+const ryu = req.body.Ryu || "";
+const tiempo_invocacion = req.body.Tiempo_invocacion || "";
+const nivel_ki = req.body.Nivel_ki ?? 0;
+const coste_ki = req.body.Coste_ki ?? 0;
+
+ console.log(`
+=== NUEVA ACCION BIBLIOTECA RECIBIDA ===
+
+Nombre: ${nombre}
+Tipo: ${tipo}
+Rareza: ${rareza}
+
+Descripción: ${descripcion}
+Sistema: ${sistema}
+
+Prioridad: ${prioridad}
+Dominio: ${dominio}
+Arte: ${arte}
+Ryu: ${ryu}
+Tiempo invocacion: ${tiempo_invocacion}
+Nivel Ki: ${nivel_ki}
+Coste Ki: ${coste_ki}
+
+Imagen: ${imagen ? "[RECIBIDA]" : "[NULL]"}
+Efecto: ${efecto}
+
+==========================
+`);
+
+
+  const clientDb = await pool.connect();
+
+  try {
+
+    await clientDb.query('BEGIN');
+
+
+    const queryAccion = `
+     INSERT INTO acciones_biblioteca (
+    nombre,
+    tipo,
+    descripcion,
+    sistema,
+    rareza,
+    efecto,
+    prioridad,
+    dominio,
+    arte,
+    ryu,
+    tiempo_invocacion,
+    nivel_ki,
+    coste_ki
+)
+VALUES (
+    $1,$2,$3,$4,$5,$6,
+    $7,$8,$9,$10,$11,$12,$13
+)
+RETURNING id
+    `;
+
+
+    const resultAccion = await clientDb.query(queryAccion, [
+      nombre,
+      tipo,
+      descripcion,
+      sistema,
+      rareza,
+      efecto,
+      prioridad,
+    dominio,
+    arte,
+    ryu,
+    tiempo_invocacion,
+    nivel_ki,
+    coste_ki
+    ]);
+
+
+    const newId = resultAccion.rows[0].id;
+
+
+    let imageUrl = null;
+
+
+    if (imagen) {
+
+      if (imagen.startsWith('http')) {
+
+        imageUrl = imagen;
+
+        await clientDb.query(
+          'UPDATE acciones_biblioteca SET imagen_url = $1 WHERE id = $2',
+          [imageUrl, newId]
+        );
+
+      } 
+      else {
+
+        const matches = imagen.match(/^data:image\/(\w+);base64,(.+)$/);
+
+
+        if (matches) {
+
+          const ext = matches[1];
+          const data = matches[2];
+
+
+          const uploadResult = await cloudinary.uploader.upload(
+            `data:image/${ext};base64,${data}`,
+            {
+              folder: 'acciones_biblioteca',
+              public_id: `accion_biblioteca_${newId}`,
+              overwrite: true,
+            }
+          );
+
+
+          imageUrl = uploadResult.secure_url;
+
+
+          await clientDb.query(
+            `
+            UPDATE acciones_biblioteca
+            SET imagen_url = $1,
+                imagen_cloud_id = $2
+            WHERE id = $3
+            `,
+            [
+              imageUrl,
+              uploadResult.public_id,
+              newId
+            ]
+          );
+
+        }
+      }
+    }
+
+
+    await clientDb.query('COMMIT');
+
+
+    res.status(201).json({
+      message: 'Accion guardada en biblioteca correctamente',
+      idaccion: newId,
+      imagen_url: imageUrl
+    });
+
+
+  } catch (err) {
+
+    await clientDb.query('ROLLBACK');
+
+    console.error(err);
+
+    res.status(500).json({
+      error: 'Error interno al insertar accion en biblioteca'
+    });
+
+  } finally {
+
+    clientDb.release();
+
+  }
+
+});
+
+
+app.get('/ConsumirAccionesBiblioteca', async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT *
+            FROM acciones_biblioteca
+        `);
+
+
+        console.log(`[Consumir Acciones Biblioteca] OK - items encontrados: ${result.rows.length}`);
+        console.log(result.rows[0]);
+        return res.json(result.rows);
+
+
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: error.message });
+    }
+});
 
 
 //actualizar ok!!
