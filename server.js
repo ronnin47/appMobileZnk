@@ -7,9 +7,76 @@ const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
 
-
+/*
 //para la carpeta de imagene sy sus urls
 const cloudinary = require('cloudinary').v2;
+
+//PARA GAURDADO DE IMAGENES Y OBTENER URLS
+cloudinary.config({
+  cloud_name: 'dzul1hatw',
+  api_key: '687946621544217',
+  api_secret: '09DUepXU-FApoUrHnc8h6sJb25I',
+});
+
+*/
+
+
+/*
+//CREDENCIALES DE LA NUEVA CUENTA DE CLOUDINARY
+cloudinary.config({
+  cloud_name: 'ucoamrxg',
+  api_key: '975696536842629',
+  api_secret: 'm6m_AmX0mlMxAXRBJrpFxCwE5Io',
+});
+*/
+
+// ==========================================
+// CLOUDINARY
+// ==========================================
+
+const cloudinary = require('cloudinary').v2;
+
+
+// ==========================================
+// CUENTA CLOUDINARY PRINCIPAL
+// ==========================================
+
+cloudinary.config({
+  cloud_name: 'dzul1hatw',
+  api_key: '687946621544217',
+  api_secret: '09DUepXU-FApoUrHnc8h6sJb25I'
+});
+
+
+// ==========================================
+// CUENTA CLOUDINARY ESCRITORIO
+// ==========================================
+
+const cloudinaryEscritorio = {
+  cloud_name: 'ucoamrxg',
+  api_key: '975696536842629',
+  api_secret: 'm6m_AmX0mlMxAXRBJrpFxCwE5Io'
+};
+
+async function subirImagenCloudinaryEscritorio(imagen, opciones) {
+
+  const configuracionOriginal = cloudinary.config();
+
+  try {
+
+    cloudinary.config(cloudinaryEscritorio);
+
+    return await cloudinary.uploader.upload(
+      imagen,
+      opciones
+    );
+
+  } finally {
+
+    cloudinary.config(configuracionOriginal);
+
+  }
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -256,13 +323,6 @@ const pool = new Pool({
 });
 
 
-//PARA GAURDADO DE IMAGENES Y OBTENER URLS
-cloudinary.config({
-  cloud_name: 'dzul1hatw',
-  api_key: '687946621544217',
-  api_secret: '09DUepXU-FApoUrHnc8h6sJb25I',
-});
-
 
 app.get('/', (req, res) => {
   res.send('Servidor funcionando y conectado a PostgreSQL');
@@ -299,9 +359,7 @@ app.get('/test-db', async (req, res) => {
 
 
 
-
-//aca los enpoits
-//REGISTRO DE USUARIO -insert de usuario OK!!
+//REGISTRO DE USUARIO -insert de usuario 
 app.post('/insert-usuario', async (req, res) => {
   const { email, contrasenia,username } = req.body;
     const estatus="jugador"
@@ -334,7 +392,7 @@ app.post('/insert-usuario', async (req, res) => {
   }
 });
 
-//login OK!
+//login 
 app.post('/loginUsuario', async (req, res) => {
   const { email, contrasenia } = req.body;
   
@@ -371,7 +429,7 @@ app.post('/loginUsuario', async (req, res) => {
 });
 
 
-//Consumir personajes Usuario OK!
+//Consumir personajes Usuario 
 app.get('/consumirPersonajesUsuario', async (req, res) => {
   try {
     
@@ -389,7 +447,7 @@ app.get('/consumirPersonajesUsuario', async (req, res) => {
         p.add1, p."valAdd1", p.add2, p."valAdd2", p.add3, p."valAdd3", p.add4, p."valAdd4",
         p.inventario, p.dominios, p."kenActual", p."kiActual", p.positiva, p.negativa, p."vidaActual",
         p.hechizos, p.consumision, p.iniciativa, p.historia, p."tecEspecial", p.conviccion, p.cicatriz,
-        p.notasaga, p.resistencia, p."pjPnj", p.imagenurl, p.imagencloudid,p."imagenSeleccionada",p."coleccionImagenes", p."usuarioId",
+        p.notasaga, p.resistencia, p."pjPnj", p.imagenurl, p.imagencloudid,p."imagenSeleccionada",p."coleccionImagenes",p.notas, p."usuarioId",
         
     a.spriteurl,
     a.filas,
@@ -432,7 +490,7 @@ app.get('/consumirPersonajesUsuario', async (req, res) => {
 });
 
 
-//OK
+//Insert personaje
 app.post('/insert-personaje', async (req, res) => {
   const {
     nombre, dominio, raza, naturaleza, edad, ken, ki, destino, pDestino,
@@ -445,7 +503,7 @@ app.post('/insert-personaje', async (req, res) => {
     add1, valAdd1, add2, valAdd2, add3, valAdd3, add4, valAdd4,
     imagen, inventario, dominios, kenActual, kiActual, positiva, negativa, vidaActual,
     hechizos, consumision, iniciativa, historia, usuarioId,
-    tecEspecial, conviccion, cicatriz, notasaga, resistencia, pjPnj
+    tecEspecial, conviccion, cicatriz, notasaga, resistencia, pjPnj,notas
   } = req.body;
 
   console.log(`
@@ -468,7 +526,7 @@ Nombre: ${nombre}
         add1, "valAdd1", add2, "valAdd2", add3, "valAdd3", add4, "valAdd4",
         inventario, dominios, "kenActual", "kiActual", positiva, negativa, "vidaActual",
         hechizos, consumision, iniciativa, historia, "tecEspecial", conviccion, cicatriz,
-        notasaga, resistencia, "pjPnj", "usuarioId"
+        notasaga, resistencia, "pjPnj",notas, "usuarioId"
       )
       VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9,
@@ -482,7 +540,7 @@ Nombre: ${nombre}
         $56, $57, $58, $59, $60, $61,
         $62, $63, $64, $65, $66, $67,
         $68, $69, $70, $71, $72, $73,
-        $74, $75
+        $74, $75, $76
       )
       RETURNING idpersonaje
     `;
@@ -498,7 +556,7 @@ Nombre: ${nombre}
       add1, valAdd1, add2, valAdd2, add3, valAdd3, add4, valAdd4,
       inventario, dominios, kenActual, kiActual, positiva, negativa, vidaActual,
       hechizos, consumision, iniciativa, historia, tecEspecial, conviccion, cicatriz,
-      notasaga, resistencia, pjPnj, usuarioId
+      notasaga, resistencia, pjPnj, notas, usuarioId
     ];
 
     const result = await pool.query(query, values);
@@ -646,7 +704,7 @@ app.put('/update-personaje/:id', async (req, res) => {
 });
 */
 
-
+//Update personaje
 app.put('/update-personaje/:id', async (req, res) => {
   const idpersonaje = req.params.id;
 
@@ -661,7 +719,7 @@ app.put('/update-personaje/:id', async (req, res) => {
     add1, valAdd1, add2, valAdd2, add3, valAdd3, add4, valAdd4,
     imagen, imagenurl, inventario, dominios, kenActual, kiActual,
     positiva, negativa, vidaActual, hechizos, consumision, iniciativa,
-    historia, usuarioId, tecEspecial, conviccion, cicatriz, resistencia, imagenSeleccionada, pjPnj
+    historia, usuarioId, tecEspecial, conviccion, cicatriz, resistencia, imagenSeleccionada, pjPnj, notas
   } = req.body;
 
  console.log("=================================");
@@ -711,8 +769,8 @@ app.put('/update-personaje/:id', async (req, res) => {
         "kiActual"=$61, positiva=$62, negativa=$63, "vidaActual"=$64,
         hechizos=$65, consumision=$66, iniciativa=$67, historia=$68,
         "usuarioId"=$69, "tecEspecial"=$70, conviccion=$71, cicatriz=$72,
-        resistencia=$73, "pjPnj"=$74, imagenurl=$75, "imagenSeleccionada"=$76 
-      WHERE idpersonaje=$77
+        resistencia=$73, "pjPnj"=$74, imagenurl=$75, "imagenSeleccionada"=$76 , notas=$77
+      WHERE idpersonaje=$78
     `;
 
     const values = [
@@ -726,7 +784,7 @@ app.put('/update-personaje/:id', async (req, res) => {
       add1, valAdd1, add2, valAdd2, add3, valAdd3, add4, valAdd4,
       inventario, dominios, kenActual, kiActual, positiva, negativa, vidaActual,
       hechizos, consumision, iniciativa, historia, usuarioId,
-      tecEspecial, conviccion, cicatriz, resistencia, pjPnj, imagenurl,imagenSeleccionada, idpersonaje
+      tecEspecial, conviccion, cicatriz, resistencia, pjPnj, imagenurl,imagenSeleccionada, notas, idpersonaje
     ];
 
 
@@ -754,7 +812,7 @@ app.put('/update-personaje/:id', async (req, res) => {
   "iniciativa", "historia", "usuarioId",
   "tecEspecial", "conviccion", "cicatriz",
   "resistencia", "pjPnj", "imagenurl",
-  "imagenSeleccionada", "idpersonaje"
+  "imagenSeleccionada", "notas", "idpersonaje"
 ];
 
 values.forEach((valor, index) => {
@@ -783,7 +841,7 @@ values.forEach((valor, index) => {
 });
 
 
-//aca vamos a probar el delete
+//Delete personaje
 app.delete('/deletePersonaje/:id', async (req, res) => {
   const idpersonaje = parseInt(req.params.id, 10);
 
@@ -847,7 +905,7 @@ app.get('/consumirPersonajesTodos', async (req, res) => {
         p.add1, p."valAdd1", p.add2, p."valAdd2",	p.add3,	p."valAdd3",	p.add4,	p."valAdd4",
         p.inventario, p.dominios, p."kenActual", p."kiActual", p.positiva, p.negativa, p."vidaActual",
         p.hechizos, p.consumision, p.iniciativa, p.historia, p."tecEspecial", p.conviccion, p.cicatriz,
-        p.notasaga, p.resistencia, p."pjPnj", p.imagenurl,p.imagencloudid,p."imagenSeleccionada",p."coleccionImagenes", p."usuarioId", a.spriteurl,
+        p.notasaga, p.resistencia, p."pjPnj", p.imagenurl,p.imagencloudid,p."imagenSeleccionada",p."coleccionImagenes", p."usuarioId", p.notas, a.spriteurl,
     a.filas,
     a.columnas,
     a.fps,
@@ -1303,7 +1361,7 @@ app.put('/updateUsuarios/:usuarioId', async (req, res) => {
 
 
 
-//update sprite ok!!
+//*************************Sprite ***********************************
 app.post("/upload-sprite", async (req, res) => {
   const { idpersonaje, imagen, filas, columnas, fps, scalesize } = req.body;
 
@@ -1456,7 +1514,7 @@ app.put("/eliminarSprite", async (req, res) => {
     });
   }
 });
-
+//*********************************************** 
 
 
 
@@ -1646,7 +1704,7 @@ app.delete('/deleteObjetoMagico/:idobjeto', async (req, res) => {
 
 
 
-
+//************************LOGROS APP MOBILE *****************************
 app.get('/consumirLogros', async (req, res) => {
   try {
     
@@ -1850,13 +1908,13 @@ app.put('/editarLogro/:id', async (req, res) => {
   }
 });
 
+//**************************************************************************** 
 
 
 
 
 
-
-//consmumir dispositivos Neo 
+//****************************Dispositivos Neo App MOBILE************************************
 app.get('/consumirObjetosNeo', async (req, res) => {
   try {
     const result = await pool.query(`
@@ -2034,6 +2092,7 @@ app.delete('/deleteObjetoNeo/:idobjeto', async (req, res) => {
   }
 });
 
+//******************************************************************************** 
 
 
 
@@ -2041,8 +2100,7 @@ app.delete('/deleteObjetoNeo/:idobjeto', async (req, res) => {
 
 
 
-
-//consmumir elementos Herbolaria
+//****************************** Herbolaria App MOBILE  ************************************
 app.get('/consumirObjetosH', async (req, res) => {
   try {
     const result = await pool.query(`
@@ -2219,8 +2277,12 @@ app.delete('/deleteObjetoH/:idobjeto', async (req, res) => {
     res.status(500).json({ error: 'Error al eliminar elemento de Herbolaria.' });
   }
 });
+//***************************************************************** 
 
-  
+
+
+
+//************************Historial DEL CHAT ***************************** */
 app.get('/buscarHistorialPj', async (req, res) => {
   const { nombre } = req.query; // o req.body si es POST
   //console.log("lo que viene ", req.query)
@@ -2264,13 +2326,13 @@ app.get('/pedirHistorialKen', async (req, res) => {
     res.status(500).json({ error: 'Error interno al obtener historial de ken del personaje' });
   }
 });
+//**************************************************************
 
 
 
 
 
-
-//ok
+//****************************** COLECCION DE IMAGENES ***************************** */
 app.put('/agregarImagenColeccion/:id', async (req, res) => {
   const idpersonaje = req.params.id; // coincide con :id en la ruta
   const { imagen } = req.body;       // solo necesitamos la imagen base64
@@ -2345,7 +2407,6 @@ app.put('/agregarImagenColeccion/:id', async (req, res) => {
 });
 
 
-//ok
 app.put('/cambiarImagenColeccion/:id', async (req, res) => {
   const idpersonaje = req.params.id;
   const { imagenId, nuevaImagen } = req.body; // <-- recibimos id de la imagen a reemplazar y Base64
@@ -2429,7 +2490,6 @@ app.put('/cambiarImagenColeccion/:id', async (req, res) => {
 });
 
 
-//ok
 app.put('/eliminarImagenColeccion/:id', async (req, res) => {
   const idpersonaje = req.params.id;
   const { imagenId } = req.body;
@@ -2516,9 +2576,6 @@ app.put('/eliminarImagenColeccion/:id', async (req, res) => {
   }
 });
 
-
-
-
 app.put('/seleccionarImagen/:id', async (req, res) => {
 
     const idpersonaje = req.params.id;
@@ -2567,26 +2624,15 @@ app.put('/seleccionarImagen/:id', async (req, res) => {
     }
 });
 
+//*********************************************************************************** */
 
 
 
+//***************************************************************************** */
+//******************************APLICACION DE ESCRITORIO ********************** */
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-//aplicacion de escritorio ok!!
-
+//**********************************ITEMS******************************************* */
 app.get('/ConsumirItemsInventario/:idPersonaje', async (req, res) => {
     const idPersonaje = req.params.idPersonaje;
 
@@ -2609,10 +2655,6 @@ app.get('/ConsumirItemsInventario/:idPersonaje', async (req, res) => {
     }
 });
 
-
-
-//get para consumir los items del manual ok!
-
 app.get('/ConsumirItemsManual', async (req, res) => {
     try {
         const result = await pool.query(`
@@ -2633,8 +2675,6 @@ app.get('/ConsumirItemsManual', async (req, res) => {
     }
 });
 
-
-//insert item ok!!
 app.post('/insertItem', async (req, res) => {
 
   const nombre = req.body.Nombre || req.body.nombre || "Ítem sin nombre";
@@ -2723,7 +2763,7 @@ Efecto: ${efecto}
           const ext = matches[1];
           const data = matches[2];
 
-          const uploadResult = await cloudinary.uploader.upload(
+          const uploadResult = await subirImagenCloudinaryEscritorio(
             `data:image/${ext};base64,${data}`,
             {
               folder: 'items',
@@ -2761,7 +2801,6 @@ Efecto: ${efecto}
 });
 
 
-//actualizar ok!!
 app.put('/ActualizarPosicionItem', async (req, res) => {
     try {
         const { ItemId, Posicion, Contenedor } = req.body;
@@ -2794,48 +2833,70 @@ console.log('-------------------');
     }
 });
 
-//delete item ok!!
+
 app.delete('/deleteItem', async (req, res) => {
 
   const iditem = req.body.iditem || req.body.IdItem;
 
   console.log("ID del item a eliminar: ", iditem);
+
   if (!iditem) {
-    return res.status(400).json({ error: 'Falta iditem' });
+    return res.status(400).json({
+      error: 'Falta iditem'
+    });
   }
 
   const clientDb = await pool.connect();
 
   try {
+
     await clientDb.query('BEGIN');
 
-    // 1. obtener datos de la acción (incluye imagen cloud id)
+    // 1. Obtener datos del item
     const selectQuery = `
       SELECT imagen_cloud_id, imagen_url
       FROM items
       WHERE id = $1
     `;
 
-    const result = await clientDb.query(selectQuery, [iditem]);
+    const result = await clientDb.query(
+      selectQuery,
+      [iditem]
+    );
 
     if (result.rows.length === 0) {
+
       await clientDb.query('ROLLBACK');
-      return res.status(404).json({ error: 'Item no encontrado' });
+
+      return res.status(404).json({
+        error: 'Item no encontrado'
+      });
     }
 
     const { imagen_cloud_id } = result.rows[0];
 
-    // 2. eliminar de cloudinary si existe
+    // 2. Eliminar imagen de Cloudinary
+    //    Primero busca en Escritorio y después en el antiguo
     if (imagen_cloud_id) {
+
       try {
-        await cloudinary.uploader.destroy(imagen_cloud_id);
+
+        await eliminarImagenCloudinaryEscritorioOAntiguo(
+          imagen_cloud_id
+        );
+
       } catch (cloudErr) {
-        console.error("Error eliminando imagen Cloudinary:", cloudErr);
-        // no cortamos la eliminación por esto
+
+        console.error(
+          `⚠️ Error eliminando imagen Cloudinary del item ${iditem}:`,
+          cloudErr
+        );
+
+        // No detenemos la eliminación del item
       }
     }
 
-    // 3. eliminar de base de datos
+    // 3. Eliminar item de PostgreSQL
     await clientDb.query(
       'DELETE FROM items WHERE id = $1',
       [iditem]
@@ -2849,24 +2910,282 @@ app.delete('/deleteItem', async (req, res) => {
     });
 
   } catch (err) {
+
     await clientDb.query('ROLLBACK');
+
     console.error(err);
-    res.status(500).json({ error: 'Error interno al eliminar item' });
+
+    res.status(500).json({
+      error: 'Error interno al eliminar item'
+    });
 
   } finally {
+
     clientDb.release();
+
   }
 });
 
 
+async function eliminarImagenCloudinaryEscritorioOAntiguo(publicId) {
+  if (!publicId) {
+    return;
+  }
+
+  // Primero buscamos en el Cloudinary nuevo
+  const resultadoNuevo = await cloudinaryEscritorio.uploader.destroy(publicId);
+
+  if (resultadoNuevo.result === 'ok') {
+    console.log(`✅ Imagen eliminada de Cloudinary Escritorio: ${publicId}`);
+    return;
+  }
+
+  console.log(
+    `ℹ️ Imagen no encontrada en Cloudinary Escritorio: ${publicId}`
+  );
+
+  // Si no estaba en el nuevo, buscamos en el viejo
+  const resultadoViejo = await cloudinary.uploader.destroy(publicId);
+
+  if (resultadoViejo.result === 'ok') {
+    console.log(`✅ Imagen eliminada de Cloudinary antiguo: ${publicId}`);
+  } else {
+    console.log(
+      `ℹ️ Imagen tampoco encontrada en Cloudinary antiguo: ${publicId}`
+    );
+  }
+}
+
+app.put('/ActualizarCantidadItem', async (req, res) => {
+
+    try {
+
+        const { ItemId, Cantidad } = req.body;
+
+        console.log(`
+=== ACTUALIZAR CANTIDAD ITEM ===
+ItemId: ${ItemId}
+Nueva Cantidad: ${Cantidad}
+===============================
+        `);
+
+
+        if (!ItemId) {
+            return res.status(400).json({ error: 'ItemId requerido' });
+        }
+
+
+        if (Cantidad === undefined || Cantidad === null) {
+            return res.status(400).json({ error: 'Cantidad requerida' });
+        }
+
+
+        await pool.query(
+            `
+            UPDATE items
+            SET cantidad = $1
+            WHERE id = $2
+            `,
+            [
+                Cantidad,
+                ItemId
+            ]
+        );
+
+
+        return res.status(200).json({
+            message: 'Cantidad actualizada correctamente'
+        });
+
+
+    } catch (error) {
+
+        console.log(error);
+
+        return res.status(500).json({
+            error: error.message
+        });
+    }
+});
+
+app.get('/ConsumirItemsBiblioteca', async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT *
+            FROM items_biblioteca
+        `);
+
+
+        //console.log(`[Consumir Tesoros] OK - items encontrados: ${result.rows.length}`);
+         //console.log(result.rows[0]);
+        return res.json(result.rows);
+
+
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/insertItemBiblioteca', async (req, res) => {
+
+  const nombre = req.body.Nombre || req.body.nombre || "Ítem sin nombre";
+  const tipo = req.body.Tipo || req.body.tipo || "";
+  const rareza = req.body.Rareza || req.body.rareza || "";
+  const nivel = req.body.Nivel || req.body.nivel || "";
+  const descripcion = req.body.Descripcion || req.body.descripcion || "";
+  const sistema = req.body.Sistema || req.body.sistema || "";
+  const precio = req.body.Precio || req.body.precio || "";
+  const costeVentaja = req.body.CosteVentaja || req.body.costeVentaja || "";
+  const imagen = req.body.Imagen_url || req.body.imagen_url || null;
+  const efecto = req.body.Efecto ?? req.body.efecto ?? "";
+
+  console.log(`
+=== NUEVO ITEM DE BIBLIOTECA RECIBIDO ===
+Nombre: ${nombre}
+Tipo: ${tipo}
+Rareza: ${rareza}
+Nivel: ${nivel}
+Descripción: ${descripcion}
+Sistema: ${sistema}
+Precio: ${precio}
+CosteVentaja: ${costeVentaja}
+Imagen: ${imagen ? "[RECIBIDA]" : "[NULL]"}
+Efecto: ${efecto}
+=========================================
+`);
+
+  const clientDb = await pool.connect();
+
+  try {
+
+    await clientDb.query('BEGIN');
+
+    const queryItem = `
+      INSERT INTO items_biblioteca (
+        nombre,
+        tipo,
+        rareza,
+        nivel,
+        descripcion,
+        sistema,
+        precio,
+        "costeVentaja",
+        efecto
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      RETURNING idobjeto
+    `;
+
+    const resultItem = await clientDb.query(queryItem, [
+      nombre,
+      tipo,
+      rareza,
+      nivel,
+      descripcion,
+      sistema,
+      precio,
+      costeVentaja,
+      efecto
+    ]);
+
+    const newId = resultItem.rows[0].idobjeto;
+
+    let imageUrl = null;
+    let imageCloudId = null;
+
+    if (imagen) {
+
+      if (imagen.startsWith('http')) {
+
+        imageUrl = imagen;
+
+        await clientDb.query(
+          `
+          UPDATE items_biblioteca
+          SET imagenurl = $1
+          WHERE idobjeto = $2
+          `,
+          [imageUrl, newId]
+        );
+
+      } else {
+
+        const matches = imagen.match(
+          /^data:image\/(\w+);base64,(.+)$/
+        );
+
+        if (matches) {
+
+          const ext = matches[1];
+          const data = matches[2];
+
+          const uploadResult =
+            await subirImagenCloudinaryEscritorio(
+              `data:image/${ext};base64,${data}`,
+              {
+                folder: 'items',
+                public_id: `item_biblioteca_${newId}`,
+                overwrite: true
+              }
+            );
+
+          imageUrl = uploadResult.secure_url;
+          imageCloudId = uploadResult.public_id;
+
+          await clientDb.query(
+            `
+            UPDATE items_biblioteca
+            SET imagenurl = $1,
+                imagencloudid = $2
+            WHERE idobjeto = $3
+            `,
+            [
+              imageUrl,
+              imageCloudId,
+              newId
+            ]
+          );
+        }
+      }
+    }
+
+    await clientDb.query('COMMIT');
+
+    res.status(201).json({
+      message: 'Item creado correctamente en la biblioteca',
+      idobjeto: newId,
+      imagenurl: imageUrl,
+      imagencloudid: imageCloudId
+    });
+
+  } catch (err) {
+
+    await clientDb.query('ROLLBACK');
+
+    console.error(
+      'Error al insertar item en biblioteca:',
+      err
+    );
+
+    res.status(500).json({
+      error: 'Error interno al insertar item en biblioteca'
+    });
+
+  } finally {
+
+    clientDb.release();
+  }
+});
+
+//****************************************************************************** */
 
 
 
 
 
-//ACIONES Y PODERES
-
-//Consumir lista ok!!
+//************************* ACIONES ************************************
 
 app.get('/ConsumirListaAcciones/:idPersonaje', async (req, res) => {
     const idPersonaje = req.params.idPersonaje;
@@ -2891,8 +3210,7 @@ app.get('/ConsumirListaAcciones/:idPersonaje', async (req, res) => {
 });
 
 
-
-//probado
+//estamos aca ok
 app.post('/insertAccion', async (req, res) => {
 
   const nombre = req.body.Nombre || req.body.nombre || "Accion sin nombre";
@@ -3028,7 +3346,7 @@ Efecto: ${efecto}
           const ext = matches[1];
           const data = matches[2];
 
-          const uploadResult = await cloudinary.uploader.upload(
+          const uploadResult = await subirImagenCloudinaryEscritorio(
             `data:image/${ext};base64,${data}`,
             {
               folder: 'acciones',
@@ -3065,9 +3383,6 @@ Efecto: ${efecto}
   }
 });
 
-
-//**************************************************
-//ESTAMOS ACAA**************************************
 app.post('/insertAccionBiblioteca', async (req, res) => {
 
   const nombre = req.body.Nombre || req.body.nombre || "Accion sin nombre";
@@ -3191,7 +3506,7 @@ RETURNING id
           const data = matches[2];
 
 
-          const uploadResult = await cloudinary.uploader.upload(
+          const uploadResult = await subirImagenCloudinaryEscritorio(
             `data:image/${ext};base64,${data}`,
             {
               folder: 'acciones_biblioteca',
@@ -3251,7 +3566,6 @@ RETURNING id
 
 });
 
-
 app.get('/ConsumirAccionesBiblioteca', async (req, res) => {
     try {
         const result = await pool.query(`
@@ -3272,8 +3586,6 @@ app.get('/ConsumirAccionesBiblioteca', async (req, res) => {
     }
 });
 
-
-//actualizar ok!!
 app.put('/ActualizarPosicionAccion', async (req, res) => {
     try {
         const { ItemId, Posicion, Contenedor } = req.body;
@@ -3306,84 +3618,163 @@ console.log('-------------------');
     }
 });
 
-
-
-
-
-
-
-//ELIMINAR ACCION OK!!
-
 app.delete('/deleteAccion', async (req, res) => {
 
   const idaccion = req.body.idaccion || req.body.IdAccion;
 
-  //console.log("ID de la acción a eliminar: ", idaccion);
   if (!idaccion) {
-    return res.status(400).json({ error: 'Falta idaccion' });
+    return res.status(400).json({
+      error: 'Falta idaccion'
+    });
   }
 
   const clientDb = await pool.connect();
 
   try {
+
     await clientDb.query('BEGIN');
 
-    // 1. obtener datos de la acción (incluye imagen cloud id)
-    const selectQuery = `
+    // 1. Obtener imagen de la acción
+    const result = await clientDb.query(
+      `
       SELECT imagen_cloud_id, imagen_url
       FROM acciones
       WHERE id = $1
-    `;
-
-    const result = await clientDb.query(selectQuery, [idaccion]);
-
-    if (result.rows.length === 0) {
-      await clientDb.query('ROLLBACK');
-      return res.status(404).json({ error: 'Accion no encontrada' });
-    }
-
-    const { imagen_cloud_id } = result.rows[0];
-
-    // 2. eliminar de cloudinary si existe
-    if (imagen_cloud_id) {
-      try {
-        await cloudinary.uploader.destroy(imagen_cloud_id);
-      } catch (cloudErr) {
-        console.error("Error eliminando imagen Cloudinary:", cloudErr);
-        // no cortamos la eliminación por esto
-      }
-    }
-
-    // 3. eliminar de base de datos
-    await clientDb.query(
-      'DELETE FROM acciones WHERE id = $1',
+      `,
       [idaccion]
     );
 
+    if (result.rows.length === 0) {
+
+      await clientDb.query('ROLLBACK');
+
+      return res.status(404).json({
+        error: 'Accion no encontrada'
+      });
+    }
+
+    const {
+      imagen_cloud_id,
+      imagen_url
+    } = result.rows[0];
+
+
+    // 2. Eliminar imagen de Cloudinary
+    if (imagen_cloud_id) {
+
+      try {
+
+        // Determinar en qué cuenta está la imagen
+        if (
+          imagen_url &&
+          imagen_url.includes('res.cloudinary.com/ucoamrxg/')
+        ) {
+
+          console.log(
+            `🟢 Acción ${idaccion}: imagen pertenece a Cloudinary Escritorio`
+          );
+
+          await eliminarImagenCloudinaryEscritorio(
+            imagen_cloud_id
+          );
+
+        } else {
+
+          console.log(
+            `🟡 Acción ${idaccion}: imagen pertenece a Cloudinary principal`
+          );
+
+          await cloudinary.uploader.destroy(
+            imagen_cloud_id
+          );
+        }
+
+      } catch (cloudErr) {
+
+        console.error(
+          `⚠️ Error eliminando imagen Cloudinary de acción ${idaccion}:`,
+          cloudErr
+        );
+
+        // No detenemos el borrado de la acción.
+      }
+    }
+
+
+    // 3. Eliminar acción de PostgreSQL
+    await clientDb.query(
+      `
+      DELETE FROM acciones
+      WHERE id = $1
+      `,
+      [idaccion]
+    );
+
+
     await clientDb.query('COMMIT');
+
 
     res.status(200).json({
       message: 'Accion eliminada correctamente',
       idaccion
     });
 
+
   } catch (err) {
+
     await clientDb.query('ROLLBACK');
-    console.error(err);
-    res.status(500).json({ error: 'Error interno al eliminar accion' });
+
+    console.error(
+      'Error interno al eliminar accion:',
+      err
+    );
+
+    res.status(500).json({
+      error: 'Error interno al eliminar accion'
+    });
 
   } finally {
+
     clientDb.release();
+
   }
 });
 
 
+async function eliminarImagenCloudinaryEscritorio(publicId) {
+  const cloudinaryEscritorio = require('cloudinary').v2;
+
+  const resultado = await new Promise((resolve, reject) => {
+
+    cloudinaryEscritorio.uploader.destroy(
+      publicId,
+      {
+        cloud_name: 'ucoamrxg',
+        api_key: '975696536842629',
+        api_secret: 'm6m_AmX0mlMxAXRBJrpFxCwE5Io'
+      },
+      (error, result) => {
+
+        if (error) {
+          reject(error);
+          return;
+        }
+
+        resolve(result);
+      }
+    );
+
+  });
+
+  return resultado;
+}
+//*************************************************************************** */
 
 
 
 
 
-//VENTAJAS EN LA APLICACION DE ESCRITORIO WPF
+//*********************VENTAJAS*****************************************
 
 
 app.get('/ConsumirVentajasDesventajasTodas', async (req, res) => {
@@ -3410,7 +3801,6 @@ app.get('/ConsumirVentajasDesventajasTodas', async (req, res) => {
     }
 });
 
-
 app.get('/ConsumirIdsVentajasPersonaje/:idPersonaje', async (req, res) => {
     const idPersonaje = req.params.idPersonaje;
 
@@ -3435,12 +3825,6 @@ app.get('/ConsumirIdsVentajasPersonaje/:idPersonaje', async (req, res) => {
         return res.status(500).json({ error: error.message });
     }
 });
-
-
-
-
-
-
 
 app.post('/AgregarVentajaPersonaje', async (req, res) => {
 
@@ -3512,8 +3896,6 @@ Ventaja: ${idVentaja}
 
 });
 
-
-
 app.post('/EliminarVentajaPersonaje', async (req, res) => {
 
   const idPersonaje = req.body.idPersonaje || req.body.idpersonaje;
@@ -3557,9 +3939,294 @@ app.post('/EliminarVentajaPersonaje', async (req, res) => {
 
 
 
+/* esto funciona para migrar imagenes de personajes a cloudinary y traerme la url y el cloudid a la base de datos
+async function migrarImagenPersonaje(idpersonaje) {
+  const resultado = await pool.query(
+    `SELECT idpersonaje, nombre, imagen
+     FROM personajes
+     WHERE idpersonaje = $1`,
+    [idpersonaje]
+  );
+
+  if (resultado.rows.length === 0) {
+    throw new Error(`Personaje ${idpersonaje} no encontrado.`);
+  }
+
+  const personaje = resultado.rows[0];
+
+  if (!personaje.imagen) {
+    throw new Error(`El personaje ${idpersonaje} no tiene imagen Base64.`);
+  }
+
+  let imagenBase64 = personaje.imagen;
+
+  if (!imagenBase64.startsWith('data:image/')) {
+    imagenBase64 = `data:image/jpeg;base64,${imagenBase64}`;
+  }
+
+  const uploadResult = await cloudinary.uploader.upload(
+    imagenBase64,
+    {
+      folder: 'personajes',
+      public_id: `personaje_${idpersonaje}`,
+      overwrite: true
+    }
+  );
+
+  console.log('=================================');
+  console.log('IMAGEN MIGRADA');
+  console.log('Personaje:', personaje.nombre);
+  console.log('ID:', idpersonaje);
+  console.log('Nueva URL:', uploadResult.secure_url);
+  console.log('Nuevo Cloud ID:', uploadResult.public_id);
+  console.log('=================================');
+
+  return {
+    idpersonaje: personaje.idpersonaje,
+    nombre: personaje.nombre,
+    imagenurl: uploadResult.secure_url,
+    imagencloudid: uploadResult.public_id
+  };
+}
+*/
 
 
+//descarga la imagen usando la url de cloudinary y la mete en la base de datos postgresql en base64
+/* funciono descargar imagen de cloudinary y guardarla en base64 en la base de datos
+async function recuperarYGuardarBase64(idpersonaje) {
+  try {
+    const resultado = await pool.query(
+      `SELECT idpersonaje, nombre, imagenurl, imagen
+       FROM personajes
+       WHERE idpersonaje = $1`,
+      [idpersonaje]
+    );
 
+    if (resultado.rows.length === 0) {
+      throw new Error(`Personaje ${idpersonaje} no encontrado.`);
+    }
+
+    const personaje = resultado.rows[0];
+
+    if (!personaje.imagenurl) {
+      throw new Error(`El personaje ${idpersonaje} no tiene imagenurl.`);
+    }
+
+    if (personaje.imagen) {
+      throw new Error(`El personaje ${idpersonaje} ya tiene imagen Base64.`);
+    }
+
+    console.log('=================================');
+    console.log('RECUPERANDO IMAGEN');
+    console.log('Personaje:', personaje.nombre);
+    console.log('ID:', personaje.idpersonaje);
+    console.log('URL:', personaje.imagenurl);
+
+    const respuesta = await fetch(personaje.imagenurl);
+
+    if (!respuesta.ok) {
+      throw new Error(
+        `Cloudinary respondió con HTTP ${respuesta.status}`
+      );
+    }
+
+    const arrayBuffer = await respuesta.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const contentType =
+      respuesta.headers.get('content-type') || 'image/jpeg';
+
+    const base64 = buffer.toString('base64');
+
+    const imagenBase64 = `data:${contentType};base64,${base64}`;
+
+    console.log('Tamaño original:', buffer.length, 'bytes');
+    console.log('Content-Type:', contentType);
+    console.log('Longitud Base64:', imagenBase64.length);
+
+    // GUARDAR BASE64 EN POSTGRESQL
+    await pool.query(
+      `UPDATE personajes
+       SET imagen = $1
+       WHERE idpersonaje = $2`,
+      [imagenBase64, idpersonaje]
+    );
+
+    console.log('✅ Base64 guardado correctamente en PostgreSQL.');
+    console.log('=================================');
+
+    return imagenBase64;
+
+  } catch (error) {
+    console.error('❌ Error recuperando y guardando imagen:', error);
+    throw error;
+  }
+}
+*/
+
+// guarda la imagen en cloudinary y trae la url y el cloudid a la base de datos
+/*
+async function subirBase64ACloudinary(idpersonaje) {
+  try {
+    const resultado = await pool.query(
+      `SELECT idpersonaje, nombre, imagen
+       FROM personajes
+       WHERE idpersonaje = $1`,
+      [idpersonaje]
+    );
+
+    if (resultado.rows.length === 0) {
+      throw new Error(`Personaje ${idpersonaje} no encontrado.`);
+    }
+
+    const personaje = resultado.rows[0];
+
+    if (!personaje.imagen) {
+      throw new Error(`El personaje ${idpersonaje} no tiene imagen Base64.`);
+    }
+
+    console.log('=================================');
+    console.log('SUBIENDO IMAGEN A CLOUDINARY');
+    console.log('Personaje:', personaje.nombre);
+    console.log('ID:', personaje.idpersonaje);
+
+    const uploadResult = await cloudinary.uploader.upload(
+      personaje.imagen,
+      {
+        folder: 'personajes',
+        public_id: `personaje_${idpersonaje}`,
+        overwrite: true
+      }
+    );
+
+    const imagenUrl = uploadResult.secure_url;
+    const imagenCloudId = uploadResult.public_id;
+
+    console.log('Nueva URL:', imagenUrl);
+    console.log('Nuevo Cloud ID:', imagenCloudId);
+
+    await pool.query(
+      `UPDATE personajes
+       SET imagenurl = $1,
+           imagencloudid = $2
+       WHERE idpersonaje = $3`,
+      [imagenUrl, imagenCloudId, idpersonaje]
+    );
+
+    console.log('✅ imagenurl guardado.');
+    console.log('✅ imagencloudid guardado.');
+    console.log('=================================');
+
+  } catch (error) {
+    console.error('❌ Error:', error);
+  }
+}
+*/
+
+
+/* me ayudo a recuperar todas las que tenai url y ponerles base 64
+async function recuperarYGuardarBase64() {
+  try {
+    const resultado = await pool.query(`
+      SELECT idpersonaje, nombre, imagenurl, imagen
+      FROM personajes
+      WHERE imagenurl IS NOT NULL
+        AND imagenurl LIKE '%res.cloudinary.com%'
+        AND (imagen IS NULL OR imagen = '')
+      ORDER BY idpersonaje
+    `);
+
+    const personajes = resultado.rows;
+
+    console.log(`=================================`);
+    console.log(`PERSONAJES A RECUPERAR: ${personajes.length}`);
+    console.log(`=================================`);
+
+    for (const personaje of personajes) {
+
+      try {
+        const {
+          idpersonaje,
+          nombre,
+          imagenurl
+        } = personaje;
+
+        console.log('=================================');
+        console.log('RECUPERANDO IMAGEN');
+        console.log('Personaje:', nombre);
+        console.log('ID:', idpersonaje);
+        console.log('URL:', imagenurl);
+
+        const respuesta = await fetch(imagenurl);
+
+        if (!respuesta.ok) {
+          throw new Error(
+            `Cloudinary respondió con HTTP ${respuesta.status}`
+          );
+        }
+
+        const arrayBuffer = await respuesta.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+
+        const contentType =
+          respuesta.headers.get('content-type') || 'image/jpeg';
+
+        const base64 = buffer.toString('base64');
+
+        const imagenBase64 =
+          `data:${contentType};base64,${base64}`;
+
+        console.log(
+          'Tamaño original:',
+          buffer.length,
+          'bytes'
+        );
+
+        console.log(
+          'Content-Type:',
+          contentType
+        );
+
+        console.log(
+          'Longitud Base64:',
+          imagenBase64.length
+        );
+
+        await pool.query(
+          `UPDATE personajes
+           SET imagen = $1
+           WHERE idpersonaje = $2`,
+          [imagenBase64, idpersonaje]
+        );
+
+        console.log(
+          `✅ Base64 guardado correctamente para ${nombre} (${idpersonaje}).`
+        );
+
+      } catch (error) {
+
+        console.error(
+          `❌ Error con personaje ${personaje.idpersonaje} (${personaje.nombre}):`,
+          error.message
+        );
+
+      }
+    }
+
+    console.log('=================================');
+    console.log('🎉 RECUPERACIÓN DE BASE64 TERMINADA');
+    console.log('=================================');
+
+  } catch (error) {
+    console.error(
+      '🚨 Error general recuperando imágenes:',
+      error.message
+    );
+  }
+}
+*/
+
+//***************************************************** 
 
 
 /*
@@ -3801,3 +4468,8 @@ server.listen(PORT, () => {
 server.listen(PORT, () => {
   console.log(`🟢 Servidor Socket.IO corriendo en puerto ${PORT}`);
 });
+
+
+
+
+
