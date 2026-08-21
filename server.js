@@ -34,11 +34,11 @@ cloudinary.config({
 // CLOUDINARY
 // ==========================================
 
-const cloudinary = require('cloudinary').v2;
+const { v2: cloudinary } = require('cloudinary');
 
 
 // ==========================================
-// CUENTA CLOUDINARY PRINCIPAL
+// CUENTA CLOUDINARY PRINCIPAL / ANTIGUA
 // ==========================================
 
 cloudinary.config({
@@ -49,14 +49,17 @@ cloudinary.config({
 
 
 // ==========================================
-// CUENTA CLOUDINARY ESCRITORIO
+// CUENTA CLOUDINARY ESCRITORIO / NUEVA
 // ==========================================
 
-const cloudinaryEscritorio = {
+const cloudinaryEscritorio = require('cloudinary').v2;
+
+cloudinaryEscritorio.config({
   cloud_name: 'ucoamrxg',
   api_key: '975696536842629',
   api_secret: 'm6m_AmX0mlMxAXRBJrpFxCwE5Io'
-};
+});
+
 
 async function subirImagenCloudinaryEscritorio(imagen, opciones) {
 
@@ -2852,15 +2855,13 @@ app.delete('/deleteItem', async (req, res) => {
 
     await clientDb.query('BEGIN');
 
-    // 1. Obtener datos del item
-    const selectQuery = `
+    // 1. Obtener imagen del item
+    const result = await clientDb.query(
+      `
       SELECT imagen_cloud_id, imagen_url
       FROM items
       WHERE id = $1
-    `;
-
-    const result = await clientDb.query(
-      selectQuery,
+      `,
       [iditem]
     );
 
@@ -2873,17 +2874,41 @@ app.delete('/deleteItem', async (req, res) => {
       });
     }
 
-    const { imagen_cloud_id } = result.rows[0];
+    const {
+      imagen_cloud_id,
+      imagen_url
+    } = result.rows[0];
+
 
     // 2. Eliminar imagen de Cloudinary
-    //    Primero busca en Escritorio y después en el antiguo
     if (imagen_cloud_id) {
 
       try {
 
-        await eliminarImagenCloudinaryEscritorioOAntiguo(
-          imagen_cloud_id
-        );
+        // Determinar en qué cuenta está la imagen
+        if (
+          imagen_url &&
+          imagen_url.includes('res.cloudinary.com/ucoamrxg/')
+        ) {
+
+          console.log(
+            `🟢 Item ${iditem}: imagen pertenece a Cloudinary Escritorio`
+          );
+
+          await eliminarImagenCloudinaryEscritorio(
+            imagen_cloud_id
+          );
+
+        } else {
+
+          console.log(
+            `🟡 Item ${iditem}: imagen pertenece a Cloudinary principal`
+          );
+
+          await cloudinary.uploader.destroy(
+            imagen_cloud_id
+          );
+        }
 
       } catch (cloudErr) {
 
@@ -2892,28 +2917,38 @@ app.delete('/deleteItem', async (req, res) => {
           cloudErr
         );
 
-        // No detenemos la eliminación del item
+        // No detenemos el borrado del item.
       }
     }
 
+
     // 3. Eliminar item de PostgreSQL
     await clientDb.query(
-      'DELETE FROM items WHERE id = $1',
+      `
+      DELETE FROM items
+      WHERE id = $1
+      `,
       [iditem]
     );
 
+
     await clientDb.query('COMMIT');
+
 
     res.status(200).json({
       message: 'Item eliminado correctamente',
       iditem
     });
 
+
   } catch (err) {
 
     await clientDb.query('ROLLBACK');
 
-    console.error(err);
+    console.error(
+      'Error interno al eliminar item:',
+      err
+    );
 
     res.status(500).json({
       error: 'Error interno al eliminar item'
@@ -2922,38 +2957,37 @@ app.delete('/deleteItem', async (req, res) => {
   } finally {
 
     clientDb.release();
-
   }
 });
 
 
-async function eliminarImagenCloudinaryEscritorioOAntiguo(publicId) {
-  if (!publicId) {
-    return;
-  }
+async function eliminarImagenCloudinaryEscritorio(publicId) {
 
-  // Primero buscamos en el Cloudinary nuevo
-  const resultadoNuevo = await cloudinaryEscritorio.uploader.destroy(publicId);
+  const cloudinaryEscritorio = require('cloudinary').v2;
 
-  if (resultadoNuevo.result === 'ok') {
-    console.log(`✅ Imagen eliminada de Cloudinary Escritorio: ${publicId}`);
-    return;
-  }
+  const resultado = await new Promise((resolve, reject) => {
 
-  console.log(
-    `ℹ️ Imagen no encontrada en Cloudinary Escritorio: ${publicId}`
-  );
+    cloudinaryEscritorio.uploader.destroy(
+      publicId,
+      {
+        cloud_name: 'ucoamrxg',
+        api_key: '975696536842629',
+        api_secret: 'm6m_AmX0mlMxAXRBJrpFxCwE5Io'
+      },
+      (error, result) => {
 
-  // Si no estaba en el nuevo, buscamos en el viejo
-  const resultadoViejo = await cloudinary.uploader.destroy(publicId);
+        if (error) {
+          reject(error);
+          return;
+        }
 
-  if (resultadoViejo.result === 'ok') {
-    console.log(`✅ Imagen eliminada de Cloudinary antiguo: ${publicId}`);
-  } else {
-    console.log(
-      `ℹ️ Imagen tampoco encontrada en Cloudinary antiguo: ${publicId}`
+        resolve(result);
+      }
     );
-  }
+
+  });
+
+  return resultado;
 }
 
 app.put('/ActualizarCantidadItem', async (req, res) => {
@@ -3208,6 +3242,111 @@ app.get('/ConsumirListaAcciones/:idPersonaje', async (req, res) => {
         return res.status(500).json({ error: error.message });
     }
 });
+
+
+
+//INSERT DE ACCIONES INICALES DE UN PERSONAJE NUEVO
+app.post('/crearAccionesIniciales', async (req, res) => {
+
+    const idPersonaje = req.body.idPersonaje;
+    const idsAcciones = req.body.idsAcciones;
+
+    if (!idPersonaje) {
+        return res.status(400).json({
+            error: 'Falta idPersonaje'
+        });
+    }
+
+    if (!Array.isArray(idsAcciones) || idsAcciones.length === 0) {
+        return res.status(400).json({
+            error: 'Faltan idsAcciones'
+        });
+    }
+
+    const clientDb = await pool.connect();
+
+    try {
+
+        await clientDb.query('BEGIN');
+
+        const query = `
+            INSERT INTO acciones (
+                nombre,
+                tipo,
+                descripcion,
+                sistema,
+                rareza,
+                posicion,
+                contenedor,
+                efecto,
+                idpersonaje,
+                prioridad,
+                dominio,
+                arte,
+                ryu,
+                tiempo_invocacion,
+                nivel_ki,
+                coste_ki,
+                imagen_url
+            )
+            SELECT
+                ab.nombre,
+                ab.tipo,
+                ab.descripcion,
+                ab.sistema,
+                ab.rareza,
+                ROW_NUMBER() OVER (ORDER BY ab.id) - 1,
+                'ACCIONES',
+                ab.efecto,
+                $1,
+                ab.prioridad,
+                ab.dominio,
+                ab.arte,
+                ab.ryu,
+                ab.tiempo_invocacion,
+                ab.nivel_ki,
+                ab.coste_ki,
+                ab.imagen_url
+            FROM acciones_biblioteca ab
+            WHERE ab.id = ANY($2::int[])
+            ORDER BY ab.id
+            RETURNING id;
+        `;
+
+        const resultado = await clientDb.query(
+            query,
+            [
+                idPersonaje,
+                idsAcciones
+            ]
+        );
+
+        await clientDb.query('COMMIT');
+
+        res.status(201).json({
+            message: 'Acciones iniciales creadas correctamente',
+            idPersonaje: idPersonaje,
+            cantidad: resultado.rows.length,
+            idsAccionesCreadas: resultado.rows.map(row => row.id)
+        });
+
+    } catch (err) {
+
+        await clientDb.query('ROLLBACK');
+
+        console.error(err);
+
+        res.status(500).json({
+            error: 'Error interno al crear las acciones iniciales'
+        });
+
+    } finally {
+
+        clientDb.release();
+    }
+});
+
+
 
 
 //estamos aca ok
