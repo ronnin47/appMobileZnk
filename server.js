@@ -226,6 +226,8 @@ io.on('connection', (socket) => {
     if (mensajesChat.length > 80) mensajesChat.shift();
 
     io.emit('chat-chat', msgNormalizado);
+
+    
   });
 
   // Eventos que usa la web
@@ -2631,6 +2633,8 @@ app.put('/seleccionarImagen/:id', async (req, res) => {
 
 
 
+
+
 //***************************************************************************** */
 //******************************APLICACION DE ESCRITORIO ********************** */
 
@@ -2639,8 +2643,6 @@ app.put('/seleccionarImagen/:id', async (req, res) => {
 app.get('/ConsumirItemsInventario/:idPersonaje', async (req, res) => {
     const idPersonaje = req.params.idPersonaje;
 
-   // console.log(`[INVENTARIO] Request recibida para personaje: ${idPersonaje}`);
-
     try {
         const result = await pool.query(
             `SELECT *
@@ -2648,8 +2650,6 @@ app.get('/ConsumirItemsInventario/:idPersonaje', async (req, res) => {
              WHERE idpersonaje = $1`,
             [idPersonaje]
         );
-
-        //console.log(`[INVENTARIO] OK personaje ${idPersonaje} - items encontrados: ${result.rows.length}`);
 
         return res.json(result.rows);
     } catch (error) {
@@ -2665,9 +2665,6 @@ app.get('/ConsumirItemsManual', async (req, res) => {
             FROM tesoros
         `);
 
-
-        //console.log(`[Consumir Tesoros] OK - items encontrados: ${result.rows.length}`);
-         //console.log(result.rows[0]);
         return res.json(result.rows);
 
 
@@ -2696,22 +2693,6 @@ app.post('/insertItem', async (req, res) => {
   const contenedor = req.body.Contenedor ?? req.body.contenedor ?? null;
   const efecto = req.body.Efecto ?? req.body.efecto ?? null;
 
-  console.log(`
-=== NUEVO ITEM RECIBIDO ===
-Nombre: ${nombre}
-Tipo: ${tipo}
-Rareza: ${rareza}
-Cantidad: ${cantidad}
-PersonajeId: ${idpersonaje}
-Descripción: ${descripcion}
-Sistema: ${sistema}
-Precio: ${precio}
-Posición: ${posicion}
-Contenedor: ${contenedor}
-Imagen: ${imagen ? "[RECIBIDA]" : "[NULL]"}
-Efecto: ${efecto}
-==========================
-`);
 
   if (!idpersonaje) {
     return res.status(400).json({ error: 'Falta idpersonaje' });
@@ -2807,13 +2788,7 @@ Efecto: ${efecto}
 app.put('/ActualizarPosicionItem', async (req, res) => {
     try {
         const { ItemId, Posicion, Contenedor } = req.body;
-/*
-        console.log('--- UPDATE ITEM ---');
-console.log('ItemId:', req.body.ItemId);
-console.log('Posicion:', req.body.Posicion);
-console.log('Contenedor:', req.body.Contenedor);
-console.log('-------------------');
-*/
+
         if (!ItemId) {
             return res.status(400).json({ error: 'ItemId requerido' });
         }
@@ -2996,12 +2971,7 @@ app.put('/ActualizarCantidadItem', async (req, res) => {
 
         const { ItemId, Cantidad } = req.body;
 
-        console.log(`
-=== ACTUALIZAR CANTIDAD ITEM ===
-ItemId: ${ItemId}
-Nueva Cantidad: ${Cantidad}
-===============================
-        `);
+       
 
 
         if (!ItemId) {
@@ -3049,9 +3019,6 @@ app.get('/ConsumirItemsBiblioteca', async (req, res) => {
             FROM items_biblioteca
         `);
 
-
-        //console.log(`[Consumir Tesoros] OK - items encontrados: ${result.rows.length}`);
-         //console.log(result.rows[0]);
         return res.json(result.rows);
 
 
@@ -3075,20 +3042,7 @@ app.post('/insertItemBiblioteca', async (req, res) => {
   const imagen = req.body.Imagen_url || req.body.imagen_url || null;
   const efecto = req.body.Efecto ?? req.body.efecto ?? "";
 
-  console.log(`
-=== NUEVO ITEM DE BIBLIOTECA RECIBIDO ===
-Nombre: ${nombre}
-Tipo: ${tipo}
-Rareza: ${rareza}
-Nivel: ${nivel}
-Descripción: ${descripcion}
-Sistema: ${sistema}
-Precio: ${precio}
-CosteVentaja: ${costeVentaja}
-Imagen: ${imagen ? "[RECIBIDA]" : "[NULL]"}
-Efecto: ${efecto}
-=========================================
-`);
+
 
   const clientDb = await pool.connect();
 
@@ -3346,10 +3300,6 @@ app.post('/crearAccionesIniciales', async (req, res) => {
     }
 });
 
-
-
-
-//estamos aca ok
 app.post('/insertAccion', async (req, res) => {
 
   const nombre = req.body.Nombre || req.body.nombre || "Accion sin nombre";
@@ -3379,34 +3329,7 @@ app.post('/insertAccion', async (req, res) => {
   const coste_ki = req.body.Coste_ki ?? 0;
 
 
- console.log(`
-=== NUEVA ACCION RECIBIDA DESDE EL CLIENTE ===
-
-Nombre: ${nombre}
-Tipo: ${tipo}
-Rareza: ${rareza}
-
-PersonajeId: ${idpersonaje}
-
-Descripción: ${descripcion}
-Sistema: ${sistema}
-
-Prioridad: ${prioridad}
-Dominio: ${dominio}
-Arte: ${arte}
-Ryu: ${ryu}
-Tiempo invocacion: ${tiempo_invocacion}
-Nivel Ki: ${nivel_ki}
-Coste Ki: ${coste_ki}
-
-Posición: ${posicion}
-Contenedor: ${contenedor}
-
-Imagen: ${imagen ? "[RECIBIDA]" : "[NULL]"}
-Efecto: ${efecto}
-
-==========================
-`);
+ 
 
   if (!idpersonaje) {
     return res.status(400).json({ error: 'Falta idpersonaje' });
@@ -3543,29 +3466,7 @@ const tiempo_invocacion = req.body.Tiempo_invocacion || "";
 const nivel_ki = req.body.Nivel_ki ?? 0;
 const coste_ki = req.body.Coste_ki ?? 0;
 
- console.log(`
-=== NUEVA ACCION BIBLIOTECA RECIBIDA ===
 
-Nombre: ${nombre}
-Tipo: ${tipo}
-Rareza: ${rareza}
-
-Descripción: ${descripcion}
-Sistema: ${sistema}
-
-Prioridad: ${prioridad}
-Dominio: ${dominio}
-Arte: ${arte}
-Ryu: ${ryu}
-Tiempo invocacion: ${tiempo_invocacion}
-Nivel Ki: ${nivel_ki}
-Coste Ki: ${coste_ki}
-
-Imagen: ${imagen ? "[RECIBIDA]" : "[NULL]"}
-Efecto: ${efecto}
-
-==========================
-`);
 
 
   const clientDb = await pool.connect();
@@ -3713,8 +3614,7 @@ app.get('/ConsumirAccionesBiblioteca', async (req, res) => {
         `);
 
 
-        console.log(`[Consumir Acciones Biblioteca] OK - items encontrados: ${result.rows.length}`);
-        console.log(result.rows[0]);
+      
         return res.json(result.rows);
 
 
@@ -3729,11 +3629,7 @@ app.put('/ActualizarPosicionAccion', async (req, res) => {
     try {
         const { ItemId, Posicion, Contenedor } = req.body;
 
-        console.log('--- UPDATE ACCION ---');
-console.log('ItemId:', req.body.ItemId);
-console.log('Posicion:', req.body.Posicion);
-console.log('Contenedor:', req.body.Contenedor);
-console.log('-------------------');
+      
 
         if (!ItemId) {
             return res.status(400).json({ error: 'ItemId requerido' });
@@ -3943,7 +3839,7 @@ app.get('/ConsumirVentajasDesventajasTodas', async (req, res) => {
 app.get('/ConsumirIdsVentajasPersonaje/:idPersonaje', async (req, res) => {
     const idPersonaje = req.params.idPersonaje;
 
-    console.log("Personaje recibido:", idPersonaje);
+    
 
     try {
         const result = await pool.query(
@@ -3969,14 +3865,7 @@ app.post('/AgregarVentajaPersonaje', async (req, res) => {
 
   const idPersonaje = req.body.idPersonaje || req.body.idpersonaje;
   const idVentaja = req.body.idVentaja || req.body.idventaja;
-/*
-  console.log(`
-=== AGREGAR VENTAJA ===
-Personaje: ${idPersonaje}
-Ventaja: ${idVentaja}
-=======================
-`);
-*/
+
   if (!idPersonaje || !idVentaja) {
     return res.status(400).json({
       error: "Faltan datos."
@@ -4080,7 +3969,7 @@ app.post('/EliminarVentajaPersonaje', async (req, res) => {
 app.get('/ConsumirIncrementosPendientes/:idPersonaje', async (req, res) => {
     const idPersonaje = req.params.idPersonaje;
 
-    console.log("Personaje recibido:", idPersonaje);
+    
 
     try {
         const result = await pool.query(
@@ -4101,11 +3990,188 @@ app.get('/ConsumirIncrementosPendientes/:idPersonaje', async (req, res) => {
     }
 });
 
-
 app.post('/GuardarIncremento', async (req, res) => {
     const incremento = req.body;
 
-    console.log("Incremento recibido:", incremento);
+    // console.log("Incremento recibido:", incremento);
+
+    try {
+
+        await pool.query(
+            `INSERT INTO incrementos_pendientes (
+                idpersonaje,
+                fuerza,
+                fortaleza,
+                destreza,
+                agilidad,
+                sabiduria,
+                principio,
+                presencia,
+                sentidos,
+                academisismo,
+                alerta,
+                atletismo,
+                conbakemono,
+                mentir,
+                pilotear,
+                artesmarciales,
+                medicina,
+                conobjmagicos,
+                sigilo,
+                conesferas,
+                conleyendas,
+                forja,
+                condemonio,
+                conespiritual,
+                manejoblaster,
+                manejosombras,
+                tratobakemono,
+                conhechiceria,
+                medvital,
+                medespiritual,
+                rayo,
+                fuego,
+                frio,
+                veneno,
+                corte,
+                energia,
+                valcombate,
+                valcombate2,
+                valadd1,
+                valadd2,
+                valadd3,
+                valadd4,
+                ki
+            )
+            VALUES (
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+                $11, $12, $13, $14, $15, $16, $17, $18, $19, $20,
+                $21, $22, $23, $24, $25, $26, $27, $28, $29, $30,
+                $31, $32, $33, $34, $35, $36, $37, $38, $39, $40,
+                $41, $42, $43
+            )
+            ON CONFLICT (idpersonaje)
+            DO UPDATE SET
+                fuerza = incrementos_pendientes.fuerza + EXCLUDED.fuerza,
+                fortaleza = incrementos_pendientes.fortaleza + EXCLUDED.fortaleza,
+                destreza = incrementos_pendientes.destreza + EXCLUDED.destreza,
+                agilidad = incrementos_pendientes.agilidad + EXCLUDED.agilidad,
+                sabiduria = incrementos_pendientes.sabiduria + EXCLUDED.sabiduria,
+                principio = incrementos_pendientes.principio + EXCLUDED.principio,
+                presencia = incrementos_pendientes.presencia + EXCLUDED.presencia,
+                sentidos = incrementos_pendientes.sentidos + EXCLUDED.sentidos,
+
+                academisismo = incrementos_pendientes.academisismo + EXCLUDED.academisismo,
+                alerta = incrementos_pendientes.alerta + EXCLUDED.alerta,
+                atletismo = incrementos_pendientes.atletismo + EXCLUDED.atletismo,
+                conbakemono = incrementos_pendientes.conbakemono + EXCLUDED.conbakemono,
+                mentir = incrementos_pendientes.mentir + EXCLUDED.mentir,
+                pilotear = incrementos_pendientes.pilotear + EXCLUDED.pilotear,
+                artesmarciales = incrementos_pendientes.artesmarciales + EXCLUDED.artesmarciales,
+                medicina = incrementos_pendientes.medicina + EXCLUDED.medicina,
+                conobjmagicos = incrementos_pendientes.conobjmagicos + EXCLUDED.conobjmagicos,
+                sigilo = incrementos_pendientes.sigilo + EXCLUDED.sigilo,
+                conesferas = incrementos_pendientes.conesferas + EXCLUDED.conesferas,
+                conleyendas = incrementos_pendientes.conleyendas + EXCLUDED.conleyendas,
+                forja = incrementos_pendientes.forja + EXCLUDED.forja,
+                condemonio = incrementos_pendientes.condemonio + EXCLUDED.condemonio,
+                conespiritual = incrementos_pendientes.conespiritual + EXCLUDED.conespiritual,
+                manejoblaster = incrementos_pendientes.manejoblaster + EXCLUDED.manejoblaster,
+                manejosombras = incrementos_pendientes.manejosombras + EXCLUDED.manejosombras,
+                tratobakemono = incrementos_pendientes.tratobakemono + EXCLUDED.tratobakemono,
+                conhechiceria = incrementos_pendientes.conhechiceria + EXCLUDED.conhechiceria,
+
+                medvital = incrementos_pendientes.medvital + EXCLUDED.medvital,
+                medespiritual = incrementos_pendientes.medespiritual + EXCLUDED.medespiritual,
+                rayo = incrementos_pendientes.rayo + EXCLUDED.rayo,
+                fuego = incrementos_pendientes.fuego + EXCLUDED.fuego,
+                frio = incrementos_pendientes.frio + EXCLUDED.frio,
+                veneno = incrementos_pendientes.veneno + EXCLUDED.veneno,
+                corte = incrementos_pendientes.corte + EXCLUDED.corte,
+                energia = incrementos_pendientes.energia + EXCLUDED.energia,
+
+                valcombate = incrementos_pendientes.valcombate + EXCLUDED.valcombate,
+                valcombate2 = incrementos_pendientes.valcombate2 + EXCLUDED.valcombate2,
+
+                valadd1 = incrementos_pendientes.valadd1 + EXCLUDED.valadd1,
+                valadd2 = incrementos_pendientes.valadd2 + EXCLUDED.valadd2,
+                valadd3 = incrementos_pendientes.valadd3 + EXCLUDED.valadd3,
+                valadd4 = incrementos_pendientes.valadd4 + EXCLUDED.valadd4,
+                ki = incrementos_pendientes.ki + EXCLUDED.ki
+            `,
+            [
+                incremento.idpersonaje,
+
+                incremento.fuerza,
+                incremento.fortaleza,
+                incremento.destreza,
+                incremento.agilidad,
+                incremento.sabiduria,
+                incremento.principio,
+                incremento.presencia,
+                incremento.sentidos,
+
+                incremento.academisismo,
+                incremento.alerta,
+                incremento.atletismo,
+                incremento.conbakemono,
+                incremento.mentir,
+                incremento.pilotear,
+                incremento.artesmarciales,
+                incremento.medicina,
+                incremento.conobjmagicos,
+                incremento.sigilo,
+                incremento.conesferas,
+                incremento.conleyendas,
+                incremento.forja,
+                incremento.condemonio,
+                incremento.conespiritual,
+                incremento.manejoblaster,
+                incremento.manejosombras,
+                incremento.tratobakemono,
+                incremento.conhechiceria,
+
+                incremento.medvital,
+                incremento.medespiritual,
+                incremento.rayo,
+                incremento.fuego,
+                incremento.frio,
+                incremento.veneno,
+                incremento.corte,
+                incremento.energia,
+
+                incremento.valcombate,
+                incremento.valcombate2,
+
+                incremento.valadd1,
+                incremento.valadd2,
+                incremento.valadd3,
+                incremento.valadd4,
+                incremento.ki
+            ]
+        );
+
+
+        
+        return res.json({
+            ok: true,
+            mensaje: "Incremento guardado correctamente"
+        });
+
+    } catch (error) {
+        console.log(error);
+
+        return res.status(500).json({
+            ok: false,
+            error: error.message
+        });
+    }
+});
+
+app.post('/GuardarIncrementoNarrador', async (req, res) => {
+    const incremento = req.body;
+
+    //console.log("Incremento recibido del narrador:", incremento);
 
     try {
 
@@ -4260,9 +4326,25 @@ app.post('/GuardarIncremento', async (req, res) => {
             ]
         );
 
+     // Avisar al jugador si está conectado
+console.log(
+    "EMITIENDO incrementos-pendientes para personaje:",
+    incremento.idpersonaje
+);
+
+console.log("SOCKETS CONECTADOS:", io.engine.clientsCount);
+
+io.emit("incrementos_pendientes", {
+    idpersonaje: incremento.idpersonaje
+});
+console.log(
+    "EMIT incrementos-pendientes EJECUTADO para personaje:",
+    incremento.idpersonaje
+);
+
         return res.json({
             ok: true,
-            mensaje: "Incremento guardado correctamente"
+            mensaje: "Incremento del narrador guardado correctamente"
         });
 
     } catch (error) {
@@ -4275,16 +4357,10 @@ app.post('/GuardarIncremento', async (req, res) => {
     }
 });
 
-
-
 app.post('/ConsumirIncremento', async (req, res) => {
     const { idpersonaje, campo, cantidad } = req.body;
 
-    console.log("Consumiendo incremento:", {
-        idpersonaje,
-        campo,
-        cantidad
-    });
+  
 
     const camposPermitidos = [
         "fuerza",
@@ -4331,7 +4407,10 @@ app.post('/ConsumirIncremento', async (req, res) => {
         "valadd1",
         "valadd2",
         "valadd3",
-        "valadd4"
+        "valadd4",
+
+        // KI
+        "ki"
     ];
 
     try {
@@ -4390,6 +4469,8 @@ app.post('/ConsumirIncremento', async (req, res) => {
         });
     }
 });
+
+
 /* esto funciona para migrar imagenes de personajes a cloudinary y traerme la url y el cloudid a la base de datos
 async function migrarImagenPersonaje(idpersonaje) {
   const resultado = await pool.query(
@@ -4440,7 +4521,6 @@ async function migrarImagenPersonaje(idpersonaje) {
   };
 }
 */
-
 
 //descarga la imagen usando la url de cloudinary y la mete en la base de datos postgresql en base64
 /* funciono descargar imagen de cloudinary y guardarla en base64 en la base de datos
