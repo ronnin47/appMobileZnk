@@ -230,6 +230,17 @@ io.on('connection', (socket) => {
     
   });
 
+
+   // ============================================================
+  // EFECTO SOBRE PERSONAJE OBJETIVO
+  // ============================================================
+
+  socket.on('efecto-objetivo', (mensaje) => {
+    console.log('EFECTO OBJETIVO RECIBIDO:', mensaje);
+
+    io.emit('efecto-objetivo', mensaje);
+  });
+
   // Eventos que usa la web
   socket.on('message', async (mensaje) => {
     const msgNormalizado = normalizarMensaje(mensaje);
@@ -2686,7 +2697,7 @@ app.post('/insertItem', async (req, res) => {
 
   const descripcion = req.body.descripcion || req.body.Descripcion || "";
   const sistema = req.body.Sistema || req.body.sistema || "";
-  const precio = req.body.precio || req.body.Precio || 0;
+  const precio = String(req.body.precio ?? req.body.Precio ?? "");
   const imagen = req.body.Imagen_url || null;
   const posicion = req.body.Posicion ?? req.body.posicion ?? null;
     
@@ -4471,6 +4482,67 @@ app.post('/ConsumirIncremento', async (req, res) => {
 });
 
 
+//CONSUMIR UN UNICO PERSONAJE 
+// Consumir un personaje por ID
+app.get('/consumirPersonaje/:idPersonaje', async (req, res) => {
+  try {
+
+    const { idPersonaje } = req.params;
+
+    const userQuery = `
+      SELECT 
+        p.idpersonaje, p.nombre, p.dominio, p.raza, p.naturaleza, p.edad, p.ken, p.ki, p.destino, p."pDestino",
+        p.fuerza, p.fortaleza, p.destreza, p.agilidad, p.sabiduria, p.presencia, p.principio,
+        p.sentidos, p.academisismo, p.alerta, p.atletismo, p."conBakemono", p.mentir, p.pilotear,
+        p."artesMarciales", p.medicina, p."conObjMagicos", p.sigilo, p."conEsferas", p."conLeyendas",
+        p.forja, p."conDemonio", p."conEspiritual", p."manejoBlaster", p."manejoSombras", p."tratoBakemono",
+        p."conHechiceria", p."medVital", p."medEspiritual", p.rayo, p.fuego, p.frio, p.veneno, p.corte,
+        p.energia, p.ventajas, p."apCombate", p."valCombate", p."apCombate2", p."valCombate2",
+        p.add1, p."valAdd1", p.add2, p."valAdd2", p.add3, p."valAdd3", p.add4, p."valAdd4",
+        p.inventario, p.dominios, p."kenActual", p."kiActual", p.positiva, p.negativa, p."vidaActual",
+        p.hechizos, p.consumision, p.iniciativa, p.historia, p."tecEspecial", p.conviccion, p.cicatriz,
+        p.notasaga, p.resistencia, p."pjPnj", p.imagenurl, p.imagencloudid,
+        p."imagenSeleccionada", p."coleccionImagenes", p.notas, p."usuarioId",
+
+        a.spriteurl,
+        a.filas,
+        a.columnas,
+        a.fps,
+        a.scalesize,
+        a.public_id
+
+      FROM personajes p
+      LEFT JOIN animaciones a
+        ON a.idpersonaje = p.idpersonaje
+
+      WHERE p.idpersonaje = $1
+    `;
+
+    const userResult = await pool.query(
+      userQuery,
+      [idPersonaje]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({
+        message: 'Personaje no encontrado'
+      });
+    }
+
+    res.json(userResult.rows[0]);
+
+  } catch (error) {
+    console.error(
+      'Error al obtener personaje:',
+      error
+    );
+
+    res.status(500).json({
+      message: 'Error en el servidor'
+    });
+  }
+});
+
 /* esto funciona para migrar imagenes de personajes a cloudinary y traerme la url y el cloudid a la base de datos
 async function migrarImagenPersonaje(idpersonaje) {
   const resultado = await pool.query(
@@ -4908,7 +4980,6 @@ async function migrarImagenesSagas() {
 
 migrarImagenesSagas();
 */
-
 
 /*
 //*************************TERCER PASO*********************
