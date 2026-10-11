@@ -953,7 +953,425 @@ app.get('/consumirPersonajesTodos', async (req, res) => {
 });
 
 
+//*****************MARCA PARA ESCRITORIO WPF************************************
 
+
+//consumir los todos los personajes OK!!
+app.get('/consumirPersonajesTodosWPF', async (req, res) => {
+  try {
+    const userQuery = `
+      SELECT 
+        p.idpersonaje, p.nombre, p.dominio, p.raza, p.naturaleza, p.edad, p.ken, p.ki, p.destino, p."pDestino",
+        p.fuerza, p.fortaleza, p.destreza, p.agilidad, p.sabiduria, p.presencia, p.principio,
+        p.sentidos, p.academisismo, p.alerta, p.atletismo, p."conBakemono", p.mentir, p.pilotear,
+        p."artesMarciales", p.medicina, p."conObjMagicos", p.sigilo, p."conEsferas", p."conLeyendas",
+        p.forja, p."conDemonio", p."conEspiritual", p."manejoBlaster", p."manejoSombras", p."tratoBakemono",
+        p."conHechiceria", p."medVital", p."medEspiritual", p.rayo, p.fuego, p.frio, p.veneno, p.corte,
+        p.energia, p.ventajas, p."apCombate", p."valCombate", p."apCombate2", p."valCombate2",
+        p.add1, p."valAdd1", p.add2, p."valAdd2",	p.add3,	p."valAdd3",	p.add4,	p."valAdd4",
+        p.inventario, p.dominios, p."kenActual", p."kiActual", p.positiva, p.negativa, p."vidaActual",
+        p.hechizos, p.consumision, p.iniciativa, p.historia, p."tecEspecial", p.conviccion, p.cicatriz,
+        p.notasaga, p.resistencia, p."pjPnj", p.imagenurl,p.imagencloudid,p."imagenSeleccionada",p."coleccionImagenes", p."usuarioId", p.notas,p.marca, a.spriteurl,
+    a.filas,
+    a.columnas,
+    a.fps,
+    a.scalesize,
+    a.public_id 
+        FROM personajes p
+  LEFT JOIN animaciones a
+    ON a.idpersonaje = p.idpersonaje
+    `;
+
+
+
+    const userResult = await pool.query(userQuery);
+
+    if (userResult.rows.length === 0) {
+  return res.status(404).json({ message: 'No se encontraron personajes en la base de datos' });
+}
+
+    const coleccionPersonajes = userResult.rows;
+    res.json({
+      message: 'Se consumiron todos los personajes',
+      coleccionPersonajes: coleccionPersonajes,   
+    });
+
+  } catch (error) {
+    console.error('Error al obtener coleccion todos los persoanjes de la base de datos:', error);
+    res.status(500).json({ message: 'Error en el servidor' });
+  }
+});
+//Consumir personajes Usuario  OK!!
+app.get('/consumirPersonajesUsuarioWPF', async (req, res) => {
+  try {
+    
+    const { usuarioId } = req.query;
+   // console.log("el id del usuario es: ",usuarioId)
+    const userQuery = `
+      SELECT 
+        p.idpersonaje, p.nombre, p.dominio, p.raza, p.naturaleza, p.edad, p.ken, p.ki, p.destino, p."pDestino",
+        p.fuerza, p.fortaleza, p.destreza, p.agilidad, p.sabiduria, p.presencia, p.principio,
+        p.sentidos, p.academisismo, p.alerta, p.atletismo, p."conBakemono", p.mentir, p.pilotear,
+        p."artesMarciales", p.medicina, p."conObjMagicos", p.sigilo, p."conEsferas", p."conLeyendas",
+        p.forja, p."conDemonio", p."conEspiritual", p."manejoBlaster", p."manejoSombras", p."tratoBakemono",
+        p."conHechiceria", p."medVital", p."medEspiritual", p.rayo, p.fuego, p.frio, p.veneno, p.corte,
+        p.energia, p.ventajas, p."apCombate", p."valCombate", p."apCombate2", p."valCombate2",
+        p.add1, p."valAdd1", p.add2, p."valAdd2", p.add3, p."valAdd3", p.add4, p."valAdd4",
+        p.inventario, p.dominios, p."kenActual", p."kiActual", p.positiva, p.negativa, p."vidaActual",
+        p.hechizos, p.consumision, p.iniciativa, p.historia, p."tecEspecial", p.conviccion, p.cicatriz,
+        p.notasaga, p.resistencia, p."pjPnj",p.marca, p.imagenurl, p.imagencloudid,p."imagenSeleccionada",p."coleccionImagenes",p.notas, p."usuarioId",
+        
+    a.spriteurl,
+    a.filas,
+    a.columnas,
+    a.fps,
+    a.scalesize,
+    a.public_id 
+
+  FROM personajes p
+  LEFT JOIN animaciones a
+    ON a.idpersonaje = p.idpersonaje
+
+  WHERE p."usuarioId" = $1
+  ORDER BY p.idpersonaje ASC
+    `;
+    const userResult = await pool.query(userQuery,[usuarioId]);
+
+   
+   if (userResult.rows.length === 0) {
+  return res.status(200).json({
+    message: 'Usuario sin personajes aún',
+    coleccionPersonajes: [],  // ← importante
+  });
+}
+
+    const coleccionPersonajes = userResult.rows;
+
+   
+
+    
+    res.json({
+      message: 'Peticion de personajes consumidos exitoso',
+      coleccionPersonajes: coleccionPersonajes,   
+    });
+
+  } catch (error) {
+    console.error('Error al obtener coleccion personajes del Usuario:', error);
+    res.status(500).json({ message: 'Error en el servidor' });
+  }
+});
+
+
+//Insert personaje OK!
+app.post('/insert-personajeWPF', async (req, res) => {
+  const {
+    nombre, dominio, raza, naturaleza, edad, ken, ki, destino, pDestino,
+    fuerza, fortaleza, destreza, agilidad, sabiduria, presencia, principio,
+    sentidos, academisismo, alerta, atletismo, conBakemono, mentir, pilotear,
+    artesMarciales, medicina, conObjMagicos, sigilo, conEsferas, conLeyendas,
+    forja, conDemonio, conEspiritual, manejoBlaster, manejoSombras, tratoBakemono,
+    conHechiceria, medVital, medEspiritual, rayo, fuego, frio, veneno, corte,
+    energia, ventajas, apCombate, valCombate, apCombate2, valCombate2,
+    add1, valAdd1, add2, valAdd2, add3, valAdd3, add4, valAdd4,
+    imagen, inventario, dominios, kenActual, kiActual, positiva, negativa, vidaActual,
+    hechizos, consumision, iniciativa, historia, usuarioId,
+    tecEspecial, conviccion, cicatriz, notasaga, resistencia, pjPnj,notas, marca
+  } = req.body;
+
+  console.log(`
+===== INSERT PERSONAJE =====
+Usuario: ${usuarioId}
+Nombre: ${nombre}
+`);
+
+  try {
+    // 1. Insertar personaje sin imagenurl
+    const query = `
+      INSERT INTO personajes (
+        nombre, dominio, raza, naturaleza, edad, ken, ki, destino, "pDestino",
+        fuerza, fortaleza, destreza, agilidad, sabiduria, presencia, principio,
+        sentidos, academisismo, alerta, atletismo, "conBakemono", mentir, pilotear,
+        "artesMarciales", medicina, "conObjMagicos", sigilo, "conEsferas", "conLeyendas",
+        forja, "conDemonio", "conEspiritual", "manejoBlaster", "manejoSombras", "tratoBakemono",
+        "conHechiceria", "medVital", "medEspiritual", rayo, fuego, frio, veneno, corte,
+        energia, ventajas, "apCombate", "valCombate", "apCombate2", "valCombate2",
+        add1, "valAdd1", add2, "valAdd2", add3, "valAdd3", add4, "valAdd4",
+        inventario, dominios, "kenActual", "kiActual", positiva, negativa, "vidaActual",
+        hechizos, consumision, iniciativa, historia, "tecEspecial", conviccion, cicatriz,
+        notasaga, resistencia, "pjPnj",notas, marca,"usuarioId"
+      )
+      VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9,
+        $10, $11, $12, $13, $14, $15, $16,
+        $17, $18, $19, $20, $21, $22, $23,
+        $24, $25, $26, $27, $28, $29,
+        $30, $31, $32, $33, $34, $35,
+        $36, $37, $38, $39, $40, $41, $42, $43,
+        $44, $45, $46, $47, $48, $49,
+        $50, $51, $52, $53, $54, $55,
+        $56, $57, $58, $59, $60, $61,
+        $62, $63, $64, $65, $66, $67,
+        $68, $69, $70, $71, $72, $73,
+        $74, $75, $76, $77
+      )
+      RETURNING idpersonaje
+    `;
+
+    const values = [
+      nombre, dominio, raza, naturaleza, edad, ken, ki, destino, pDestino,
+      fuerza, fortaleza, destreza, agilidad, sabiduria, presencia, principio,
+      sentidos, academisismo, alerta, atletismo, conBakemono, mentir, pilotear,
+      artesMarciales, medicina, conObjMagicos, sigilo, conEsferas, conLeyendas,
+      forja, conDemonio, conEspiritual, manejoBlaster, manejoSombras, tratoBakemono,
+      conHechiceria, medVital, medEspiritual, rayo, fuego, frio, veneno, corte,
+      energia, ventajas, apCombate, valCombate, apCombate2, valCombate2,
+      add1, valAdd1, add2, valAdd2, add3, valAdd3, add4, valAdd4,
+      inventario, dominios, kenActual, kiActual, positiva, negativa, vidaActual,
+      hechizos, consumision, iniciativa, historia, tecEspecial, conviccion, cicatriz,
+      notasaga, resistencia, pjPnj, notas, marca, usuarioId
+    ];
+
+    const result = await pool.query(query, values);
+    const newId = result.rows[0].idpersonaje;
+
+    let imageUrl = null;
+
+    if (imagen) {
+      const matches = imagen.match(/^data:image\/(\w+);base64,(.+)$/);
+      if (!matches) return res.status(400).json({ error: 'Imagen base64 inválida.' });
+
+      const ext = matches[1];
+      const data = matches[2];
+
+      // 2. Subir la imagen a Cloudinary
+      const uploadResult = await cloudinary.uploader.upload(`data:image/${ext};base64,${data}`, {
+        folder: 'personajes',
+        public_id: `personaje_${newId}`,
+        overwrite: true,
+      });
+
+      imageUrl = uploadResult.secure_url;
+
+      // 3. Actualizar la URL en la base de datos
+      await pool.query(
+        'UPDATE personajes SET imagenurl = $1 WHERE idpersonaje = $2',
+        [imageUrl, newId]
+      );
+    }
+
+    // 4. Responder con éxito y URL
+    res.status(201).json({
+      message: 'Personaje creado exitosamente.',
+      idpersonaje: newId,
+      imagenurl: imageUrl,
+    });
+
+  } catch (err) {
+    console.error('Error al insertar el personaje:', err);
+    res.status(500).json({ error: 'Error al insertar el personaje.' });
+  }
+});
+
+
+//Update personaje OK!
+app.put('/update-personajeWPF/:id', async (req, res) => {
+  const idpersonaje = req.params.id;
+
+  let {
+    nombre, dominio, raza, naturaleza, edad, ken, ki, destino, pDestino,
+    fuerza, fortaleza, destreza, agilidad, sabiduria, presencia, principio,
+    sentidos, academisismo, alerta, atletismo, conBakemono, mentir, pilotear,
+    artesMarciales, medicina, conObjMagicos, sigilo, conEsferas, conLeyendas,
+    forja, conDemonio, conEspiritual, manejoBlaster, manejoSombras, tratoBakemono,
+    conHechiceria, medVital, medEspiritual, rayo, fuego, frio, veneno, corte,
+    energia, ventajas, apCombate, valCombate, apCombate2, valCombate2,
+    add1, valAdd1, add2, valAdd2, add3, valAdd3, add4, valAdd4,
+    imagen, imagenurl, inventario, dominios, kenActual, kiActual,
+    positiva, negativa, vidaActual, hechizos, consumision, iniciativa,
+    historia, usuarioId, tecEspecial, conviccion, cicatriz, resistencia, imagenSeleccionada, pjPnj, notas,marca
+  } = req.body;
+
+ console.log("=================================");
+  console.log("ACTUALIZANDO PERSONAJE");
+  console.log("ID personaje:", idpersonaje);
+  console.log("Nombre:", nombre);
+  console.log("=================================");
+
+  console.log("Imagen selecionada en el backend: ", imagenSeleccionada)
+  try {
+    let imagencloudid = null; // solo se usa si subimos a Cloudinary
+
+    // Si envían base64, lo subimos a Cloudinary y reemplazamos imagenurl
+    if (imagen && imagen.startsWith('data:image/')) {
+      const matches = imagen.match(/^data:image\/(\w+);base64,(.+)$/);
+      if (!matches) return res.status(400).json({ error: 'Imagen base64 inválida.' });
+
+      const ext = matches[1];
+      const data = matches[2];
+
+      const uploadResult = await cloudinary.uploader.upload(`data:image/${ext};base64,${data}`, {
+        folder: 'personajes',
+        public_id: `personaje_${idpersonaje}`,
+        overwrite: true,
+      });
+
+      imagenurl = uploadResult.secure_url;      // reemplaza la URL que venga del frontend
+      imagencloudid = uploadResult.public_id;
+    }
+
+    // UPDATE completo incluyendo imagenurl
+    const query = `
+      UPDATE personajes SET
+        nombre=$1, dominio=$2, raza=$3, naturaleza=$4, edad=$5,
+        ken=$6, ki=$7, destino=$8, "pDestino"=$9, fuerza=$10,
+        fortaleza=$11, destreza=$12, agilidad=$13, sabiduria=$14,
+        presencia=$15, principio=$16, sentidos=$17, academisismo=$18,
+        alerta=$19, atletismo=$20, "conBakemono"=$21, mentir=$22, pilotear=$23,
+        "artesMarciales"=$24, medicina=$25, "conObjMagicos"=$26, sigilo=$27,
+        "conEsferas"=$28, "conLeyendas"=$29, forja=$30, "conDemonio"=$31,
+        "conEspiritual"=$32, "manejoBlaster"=$33, "manejoSombras"=$34,
+        "tratoBakemono"=$35, "conHechiceria"=$36, "medVital"=$37, "medEspiritual"=$38,
+        rayo=$39, fuego=$40, frio=$41, veneno=$42, corte=$43, energia=$44, ventajas=$45,
+        "apCombate"=$46, "valCombate"=$47, "apCombate2"=$48, "valCombate2"=$49,
+        add1=$50, "valAdd1"=$51, add2=$52, "valAdd2"=$53, add3=$54, "valAdd3"=$55,
+        add4=$56, "valAdd4"=$57, inventario=$58, dominios=$59, "kenActual"=$60,
+        "kiActual"=$61, positiva=$62, negativa=$63, "vidaActual"=$64,
+        hechizos=$65, consumision=$66, iniciativa=$67, historia=$68,
+        "usuarioId"=$69, "tecEspecial"=$70, conviccion=$71, cicatriz=$72,
+        resistencia=$73, "pjPnj"=$74, imagenurl=$75, "imagenSeleccionada"=$76 , notas=$77, marca=$78
+      WHERE idpersonaje=$79
+    `;
+
+    const values = [
+      nombre, dominio, raza, naturaleza, edad, ken, ki, destino, pDestino,
+      fuerza, fortaleza, destreza, agilidad, sabiduria, presencia, principio,
+      sentidos, academisismo, alerta, atletismo, conBakemono, mentir, pilotear,
+      artesMarciales, medicina, conObjMagicos, sigilo, conEsferas, conLeyendas,
+      forja, conDemonio, conEspiritual, manejoBlaster, manejoSombras, tratoBakemono,
+      conHechiceria, medVital, medEspiritual, rayo, fuego, frio, veneno, corte,
+      energia, ventajas, apCombate, valCombate, apCombate2, valCombate2,
+      add1, valAdd1, add2, valAdd2, add3, valAdd3, add4, valAdd4,
+      inventario, dominios, kenActual, kiActual, positiva, negativa, vidaActual,
+      hechizos, consumision, iniciativa, historia, usuarioId,
+      tecEspecial, conviccion, cicatriz, resistencia, pjPnj, imagenurl,imagenSeleccionada, notas,marca, idpersonaje
+    ];
+
+
+
+    const nombresCampos = [
+  "nombre", "dominio", "raza", "naturaleza", "edad",
+  "ken", "ki", "destino", "pDestino", "fuerza",
+  "fortaleza", "destreza", "agilidad", "sabiduria",
+  "presencia", "principio", "sentidos", "academisismo",
+  "alerta", "atletismo", "conBakemono", "mentir",
+  "pilotear", "artesMarciales", "medicina",
+  "conObjMagicos", "sigilo", "conEsferas",
+  "conLeyendas", "forja", "conDemonio",
+  "conEspiritual", "manejoBlaster",
+  "manejoSombras", "tratoBakemono",
+  "conHechiceria", "medVital", "medEspiritual",
+  "rayo", "fuego", "frio", "veneno", "corte",
+  "energia", "ventajas", "apCombate",
+  "valCombate", "apCombate2", "valCombate2",
+  "add1", "valAdd1", "add2", "valAdd2",
+  "add3", "valAdd3", "add4", "valAdd4",
+  "inventario", "dominios", "kenActual",
+  "kiActual", "positiva", "negativa",
+  "vidaActual", "hechizos", "consumision",
+  "iniciativa", "historia", "usuarioId",
+  "tecEspecial", "conviccion", "cicatriz",
+  "resistencia", "pjPnj", "imagenurl",
+  "imagenSeleccionada", "notas", "marca", "idpersonaje"
+];
+
+values.forEach((valor, index) => {
+  if (valor === "") {
+    console.log("=================================");
+    console.log("CAMPO VACIO DETECTADO:");
+    console.log("Campo:", nombresCampos[index]);
+    console.log("Posicion SQL:", index + 1);
+    console.log("=================================");
+  }
+});
+
+    await pool.query(query, values);
+
+    res.status(201).json({
+      message: 'Personaje modificado exitosamente.',
+      idpersonaje,
+      imagenurl,
+      imagencloudid
+    });
+
+  } catch (err) {
+    console.error('Error al modificar el personaje:', err.message);
+    res.status(500).json({ error: 'Error al modificar el personaje.' });
+  }
+});
+
+//OK!!
+app.get('/consumirPersonajesRankingWPF', async (req, res) => {
+    try {
+        const userQuery = `
+            SELECT 
+                p.idpersonaje, p.nombre, p.dominio, p.raza, p.naturaleza,
+                p.edad, p.ken, p.ki, p.destino, p."pDestino",
+                p.fuerza, p.fortaleza, p.destreza, p.agilidad,
+                p.sabiduria, p.presencia, p.principio,
+                p.sentidos, p.academisismo, p.alerta, p.atletismo,
+                p."conBakemono", p.mentir, p.pilotear,
+                p."artesMarciales", p.medicina, p."conObjMagicos",
+                p.sigilo, p."conEsferas", p."conLeyendas",
+                p.forja, p."conDemonio", p."conEspiritual",
+                p."manejoBlaster", p."manejoSombras", p."tratoBakemono",
+                p."conHechiceria", p."medVital", p."medEspiritual",
+                p.rayo, p.fuego, p.frio, p.veneno, p.corte,
+                p.energia, p.ventajas, p."apCombate", p."valCombate",
+                p."apCombate2", p."valCombate2",
+                p.add1, p."valAdd1", p.add2, p."valAdd2",
+                p.add3, p."valAdd3", p.add4, p."valAdd4",
+                p.inventario, p.dominios, p."kenActual", p."kiActual",
+                p.positiva, p.negativa, p."vidaActual",
+                p.hechizos, p.consumision, p.iniciativa,
+                p.historia, p."tecEspecial", p.conviccion, p.cicatriz,
+                p.notasaga, p.resistencia, p."pjPnj",
+                p.imagenurl, p.imagencloudid, p."imagenSeleccionada",
+                p."coleccionImagenes", p."usuarioId", p.notas,
+                a.spriteurl, a.filas, a.columnas, a.fps,
+                a.scalesize, a.public_id
+            FROM personajes p
+            LEFT JOIN animaciones a
+                ON a.idpersonaje = p.idpersonaje
+            WHERE p.ken >= 100
+              AND p.marca = TRUE
+        `;
+
+        const userResult = await pool.query(userQuery);
+
+        if (userResult.rows.length === 0) {
+            return res.status(404).json({
+                message: 'No se encontraron personajes con Ken igual o superior a 100 y marca activa'
+            });
+        }
+
+        res.json({
+            message: 'Se consumieron los personajes con marca activa',
+            coleccionPersonajes: userResult.rows
+        });
+
+    } catch (error) {
+        console.error(
+            'Error al obtener personajes marcados de la base de datos:',
+            error
+        );
+
+        res.status(500).json({
+            message: 'Error en el servidor'
+        });
+    }
+});
+
+//*************************************************
 // SAGAS
 // INSERT SAGA OK ✅
 app.post('/insert-saga', async (req, res) => {
@@ -4007,51 +4425,13 @@ app.post('/GuardarIncremento', async (req, res) => {
     // console.log("Incremento recibido:", incremento);
 
     try {
-
         await pool.query(
             `INSERT INTO incrementos_pendientes (
-                idpersonaje,
-                fuerza,
-                fortaleza,
-                destreza,
-                agilidad,
-                sabiduria,
-                principio,
-                presencia,
-                sentidos,
-                academisismo,
-                alerta,
-                atletismo,
-                conbakemono,
-                mentir,
-                pilotear,
-                artesmarciales,
-                medicina,
-                conobjmagicos,
-                sigilo,
-                conesferas,
-                conleyendas,
-                forja,
-                condemonio,
-                conespiritual,
-                manejoblaster,
-                manejosombras,
-                tratobakemono,
-                conhechiceria,
-                medvital,
-                medespiritual,
-                rayo,
-                fuego,
-                frio,
-                veneno,
-                corte,
-                energia,
-                valcombate,
-                valcombate2,
-                valadd1,
-                valadd2,
-                valadd3,
-                valadd4,
+                idpersonaje, fuerza, fortaleza, destreza, agilidad, sabiduria, principio, presencia, sentidos,
+                academisismo, alerta, atletismo, conbakemono, mentir, pilotear, artesmarciales, medicina,
+                conobjmagicos, sigilo, conesferas, conleyendas, forja, condemonio, conespiritual, manejoblaster,
+                manejosombras, tratobakemono, conhechiceria, medvital, medespiritual, rayo, fuego, frio,
+                veneno, corte, energia, valcombate, valcombate2, valadd1, valadd2, valadd3, valadd4,
                 ki
             )
             VALUES (
@@ -4059,111 +4439,75 @@ app.post('/GuardarIncremento', async (req, res) => {
                 $11, $12, $13, $14, $15, $16, $17, $18, $19, $20,
                 $21, $22, $23, $24, $25, $26, $27, $28, $29, $30,
                 $31, $32, $33, $34, $35, $36, $37, $38, $39, $40,
-                $41, $42, $43
+                $41, $42, 
+                COALESCE($43, 0) -- ✅ Si el ki enviado desde C# llega nulo, guarda un 0
             )
             ON CONFLICT (idpersonaje)
             DO UPDATE SET
-                fuerza = incrementos_pendientes.fuerza + EXCLUDED.fuerza,
-                fortaleza = incrementos_pendientes.fortaleza + EXCLUDED.fortaleza,
-                destreza = incrementos_pendientes.destreza + EXCLUDED.destreza,
-                agilidad = incrementos_pendientes.agilidad + EXCLUDED.agilidad,
-                sabiduria = incrementos_pendientes.sabiduria + EXCLUDED.sabiduria,
-                principio = incrementos_pendientes.principio + EXCLUDED.principio,
-                presencia = incrementos_pendientes.presencia + EXCLUDED.presencia,
-                sentidos = incrementos_pendientes.sentidos + EXCLUDED.sentidos,
+                fuerza = COALESCE(incrementos_pendientes.fuerza, 0) + COALESCE(EXCLUDED.fuerza, 0),
+                fortaleza = COALESCE(incrementos_pendientes.fortaleza, 0) + COALESCE(EXCLUDED.fortaleza, 0),
+                destreza = COALESCE(incrementos_pendientes.destreza, 0) + COALESCE(EXCLUDED.destreza, 0),
+                agilidad = COALESCE(incrementos_pendientes.agilidad, 0) + COALESCE(EXCLUDED.agilidad, 0),
+                sabiduria = COALESCE(incrementos_pendientes.sabiduria, 0) + COALESCE(EXCLUDED.sabiduria, 0),
+                principio = COALESCE(incrementos_pendientes.principio, 0) + COALESCE(EXCLUDED.principio, 0),
+                presencia = COALESCE(incrementos_pendientes.presencia, 0) + COALESCE(EXCLUDED.presencia, 0),
+                sentidos = COALESCE(incrementos_pendientes.sentidos, 0) + COALESCE(EXCLUDED.sentidos, 0),
 
-                academisismo = incrementos_pendientes.academisismo + EXCLUDED.academisismo,
-                alerta = incrementos_pendientes.alerta + EXCLUDED.alerta,
-                atletismo = incrementos_pendientes.atletismo + EXCLUDED.atletismo,
-                conbakemono = incrementos_pendientes.conbakemono + EXCLUDED.conbakemono,
-                mentir = incrementos_pendientes.mentir + EXCLUDED.mentir,
-                pilotear = incrementos_pendientes.pilotear + EXCLUDED.pilotear,
-                artesmarciales = incrementos_pendientes.artesmarciales + EXCLUDED.artesmarciales,
-                medicina = incrementos_pendientes.medicina + EXCLUDED.medicina,
-                conobjmagicos = incrementos_pendientes.conobjmagicos + EXCLUDED.conobjmagicos,
-                sigilo = incrementos_pendientes.sigilo + EXCLUDED.sigilo,
-                conesferas = incrementos_pendientes.conesferas + EXCLUDED.conesferas,
-                conleyendas = incrementos_pendientes.conleyendas + EXCLUDED.conleyendas,
-                forja = incrementos_pendientes.forja + EXCLUDED.forja,
-                condemonio = incrementos_pendientes.condemonio + EXCLUDED.condemonio,
-                conespiritual = incrementos_pendientes.conespiritual + EXCLUDED.conespiritual,
-                manejoblaster = incrementos_pendientes.manejoblaster + EXCLUDED.manejoblaster,
-                manejosombras = incrementos_pendientes.manejosombras + EXCLUDED.manejosombras,
-                tratobakemono = incrementos_pendientes.tratobakemono + EXCLUDED.tratobakemono,
-                conhechiceria = incrementos_pendientes.conhechiceria + EXCLUDED.conhechiceria,
+                academisismo = COALESCE(incrementos_pendientes.academisismo, 0) + COALESCE(EXCLUDED.academisismo, 0),
+                alerta = COALESCE(incrementos_pendientes.alerta, 0) + COALESCE(EXCLUDED.alerta, 0),
+                atletismo = COALESCE(incrementos_pendientes.atletismo, 0) + COALESCE(EXCLUDED.atletismo, 0),
+                conbakemono = COALESCE(incrementos_pendientes.conbakemono, 0) + COALESCE(EXCLUDED.conbakemono, 0),
+                mentir = COALESCE(incrementos_pendientes.mentir, 0) + COALESCE(EXCLUDED.mentir, 0),
+                pilotear = COALESCE(incrementos_pendientes.pilotear, 0) + COALESCE(EXCLUDED.pilotear, 0),
+                artesmarciales = COALESCE(incrementos_pendientes.artesmarciales, 0) + COALESCE(EXCLUDED.artesmarciales, 0),
+                medicina = COALESCE(incrementos_pendientes.medicina, 0) + COALESCE(EXCLUDED.medicina, 0),
+                conobjmagicos = COALESCE(incrementos_pendientes.conobjmagicos, 0) + COALESCE(EXCLUDED.conobjmagicos, 0),
+                sigilo = COALESCE(incrementos_pendientes.sigilo, 0) + COALESCE(EXCLUDED.sigilo, 0),
+                conesferas = COALESCE(incrementos_pendientes.conesferas, 0) + COALESCE(EXCLUDED.conesferas, 0),
+                conleyendas = COALESCE(incrementos_pendientes.conleyendas, 0) + COALESCE(EXCLUDED.conleyendas, 0),
+                forja = COALESCE(incrementos_pendientes.forja, 0) + COALESCE(EXCLUDED.forja, 0),
+                condemonio = COALESCE(incrementos_pendientes.condemonio, 0) + COALESCE(EXCLUDED.condemonio, 0),
+                conespiritual = COALESCE(incrementos_pendientes.conespiritual, 0) + COALESCE(EXCLUDED.conespiritual, 0),
+                manejoblaster = COALESCE(incrementos_pendientes.manejoblaster, 0) + COALESCE(EXCLUDED.manejoblaster, 0),
+                manejosombras = COALESCE(incrementos_pendientes.manejosombras, 0) + COALESCE(EXCLUDED.manejosombras, 0),
+                tratobakemono = COALESCE(incrementos_pendientes.tratobakemono, 0) + COALESCE(EXCLUDED.tratobakemono, 0),
+                conhechiceria = COALESCE(incrementos_pendientes.conhechiceria, 0) + COALESCE(EXCLUDED.conhechiceria, 0),
 
-                medvital = incrementos_pendientes.medvital + EXCLUDED.medvital,
-                medespiritual = incrementos_pendientes.medespiritual + EXCLUDED.medespiritual,
-                rayo = incrementos_pendientes.rayo + EXCLUDED.rayo,
-                fuego = incrementos_pendientes.fuego + EXCLUDED.fuego,
-                frio = incrementos_pendientes.frio + EXCLUDED.frio,
-                veneno = incrementos_pendientes.veneno + EXCLUDED.veneno,
-                corte = incrementos_pendientes.corte + EXCLUDED.corte,
-                energia = incrementos_pendientes.energia + EXCLUDED.energia,
+                medvital = COALESCE(incrementos_pendientes.medvital, 0) + COALESCE(EXCLUDED.medvital, 0),
+                medespiritual = COALESCE(incrementos_pendientes.medespiritual, 0) + COALESCE(EXCLUDED.medespiritual, 0),
+                rayo = COALESCE(incrementos_pendientes.rayo, 0) + COALESCE(EXCLUDED.rayo, 0),
+                fuego = COALESCE(incrementos_pendientes.fuego, 0) + COALESCE(EXCLUDED.fuego, 0),
+                frio = COALESCE(incrementos_pendientes.frio, 0) + COALESCE(EXCLUDED.frio, 0),
+                veneno = COALESCE(incrementos_pendientes.veneno, 0) + COALESCE(EXCLUDED.veneno, 0),
+                corte = COALESCE(incrementos_pendientes.corte, 0) + COALESCE(EXCLUDED.corte, 0),
+                energia = COALESCE(incrementos_pendientes.energia, 0) + COALESCE(EXCLUDED.energia, 0),
 
-                valcombate = incrementos_pendientes.valcombate + EXCLUDED.valcombate,
-                valcombate2 = incrementos_pendientes.valcombate2 + EXCLUDED.valcombate2,
+                valcombate = COALESCE(incrementos_pendientes.valcombate, 0) + COALESCE(EXCLUDED.valcombate, 0),
+                valcombate2 = COALESCE(incrementos_pendientes.valcombate2, 0) + COALESCE(EXCLUDED.valcombate2, 0),
 
-                valadd1 = incrementos_pendientes.valadd1 + EXCLUDED.valadd1,
-                valadd2 = incrementos_pendientes.valadd2 + EXCLUDED.valadd2,
-                valadd3 = incrementos_pendientes.valadd3 + EXCLUDED.valadd3,
-                valadd4 = incrementos_pendientes.valadd4 + EXCLUDED.valadd4,
-                ki = incrementos_pendientes.ki + EXCLUDED.ki
+                valadd1 = COALESCE(incrementos_pendientes.valadd1, 0) + COALESCE(EXCLUDED.valadd1, 0),
+                valadd2 = COALESCE(incrementos_pendientes.valadd2, 0) + COALESCE(EXCLUDED.valadd2, 0),
+                valadd3 = COALESCE(incrementos_pendientes.valadd3, 0) + COALESCE(EXCLUDED.valadd3, 0),
+                valadd4 = COALESCE(incrementos_pendientes.valadd4, 0) + COALESCE(EXCLUDED.valadd4, 0),
+                
+                -- ✅ Blindamos el Ki contra sumas que involucren NULL
+                ki = COALESCE(incrementos_pendientes.ki, 0) + COALESCE(EXCLUDED.ki, 0)
             `,
             [
-                incremento.idpersonaje,
-
-                incremento.fuerza,
-                incremento.fortaleza,
-                incremento.destreza,
-                incremento.agilidad,
-                incremento.sabiduria,
-                incremento.principio,
-                incremento.presencia,
-                incremento.sentidos,
-
-                incremento.academisismo,
-                incremento.alerta,
-                incremento.atletismo,
-                incremento.conbakemono,
-                incremento.mentir,
-                incremento.pilotear,
-                incremento.artesmarciales,
-                incremento.medicina,
-                incremento.conobjmagicos,
-                incremento.sigilo,
-                incremento.conesferas,
-                incremento.conleyendas,
-                incremento.forja,
-                incremento.condemonio,
-                incremento.conespiritual,
-                incremento.manejoblaster,
-                incremento.manejosombras,
-                incremento.tratobakemono,
-                incremento.conhechiceria,
-
-                incremento.medvital,
-                incremento.medespiritual,
-                incremento.rayo,
-                incremento.fuego,
-                incremento.frio,
-                incremento.veneno,
-                incremento.corte,
-                incremento.energia,
-
-                incremento.valcombate,
-                incremento.valcombate2,
-
-                incremento.valadd1,
-                incremento.valadd2,
-                incremento.valadd3,
-                incremento.valadd4,
-                incremento.ki
+                incremento.idpersonaje, incremento.fuerza, incremento.fortaleza, incremento.destreza,
+                incremento.agilidad, incremento.sabiduria, incremento.principio, incremento.presencia,
+                incremento.sentidos, incremento.academisismo, incremento.alerta, incremento.atletismo,
+                incremento.conbakemono, incremento.mentir, incremento.pilotear, incremento.artesmarciales,
+                incremento.medicina, incremento.conobjmagicos, incremento.sigilo, incremento.conesferas,
+                incremento.conleyendas, incremento.forja, incremento.condemonio, incremento.conespiritual,
+                incremento.manejoblaster, incremento.manejosombras, incremento.tratobakemono,
+                incremento.conhechiceria, incremento.medvital, incremento.medespiritual, incremento.rayo,
+                incremento.fuego, incremento.frio, incremento.veneno, incremento.corte, incremento.energia,
+                incremento.valcombate, incremento.valcombate2, incremento.valadd1, incremento.valadd2,
+                incremento.valadd3, incremento.valadd4, incremento.ki
             ]
         );
 
-
-        
         return res.json({
             ok: true,
             mensaje: "Incremento guardado correctamente"
@@ -4171,7 +4515,6 @@ app.post('/GuardarIncremento', async (req, res) => {
 
     } catch (error) {
         console.log(error);
-
         return res.status(500).json({
             ok: false,
             error: error.message
@@ -4185,51 +4528,13 @@ app.post('/GuardarIncrementoNarrador', async (req, res) => {
     //console.log("Incremento recibido del narrador:", incremento);
 
     try {
-
         await pool.query(
             `INSERT INTO incrementos_pendientes (
-                idpersonaje,
-                fuerza,
-                fortaleza,
-                destreza,
-                agilidad,
-                sabiduria,
-                principio,
-                presencia,
-                sentidos,
-                academisismo,
-                alerta,
-                atletismo,
-                conbakemono,
-                mentir,
-                pilotear,
-                artesmarciales,
-                medicina,
-                conobjmagicos,
-                sigilo,
-                conesferas,
-                conleyendas,
-                forja,
-                condemonio,
-                conespiritual,
-                manejoblaster,
-                manejosombras,
-                tratobakemono,
-                conhechiceria,
-                medvital,
-                medespiritual,
-                rayo,
-                fuego,
-                frio,
-                veneno,
-                corte,
-                energia,
-                valcombate,
-                valcombate2,
-                valadd1,
-                valadd2,
-                valadd3,
-                valadd4
+                idpersonaje, fuerza, fortaleza, destreza, agilidad, sabiduria, principio, presencia, sentidos,
+                academisismo, alerta, atletismo, conbakemono, mentir, pilotear, artesmarciales, medicina,
+                conobjmagicos, sigilo, conesferas, conleyendas, forja, condemonio, conespiritual, manejoblaster,
+                manejosombras, tratobakemono, conhechiceria, medvital, medespiritual, rayo, fuego, frio,
+                veneno, corte, energia, valcombate, valcombate2, valadd1, valadd2, valadd3, valadd4
             )
             VALUES (
                 $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
@@ -4240,118 +4545,75 @@ app.post('/GuardarIncrementoNarrador', async (req, res) => {
             )
             ON CONFLICT (idpersonaje)
             DO UPDATE SET
-                fuerza = incrementos_pendientes.fuerza + EXCLUDED.fuerza,
-                fortaleza = incrementos_pendientes.fortaleza + EXCLUDED.fortaleza,
-                destreza = incrementos_pendientes.destreza + EXCLUDED.destreza,
-                agilidad = incrementos_pendientes.agilidad + EXCLUDED.agilidad,
-                sabiduria = incrementos_pendientes.sabiduria + EXCLUDED.sabiduria,
-                principio = incrementos_pendientes.principio + EXCLUDED.principio,
-                presencia = incrementos_pendientes.presencia + EXCLUDED.presencia,
-                sentidos = incrementos_pendientes.sentidos + EXCLUDED.sentidos,
+                fuerza = COALESCE(incrementos_pendientes.fuerza, 0) + COALESCE(EXCLUDED.fuerza, 0),
+                fortaleza = COALESCE(incrementos_pendientes.fortaleza, 0) + COALESCE(EXCLUDED.fortaleza, 0),
+                destreza = COALESCE(incrementos_pendientes.destreza, 0) + COALESCE(EXCLUDED.destreza, 0),
+                agilidad = COALESCE(incrementos_pendientes.agilidad, 0) + COALESCE(EXCLUDED.agilidad, 0),
+                sabiduria = COALESCE(incrementos_pendientes.sabiduria, 0) + COALESCE(EXCLUDED.sabiduria, 0),
+                principio = COALESCE(incrementos_pendientes.principio, 0) + COALESCE(EXCLUDED.principio, 0),
+                presencia = COALESCE(incrementos_pendientes.presencia, 0) + COALESCE(EXCLUDED.presencia, 0),
+                sentidos = COALESCE(incrementos_pendientes.sentidos, 0) + COALESCE(EXCLUDED.sentidos, 0),
 
-                academisismo = incrementos_pendientes.academisismo + EXCLUDED.academisismo,
-                alerta = incrementos_pendientes.alerta + EXCLUDED.alerta,
-                atletismo = incrementos_pendientes.atletismo + EXCLUDED.atletismo,
-                conbakemono = incrementos_pendientes.conbakemono + EXCLUDED.conbakemono,
-                mentir = incrementos_pendientes.mentir + EXCLUDED.mentir,
-                pilotear = incrementos_pendientes.pilotear + EXCLUDED.pilotear,
-                artesmarciales = incrementos_pendientes.artesmarciales + EXCLUDED.artesmarciales,
-                medicina = incrementos_pendientes.medicina + EXCLUDED.medicina,
-                conobjmagicos = incrementos_pendientes.conobjmagicos + EXCLUDED.conobjmagicos,
-                sigilo = incrementos_pendientes.sigilo + EXCLUDED.sigilo,
-                conesferas = incrementos_pendientes.conesferas + EXCLUDED.conesferas,
-                conleyendas = incrementos_pendientes.conleyendas + EXCLUDED.conleyendas,
-                forja = incrementos_pendientes.forja + EXCLUDED.forja,
-                condemonio = incrementos_pendientes.condemonio + EXCLUDED.condemonio,
-                conespiritual = incrementos_pendientes.conespiritual + EXCLUDED.conespiritual,
-                manejoblaster = incrementos_pendientes.manejoblaster + EXCLUDED.manejoblaster,
-                manejosombras = incrementos_pendientes.manejosombras + EXCLUDED.manejosombras,
-                tratobakemono = incrementos_pendientes.tratobakemono + EXCLUDED.tratobakemono,
-                conhechiceria = incrementos_pendientes.conhechiceria + EXCLUDED.conhechiceria,
+                academisismo = COALESCE(incrementos_pendientes.academisismo, 0) + COALESCE(EXCLUDED.academisismo, 0),
+                alerta = COALESCE(incrementos_pendientes.alerta, 0) + COALESCE(EXCLUDED.alerta, 0),
+                atletismo = COALESCE(incrementos_pendientes.atletismo, 0) + COALESCE(EXCLUDED.atletismo, 0),
+                conbakemono = COALESCE(incrementos_pendientes.conbakemono, 0) + COALESCE(EXCLUDED.conbakemono, 0),
+                mentir = COALESCE(incrementos_pendientes.mentir, 0) + COALESCE(EXCLUDED.mentir, 0),
+                pilotear = COALESCE(incrementos_pendientes.pilotear, 0) + COALESCE(EXCLUDED.pilotear, 0),
+                artesmarciales = COALESCE(incrementos_pendientes.artesmarciales, 0) + COALESCE(EXCLUDED.artesmarciales, 0),
+                medicina = COALESCE(incrementos_pendientes.medicina, 0) + COALESCE(EXCLUDED.medicina, 0),
+                conobjmagicos = COALESCE(incrementos_pendientes.conobjmagicos, 0) + COALESCE(EXCLUDED.conobjmagicos, 0),
+                sigilo = COALESCE(incrementos_pendientes.sigilo, 0) + COALESCE(EXCLUDED.sigilo, 0),
+                conesferas = COALESCE(incrementos_pendientes.conesferas, 0) + COALESCE(EXCLUDED.conesferas, 0),
+                conleyendas = COALESCE(incrementos_pendientes.conleyendas, 0) + COALESCE(EXCLUDED.conleyendas, 0),
+                forja = COALESCE(incrementos_pendientes.forja, 0) + COALESCE(EXCLUDED.forja, 0),
+                condemonio = COALESCE(incrementos_pendientes.condemonio, 0) + COALESCE(EXCLUDED.condemonio, 0),
+                conespiritual = COALESCE(incrementos_pendientes.conespiritual, 0) + COALESCE(EXCLUDED.conespiritual, 0),
+                manejoblaster = COALESCE(incrementos_pendientes.manejoblaster, 0) + COALESCE(EXCLUDED.manejoblaster, 0),
+                manejosombras = COALESCE(incrementos_pendientes.manejosombras, 0) + COALESCE(EXCLUDED.manejosombras, 0),
+                tratobakemono = COALESCE(incrementos_pendientes.tratobakemono, 0) + COALESCE(EXCLUDED.tratobakemono, 0),
+                conhechiceria = COALESCE(incrementos_pendientes.conhechiceria, 0) + COALESCE(EXCLUDED.conhechiceria, 0),
 
-                medvital = incrementos_pendientes.medvital + EXCLUDED.medvital,
-                medespiritual = incrementos_pendientes.medespiritual + EXCLUDED.medespiritual,
-                rayo = incrementos_pendientes.rayo + EXCLUDED.rayo,
-                fuego = incrementos_pendientes.fuego + EXCLUDED.fuego,
-                frio = incrementos_pendientes.frio + EXCLUDED.frio,
-                veneno = incrementos_pendientes.veneno + EXCLUDED.veneno,
-                corte = incrementos_pendientes.corte + EXCLUDED.corte,
-                energia = incrementos_pendientes.energia + EXCLUDED.energia,
+                medvital = COALESCE(incrementos_pendientes.medvital, 0) + COALESCE(EXCLUDED.medvital, 0),
+                medespiritual = COALESCE(incrementos_pendientes.medespiritual, 0) + COALESCE(EXCLUDED.medespiritual, 0),
+                rayo = COALESCE(incrementos_pendientes.rayo, 0) + COALESCE(EXCLUDED.rayo, 0),
+                fuego = COALESCE(incrementos_pendientes.fuego, 0) + COALESCE(EXCLUDED.fuego, 0),
+                frio = COALESCE(incrementos_pendientes.frio, 0) + COALESCE(EXCLUDED.frio, 0),
+                veneno = COALESCE(incrementos_pendientes.veneno, 0) + COALESCE(EXCLUDED.veneno, 0),
+                corte = COALESCE(incrementos_pendientes.corte, 0) + COALESCE(EXCLUDED.corte, 0),
+                energia = COALESCE(incrementos_pendientes.energia, 0) + COALESCE(EXCLUDED.energia, 0),
 
-                valcombate = incrementos_pendientes.valcombate + EXCLUDED.valcombate,
-                valcombate2 = incrementos_pendientes.valcombate2 + EXCLUDED.valcombate2,
+                valcombate = COALESCE(incrementos_pendientes.valcombate, 0) + COALESCE(EXCLUDED.valcombate, 0),
+                valcombate2 = COALESCE(incrementos_pendientes.valcombate2, 0) + COALESCE(EXCLUDED.valcombate2, 0),
 
-                valadd1 = incrementos_pendientes.valadd1 + EXCLUDED.valadd1,
-                valadd2 = incrementos_pendientes.valadd2 + EXCLUDED.valadd2,
-                valadd3 = incrementos_pendientes.valadd3 + EXCLUDED.valadd3,
-                valadd4 = incrementos_pendientes.valadd4 + EXCLUDED.valadd4
+                valadd1 = COALESCE(incrementos_pendientes.valadd1, 0) + COALESCE(EXCLUDED.valadd1, 0),
+                valadd2 = COALESCE(incrementos_pendientes.valadd2, 0) + COALESCE(EXCLUDED.valadd2, 0),
+                valadd3 = COALESCE(incrementos_pendientes.valadd3, 0) + COALESCE(EXCLUDED.valadd3, 0),
+                valadd4 = COALESCE(incrementos_pendientes.valadd4, 0) + COALESCE(EXCLUDED.valadd4, 0)
             `,
             [
-                incremento.idpersonaje,
-
-                incremento.fuerza,
-                incremento.fortaleza,
-                incremento.destreza,
-                incremento.agilidad,
-                incremento.sabiduria,
-                incremento.principio,
-                incremento.presencia,
-                incremento.sentidos,
-
-                incremento.academisismo,
-                incremento.alerta,
-                incremento.atletismo,
-                incremento.conbakemono,
-                incremento.mentir,
-                incremento.pilotear,
-                incremento.artesmarciales,
-                incremento.medicina,
-                incremento.conobjmagicos,
-                incremento.sigilo,
-                incremento.conesferas,
-                incremento.conleyendas,
-                incremento.forja,
-                incremento.condemonio,
-                incremento.conespiritual,
-                incremento.manejoblaster,
-                incremento.manejosombras,
-                incremento.tratobakemono,
-                incremento.conhechiceria,
-
-                incremento.medvital,
-                incremento.medespiritual,
-                incremento.rayo,
-                incremento.fuego,
-                incremento.frio,
-                incremento.veneno,
-                incremento.corte,
-                incremento.energia,
-
-                incremento.valcombate,
-                incremento.valcombate2,
-
-                incremento.valadd1,
-                incremento.valadd2,
-                incremento.valadd3,
-                incremento.valadd4
+                incremento.idpersonaje, incremento.fuerza, incremento.fortaleza, incremento.destreza,
+                incremento.agilidad, incremento.sabiduria, incremento.principio, incremento.presencia,
+                incremento.sentidos, incremento.academisismo, incremento.alerta, incremento.atletismo,
+                incremento.conbakemono, incremento.mentir, incremento.pilotear, incremento.artesmarciales,
+                incremento.medicina, incremento.conobjmagicos, incremento.sigilo, incremento.conesferas,
+                incremento.conleyendas, incremento.forja, incremento.condemonio, incremento.conespiritual,
+                incremento.manejoblaster, incremento.manejosombras, incremento.tratobakemono,
+                incremento.conhechiceria, incremento.medvital, incremento.medespiritual, incremento.rayo,
+                incremento.fuego, incremento.frio, incremento.veneno, incremento.corte, incremento.energia,
+                incremento.valcombate, incremento.valcombate2, incremento.valadd1, incremento.valadd2,
+                incremento.valadd3, incremento.valadd4
             ]
         );
 
-     // Avisar al jugador si está conectado
-console.log(
-    "EMITIENDO incrementos-pendientes para personaje:",
-    incremento.idpersonaje
-);
+        // Avisar al jugador si está conectado
+        console.log("EMITIENDO incrementos-pendientes para personaje:", incremento.idpersonaje);
+        console.log("SOCKETS CONECTADOS:", io.engine.clientsCount);
 
-console.log("SOCKETS CONECTADOS:", io.engine.clientsCount);
-
-io.emit("incrementos_pendientes", {
-    idpersonaje: incremento.idpersonaje
-});
-console.log(
-    "EMIT incrementos-pendientes EJECUTADO para personaje:",
-    incremento.idpersonaje
-);
+        io.emit("incrementos_pendientes", {
+            idpersonaje: incremento.idpersonaje
+        });
+        console.log("EMIT incrementos-pendientes EJECUTADO para personaje:", incremento.idpersonaje);
 
         return res.json({
             ok: true,
@@ -4360,7 +4622,6 @@ console.log(
 
     } catch (error) {
         console.log(error);
-
         return res.status(500).json({
             ok: false,
             error: error.message
