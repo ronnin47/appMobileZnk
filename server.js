@@ -738,6 +738,10 @@ app.put('/update-personaje/:id', async (req, res) => {
     historia, usuarioId, tecEspecial, conviccion, cicatriz, resistencia, imagenSeleccionada, pjPnj, notas
   } = req.body;
 
+
+    resistencia = resistencia === null || resistencia === undefined || resistencia === ""
+    ? 0
+    : resistencia;
  console.log("=================================");
   console.log("ACTUALIZANDO PERSONAJE");
   console.log("ID personaje:", idpersonaje);
@@ -1191,6 +1195,10 @@ app.put('/update-personajeWPF/:id', async (req, res) => {
     historia, usuarioId, tecEspecial, conviccion, cicatriz, resistencia, imagenSeleccionada, pjPnj, notas,marca
   } = req.body;
 
+  resistencia = resistencia === null || resistencia === undefined || resistencia === ""
+    ? 0
+    : resistencia;
+
  console.log("=================================");
   console.log("ACTUALIZANDO PERSONAJE");
   console.log("ID personaje:", idpersonaje);
@@ -1304,9 +1312,25 @@ values.forEach((valor, index) => {
     });
 
   } catch (err) {
-    console.error('Error al modificar el personaje:', err.message);
-    res.status(500).json({ error: 'Error al modificar el personaje.' });
-  }
+    console.error("=================================");
+    console.error("ERROR AL ACTUALIZAR PERSONAJE");
+    console.error("ID personaje:", idpersonaje);
+    console.error("Mensaje:", err.message);
+    console.error("Código PostgreSQL:", err.code);
+    console.error("Detalle:", err.detail);
+    console.error("Dónde:", err.where);
+    console.error("Tabla:", err.table);
+    console.error("Columna:", err.column);
+    console.error("Restricción:", err.constraint);
+    console.error("Stack completo:", err.stack);
+    console.error("=================================");
+
+    res.status(500).json({
+        error: err.message,
+        code: err.code,
+        detail: err.detail
+    });
+}
 });
 
 //OK!!
