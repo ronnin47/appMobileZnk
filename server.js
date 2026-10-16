@@ -959,6 +959,81 @@ app.get('/consumirPersonajesTodos', async (req, res) => {
 
 //*****************MARCA PARA ESCRITORIO WPF************************************
 
+app.get('/consumirUnicosWPF', async (req, res) => {
+  try {
+    const { idpersonaje } = req.query;
+
+    if (!idpersonaje || isNaN(Number(idpersonaje))) {
+      return res.status(400).json({
+        message: 'Debe proporcionar un idpersonaje válido'
+      });
+    }
+
+    const accionesQuery = `
+      SELECT *
+      FROM acciones
+      WHERE idpersonaje = $1
+        AND tipo IN ('Tecnica Especial', 'Especial')
+    `;
+
+    const itemsQuery = `
+      SELECT *
+      FROM items
+      WHERE idpersonaje = $1
+        AND rareza = 'Unico'
+    `;
+
+    const [accionesResult, itemsResult] = await Promise.all([
+      pool.query(accionesQuery, [idpersonaje]),
+      pool.query(itemsQuery, [idpersonaje])
+    ]);
+
+    // Separar las acciones por categoría
+    const tecnicasEspeciales = accionesResult.rows.filter(
+      accion => accion.tipo === 'Tecnica Especial'
+    );
+
+    const especiales = accionesResult.rows.filter(
+      accion => accion.tipo === 'Especial'
+    );
+
+    const objetosUnicos = itemsResult.rows;
+
+    // Mostrar en consola lo recuperado de PostgreSQL
+    console.log('========== ESPECIALES WPF ==========');
+    console.log('ID del personaje:', idpersonaje);
+
+    console.log('Técnicas especiales encontradas:', tecnicasEspeciales.length);
+    console.log(tecnicasEspeciales);
+
+    console.log('Especiales encontrados:', especiales.length);
+    console.log(especiales);
+
+    console.log('Objetos únicos encontrados:', objetosUnicos.length);
+    console.log(objetosUnicos);
+
+    console.log('====================================');
+
+    return res.json({
+      message: 'Especiales obtenidos correctamente',
+      tecnicasEspeciales: tecnicasEspeciales,
+      especiales: especiales,
+      objetosUnicos: objetosUnicos
+    });
+
+  } catch (error) {
+    console.error(
+      'Error al obtener técnicas especiales, especiales y objetos únicos:',
+      error
+    );
+
+    return res.status(500).json({
+      message: 'Error en el servidor'
+    });
+  }
+});
+
+
 
 //consumir los todos los personajes OK!!
 app.get('/consumirPersonajesTodosWPF', async (req, res) => {
